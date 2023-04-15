@@ -172,11 +172,63 @@ function StackNavigators({navigation}) {
         remoteMessage.notification.title,
         remoteMessage.notification.body,
       );
+      // messaging().getInitialNotification().then((notificationOpen) => {
+      //   if (notificationOpen) {
+      //     console.log('Opened via notification:');
+      //   }
+      // });
+      // messaging().onNotificationOpenedApp((notificationOpen) => {
+      //   console.log('Opened via notification:');
+      // });
     });
 
     return unsubscribe;
+    // return () => {
+      // unsubscribeNotification();
+      // unsubscribe();
+    // };
+    
   }, []);
 
+
+  useEffect(() => {
+    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+      // Handle FCM message here
+    });
+
+    const unsubscribeNotification = messaging().onNotificationOpenedApp((notificationOpen) => {
+      console.log('Opened via notification11:', notificationOpen.notification);
+      
+      // navigation.navigate('NewSellerAdditionNotification');
+    });
+
+    messaging().getInitialNotification().then((notificationOpen) => {
+      if (notificationOpen) {
+        console.log('Opened via notification:', notificationOpen.notification);
+        note11();
+        // navigation.navigate('NewSellerAdditionNotification');
+      } else {
+        console.log('Opened normally');
+      }
+    });
+
+    return () => {
+      unsubscribe();
+      unsubscribeNotification();
+    };
+  }, []);
+
+  const pull_API_Data = () => {
+    console.log('api pull');
+    loadAPI_Data1();
+    loadAPI_Data2();
+    loadAPI_Data3();
+    loadAPI_Data4();
+    loadAPI_Data5();
+    loadAPI_Data6();
+    loadAPI_DataCD();
+    createTableBag1();
+  };
   useEffect(() => {
     // This useEffect  is use to hide warnings in mobile screen .
     // LogBox.ignoreLogs(['Warning: Each child in a list should have a unique "key" prop.']);
@@ -201,16 +253,11 @@ function StackNavigators({navigation}) {
   }, [userId]);
 
   // Sync button function
-  const pull_API_Data = () => {
-    console.log('api pull');
-    loadAPI_Data1();
-    loadAPI_Data2();
-    loadAPI_Data3();
-    loadAPI_Data4();
-    loadAPI_Data5();
-    loadAPI_Data6();
-    loadAPI_DataCD();
-    createTableBag1();
+  const note11 = () => {
+    if(!isLoading){
+    console.log('call notification');
+    navigation.navigate('NewSellerAdditionNotification');
+    }
   };
 
   useEffect(() => {
