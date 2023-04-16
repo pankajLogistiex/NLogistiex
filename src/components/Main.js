@@ -804,6 +804,7 @@ export default function Main({navigation, route}) {
                                 Forward: Forward,
                                 Reverse: Reverse,
                                 Trip: tripValue,
+                                PendingHandover:shp1,
                               })
                             }>
                             {tripValue === 'Start Trip' ? 'New Delivery' : spp1 === 0 ? 'Delivery completed' : 'Delivery in progress'}
@@ -1076,6 +1077,7 @@ export default function Main({navigation, route}) {
                                 Reverse: Reverse,
                                 Trip: tripValue,
                                 userId: id,
+                                PendingHandover:shp1,
                               })
                             }>
                             {tripValue === 'Start Trip' ? 'New Pickup' : spp === 0 ? 'Pickup completed' : 'Pickup in progress'}

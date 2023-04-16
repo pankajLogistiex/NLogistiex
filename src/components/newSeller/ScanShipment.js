@@ -631,6 +631,22 @@ const ScanShipment = ({route}) => {
     getCategories(e.data);
   };
 
+  const onSuccess12 = e => {
+    // Vibration.vibrate(100);
+    // RNBeep.beep();
+    Vibration.vibrate(100);
+    dingAccept.play(success => {
+      if (success) {
+
+        console.log('successfully finished playing');
+      } else {
+        console.log('playback failed due to audio decoding errors');
+      }
+    });
+    console.log(e.data, 'ExpectedPackagingID');
+    // getCategories(e.data);
+    setExpectedPackaging(e.data);
+  };
   const onSucessThroughButton=(data21)=>{
     console.log(data21, 'barcode');
     setBarcode(data21);
@@ -1197,23 +1213,26 @@ const ScanShipment = ({route}) => {
       <ScrollView
         style={{paddingTop: 20, paddingBottom: 50}}
         showsVerticalScrollIndicator={false}>
-        <QRCodeScanner
-          onRead={onSuccess}
-          reactivate={true}
-          reactivateTimeout={3000}
-          flashMode={RNCamera.Constants.FlashMode.off}
-          containerStyle={{
-            width: '100%',
-            alignSelf: 'center',
-            backgroundColor: 'white',
-          }}
-          cameraStyle={{width: '90%', alignSelf: 'center'}}
-          topContent={
-            <View>
-              <Text>Scanner</Text>
-            </View>
-          }
-        />
+        {!showCloseBagModal12 && scanned && (
+          <QRCodeScanner
+            onRead={onSuccess}
+            reactivate={true}
+            reactivateTimeout={3000}
+            ref={scannerRef}
+            flashMode={RNCamera.Constants.FlashMode.off}
+            containerStyle={{
+              width: '100%',
+              alignSelf: 'center',
+              backgroundColor: 'white',
+            }}
+            cameraStyle={{width: '90%', alignSelf: 'center'}}
+            topContent={
+              <View>
+                <Text>Scan your Shipments </Text>
+              </View>
+            }
+          />
+        )}
         <View>
           <Center></Center>
         </View>
