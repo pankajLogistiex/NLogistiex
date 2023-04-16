@@ -1622,7 +1622,7 @@ console.log('pa',packagingAction);
       <ScrollView
         style={{paddingTop: 20, paddingBottom: 50}}
         showsVerticalScrollIndicator={false}>
-        {(!showCloseBagModal || !showCloseBagModal12) && scanned && (
+        {(!showCloseBagModal && scanned) || (!showCloseBagModal12 && scanned) && (
           <QRCodeScanner
             onRead={onSuccess}
             reactivate={true}
