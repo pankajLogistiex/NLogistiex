@@ -42,16 +42,19 @@ export default function NewSellerAdditionNotification(route) {
       console.error(error);
     }
   };
-
+console.log(userId);
   const DisplayData = () => {
-    axios
-      .get(backendUrl + `SellerMainScreen/getadditionalwork/${userId}`)
+    // console.log(backendUrl + `SellerMainScreen/getadditionalwork/${userId}`);
+    if(userId){
+     axios.get(backendUrl + `SellerMainScreen/getadditionalwork/${userId}`)
       .then(res => {
-        setData(res.data);
+        console.log(res.data.data);
+        setData(res.data.data);
       })
       .catch(error => {
-        console.log('Error Msg:', error);
+        console.log('Error Msg1:', error);
       });
+    }
   };
   useEffect(() => {
     DisplayData();
@@ -59,14 +62,14 @@ export default function NewSellerAdditionNotification(route) {
   // console.log('Data:',data);
 
   const AcceptHandler = async () => {
-    console.log('df')
+    // console.log('df')
     axios
-      .post(backendUrl + 'SellerMainScreen/acceptworkload', {
+      .post(backendUrl + 'SellerMainScreen/acceptWorkLoad', {
         consignorCode: data.consignorCode,
         feUserId: userId,
       })
       .then(response => {
-        console.log(response);
+        console.log("Msg Accepted ",response.data);
       })
       .catch(error => {
         console.log(error);
@@ -74,14 +77,14 @@ export default function NewSellerAdditionNotification(route) {
   }
 
   const RejectHandler = async () => {
-    console.log('df')
+    // console.log('df')
     axios
-      .post(backendUrl + 'SellerMainScreen/rejectworkload', {
+      .post(backendUrl + 'SellerMainScreen/rejectWorkLoad', {
         consignorCode: data.consignorCode,
         feUserId: userId,
       })
       .then(response => {
-        console.log(response);
+        console.log("Msg Rejected ",response.data);
       })
       .catch(error => {
         console.log(error);
@@ -94,7 +97,7 @@ export default function NewSellerAdditionNotification(route) {
     <NativeBaseProvider>
       <ScrollView>
         <Box flex={1} bg="coolGray.100" p={4}>
-          {(data) && data.length &&
+          {(data) && data.length ?
             data.map((d, i) => {
               return (
                 <Box key={i} width='100%' marginBottom='5' alignItems="center">
@@ -171,9 +174,9 @@ export default function NewSellerAdditionNotification(route) {
                 </Box>
               )
             })
-          }
+        :null  }
 
-          {
+          {/* {
             data.length <= 0 && (
               <Box  width='100%' marginBottom='5' alignItems="center">
                 <Box width='100%' rounded="lg" overflow="hidden" borderColor="coolGray.100" borderWidth="1" _dark={{
@@ -199,7 +202,7 @@ export default function NewSellerAdditionNotification(route) {
                 </Box>
               </Box>
             )
-          }
+          } */}
           <Center>
             <Image style={{ width: 150, height: 100 }} source={require('../assets/image.png')} alt={"Logo Image"} />
           </Center>
