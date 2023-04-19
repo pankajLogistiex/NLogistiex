@@ -228,6 +228,7 @@ function StackNavigators({navigation}) {
     loadAPI_Data6();
     loadAPI_DataCD();
     createTableBag1();
+    loadAPI_DataSF();
   };
   useEffect(() => {
     // This useEffect  is use to hide warnings in mobile screen .
@@ -1010,7 +1011,80 @@ function StackNavigators({navigation}) {
       });
     });
   };
+  const createTablesSF = () => {
+    db.transaction(txn => {
+      txn.executeSql('DROP TABLE IF EXISTS ShipmentFailure', []);
+      txn.executeSql(
+        'CREATE TABLE IF NOT EXISTS ShipmentFailure(_id VARCHAR(24) PRIMARY KEY,description VARCHAR(255),parentCode VARCHAR(20), short_code VARCHAR(20), consignor_failure BOOLEAN, fe_failure BOOLEAN, operational_failure BOOLEAN, system_failure BOOLEAN, enable_geo_fence BOOLEAN, enable_future_scheduling BOOLEAN, enable_otp BOOLEAN, enable_call_validation BOOLEAN, created_by VARCHAR(10), last_updated_by VARCHAR(10), applies_to VARCHAR(255),life_cycle_code INT(20), __v INT(10))',
+        [],
+        (sqlTxn, res) => {
+          console.log('table ShipmentFailure created successfully');
+          // loadAPI_Data();
+        },
+        error => {
+          console.log('error on creating table ' + error.message);
+        },
+      );
+    });
+  };
+  const loadAPI_DataSF = () => {
+    // setIsLoading(!isLoading);
+    createTablesSF();
+    (async () => {
+      await axios
+        .get(backendUrl + 'ADshipmentFailure/getList')
+        .then(
+          res => {
+            // console.log('Table6 API OK: ' + res.data.data.length);
+            // console.log(res.data);
+            for (let i = 0; i < res.data.data.length; i++) {
+              // const appliesto=JSON.parse(JSON.stringify(res.data.data[i].appliesTo))
+              const appliesto= String(res.data.data[i].appliesTo.slice());
+              db.transaction(txn => {
+                txn.executeSql(
+                  `INSERT OR REPLACE INTO ShipmentFailure(_id ,description , parentCode, short_code , consignor_failure , fe_failure , operational_failure , system_failure , enable_geo_fence , enable_future_scheduling , enable_otp , enable_call_validation, created_by , last_updated_by, applies_to ,life_cycle_code , __v
+                          ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                  [
+                    res.data.data[i]._id,
+                    res.data.data[i].description,
+                    res.data.data[i].parentCode,
+                    res.data.data[i].shortCode,
+                    res.data.data[i].consignorFailure,
+                    res.data.data[i].feFailure,
+                    res.data.data[i].operationalFailure,
+                    res.data.data[i].systemFailure,
+                    res.data.data[i].enableGeoFence,
+                    res.data.data[i].enableFutureScheduling,
+                    res.data.data[i].enableOTP,
+                    res.data.data[i].enableCallValidation,
+                    res.data.data[i].createdBy,
+                    res.data.data[i].lastUpdatedBy,
+                    appliesto,
+                    res.data.data[i].lifeCycleCode,
+                    res.data.data[i].__v,
+                  ],
+                  (sqlTxn, _res) => {
+                    // console.log('\n Data Added to local db 6 ');
+                    // console.log(res);
+                  },
+                  error => {
+                    console.log('error on adding data ' + error.message);
+                  },
+                );
+              });
+            }
+            m++;
+            // console.log('value of m6 '+m);
 
+            // viewDetailsSF();
+            // setIsLoading(false);
+          },
+          error => {
+            console.log(error);
+          },
+        );
+    })();
+  };
   // Table 6
   const createTables6 = () => {
     db.transaction(txn => {
@@ -1082,7 +1156,7 @@ function StackNavigators({navigation}) {
             m++;
             // console.log('value of m6 '+m);
 
-            viewDetails6();
+            // viewDetails6();
             // setIsLoading(false);
           },
           error => {
@@ -1091,15 +1165,16 @@ function StackNavigators({navigation}) {
         );
     })();
   };
-  const viewDetails6 = () => {
+  const viewDetailsSF = () => {
     db.transaction(tx => {
-      tx.executeSql('SELECT * FROM PartialCloseReasons', [], (tx1, results) => {
-        // let temp = [];
-        // // console.log(results.rows.length);
-        // for (let i = 0; i < results.rows.length; ++i) {
-        //     temp.push(results.rows.item(i));
-        // }
-        // m++;
+      tx.executeSql('SELECT * FROM ShipmentFailure', [], (tx1, results) => {
+        let temp = [];
+        // console.log(results.rows.length);
+        for (let i = 0; i < results.rows.length; ++i) {
+            temp.push(results.rows.item(i));
+        }
+        m++;
+        console.log('1173',temp);
         // if (m <= 6){
         //   // ToastAndroid.show('Sync Successful',ToastAndroid.SHORT);
         //   console.log('Waiting for ' + ( 7 - m ) + ' API to load. Plz wait...');
@@ -1109,7 +1184,7 @@ function StackNavigators({navigation}) {
         //   console.log('Only ' + m + ' APIs loaded out of 6 ');
         // }
         // console.log('Data from Local Database 6 : \n ', temp);
-        // console.log('Table6 DB OK:', temp.length);
+        // console.log('TableSF DB OK:', temp.length);
       });
     });
   };

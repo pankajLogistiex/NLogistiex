@@ -673,7 +673,7 @@ const ScanShipment = ({route}) => {
   const displaydata = async () => {
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM ShipmentRejectReasons',
+        'SELECT * FROM ShipmentFailure',
         [],
         (tx1, results) => {
           let temp = [];
@@ -858,8 +858,8 @@ const ScanShipment = ({route}) => {
             <Modal.CloseButton />
             <Modal.Header>Partial Close Reason</Modal.Header>
             <Modal.Body>
-              {NotAttemptData &&
-                NotAttemptData.map((d, index) => (
+              {rejectedData &&
+                rejectedData.filter(d => d.applies_to.includes("PDCF")).map((d, index) => (
                   <Button
                     key={d._id}
                     flex="1"
@@ -868,18 +868,18 @@ const ScanShipment = ({route}) => {
                     marginTop={1.5}
                     style={{
                       backgroundColor:
-                        d.reasonID === DropDownValue11 ? '#6666FF' : '#C8C8C8',
+                        d.short_code === DropDownValue11 ? '#6666FF' : '#C8C8C8',
                     }}
-                    title={d.reasonName}
+                    title={d.description}
                     onPress={() =>
-                      handleButtonPress2(d.reasonID)
+                      handleButtonPress2(d.short_code)
                     }>
                     <Text
                       style={{
                         color:
-                          d.reasonID == DropDownValue11 ? 'white' : 'black',
+                          d.short_code == DropDownValue11 ? 'white' : 'black',
                       }}>
-                      {d.reasonName}
+                      {d.description}
                     </Text>
                   </Button>
                 ))}
@@ -922,29 +922,29 @@ const ScanShipment = ({route}) => {
           <Modal.CloseButton />
           <Modal.Header>Return Handover Rejection Tag</Modal.Header>
           <Modal.Body>
-            {rejectedData.map(d => (
+            {rejectedData && rejectedData.filter(d => d.applies_to.includes("RHRF")).map(d => (
               <Button
-                key={d.shipmentExceptionReasonID}
+                key={d._id}
                 flex="1"
                 mt={2}
                 marginBottom={1.5}
                 marginTop={1.5}
-                title={d.shipmentExceptionReasonName}
+                title={d.description}
                 style={{
                   backgroundColor:
-                    d.shipmentExceptionReasonID === DropDownValue
+                    d.short_code === DropDownValue
                       ? '#6666FF'
                       : '#C8C8C8',
                 }}
-                onPress={() => handleButtonPress(d.shipmentExceptionReasonID)}>
+                onPress={() => handleButtonPress(d.short_code)}>
                 <Text
                   style={{
                     color:
-                      DropDownValue == d.shipmentExceptionReasonID
+                      DropDownValue == d.short_code
                         ? 'white'
                         : 'black',
                   }}>
-                  {d.shipmentExceptionReasonName}
+                  {d.description}
                 </Text>
               </Button>
             ))}
@@ -1268,7 +1268,6 @@ backgroundColor:'lightgrey',
   </Center>
 </TouchableOpacity>
               </View>
-              {packagingAction==0 || packagingAction==2 ?
                 <Button
                 title="Reject Shipment"
                 onPress={() => setModalVisible1(true)}
@@ -1279,9 +1278,6 @@ backgroundColor:'lightgrey',
                 mt={4}>
                 Reject/Tag Shipment
               </Button>
-              :
-              null
-              }
               <View
                 style={{
                   width: '90%',
