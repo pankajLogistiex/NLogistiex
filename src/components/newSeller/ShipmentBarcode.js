@@ -284,7 +284,7 @@ var dingAccept = new Sound(dingAccept11, error => {
   }, []);
   const DisplayData11 = async () => {
     db.transaction(tx => {
-      tx.executeSql('SELECT * FROM PartialCloseReasons', [], (tx1, results) => {
+      tx.executeSql('SELECT * FROM ShipmentFailure', [], (tx1, results) => {
         let temp = [];
         // console.log(results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
@@ -1124,7 +1124,7 @@ console.log('pa',packagingAction);
   const displaydata = async () => {
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM ShipmentRejectReasons',
+        'SELECT * FROM ShipmentFailure',
         [],
         (tx1, results) => {
           let temp = [];
@@ -1190,8 +1190,8 @@ console.log('pa',packagingAction);
           <Modal.Header>Partial Close Reason</Modal.Header>
           <Modal.Body>
             {PartialCloseData &&
-              PartialCloseData.map((d, index) =>
-                 !pdCheck && d.reasonName === 'Partial Dispatch' ? (
+              PartialCloseData.filter(d => d.applies_to.includes("PPCF")).map((d, index) =>
+                 !pdCheck && d.description === 'Partial Dispatch' ? (
                   <Button
                     h="12"
                     paddingBottom={5}
@@ -1202,48 +1202,48 @@ console.log('pa',packagingAction);
                     marginTop={1.4}
                     style={{
                       backgroundColor:
-                        d.reasonID === DropDownValue11 ? '#6666FF' : '#C8C8C8',
+                        d.short_code === DropDownValue11 ? '#6666FF' : '#C8C8C8',
                       opacity: 0.4,
                     }}
-                    title={d.reasonName} onPress={() => ToastAndroid.show('No bags for dispatch',ToastAndroid.SHORT)} >
+                    title={d.description} onPress={() => ToastAndroid.show('No bags for dispatch',ToastAndroid.SHORT)} >
                     {' '}
                     {/* onPress={() => ToastAndroid.show("No bags for dispatch",ToastAndroid.SHORT)}  */}
                     <Text
                       style={{
                         color:
-                          d.reasonID === DropDownValue11 ? 'white' : 'black',
+                          d.short_code === DropDownValue11 ? 'white' : 'black',
                         alignContent: 'center',
                         paddingTop: -5,
                       }}>
                       {' '}
-                      {d.reasonName}{' '}
+                      {d.description}{' '}
                     </Text>
                   </Button>
                 ) : (
                   <Button
                     h="12"
                     paddingBottom={5}
-                    key={d.reasonID}
+                    key={d._id}
                     flex="1"
                     mt={2}
                     marginBottom={1.4}
                     marginTop={1.4}
                     style={{
                       backgroundColor:
-                        d.reasonID === DropDownValue11 ? '#6666FF' : '#C8C8C8',
+                        d.short_code === DropDownValue11 ? '#6666FF' : '#C8C8C8',
                     }}
-                    title={d.reasonName}
-                    onPress={() => handleButtonPress11(d.reasonID)}>
+                    title={d.description}
+                    onPress={() => handleButtonPress11(d.short_code)}>
                     {' '}
                     <Text
                       style={{
                         color:
-                          d.reasonID === DropDownValue11 ? 'white' : 'black',
+                          d.short_code === DropDownValue11 ? 'white' : 'black',
                         alignContent: 'center',
                         paddingTop: -5,
                       }}>
                       {' '}
-                      {d.reasonName}{' '}
+                      {d.description}{' '}
                     </Text>
                   </Button>
                 ),
@@ -1576,29 +1576,29 @@ console.log('pa',packagingAction);
           <Modal.CloseButton />
           <Modal.Header>Reject Reason</Modal.Header>
           <Modal.Body>
-            {rejectedData.map(d => (
+            {rejectedData && rejectedData.filter(d => d.applies_to.includes("SHPF")).map(d => (
               <Button
-                key={d.shipmentExceptionReasonID}
+                key={d.short_code}
                 flex="1"
                 mt={2}
                 marginBottom={1.5}
                 marginTop={1.5}
-                title={d.shipmentExceptionReasonName}
+                title={d.description}
                 style={{
                   backgroundColor:
-                    d.shipmentExceptionReasonID === DropDownValue
+                    d.short_code === DropDownValue
                       ? '#6666FF'
                       : '#C8C8C8',
                 }}
-                onPress={() => handleButtonPress(d.shipmentExceptionReasonID)}>
+                onPress={() => handleButtonPress(d.short_code)}>
                 <Text
                   style={{
                     color:
-                      DropDownValue == d.shipmentExceptionReasonID
+                      DropDownValue == d.short_code
                         ? 'white'
                         : 'black',
                   }}>
-                  {d.shipmentExceptionReasonName}
+                  {d.description}
                 </Text>
               </Button>
             ))}
@@ -1622,7 +1622,7 @@ console.log('pa',packagingAction);
       <ScrollView
         style={{paddingTop: 20, paddingBottom: 50}}
         showsVerticalScrollIndicator={false}>
-        {(!showCloseBagModal && scanned) || (!showCloseBagModal12 && scanned) && (
+        {(!showCloseBagModal11 ||!showCloseBagModal12 ) && scanned && (
           <QRCodeScanner
             onRead={onSuccess}
             reactivate={true}
@@ -1681,7 +1681,6 @@ console.log('pa',packagingAction);
         </View> */}
                 {/* </View> */}
               </View>
-              {packagingAction == 0 || packagingAction == 2 ?
               <Button
               title="Reject Shipment"
               onPress={() =>{ check11 === 0 ? ToastAndroid.show('No Shipment to Reject',ToastAndroid.SHORT) : setModalVisible(true);}}
@@ -1692,8 +1691,6 @@ console.log('pa',packagingAction);
               mt={4}>
               Reject Shipment
             </Button>
-            : null
-              }
               <View
                 style={{
                   width: '90%',
