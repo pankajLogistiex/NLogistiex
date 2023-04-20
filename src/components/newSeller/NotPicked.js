@@ -66,7 +66,7 @@ const NotPicked = ({route}) => {
     };
     const closePickup11 = () => {
       db.transaction(tx => {
-        tx.executeSql('SELECT * FROM ClosePickupReasons', [], (tx1, results) => {
+        tx.executeSql('SELECT * FROM ShipmentFailure', [], (tx1, results) => {
           let temp = [];
           console.log(results.rows.length);
           for (let i = 0; i < results.rows.length; ++i) {
@@ -169,31 +169,31 @@ return (
               <Modal.CloseButton />
               <Modal.Header>Close Pickup Reason Code</Modal.Header>
               <Modal.Body>
-                {CloseData.map((d, index) => (
+                {CloseData && CloseData.filter(d => d.applies_to.includes("SLPF") && d.parentCode !== "CNA").map((d, index) => (
                   <Button
-                    key={d.pickupFailureReasonID}
+                    key={d.short_code}
                     flex="1"
                     mt={2}
                     marginBottom={1.5}
                     marginTop={1.5}
                     style={{
                       backgroundColor:
-                        d.pickupFailureReasonName === DropDownValue
+                        d.description === DropDownValue
                           ? '#6666FF'
                           : '#C8C8C8',
                     }}
-                    title={d.pickupFailureReasonName}
+                    title={d.description}
                     onPress={() =>
-                      handleButtonPress(d.pickupFailureReasonName,d.pickupFailureReasonID)
+                      handleButtonPress(d.description,d.short_code)
                     }>
                     <Text
                       style={{
                         color:
-                          DropDownValue == d.pickupFailureReasonName
+                          DropDownValue == d.description
                             ? 'white'
                             : 'black',
                       }}>
-                      {d.pickupFailureReasonName}
+                      {d.description}
                     </Text>
                   </Button>
                 ))}
@@ -220,8 +220,7 @@ return (
               <Modal.CloseButton />
               <Modal.Header>Could Not Attempt Reason</Modal.Header>
               <Modal.Body>
-                {NotAttemptData &&
-                  NotAttemptData.map((d, index) => (
+                {CloseData && CloseData.filter(d => d.applies_to.includes("SLPF") && d.parentCode == "CNA").map((d, index) => (
                     <Button
                       key={d._id}
                       flex="1"
@@ -234,14 +233,14 @@ return (
                             ? '#6666FF'
                             : '#C8C8C8',
                       }}
-                      title={d.reasonName}
-                      onPress={() => handleButtonPress2(d.reasonName, d.reasonID)}>
+                      title={d.description}
+                      onPress={() => handleButtonPress2(d.description, d.short_code)}>
                       <Text
                         style={{
                           color:
-                            d.reasonName == DropDownValue1 ? 'white' : 'black',
+                            d.description == DropDownValue1 ? 'white' : 'black',
                         }}>
-                        {d.reasonName}
+                        {d.description}
                       </Text>
                     </Button>
                   ))}

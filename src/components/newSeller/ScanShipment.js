@@ -85,8 +85,9 @@ const ScanShipment = ({route}) => {
   const [showModal, setModal] = useState(false);
   const [showModal1, setModal1] = useState(false);
   const [expectedPackagingId, setExpectedPackaging] = useState('');
-
-
+  const [scanned, setScanned] = useState(true);
+  const [check11, setCheck11] = useState(0);
+  const buttonColorRejected = check11 === 0 ? 'gray.300' : '#004aad';
   var otpInput = useRef(null);
   const [ImageUrl, setImageUrl] = useState('');
   const [imageUrls, setImageUrls] = useState([]);
@@ -660,6 +661,7 @@ const ScanShipment = ({route}) => {
   useEffect(() => {
     if (len) {
       if(packagingAction==0){
+        check11(1)
       Vibration.vibrate(100);
       RNBeep.beep();
       ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
@@ -1268,16 +1270,16 @@ backgroundColor:'lightgrey',
   </Center>
 </TouchableOpacity>
               </View>
-                <Button
-                title="Reject Shipment"
-                onPress={() => setModalVisible1(true)}
-                w="90%"
-                size="lg"
-                bg="#004aad"
-                mb={4}
-                mt={4}>
-                Reject/Tag Shipment
-              </Button>
+              <Button
+              title="Reject/Tag Shipment"
+              onPress={() =>{ check11 === 0 ? ToastAndroid.show('No Shipment to Reject/Tag',ToastAndroid.SHORT) : setModalVisible1(true);}}
+              w="90%"
+              size="lg"
+              bg={buttonColorRejected}
+              mb={4}
+              mt={4}>
+              Reject/Tag Shipment
+            </Button>
               <View
                 style={{
                   width: '90%',

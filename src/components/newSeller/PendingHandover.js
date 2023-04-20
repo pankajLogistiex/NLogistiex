@@ -34,7 +34,8 @@ const PendingHandover = ({route}) => {
     const [consignorCode, setConsignorCode] = useState('');
     const [showCloseBagModal, setShowCloseBagModal] = useState(false);
     const [latitude, setLatitude] = useState(0);
-  const [longitude, setLongitude] = useState(0);
+    const [data11,setData11]=useState([])
+    const [longitude, setLongitude] = useState(0);
 
 
   const [userId, setUserID] = useState('');
@@ -150,6 +151,16 @@ const PendingHandover = ({route}) => {
             setData(temp);
           });
         });
+        db.transaction(tx => {
+          tx.executeSql('SELECT * FROM ShipmentFailure', [], (tx1, results) => {
+            let temp = [];
+            for (let i = 0; i < results.rows.length; ++i) {
+              temp.push(results.rows.item(i));
+            }
+            // console.log('Data from Local Database CPR: \n ', temp);
+            setData11(temp);
+          });
+        });
       };
     //   useEffect(() => {
     //     loadDetails()
@@ -163,11 +174,11 @@ const PendingHandover = ({route}) => {
           return obj;
         }, {});
 
-    let data11 = [
-        { value: 'Out of Capacity', label: 'Out of Capacity' },
-        { value: 'Seller Holiday', label: 'Seller Holiday' },
-        { value: 'Shipment Not Traceable', label: 'Shipment Not Traceable' },
-      ];
+    // let data11 = [
+    //     { value: 'Out of Capacity', label: 'Out of Capacity' },
+    //     { value: 'Seller Holiday', label: 'Seller Holiday' },
+    //     { value: 'Shipment Not Traceable', label: 'Shipment Not Traceable' },
+    //   ];
       function handleButtonPress(item) {
         setDropDownValue(item);
       }
@@ -360,9 +371,9 @@ return (
           <Modal.CloseButton />
           <Modal.Header>Pending Handover Reason</Modal.Header>
           <Modal.Body>
-          {data11.map((d) => (
-            <Button key={d.value} flex="1" mt={2}  marginBottom={1.5} marginTop={1.5} title={d.value} style={{backgroundColor: d.value === DropDownValue ? '#6666FF' : '#C8C8C8'}} onPress={() => handleButtonPress(d.value)} >
-            <Text style={{color:DropDownValue == d.value ? 'white' : 'black'}}>{d.value}</Text></Button>
+          {data11 && data11.filter(d => d.applies_to.includes("PWEF")).map((d) => (
+            <Button key={d.short_code} flex="1" mt={2}  marginBottom={1.5} marginTop={1.5} title={d.description} style={{backgroundColor: d.description === DropDownValue ? '#6666FF' : '#C8C8C8'}} onPress={() => handleButtonPress(d.description)} >
+            <Text style={{color:DropDownValue == d.description ? 'white' : 'black'}}>{d.description}</Text></Button>
             ))}
             <Button flex="1" mt={2} bg="#004aad" marginBottom={1.5} marginTop={1.5} onPress={() => {pendingHandover11(); setModalVisible(false);}} >
             Submit</Button>
