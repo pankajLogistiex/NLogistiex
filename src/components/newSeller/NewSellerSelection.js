@@ -180,7 +180,6 @@ const NewSellerSelection = ({route}) => {
   const DisplayData2 = async () => {
     NotAttemptReasons11();
   };
-  console.log("184",CloseData[0]);
 
   const NotAttemptReasons11 = () => {
     db.transaction(tx => {
