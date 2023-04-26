@@ -470,11 +470,12 @@ var dingAccept = new Sound(dingAccept11, error => {
 
   function handleButtonPress11(item) {
     console.log('partial button 121' + item);
-    if (item === 'PCR1') {
+    if (item === 'PDF') {
       setDropDownValue11('');
       setModalVisible11(false);
       navigation.navigate('Dispatch', {
         consignorCode: route.params.consignorCode,
+        userId:route.params.userId,
       });
     }
     setDropDownValue11(item);
