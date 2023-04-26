@@ -14,6 +14,8 @@ import { openDatabase } from 'react-native-sqlite-storage';
 import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import RNBeep from 'react-native-a-beep';
+import { backendUrl } from '../../utils/backendUrl';
+
 const db = openDatabase({
   name: 'rn_sqlite',
 });
@@ -114,17 +116,80 @@ const Dispatch = ({route}) => {
       const updateBags = () => {
         console.log('dispatch 45456');
         db.transaction((tx) => {
-          tx.executeSql('UPDATE closeBag1 SET status="dispatched"  WHERE status="Scanned" AND consignorCode=?  ', [route.params.consignorCode], (tx1, results) => {
-            if (results.rowsAffected > 0) {
-              ToastAndroid.show('Bags Dispatch Successfully',ToastAndroid.SHORT);
-              console.log('Bags Dispatch');
+          tx.executeSql(
+            'SELECT * FROM closeBag1 WHERE status="Scanned" AND consignorCode=?',
+            [route.params.consignorCode],
+            (tx1, results) => {
+              for (let i = 0; i < results.rows.length; i++) {
+                const data = results.rows.item(i);
+                console.log(results.rows.length);
+                try {
+                  const response =  axios.post(backendUrl + 'SellerMainScreen/partialDispatch', {
+                    bagSealId: data.bagSeal,
+                    acceptedList: JSON.parse(data.AcceptedList),
+                    consignorCode: route.params.consignorCode,
+                    bagDate: data.bagDate,
+                    feUserID: route.params.userId,
+                    receivingTime: parseInt(new Date().valueOf(), 10)
+                  }) .then(response => {
+                    console.log('Successfully pushed');
+                    console.log(response.data);
+                  
+                  })
+                  .catch(error => {
+                    console.log('dispatch error', {error});
+                  });
+      
+                  // console.log(response); // success message or response from server
+      
+                  // Update status in the database
+                //   db.transaction((tx) => {
+                //     tx.executeSql('UPDATE closeBag1 SET status="dispatched"  WHERE status="Scanned" AND consignorCode=?  ', [route.params.consignorCode], (tx1, results) => {
+                //       if (results.rowsAffected > 0) {
+                //         ToastAndroid.show('Bags Dispatch Successfully',ToastAndroid.SHORT);
+                //         console.log('Bags Dispatch');
+            
+                //       } else {
+                //         console.log('failed to dispatch bags ');
+                //       }
+                //     },
+                //   );
+                // });
+                if(i === results.rows.length -1){
+                  db.transaction((tx) => {
+                    tx.executeSql('UPDATE closeBag1 SET status="dispatched"  WHERE status="Scanned" AND consignorCode=?  ', [route.params.consignorCode], (tx1, results12) => {
+                      if (results12.rowsAffected > 0) {
+                        ToastAndroid.show('Bags Dispatch Successfully',ToastAndroid.SHORT);
+                        console.log('Bags Dispatched');
+            
+                      } else {
+                        console.log('failed to dispatch bags ');
+                      }
+                    },
+                  );
+                });
+                }
+                } catch (error) {
+                  console.error(error);
+                }
+              }
+            },
+          );
+        });
+
+      //   db.transaction((tx) => {
+      //     tx.executeSql('UPDATE closeBag1 SET status="dispatched"  WHERE status="Scanned" AND consignorCode=?  ', [route.params.consignorCode], (tx1, results) => {
+      //       if (results.rowsAffected > 0) {
+      //         ToastAndroid.show('Bags Dispatch Successfully',ToastAndroid.SHORT);
+      //         console.log('Bags Dispatch');
   
-            } else {
-              console.log('failed to dispatch bags ');
-            }
-          },
-        );
-      });
+      //       } else {
+      //         console.log('failed to dispatch bags ');
+      //       }
+      //     },
+      //   );
+      // });
+
     };
 
       const displayDataSPScan = async () => {
