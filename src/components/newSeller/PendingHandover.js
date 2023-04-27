@@ -36,7 +36,7 @@ const PendingHandover = ({route}) => {
     const [latitude, setLatitude] = useState(0);
     const [data11,setData11]=useState([])
     const [longitude, setLongitude] = useState(0);
-
+    const [modalVisibleCNA, setModalVisibleCNA] = useState(false);
 
   const [userId, setUserID] = useState('');
 
@@ -180,6 +180,10 @@ const PendingHandover = ({route}) => {
     //     { value: 'Shipment Not Traceable', label: 'Shipment Not Traceable' },
     //   ];
       function handleButtonPress(item) {
+        if(item=="CNA"){
+          setModalVisibleCNA(true);
+          setModalVisible(false)
+        }
         setDropDownValue(item);
       }
       const pendingHandover11 = ()=>{
@@ -371,15 +375,75 @@ return (
           <Modal.CloseButton />
           <Modal.Header>Pending Handover Reason</Modal.Header>
           <Modal.Body>
-          {data11 && data11.filter(d => d.applies_to.includes("PWEF")).map((d) => (
-            <Button key={d.short_code} flex="1" mt={2}  marginBottom={1.5} marginTop={1.5} title={d.description} style={{backgroundColor: d.description === DropDownValue ? '#6666FF' : '#C8C8C8'}} onPress={() => handleButtonPress(d.description)} >
-            <Text style={{color:DropDownValue == d.description ? 'white' : 'black'}}>{d.description}</Text></Button>
+          {data11 && data11.filter(d => d.applies_to.includes("PWEF") && d.parentCode !== "CNA").map((d) => (
+            <Button key={d.short_code} flex="1" mt={2}  marginBottom={1.5} marginTop={1.5} title={d.description} style={{backgroundColor: d.short_code === DropDownValue ? '#6666FF' : '#C8C8C8'}} onPress={() => handleButtonPress(d.short_code)} >
+            <Text style={{color:DropDownValue == d.short_code ? 'white' : 'black'}}>{d.description}</Text></Button>
             ))}
             <Button flex="1" mt={2} bg="#004aad" marginBottom={1.5} marginTop={1.5} onPress={() => {pendingHandover11(); setModalVisible(false);}} >
             Submit</Button>
           </Modal.Body>
         </Modal.Content>
       </Modal>
+      <Modal
+          isOpen={modalVisibleCNA}
+          onClose={() => {
+            setModalVisibleCNA(false);
+            setDropDownValue('');
+          }}
+          size="lg">
+          <Modal.Content maxWidth="350">
+            <Modal.CloseButton />
+            <Modal.Header>Could Not Attempt Reason</Modal.Header>
+            <Modal.Body>
+              {data11 && data11.filter(d => d.applies_to.includes("PWEF") && d.parentCode == "CNA").map((d, index) => (
+                  <Button
+                    key={d._id}
+                    flex="1"
+                    mt={2}
+                    marginBottom={1.5}
+                    marginTop={1.5}
+                    style={{
+                      backgroundColor:
+                        d.short_code === DropDownValue ? '#6666FF' : '#C8C8C8',
+                    }}
+                    title={d.description}
+                    onPress={() =>
+                      handleButtonPress(d.short_code)
+                    }>
+                    <Text
+                      style={{
+                        color:
+                          d.short_code == DropDownValue ? 'white' : 'black',
+                      }}>
+                      {d.description}
+                    </Text>
+                  </Button>
+                ))}
+              <Button
+                flex="1"
+                mt={2}
+                bg="#004aad"
+                marginBottom={1.5}
+                marginTop={1.5}
+                onPress={() => {
+                  setModalVisibleCNA(false);
+                }}>
+                Submit
+              </Button>
+              <Button
+                flex="1"
+                mt={2}
+                bg="#004aad"
+                marginBottom={1.5}
+                marginTop={1.5}
+                onPress={() => {
+                  setModalVisible(true), setModalVisibleCNA(false);
+                }}>
+                Back
+              </Button>
+            </Modal.Body>
+          </Modal.Content>
+        </Modal>
       <View style={{width: '90%', flexDirection: 'row', justifyContent: 'space-between', alignSelf: 'center', marginTop: 10 }}>
 
           {totalPending===0 ? <Button w="48%" size="lg" bg="gray.300" onPress={()=>ToastAndroid.show("All shipments scanned",ToastAndroid.SHORT)

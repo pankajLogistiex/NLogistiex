@@ -66,6 +66,7 @@ const ShipmentBarcode = ({route}) => {
   const [sellerLongitude, setSellerLongitude] = useState(0);
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalVisibleCNA, setModalVisibleCNA] = useState(false);
   const [bagId, setBagId] = useState('');
   const [bagIdNo, setBagIdNo] = useState(1);
   const [showCloseBagModal, setShowCloseBagModal] = useState(false);
@@ -470,13 +471,17 @@ var dingAccept = new Sound(dingAccept11, error => {
 
   function handleButtonPress11(item) {
     console.log('partial button 121' + item);
-    if (item === 'PDF') {
+    if (item == 'PDF') {
       setDropDownValue11('');
       setModalVisible11(false);
       navigation.navigate('Dispatch', {
         consignorCode: route.params.consignorCode,
         userId:route.params.userId,
       });
+    }
+    if(item == 'CNA'){
+      setModalVisibleCNA(true);
+      setModalVisible11(false);
     }
     setDropDownValue11(item);
     // setModalVisible11(false);
@@ -1029,7 +1034,7 @@ console.log('pa',packagingAction);
     const handlepackaging = ()=>{
       db.transaction(tx => {
         tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET eventTime=?, latitude=?, longitude=? WHERE  consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+          'UPDATE SellerMainScreenDetails SET status= "scanned", eventTime=?, latitude=?, longitude=? WHERE  consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
           [
             new Date().valueOf(),
             latitude,
@@ -1191,12 +1196,12 @@ console.log('pa',packagingAction);
           <Modal.Header>Partial Close Reason</Modal.Header>
           <Modal.Body>
             {PartialCloseData &&
-              PartialCloseData.filter(d => d.applies_to.includes("PPCF")).map((d, index) =>
+              PartialCloseData.filter(d => d.applies_to.includes("PPCF") && d.parentCode !== "CNA").map((d, index) =>
                  !pdCheck && d.description === 'Partial Dispatch' ? (
                   <Button
                     h="12"
                     paddingBottom={5}
-                    key={d.reasonID}
+                    key={d._id}
                     flex="1"
                     mt={2}
                     marginBottom={1.4}
@@ -1280,6 +1285,67 @@ console.log('pa',packagingAction);
           </Modal.Body>
         </Modal.Content>
       </Modal>
+      <Modal
+          isOpen={modalVisibleCNA}
+          onClose={() => {
+            setModalVisibleCNA(false);
+            setDropDownValue11('');
+          }}
+          size="lg">
+          <Modal.Content maxWidth="350">
+            <Modal.CloseButton />
+            <Modal.Header>Could Not Attempt Reason</Modal.Header>
+            <Modal.Body>
+              {PartialCloseData &&
+              PartialCloseData.filter(d => d.applies_to.includes("PPCF") && d.parentCode == "CNA").map((d, index) => (
+                  <Button
+                    key={d._id}
+                    flex="1"
+                    mt={2}
+                    marginBottom={1.5}
+                    marginTop={1.5}
+                    style={{
+                      backgroundColor:
+                        d.short_code === DropDownValue11 ? '#6666FF' : '#C8C8C8',
+                    }}
+                    title={d.description}
+                    onPress={() =>
+                      handleButtonPress11(d.short_code)
+                    }>
+                    <Text
+                      style={{
+                        color:
+                          d.short_code == DropDownValue11 ? 'white' : 'black',
+                      }}>
+                      {d.description}
+                    </Text>
+                  </Button>
+                ))}
+              <Button
+                flex="1"
+                mt={2}
+                bg="#004aad"
+                marginBottom={1.5}
+                marginTop={1.5}
+                onPress={() => {
+                  setModalVisibleCNA(false);
+                }}>
+                Submit
+              </Button>
+              <Button
+                flex="1"
+                mt={2}
+                bg="#004aad"
+                marginBottom={1.5}
+                marginTop={1.5}
+                onPress={() => {
+                  setModalVisible11(true), setModalVisibleCNA(false);
+                }}>
+                Back
+              </Button>
+            </Modal.Body>
+          </Modal.Content>
+        </Modal>
       <View style={{backgroundColor: 'white', flex: 1, paddingTop: 30}}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <Center>
@@ -1610,7 +1676,7 @@ console.log('pa',packagingAction);
               marginBottom={1.5}
               marginTop={1.5}
               onPress={() => {
-                // rejectDetails2();
+                rejectDetails2();
                 handleRejectAction();
                 setModalVisible(false);
               }}>
@@ -1623,7 +1689,7 @@ console.log('pa',packagingAction);
       <ScrollView
         style={{paddingTop: 20, paddingBottom: 50}}
         showsVerticalScrollIndicator={false}>
-        {(!showCloseBagModal11 ||!showCloseBagModal12 ) && scanned && (
+        {(!showCloseBagModal11 && scanned ||!showCloseBagModal12 && scanned  ) && (
           <QRCodeScanner
             onRead={onSuccess}
             reactivate={true}
