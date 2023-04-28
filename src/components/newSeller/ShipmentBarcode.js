@@ -55,6 +55,7 @@ const ShipmentBarcode = ({route}) => {
   const [newNotPicked, setNewNotPicked] = useState(0);
   const [barcode, setBarcode] = useState('');
   const [packagingAction, setPackagingAction] = useState(0);
+  const [packagingID, setPackagingID] = useState('');
   const [len, setLen] = useState(0);
   const [DropDownValue, setDropDownValue] = useState('');
   const [rejectedData, setRejectedData] = useState([]);
@@ -730,6 +731,54 @@ var dingAccept = new Sound(dingAccept11, error => {
       );
     });
   };
+  const updateDetails21 = () => {
+    console.log('scan ' + barcode.toString());
+    setAcceptedArray([...acceptedArray, barcode.toString()]);
+    console.log(acceptedArray);
+    db.transaction(tx => {
+      tx.executeSql(
+        'UPDATE SellerMainScreenDetails SET status="accepted",packagingId=?, expectedpackagingId=?, eventTime=?, latitude=?, longitude=? WHERE  consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+        [
+          expectedPackagingId,
+          packagingID,
+          new Date().valueOf(),
+          latitude,
+          longitude,
+          route.params.consignorCode,
+          barcode,
+          barcode,
+          barcode,
+        ],
+        (tx1, results) => {
+          let temp = [];
+          console.log('Results', results.rowsAffected);
+
+          if (results.rowsAffected > 0) {
+            console.log(barcode + 'accepted');
+            Vibration.vibrate(200);
+            dingAccept.play(success => {
+              if (success) {
+                // Vibration.vibrate(800);
+                console.log('successfully finished playing');
+              } else {
+                console.log('playback failed due to audio decoding errors');
+              }
+            });
+            displayDataSPScan();
+            // ToastAndroid.show(barcode + ' Accepted',ToastAndroid.SHORT);
+          } else {
+            console.log(barcode + 'not accepted');
+          }
+          console.log(results.rows.length);
+          for (let i = 0; i < results.rows.length; ++i) {
+            temp.push(results.rows.item(i));
+          }
+          // console.log("Data updated: \n ", JSON.stringify(temp, null, 4));
+          // viewDetails2();
+        },
+      );
+    });
+  };
 
   const barcodeCheck11 = () => {
     db.transaction(tx => {
@@ -748,7 +797,7 @@ var dingAccept = new Sound(dingAccept11, error => {
       );
     });
   };
-
+console.log('packagingId',packagingID)
     const rejectDetails2 = () => {
       console.log('scan 45456');
 var barcode11 = barcode;
@@ -797,7 +846,8 @@ var barcode11 = barcode;
       }
       else {
         db.transaction((tx) => {
-          tx.executeSql('UPDATE SellerMainScreenDetails SET status="rejected" ,rejectionReasonL1=?  WHERE consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ', [DropDownValue,route.params.consignorCode, barcode11,barcode11,barcode11], (tx1, results) => {
+          tx.executeSql('UPDATE SellerMainScreenDetails SET status="rejected" ,packagingId=?, expectedpackagingId=?, rejectionReasonL1=?  WHERE consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ', 
+          [expectedPackagingId, packagingID, DropDownValue,route.params.consignorCode, barcode11,barcode11,barcode11], (tx1, results) => {
             let temp = [];
             console.log('Rejected Reason : ', DropDownValue);
             console.log('Results', results.rowsAffected);
@@ -984,6 +1034,7 @@ var barcode11 = barcode;
             temp.push(results.rows.item(i));
           }
           setPackagingAction(temp[0].packagingAction);
+          setPackagingID(temp[0].packagingId);
         },
       );
     });
@@ -1511,10 +1562,32 @@ console.log('pa',packagingAction);
             bg="#004aad"
             onPress={() => {
               if (packagingAction == 2) {
-                setModal(true);
+                if(packagingID==expectedPackagingId){
+                  setCheck11(1);
+                  ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
+                  updateDetails2();
+                  displayDataSPScan();
+                  setLen(false);
+                  setModal(false);
+                  setExpectedPackaging('');
+                }
+                else{
+                  setModal(true);
+                }
                 setShowCloseBagModal12(false);
               } else if (packagingAction == 3) {
-                setModal1(true);
+                if(packagingID==expectedPackagingId){
+                  setCheck11(1);
+                  ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
+                  updateDetails2();
+                  displayDataSPScan();
+                  setLen(false);
+                  setModal(false);
+                  setExpectedPackaging('');
+                }
+                else{
+                  setModal1(true);
+                }
                 setShowCloseBagModal12(false);
               } else {
                 setShowCloseBagModal12(false);
@@ -1604,7 +1677,7 @@ console.log('pa',packagingAction);
               onPress={() => {
                 setCheck11(1);
                 ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
-                updateDetails2();
+                updateDetails21();
                 displayDataSPScan();
                 setLen(false);
                 setModal(false);
