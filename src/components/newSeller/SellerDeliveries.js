@@ -123,18 +123,18 @@ import {
       if(route.params.PendingHandover!=0){
         setMessage1(2);
         setShowModal1(true);
-        navigation.navigate('Main');
+        // navigation.navigate('Main');
       }
       else{
         setMessage1(1);
         setShowModal1(true);
-        navigation.navigate('Main');
+        // navigation.navigate('Main');
       }
     }
     
   return (
   <NativeBaseProvider>
-    <Modal isOpen={showModal1} onClose={() => setShowModal1(false)}>
+    <Modal isOpen={showModal1} onClose={() => {setShowModal1(false);navigation.navigate('Main')}}>
                 <Modal.Content backgroundColor={message1 === 1 ? '#fee2e2' : '#fee2e2'}>
                   <Modal.CloseButton />
                   <Modal.Body>

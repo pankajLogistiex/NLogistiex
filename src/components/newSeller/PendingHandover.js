@@ -427,6 +427,7 @@ return (
                 marginTop={1.5}
                 onPress={() => {
                   setModalVisibleCNA(false);
+                  pendingHandover11();
                 }}>
                 Submit
               </Button>
