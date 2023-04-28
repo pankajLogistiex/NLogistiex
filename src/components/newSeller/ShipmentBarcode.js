@@ -180,9 +180,6 @@ const [text12,setText12] = useState('');
             },
           ]);
         }
-
-
-
       })
       .catch(error => {
         RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
@@ -199,9 +196,6 @@ const [text12,setText12] = useState('');
           });
         console.log('Location Lat long error', error);
       });
-
-
-
   };
 
   const vibrateDevice = (type) => {
@@ -1034,7 +1028,7 @@ console.log('pa',packagingAction);
     const handlepackaging = ()=>{
       db.transaction(tx => {
         tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET status= "scanned", eventTime=?, latitude=?, longitude=? WHERE  consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+          'UPDATE SellerMainScreenDetails SET status="scanned", eventTime=?, latitude=?, longitude=? WHERE  consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
           [
             new Date().valueOf(),
             latitude,
@@ -1329,6 +1323,20 @@ console.log('pa',packagingAction);
                 marginTop={1.5}
                 onPress={() => {
                   setModalVisibleCNA(false);
+                  navigation.navigate('POD', {
+                    Forward: route.params.Forward,
+                    accepted: newaccepted,
+                    rejected: newrejected,
+                    notPicked: newNotPicked,
+                    phone: route.params.phone,
+                    userId: route.params.userId,
+                    consignorCode: route.params.consignorCode,
+                    DropDownValue: DropDownValue11,
+                    contactPersonName: route.params.contactPersonName,
+                    runsheetno: route.params.PRSNumber,
+                    latitude: latitude,
+                    longitude: longitude,
+                  })
                 }}>
                 Submit
               </Button>
@@ -1676,7 +1684,7 @@ console.log('pa',packagingAction);
               marginBottom={1.5}
               marginTop={1.5}
               onPress={() => {
-                rejectDetails2();
+                // rejectDetails2();
                 handleRejectAction();
                 setModalVisible(false);
               }}>
@@ -1689,7 +1697,7 @@ console.log('pa',packagingAction);
       <ScrollView
         style={{paddingTop: 20, paddingBottom: 50}}
         showsVerticalScrollIndicator={false}>
-        {(!showCloseBagModal11 && scanned ||!showCloseBagModal12 && scanned  ) && (
+        {(!showCloseBagModal11 && !showCloseBagModal12 && scanned) && (
           <QRCodeScanner
             onRead={onSuccess}
             reactivate={true}

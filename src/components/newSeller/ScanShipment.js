@@ -566,7 +566,7 @@ const ScanShipment = ({route}) => {
   const handlepackaging=()=>{
     db.transaction(tx => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET eventTime=?, latitude=?, longitude=? WHERE  consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+        'UPDATE SellerMainScreenDetails SET status="scanned", eventTime=?, latitude=?, longitude=? WHERE  consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
         [
           new Date().valueOf(),
           latitude,
