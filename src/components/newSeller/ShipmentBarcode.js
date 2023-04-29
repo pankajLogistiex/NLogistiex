@@ -1162,9 +1162,10 @@ console.log('pa',packagingAction);
       setCheck11(1);
       ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
       updateDetails2();
-      }
       displayDataSPScan();
       setLen(false);
+      }
+      
     }
   }, [len]);
 
@@ -1562,6 +1563,8 @@ console.log('pa',packagingAction);
                 setCheck11(1);
                 ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
                 updateDetails2();
+                displayDataSPScan();
+                setLen(false);
                 setExpectedPackaging('');
                 setShowCloseBagModal12(false);
               }
@@ -1570,6 +1573,8 @@ console.log('pa',packagingAction);
                   setCheck11(1);
                   ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
                   updateDetails2();
+                  displayDataSPScan();
+                  setLen(false);
                   setModal(false);
                   setExpectedPackaging('');
                 }
@@ -1582,6 +1587,8 @@ console.log('pa',packagingAction);
                   setCheck11(1);
                   ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
                   updateDetails2();
+                  displayDataSPScan();
+                  setLen(false);
                   setModal(false);
                   setExpectedPackaging('');
                 }
