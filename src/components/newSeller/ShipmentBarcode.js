@@ -1024,19 +1024,16 @@ var barcode11 = barcode;
         'SELECT * FROM SellerMainScreenDetails where awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?',
         [text11,text11,text11],
         (tx1, results) => {
-          // ToastAndroid.show("Loading...", ToastAndroid.SHORT);
-          let temp = [];
-          console.log(results.rows.length);
-          for (let i = 0; i < results.rows.length; ++i) {
-            temp.push(results.rows.item(i));
+          if (results.rows.length > 0) { 
+            const row = results.rows.item(0); 
+            setPackagingAction(row.packagingAction);
+            setPackagingID(row.packagingId);
           }
-          setPackagingAction(temp[0].packagingAction);
-          setPackagingID(temp[0].packagingId);
         },
       );
     });
   };
-
+  
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       displayData();
@@ -1104,7 +1101,7 @@ console.log('pa',packagingAction);
                 }
               });
             } else {
-              console.log(barcode + 'not updated');
+              console.log(expectedPackagingId + 'not updated');
             }
             console.log(results.rows.length);
             for (let i = 0; i < results.rows.length; ++i) {
@@ -1165,9 +1162,9 @@ console.log('pa',packagingAction);
       setCheck11(1);
       ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
       updateDetails2();
+      }
       displayDataSPScan();
       setLen(false);
-      }
     }
   }, [len]);
 
@@ -1565,16 +1562,14 @@ console.log('pa',packagingAction);
                 setCheck11(1);
                 ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
                 updateDetails2();
-                displayDataSPScan();
-                setLen(false);
+                setExpectedPackaging('');
+                setShowCloseBagModal12(false);
               }
               else if (packagingAction == 2) {
                 if(packagingID==expectedPackagingId){
                   setCheck11(1);
                   ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
                   updateDetails2();
-                  displayDataSPScan();
-                  setLen(false);
                   setModal(false);
                   setExpectedPackaging('');
                 }
@@ -1587,8 +1582,6 @@ console.log('pa',packagingAction);
                   setCheck11(1);
                   ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
                   updateDetails2();
-                  displayDataSPScan();
-                  setLen(false);
                   setModal(false);
                   setExpectedPackaging('');
                 }
