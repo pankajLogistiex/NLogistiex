@@ -81,6 +81,7 @@ const ScanShipment = ({route}) => {
   const [showCloseBagModal, setShowCloseBagModal] = useState(false);
   const [bagSeal, setBagSeal] = useState('');
   const [packagingAction, setPackagingAction] = useState(0);
+  const [packagingID, setPackagingID] = useState(0);
   const [showCloseBagModal12, setShowCloseBagModal12] = useState(false);
   const [showModal, setModal] = useState(false);
   const [showModal1, setModal1] = useState(false);
@@ -309,6 +310,7 @@ const ScanShipment = ({route}) => {
             temp.push(results.rows.item(i));
           }
           setPackagingAction(temp[0].packagingAction);
+          setPackagingID(temp[0].packagingId)
         },
       );
     });
@@ -335,6 +337,52 @@ const ScanShipment = ({route}) => {
       tx.executeSql(
         'UPDATE SellerMainScreenDetails SET status="accepted", eventTime=?, latitude=?, longitude=? WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
         [
+          new Date().valueOf(),
+          latitude,
+          longitude,
+          route.params.consignorCode,
+          barcode,
+          barcode,
+          barcode,
+        ],
+        (tx1, results) => {
+          let temp = [];
+          console.log('Results', results.rowsAffected);
+          console.log(results);
+
+          if (results.rowsAffected > 0) {
+            console.log(barcode + 'accepted');
+            Vibration.vibrate(200);
+            dingAccept.play(success => {
+              if (success) {
+                // Vibration.vibrate(800);
+                console.log('successfully finished playing');
+              } else {
+                console.log('playback failed due to audio decoding errors');
+              }
+            });
+            displayDataSPScan();
+          } else {
+            console.log(barcode + 'not accepted');
+          }
+          console.log(results.rows.length);
+          for (let i = 0; i < results.rows.length; ++i) {
+            temp.push(results.rows.item(i));
+          }
+        },
+      );
+    });
+  };
+  const updateDetails21 = () => {
+    console.log('scan ' + barcode.toString());
+    setAcceptedArray([...acceptedArray, barcode.toString()]);
+    console.log(acceptedArray);
+    db.transaction(tx => {
+      tx.executeSql(
+        'UPDATE SellerMainScreenDetails SET status="accepted",packagingId=?, expectedpackagingId=?, eventTime=?, latitude=?, longitude=? WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+        [
+          expectedPackagingId,
+          packagingID,
           new Date().valueOf(),
           latitude,
           longitude,
@@ -411,8 +459,8 @@ const ScanShipment = ({route}) => {
     else{
       db.transaction(tx => {
         tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET status="rejected" ,rejectionReasonL1=?  WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-          [DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
+          'UPDATE SellerMainScreenDetails SET status="rejected" ,packagingId=?, expectedpackagingId=?, rejectionReasonL1=?  WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+          [expectedPackagingId, packagingID,DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
           (tx1, results) => {
             let temp = [];
             console.log('Rejected Reason : ', DropDownValue);
@@ -1134,10 +1182,33 @@ const ScanShipment = ({route}) => {
             bg="#004aad"
             onPress={() => {
               if (packagingAction ==2) {
-                setModal(true);
+                if(packagingID==expectedPackagingId){
+                  Vibration.vibrate(100);
+                  RNBeep.beep();
+                  ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
+                  updateDetails2();
+                  displayDataSPScan();
+                  setLen(false);
+                  setModal(false);
+                  setExpectedPackaging('');
+                }else{
+                  setModal(true);
+                }
                 setShowCloseBagModal12(false);
               } else if (packagingAction ==3) {
-                setModal1(true);
+                if(packagingID==expectedPackagingId){
+                  Vibration.vibrate(100);
+                RNBeep.beep();
+                ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
+                updateDetails2();
+                displayDataSPScan();
+                setLen(false);
+                setModal(false);
+                setExpectedPackaging('');
+                }
+                else{
+                  setModal1(true);
+                }
                 setShowCloseBagModal12(false);
               } else {
                 setShowCloseBagModal12(false);
@@ -1177,7 +1248,7 @@ const ScanShipment = ({route}) => {
                 Vibration.vibrate(100);
                 RNBeep.beep();
                 ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
-                updateDetails2();
+                updateDetails21();
                 displayDataSPScan();
                 setLen(false);
                 setModal(false);
