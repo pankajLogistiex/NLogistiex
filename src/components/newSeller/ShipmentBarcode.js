@@ -995,11 +995,8 @@ var barcode11 = barcode;
         },
       );
     });
-    if (packagingAction != 0 && packagingAction != 1 && barcode){
+    if (packagingAction != 0 && barcode){
       setShowCloseBagModal12(true);
-    }
-    if (packagingAction == 1){
-      handlepackaging();
     }
   };
   console.log(text11);
@@ -1079,8 +1076,10 @@ console.log('pa',packagingAction);
     const handlepackaging = ()=>{
       db.transaction(tx => {
         tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET status="scanned", eventTime=?, latitude=?, longitude=? WHERE  consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+          'UPDATE SellerMainScreenDetails SET pacakgingId=?,expectedpackaging=?, eventTime=?, latitude=?, longitude=? WHERE  consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
           [
+            expectedPackagingId,
+            packagingID,
             new Date().valueOf(),
             latitude,
             longitude,
@@ -1095,7 +1094,7 @@ console.log('pa',packagingAction);
 
             if (results.rowsAffected > 0) {
               Vibration.vibrate(200);
-              ToastAndroid.show(barcode + ' Saved', ToastAndroid.SHORT);
+              ToastAndroid.show(expectedPackagingId + ' Saved', ToastAndroid.SHORT);
               dingAccept.play(success => {
                 if (success) {
                   // Vibration.vibrate(800);
@@ -1405,7 +1404,7 @@ console.log('pa',packagingAction);
             </Modal.Body>
           </Modal.Content>
         </Modal>
-      <View style={{backgroundColor: 'white', flex: 1, paddingTop: 30}}>
+      {/* <View style={{backgroundColor: 'white', flex: 1, paddingTop: 30}}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <Center>
             <Input
@@ -1454,7 +1453,7 @@ console.log('pa',packagingAction);
             />
           </Center>
         </ScrollView>
-      </View>
+      </View> */}
       <Modal
         isOpen={showCloseBagModal11}
         onClose={() => {
@@ -1561,7 +1560,15 @@ console.log('pa',packagingAction);
             mt={2}
             bg="#004aad"
             onPress={() => {
-              if (packagingAction == 2) {
+              if (packagingAction == 1){
+                handlepackaging();
+                setCheck11(1);
+                ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
+                updateDetails2();
+                displayDataSPScan();
+                setLen(false);
+              }
+              else if (packagingAction == 2) {
                 if(packagingID==expectedPackagingId){
                   setCheck11(1);
                   ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
