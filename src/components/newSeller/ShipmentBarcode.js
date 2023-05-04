@@ -79,6 +79,7 @@ const ShipmentBarcode = ({route}) => {
   const [check11, setCheck11] = useState(0);
   const [pdCheck, setPDCheck] = useState(false);
   const [expectedPackagingId, setExpectedPackaging] = useState('');
+  const [showScanner, setShowScanner] = useState(true);
 
   const buttonColor = acceptedArray.length === 0 ? 'gray.300' : '#004aad';
 
@@ -93,6 +94,7 @@ const ShipmentBarcode = ({route}) => {
   const [PartialCloseData, setPartialCloseData] = useState([]);
   const [closeBagColor, setCloseBagColor] = useState('gray.300');
   const [showQRCodeModal, setShowQRCodeModal] = useState(true);
+  const [showOuterScanner, setShowOuterScanner] = useState(true);
 
   const currentDate = new Date().toISOString().slice(0, 10);
   let serialNo = 0;
@@ -691,56 +693,9 @@ var dingAccept = new Sound(dingAccept11, error => {
     console.log(acceptedArray);
     db.transaction(tx => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="accepted", eventTime=?, latitude=?, longitude=? WHERE  consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-        [
-          new Date().valueOf(),
-          latitude,
-          longitude,
-          route.params.consignorCode,
-          barcode,
-          barcode,
-          barcode,
-        ],
-        (tx1, results) => {
-          let temp = [];
-          console.log('Results', results.rowsAffected);
-
-          if (results.rowsAffected > 0) {
-            console.log(barcode + 'accepted');
-            Vibration.vibrate(200);
-            dingAccept.play(success => {
-              if (success) {
-                // Vibration.vibrate(800);
-                console.log('successfully finished playing');
-              } else {
-                console.log('playback failed due to audio decoding errors');
-              }
-            });
-            displayDataSPScan();
-            // ToastAndroid.show(barcode + ' Accepted',ToastAndroid.SHORT);
-          } else {
-            console.log(barcode + 'not accepted');
-          }
-          console.log(results.rows.length);
-          for (let i = 0; i < results.rows.length; ++i) {
-            temp.push(results.rows.item(i));
-          }
-          // console.log("Data updated: \n ", JSON.stringify(temp, null, 4));
-          // viewDetails2();
-        },
-      );
-    });
-  };
-  const updateDetails21 = () => {
-    console.log('scan ' + barcode.toString());
-    setAcceptedArray([...acceptedArray, barcode.toString()]);
-    console.log(acceptedArray);
-    db.transaction(tx => {
-      tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="accepted",packagingId=?, expectedpackagingId=?, eventTime=?, latitude=?, longitude=? WHERE  consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+        'UPDATE SellerMainScreenDetails SET status="accepted", packagingId=?, eventTime=?, latitude=?, longitude=? WHERE  consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
         [
           expectedPackagingId,
-          packagingID,
           new Date().valueOf(),
           latitude,
           longitude,
@@ -779,24 +734,7 @@ var dingAccept = new Sound(dingAccept11, error => {
       );
     });
   };
-
-  const barcodeCheck11 = () => {
-    db.transaction(tx => {
-      tx.executeSql(
-        'Select * FROM SellerMainScreenDetails WHERE status IS NOT NULL AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?)',
-        [barcode, barcode, barcode],
-        (tx1, results) => {
-          console.log('Results121', results.rows.length);
-          console.log(barcode);
-          if (results.rows.length === 0) {
-            ToastAndroid.show('Scanning wrong product', ToastAndroid.SHORT);
-          } else {
-            ToastAndroid.show(barcode + ' already scanned', ToastAndroid.SHORT);
-          }
-        },
-      );
-    });
-  };
+  
 console.log('packagingId',packagingID)
     const rejectDetails2 = () => {
       console.log('scan 45456');
@@ -846,8 +784,8 @@ var barcode11 = barcode;
       }
       else {
         db.transaction((tx) => {
-          tx.executeSql('UPDATE SellerMainScreenDetails SET status="rejected" ,packagingId=?, expectedpackagingId=?, rejectionReasonL1=?  WHERE consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ', 
-          [expectedPackagingId, packagingID, DropDownValue,route.params.consignorCode, barcode11,barcode11,barcode11], (tx1, results) => {
+          tx.executeSql('UPDATE SellerMainScreenDetails SET status="rejected" ,packagingId=?, rejectionReasonL1=?  WHERE consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ', 
+          [expectedPackagingId, DropDownValue,route.params.consignorCode, barcode11,barcode11,barcode11], (tx1, results) => {
             let temp = [];
             console.log('Rejected Reason : ', DropDownValue);
             console.log('Results', results.rowsAffected);
@@ -952,7 +890,6 @@ var barcode11 = barcode;
                 (tx1, results) => {
                   console.log('Results121', results.rows.length);
                   console.log('ok4444', data);
-
                   console.log(data);
                   if (results.rows.length === 0) {
                     ToastAndroid.show(
@@ -963,7 +900,6 @@ var barcode11 = barcode;
                     Vibration.vibrate(800);
                     dingReject.play(success => {
                       if (success) {
-
                         console.log('successfully finished playing');
                       } else {
                         console.log('playback failed due to audio decoding errors');
@@ -976,18 +912,21 @@ var barcode11 = barcode;
                     setCheck11(0);
                     dingReject.play(success => {
                       if (success) {
-
                         console.log('successfully finished playing');
                       } else {
                         console.log('playback failed due to audio decoding errors');
                       }
                     });
                     setBarcode('');
-
                   }
                 },
               );
             });
+          } else {
+            if (packagingAction !== 0 && barcode){
+              setShowCloseBagModal12(true);
+              setShowOuterScanner(false);
+            }
           }
         },
         error => {
@@ -995,29 +934,9 @@ var barcode11 = barcode;
         },
       );
     });
-    if (packagingAction != 0 && barcode){
-      setShowCloseBagModal12(true);
-    }
   };
   console.log(text11);
-  // const fetchData = async () => {
-  //   const tx = await db.transaction();
-  //   const result = await tx.executeSql(
-  //     'SELECT * FROM SellerMainScreenDetails where awbNo="XB-NaNNaNNaN16104" OR clientRefId="1679740804375" OR clientShipmentReferenceNumber="D59uuyd7M"',
-  //     [],
-  //   );
-  //   let temp = [];
-  //         console.log(result.rows.length);
-  //         for (let i = 0; i < result.rows.length; ++i) {
-  //           temp.push(result.rows.item(i));
-  //         }
-  //         setPackagingAction(temp[0].packagingAction);
-  // };
-
-  // useEffect(() => {
-  //   const unsubscribe = navigation.addListener('focus', fetchData);
-  //   return unsubscribe;
-  // }, [navigation]);
+  
   const displayData = async () => {
     db.transaction(tx => {
       tx.executeSql(
@@ -1070,48 +989,49 @@ console.log('pa',packagingAction);
         );
       });
     };
-    const handlepackaging = ()=>{
-      db.transaction(tx => {
-        tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET pacakgingId=?,expectedpackaging=?, eventTime=?, latitude=?, longitude=? WHERE  consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-          [
-            expectedPackagingId,
-            packagingID,
-            new Date().valueOf(),
-            latitude,
-            longitude,
-            route.params.consignorCode,
-            barcode,
-            barcode,
-            barcode,
-          ],
-          (tx1, results) => {
-            let temp = [];
-            console.log('Results', results.rowsAffected);
-
-            if (results.rowsAffected > 0) {
-              Vibration.vibrate(200);
-              ToastAndroid.show(expectedPackagingId + ' Saved', ToastAndroid.SHORT);
-              dingAccept.play(success => {
-                if (success) {
-                  // Vibration.vibrate(800);
-                  console.log('successfully finished playing');
-                } else {
-                  console.log('playback failed due to audio decoding errors');
-                }
-              });
-            } else {
-              console.log(expectedPackagingId + 'not updated');
-            }
-            console.log(results.rows.length);
-            for (let i = 0; i < results.rows.length; ++i) {
-              temp.push(results.rows.item(i));
-            }
-          },
-        );
-      });
-
+    const handlepackaging = (value) => {
+      if (packagingAction == 1) {
+        ToastAndroid.show(value + ' Saved', ToastAndroid.SHORT);
+        setCheck11(1);
+        ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
+        updateDetails2();
+        displayDataSPScan();
+        setLen(false);
+        setExpectedPackaging('');
+        setShowCloseBagModal12(false);
+      } else if (packagingAction == 2) {
+        if (packagingID.trim() === value.trim()) {
+          setCheck11(1);
+          ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
+          updateDetails2();
+          displayDataSPScan();
+          setLen(false);
+          setModal(false);
+          setExpectedPackaging('');
+          setShowCloseBagModal12(false);
+        } else {
+          setModal(true);
+          setShowCloseBagModal12(false);
+        }
+      } else if (packagingAction == 3) {
+        if (packagingID.trim() === value.trim()) {
+          setCheck11(1);
+          ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
+          updateDetails2();
+          displayDataSPScan();
+          setLen(false);
+          setModal(false);
+          setShowCloseBagModal12(false);
+        } else {
+          setModal1(true);
+          setShowCloseBagModal12(false);
+        }
+      } else {
+        console.log(packagingID, "is not equal to", value)
+      }
+      setShowOuterScanner(true);
     };
+    
     const onSuccess = e => {
       console.log(e.data, 'barcode');
       setBarcode(e.data);
@@ -1149,6 +1069,7 @@ console.log('pa',packagingAction);
       console.log(e.data, 'ExpectedPackagingID');
       // getCategories(e.data);
       setExpectedPackaging(e.data);
+      handlepackaging(e.data);
     };
     const onSucessThroughButton = (data21)=>{
       console.log(data21, 'barcode');
@@ -1199,7 +1120,7 @@ console.log('pa',packagingAction);
   function handleButtonPress(item) {
     setDropDownValue(item);
   }
-
+console.log("Expected",expectedPackagingId);
   return (
     <NativeBaseProvider>
       <Modal
@@ -1402,56 +1323,6 @@ console.log('pa',packagingAction);
             </Modal.Body>
           </Modal.Content>
         </Modal>
-      {/* <View style={{backgroundColor: 'white', flex: 1, paddingTop: 30}}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <Center>
-            <Input
-              mx="3"
-              mt={4}
-              placeholder="Receiver Name"
-              w="90%"
-              bg="gray.200"
-              size="lg"
-              value={name}
-              onChangeText={e => setName(e)}
-            />
-            <Input
-              mx="3"
-              my={4}
-              placeholder="Mobile Number"
-              w="90%"
-              bg="gray.200"
-              size="lg"
-              value={mobileNumber}
-              onChangeText={e => setMobileNumber(e)}
-            />
-            <Button
-              w="90%"
-              size="lg"
-              style={{backgroundColor: '#004aad', color: '#fff'}}
-              title="Submit"
-              onPress={() => sendSmsOtp()}>
-              Submit
-            </Button>
-            <Button
-              w="90%"
-              mt={2}
-              size="lg"
-              style={{backgroundColor: '#004aad', color: '#fff'}}
-              title="Submit"
-              onPress={() => setModalVisible11(true)}>
-              Partial Close
-            </Button>
-          </Center>
-          <Center>
-            <Image
-              style={{width: 150, height: 150}}
-              source={require('../../assets/image.png')}
-              alt={'Logo Image'}
-            />
-          </Center>
-        </ScrollView>
-      </View> */}
       <Modal
         isOpen={showCloseBagModal11}
         onClose={() => {
@@ -1502,6 +1373,7 @@ console.log('pa',packagingAction);
               onPress={() => {
                 CloseBagEndScan();
                 setShowCloseBagModal11(false);
+                setScanned(true);
               }}>
               Submit
             </Button>
@@ -1514,7 +1386,8 @@ console.log('pa',packagingAction);
           setShowCloseBagModal12(false);
           setExpectedPackaging('');
           reloadScanner();
-          setScanned(true);
+          setShowScanner(true)
+          setShowOuterScanner(true)
         }}
         size="lg">
         <Modal.Content maxWidth="350">
@@ -1558,48 +1431,7 @@ console.log('pa',packagingAction);
             mt={2}
             bg="#004aad"
             onPress={() => {
-              if (packagingAction == 1){
-                handlepackaging();
-                setCheck11(1);
-                ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
-                updateDetails2();
-                displayDataSPScan();
-                setLen(false);
-                setExpectedPackaging('');
-                setShowCloseBagModal12(false);
-              }
-              else if (packagingAction == 2) {
-                if(packagingID==expectedPackagingId){
-                  setCheck11(1);
-                  ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
-                  updateDetails2();
-                  displayDataSPScan();
-                  setLen(false);
-                  setModal(false);
-                  setExpectedPackaging('');
-                }
-                else{
-                  setModal(true);
-                }
-                setShowCloseBagModal12(false);
-              } else if (packagingAction == 3) {
-                if(packagingID==expectedPackagingId){
-                  setCheck11(1);
-                  ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
-                  updateDetails2();
-                  displayDataSPScan();
-                  setLen(false);
-                  setModal(false);
-                  setExpectedPackaging('');
-                }
-                else{
-                  setModal1(true);
-                }
-                setShowCloseBagModal12(false);
-              } else {
-                setShowCloseBagModal12(false);
-                setExpectedPackaging('');
-              }
+              handlepackaging(expectedPackagingId);
             }}>
             Submit
           </Button>
@@ -1622,6 +1454,7 @@ console.log('pa',packagingAction);
           setShowCloseBagModal(false);
           setShowQRCodeModal(true);
           reloadScanner();
+          setShowOuterScanner(true)
         }}
         size="lg">
         <Modal.Content maxWidth="350">
@@ -1659,7 +1492,7 @@ console.log('pa',packagingAction);
               mt={2}
               bg="#004aad"
               onPress={() => {
-                CloseBag(), setShowCloseBagModal(false);
+                CloseBag(), setShowCloseBagModal(false); setShowOuterScanner(true)
               }}>
               Submit
             </Button>
@@ -1674,17 +1507,25 @@ console.log('pa',packagingAction);
         size="lg">
         <Modal.Content maxWidth="350">
           <Modal.CloseButton />
-          <Modal.Header>Accept Shipment</Modal.Header>
+          <Modal.Header>Accept/Reject Shipment</Modal.Header>
           <Modal.Body>
             <Text>Mismatch Packaging ID</Text>
+            <View style={{
+              width: '95%',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignSelf: 'center',
+              marginTop: 10,
+            }}>
             <Button
               flex="1"
               mt={2}
               bg="#004aad"
+              w="45%"
               onPress={() => {
                 setCheck11(1);
                 ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
-                updateDetails21();
+                updateDetails2();
                 displayDataSPScan();
                 setLen(false);
                 setModal(false);
@@ -1692,6 +1533,19 @@ console.log('pa',packagingAction);
               }}>
               Accept Anyway
             </Button>
+            <Button
+              flex="1"
+              mt={2}
+              bg="#004aad"
+              w="45%"
+              onPress={() => {
+                setModalVisible(true)
+                setModal(false);
+                setExpectedPackaging('');
+              }}>
+              Reject
+            </Button>
+            </View>
           </Modal.Body>
         </Modal.Content>
       </Modal>
@@ -1777,7 +1631,7 @@ console.log('pa',packagingAction);
       <ScrollView
         style={{paddingTop: 20, paddingBottom: 50}}
         showsVerticalScrollIndicator={false}>
-        {(!showCloseBagModal11 && !showCloseBagModal12 && scanned) && (
+        {showOuterScanner  && (
           <QRCodeScanner
             onRead={onSuccess}
             reactivate={true}
@@ -1928,6 +1782,7 @@ console.log('pa',packagingAction);
                 } else {
                   if (acceptedArray.length !== 0) {
                     setShowCloseBagModal11(true);
+                    setScanned(false);
                   } else {
                     partialClose112();
                   }
@@ -1948,6 +1803,7 @@ console.log('pa',packagingAction);
                   ToastAndroid.show('Bag is Empty', ToastAndroid.SHORT);
                 } else {
                   setShowCloseBagModal(true);
+                  setShowOuterScanner(false);
                 }
               }}>
               Close bag
