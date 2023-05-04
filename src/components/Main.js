@@ -821,6 +821,7 @@ export default function Main({navigation, route}) {
                             w="100%"
                             size="lg"
                             bg="#004aad"
+                            rounded="md"
                             onPress={() =>
                               navigation.navigate('SellerHandover')
                             }>
@@ -831,6 +832,7 @@ export default function Main({navigation, route}) {
                             w="100%"
                             size="lg"
                             bg="#004aad"
+                            rounded="md"
                             onPress={() =>
                               navigation.navigate('SellerDeliveries', {
                                 Forward: Forward,
@@ -846,6 +848,7 @@ export default function Main({navigation, route}) {
                             w="100%"
                             size="lg"
                             bg="#004aad"
+                            rounded="md"
                             onPress={() =>
                               navigation.navigate('NewSellerPickup', {
                                 Forward: Forward,
@@ -1088,6 +1091,7 @@ export default function Main({navigation, route}) {
                             w="100%"
                             size="lg"
                             bg="#004aad"
+                            rounded="md"
                             onPress={() =>
                               navigation.navigate('SellerDeliveries', {
                                 Forward: Forward,
@@ -1103,6 +1107,7 @@ export default function Main({navigation, route}) {
                             w="100%"
                             size="lg"
                             bg="#004aad"
+                            rounded="md"
                             onPress={() =>
                               navigation.navigate('NewSellerPickup', {
                                 Forward: Forward,
