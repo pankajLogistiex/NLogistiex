@@ -315,7 +315,7 @@ const ScanShipment = ({route}) => {
       );
     });
   };
-
+console.log("packagingId",packagingID)
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       displayData();
@@ -335,54 +335,9 @@ const ScanShipment = ({route}) => {
     console.log(acceptedArray);
     db.transaction(tx => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="accepted", eventTime=?, latitude=?, longitude=? WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-        [
-          new Date().valueOf(),
-          latitude,
-          longitude,
-          route.params.consignorCode,
-          barcode,
-          barcode,
-          barcode,
-        ],
-        (tx1, results) => {
-          let temp = [];
-          console.log('Results', results.rowsAffected);
-          console.log(results);
-
-          if (results.rowsAffected > 0) {
-            console.log(barcode + 'accepted');
-            Vibration.vibrate(200);
-            dingAccept.play(success => {
-              if (success) {
-                // Vibration.vibrate(800);
-                console.log('successfully finished playing');
-              } else {
-                console.log('playback failed due to audio decoding errors');
-              }
-            });
-            displayDataSPScan();
-          } else {
-            console.log(barcode + 'not accepted');
-          }
-          console.log(results.rows.length);
-          for (let i = 0; i < results.rows.length; ++i) {
-            temp.push(results.rows.item(i));
-          }
-        },
-      );
-    });
-  };
-  const updateDetails21 = () => {
-    console.log('scan ' + barcode.toString());
-    setAcceptedArray([...acceptedArray, barcode.toString()]);
-    console.log(acceptedArray);
-    db.transaction(tx => {
-      tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="accepted",packagingId=?, expectedpackagingId=?, eventTime=?, latitude=?, longitude=? WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+        'UPDATE SellerMainScreenDetails SET status="accepted", packagingId=?, eventTime=?, latitude=?, longitude=? WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
         [
           expectedPackagingId,
-          packagingID,
           new Date().valueOf(),
           latitude,
           longitude,
@@ -419,7 +374,7 @@ const ScanShipment = ({route}) => {
       );
     });
   };
-
+  
   const rejectDetails2 = () => {
     if(packagingAction==0){
       db.transaction(tx => {
@@ -459,8 +414,8 @@ const ScanShipment = ({route}) => {
     else{
       db.transaction(tx => {
         tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET status="rejected" ,packagingId=?, expectedpackagingId=?, rejectionReasonL1=?  WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-          [expectedPackagingId, packagingID,DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
+          'UPDATE SellerMainScreenDetails SET status="rejected" ,packagingId=?, rejectionReasonL1=?  WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+          [expectedPackagingId,DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
           (tx1, results) => {
             let temp = [];
             console.log('Rejected Reason : ', DropDownValue);
@@ -574,10 +529,10 @@ const ScanShipment = ({route}) => {
           if (!res.rows.length) {
             console.log(data);
             console.log('ok2222', data);
-
+  
             db.transaction(tx => {
               console.log('ok3333', data);
-
+  
               tx.executeSql(
                 'Select * FROM SellerMainScreenDetails WHERE status IS NOT NULL And shipmentAction="Seller Delivery" And consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?)',
                 [route.params.consignorCode, data, data, data],
@@ -596,6 +551,9 @@ const ScanShipment = ({route}) => {
                 },
               );
             });
+          } else if (packagingAction != 0 && barcode) {
+            setShowCloseBagModal12(true);
+            setScanned(false);
           }
         },
         error => {
@@ -603,54 +561,52 @@ const ScanShipment = ({route}) => {
         },
       );
     });
-    if(packagingAction!=0 && packagingAction!=1 && barcode){
-      setShowCloseBagModal12(true);
+  };
+  
+
+  const handlepackaging = (value) => {
+    if (packagingAction == 1) {
+      ToastAndroid.show(value + ' Saved', ToastAndroid.SHORT);
+      setCheck11(1);
+      ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
+      updateDetails2();
+      displayDataSPScan();
+      setLen(false);
+      setExpectedPackaging('');
+      setShowCloseBagModal12(false);
+    } else if (packagingAction == 2) {
+      if (packagingID.trim() === value.trim()) {
+        setCheck11(1);
+        ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
+        updateDetails2();
+        displayDataSPScan();
+        setLen(false);
+        setModal(false);
+        setExpectedPackaging('');
+        setShowCloseBagModal12(false);
+      } else {
+        setModal(true);
+        setShowCloseBagModal12(false);
+      }
+    } else if (packagingAction == 3) {
+      if (packagingID.trim() === value.trim()) {
+        setCheck11(1);
+        ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
+        updateDetails2();
+        displayDataSPScan();
+        setLen(false);
+        setModal(false);
+        setShowCloseBagModal12(false);
+      } else {
+        setModal1(true);
+        setShowCloseBagModal12(false);
+      }
+    } else {
+      console.log(packagingID, "is not equal to", value)
     }
-    if(packagingAction==1){
-      handlepackaging();
-    }
+    setScanned(true);
   };
 
-  const handlepackaging=()=>{
-    db.transaction(tx => {
-      tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="scanned", eventTime=?, latitude=?, longitude=? WHERE  consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-        [
-          new Date().valueOf(),
-          latitude,
-          longitude,
-          route.params.consignorCode,
-          barcode,
-          barcode,
-          barcode,
-        ],
-        (tx1, results) => {
-          let temp = [];
-          console.log('Results', results.rowsAffected);
-
-          if (results.rowsAffected > 0) {
-            Vibration.vibrate(200);
-            ToastAndroid.show(barcode + ' Saved', ToastAndroid.SHORT);
-            dingAccept.play(success => {
-              if (success) {
-                // Vibration.vibrate(800);
-                console.log('successfully finished playing');
-              } else {
-                console.log('playback failed due to audio decoding errors');
-              }
-            });
-          } else {
-            console.log(barcode + 'not updated');
-          }
-          console.log(results.rows.length);
-          for (let i = 0; i < results.rows.length; ++i) {
-            temp.push(results.rows.item(i));
-          }
-        },
-      );
-    });
-
-  }
   const updateCategories = data => {
     db.transaction(tx => {
       tx.executeSql(
@@ -695,6 +651,7 @@ const ScanShipment = ({route}) => {
     console.log(e.data, 'ExpectedPackagingID');
     // getCategories(e.data);
     setExpectedPackaging(e.data);
+    handlepackaging(e.data);
   };
   const onSucessThroughButton=(data21)=>{
     console.log(data21, 'barcode');
@@ -709,7 +666,7 @@ const ScanShipment = ({route}) => {
   useEffect(() => {
     if (len) {
       if(packagingAction==0){
-        check11(1)
+        setCheck11(1)
       Vibration.vibrate(100);
       RNBeep.beep();
       ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
@@ -1181,39 +1138,7 @@ const ScanShipment = ({route}) => {
             mt={2}
             bg="#004aad"
             onPress={() => {
-              if (packagingAction ==2) {
-                if(packagingID==expectedPackagingId){
-                  Vibration.vibrate(100);
-                  RNBeep.beep();
-                  ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
-                  updateDetails2();
-                  displayDataSPScan();
-                  setLen(false);
-                  setModal(false);
-                  setExpectedPackaging('');
-                }else{
-                  setModal(true);
-                }
-                setShowCloseBagModal12(false);
-              } else if (packagingAction ==3) {
-                if(packagingID==expectedPackagingId){
-                  Vibration.vibrate(100);
-                RNBeep.beep();
-                ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
-                updateDetails2();
-                displayDataSPScan();
-                setLen(false);
-                setModal(false);
-                setExpectedPackaging('');
-                }
-                else{
-                  setModal1(true);
-                }
-                setShowCloseBagModal12(false);
-              } else {
-                setShowCloseBagModal12(false);
-                setExpectedPackaging('');
-              }
+              handlepackaging(expectedPackagingId);
             }}>
             Submit
           </Button>
@@ -1240,6 +1165,13 @@ const ScanShipment = ({route}) => {
           <Modal.Header>Accept Shipment</Modal.Header>
           <Modal.Body>
             <Text>Mismatch Packaging ID</Text>
+            <View style={{
+              width: '95%',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignSelf: 'center',
+              marginTop: 10,
+            }}>
             <Button
               flex="1"
               mt={2}
@@ -1248,7 +1180,7 @@ const ScanShipment = ({route}) => {
                 Vibration.vibrate(100);
                 RNBeep.beep();
                 ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
-                updateDetails21();
+                updateDetails2();
                 displayDataSPScan();
                 setLen(false);
                 setModal(false);
@@ -1256,6 +1188,18 @@ const ScanShipment = ({route}) => {
               }}>
               Accept Anyway
             </Button>
+            <Button
+              flex="1"
+              mt={2}
+              bg="#004aad"
+              onPress={() => {
+                setModalVisible1(true)
+                setModal(false);
+                setExpectedPackaging('');
+              }}>
+              Reject/Tag
+            </Button>
+            </View>
           </Modal.Body>
         </Modal.Content>
       </Modal>
@@ -1286,7 +1230,7 @@ const ScanShipment = ({route}) => {
       <ScrollView
         style={{paddingTop: 20, paddingBottom: 50}}
         showsVerticalScrollIndicator={false}>
-        {!showCloseBagModal12 && scanned && (
+        {scanned && (
           <QRCodeScanner
             onRead={onSuccess}
             reactivate={true}

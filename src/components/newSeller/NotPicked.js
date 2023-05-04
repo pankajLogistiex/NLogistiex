@@ -121,7 +121,6 @@ const NotPicked = ({route}) => {
           setMessage('Submission failed');
           setStatus('error');
         });
-      setShowModal(true);
     };
     const NotAttemptReasons11 = () => {
       db.transaction(tx => {
@@ -229,7 +228,7 @@ return (
                       marginTop={1.5}
                       style={{
                         backgroundColor:
-                          d.reasonName === DropDownValue1
+                          d.description === DropDownValue1
                             ? '#6666FF'
                             : '#C8C8C8',
                       }}

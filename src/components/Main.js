@@ -1,7 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable prettier/prettier */
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, {useEffect, useState, Alert} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Text,
   View,
@@ -22,6 +22,9 @@ import {
   Center,
   Image,
   Heading,
+  VStack,
+  Alert,
+  Modal
 } from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {openDatabase} from 'react-native-sqlite-storage';
@@ -65,7 +68,8 @@ export default function Main({navigation, route}) {
   const [id, setId] = useState('');
   const [tripData, setTripData] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const [showModal1, setShowModal1] = useState(false);
+  const [message1, setMessage1] = useState(0);
   const focus = useIsFocused();
   const getUserId = async () => {
     try {
@@ -315,7 +319,7 @@ export default function Main({navigation, route}) {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND handoverStatus="accepted"',
+        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND handoverStatus="accepted" AND status IS NULL',
         [],
         (tx1, results) => {
           setSpp1(results.rows.length);
@@ -418,6 +422,19 @@ export default function Main({navigation, route}) {
   //         },);
   //     });
   // };
+  const handleStartTrip=()=>{
+    if(spp==0 && spp1==0 && shp1==0){
+      setMessage1(1);
+      setShowModal1(true);
+    }
+    else if(shp1!=0){
+      setMessage1(2);
+      setShowModal1(true);
+    }
+    else{
+      navigation.navigate('MyTrip', {userId: id});
+    }
+  }
 
   const storeUser = async () => {
     try {
@@ -558,9 +575,23 @@ export default function Main({navigation, route}) {
 
   return (
     <NativeBaseProvider>
+      <Modal isOpen={showModal1} onClose={() => setShowModal1(false)}>
+                <Modal.Content backgroundColor={message1 === 1 ? '#fee2e2' : '#fee2e2'}>
+                  <Modal.CloseButton />
+                  <Modal.Body>
+                    <Alert w="100%" status={message1 === 1 ? 'error' : 'error'}>
+                      <VStack space={1} flexShrink={1} w="100%" alignItems="center">
+                        <Alert.Icon size="4xl" />
+                        <Text my={3} fontSize="md" fontWeight="medium">{message1 === 1 ? 'No Pickup/Delivery Assigned' : 'Please complete handover before Start a trip'}</Text>
+                      </VStack>
+                    </Alert>
+                  </Modal.Body>
+                </Modal.Content>
+      </Modal>
       {loading ? (
         <ActivityIndicator size="large" color="blue" style={{marginTop: 44}} />
       ) : (
+        
         <Box flex={1} bg="gray.300">
           <ScrollView>
             <Box flex={1} bg="gray.300" p={4}>
@@ -580,7 +611,8 @@ export default function Main({navigation, route}) {
                           flexDir="row"
                           justifyContent="space-between"
                           mb={4}
-                          px={4}>
+                          px={4}
+                          borderBottomRadius="md">
                           <Box w="45%">
                             <Heading size="sm" mb={4}>
                               {it.title}
@@ -1290,12 +1322,13 @@ export default function Main({navigation, route}) {
               <Button
                 variant="outline"
                 onPress={() => {
-                  navigation.navigate('MyTrip', {userId: id});
+                  handleStartTrip();
                 }}
                 mt={4}
                 style={{color: '#004aad', borderColor: '#004aad'}}>
                 <Text style={{color: '#004aad'}}>{tripValue}</Text>
               </Button>
+              
               {/* <Fab onPress={()=>{navigation.navigate('MyTrip', {userId: id})}} position="absolute" size="sm" style={{backgroundColor: '#004aad'}} label={<Text style={{color: 'white', fontSize: 16}} >{tripValue}</Text>} /> */}
               {/* <Button w="100%" size="lg" bg="#004aad" mt={-5} onPress={()=>navigation.navigate('SellerHandover')}>Seller Handover</Button> */}
               {/* <Button w="100%" size="lg" bg="#004aad" onPress={()=>navigation.navigate('SellerHandover')}>Start Handover</Button> */}
