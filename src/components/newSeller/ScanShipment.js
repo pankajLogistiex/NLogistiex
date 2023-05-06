@@ -572,7 +572,6 @@ console.log("packagingId",packagingID)
       updateDetails2();
       displayDataSPScan();
       setLen(false);
-      setExpectedPackaging('');
       setShowCloseBagModal12(false);
     } else if (packagingAction == 2) {
       if (packagingID.trim() === value.trim()) {
@@ -582,7 +581,6 @@ console.log("packagingId",packagingID)
         displayDataSPScan();
         setLen(false);
         setModal(false);
-        setExpectedPackaging('');
         setShowCloseBagModal12(false);
       } else {
         setModal(true);
@@ -597,7 +595,6 @@ console.log("packagingId",packagingID)
         setLen(false);
         setModal(false);
         setShowCloseBagModal12(false);
-        setExpectedPackaging('');
       } else {
         setModal1(true);
         setShowCloseBagModal12(false);
@@ -605,6 +602,8 @@ console.log("packagingId",packagingID)
     } else {
       console.log(packagingID, "is not equal to", value)
     }
+    setPackagingAction('');
+    setExpectedPackaging('');
     setScanned(true);
   };
 

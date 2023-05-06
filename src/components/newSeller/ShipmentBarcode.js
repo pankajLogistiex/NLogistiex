@@ -1004,7 +1004,6 @@ console.log('pa',packagingAction);
         updateDetails2();
         displayDataSPScan();
         setLen(false);
-        setExpectedPackaging('');
         setShowCloseBagModal12(false);
       } else if (packagingAction == 2) {
         if (packagingID.trim() === value.trim()) {
@@ -1014,7 +1013,6 @@ console.log('pa',packagingAction);
           displayDataSPScan();
           setLen(false);
           setModal(false);
-          setExpectedPackaging('');
           setShowCloseBagModal12(false);
         } else {
           setModal(true);
@@ -1036,6 +1034,8 @@ console.log('pa',packagingAction);
       } else {
         console.log(packagingID, "is not equal to", value)
       }
+      setPackagingAction('');
+      setExpectedPackaging('');
       setShowOuterScanner(true);
     };
     
@@ -1086,7 +1086,7 @@ console.log('pa',packagingAction);
 
   useEffect(() => {
     if (len ) {
-      if( packagingAction != undefined && packagingAction==0){
+      if( packagingAction !== undefined && packagingAction==0){
       setCheck11(1);
       ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
       updateDetails2();
