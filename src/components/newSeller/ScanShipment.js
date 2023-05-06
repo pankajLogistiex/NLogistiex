@@ -602,7 +602,7 @@ console.log("packagingId",packagingID)
     } else {
       console.log(packagingID, "is not equal to", value)
     }
-    setPackagingAction('');
+    setPackagingAction();
     setExpectedPackaging('');
     setScanned(true);
   };

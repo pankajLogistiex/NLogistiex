@@ -1034,7 +1034,7 @@ console.log('pa',packagingAction);
       } else {
         console.log(packagingID, "is not equal to", value)
       }
-      setPackagingAction('');
+      setPackagingAction();
       setExpectedPackaging('');
       setShowOuterScanner(true);
     };
