@@ -80,7 +80,7 @@ const ScanShipment = ({route}) => {
   const [bagIdNo, setBagIdNo] = useState(1);
   const [showCloseBagModal, setShowCloseBagModal] = useState(false);
   const [bagSeal, setBagSeal] = useState('');
-  const [packagingAction, setPackagingAction] = useState(0);
+  const [packagingAction, setPackagingAction] = useState();
   const [packagingID, setPackagingID] = useState(0);
   const [showCloseBagModal12, setShowCloseBagModal12] = useState(false);
   const [showModal, setModal] = useState(false);
@@ -551,7 +551,7 @@ console.log("packagingId",packagingID)
                 },
               );
             });
-          } else if (packagingAction != 0 && barcode) {
+          } else if (packagingAction !== undefined && packagingAction != 0 && barcode) {
             setShowCloseBagModal12(true);
             setScanned(false);
           }
@@ -597,6 +597,7 @@ console.log("packagingId",packagingID)
         setLen(false);
         setModal(false);
         setShowCloseBagModal12(false);
+        setExpectedPackaging('');
       } else {
         setModal1(true);
         setShowCloseBagModal12(false);
@@ -665,8 +666,8 @@ console.log("packagingId",packagingID)
 
   useEffect(() => {
     if (len) {
-      if(packagingAction==0){
-        setCheck11(1)
+      if(packagingAction !== undefined && packagingAction==0){
+      setCheck11(1)
       Vibration.vibrate(100);
       RNBeep.beep();
       ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
@@ -675,7 +676,7 @@ console.log("packagingId",packagingID)
       setLen(false);
       }
     }
-  }, [len]);
+  }, [len, packagingAction]);
 
   const displaydata = async () => {
     db.transaction(tx => {

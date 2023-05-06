@@ -222,11 +222,11 @@ function StackNavigators({navigation}) {
     console.log('api pull');
     loadAPI_Data1();
     loadAPI_Data2();
-    loadAPI_Data3();
-    loadAPI_Data4();
-    loadAPI_Data5();
-    loadAPI_Data6();
-    loadAPI_DataCD();
+    // loadAPI_Data3();
+    // loadAPI_Data4();
+    // loadAPI_Data5();
+    // loadAPI_Data6();
+    // loadAPI_DataCD();
     createTableBag1();
     loadAPI_DataSF();
   };
@@ -546,7 +546,7 @@ function StackNavigators({navigation}) {
           // console.log("Address from local db : " + address_json.consignorAddress1 + " " + address_json.consignorAddress2);
           // ToastAndroid.show('consignorName:' + results.rows.item(i).consignorName + "\n" + 'PRSNumber : ' + results.rows.item(i).PRSNumber, ToastAndroid.SHORT);
         }
-        if (m === 8) {
+        if (m === 3) {
           ToastAndroid.show('Sync Successful', ToastAndroid.SHORT);
           setIsLoading(false);
           setIsLogin(true);
@@ -556,7 +556,7 @@ function StackNavigators({navigation}) {
 
           AsyncStorage.setItem('refresh11', 'refresh');
         } else {
-          console.log('Only ' + m + ' APIs loaded out of 8 ');
+          console.log('Only ' + m + ' APIs loaded out of 3 ');
         }
         // m++;
         // ToastAndroid.show("Sync Successful",ToastAndroid.SHORT);
@@ -701,316 +701,256 @@ function StackNavigators({navigation}) {
   };
 
   // Table 3
-  const createTables3 = () => {
-    db.transaction(txn => {
-      txn.executeSql('DROP TABLE IF EXISTS ShipmentRejectReasons', []);
-      txn.executeSql(
-        'CREATE TABLE IF NOT EXISTS ShipmentRejectReasons(_id ID VARCHAR(100) PRIMARY KEY ,shipmentExceptionReasonID VARCHAR(200),shipmentExceptionReasonName VARCHAR(200),shipmentExceptionReasonUserID VARCHAR(200),disable VARCHAR(20),createdAt VARCHAR(200),updatedAt VARCHAR(200),__v INT(10))',
-        [],
-        (sqlTxn, res) => {
-          // console.log('table 3 created successfully');
-          // loadAPI_Data();
-        },
-        error => {
-          console.log('error on creating table ' + error.message);
-        },
-      );
-    });
-  };
-  const loadAPI_Data3 = () => {
-    // setIsLoading(!isLoading);
-    createTables3();
-    (async () => {
-      await axios.get(backendUrl + 'ADupdatePrams/getUSER').then(
-        res => {
-          // console.log('Table3 API OK: ' + res.data.length);
-          // console.log(res.data);
-          for (let i = 0; i < res.data.length; i++) {
-            db.transaction(txn => {
-              txn.executeSql(
-                'INSERT OR REPLACE INTO ShipmentRejectReasons( _id,shipmentExceptionReasonID,shipmentExceptionReasonName,shipmentExceptionReasonUserID,disable,createdAt,updatedAt,__v) VALUES (?,?,?,?,?,?,?,?)',
-                [
-                  res.data[i]._id,
-                  res.data[i].shipmentExceptionReasonID,
-                  res.data[i].shipmentExceptionReasonName,
-                  res.data[i].shipmentExceptionReasonUserID,
-                  res.data[i].disable,
-                  res.data[i].createdAt,
-                  res.data[i].updatedAt,
-                  res.data[i].__v,
-                ],
-                (sqlTxn, _res) => {
-                  // console.log('\n Data Added to local db 3 ');
-                  // console.log(_res);
-                },
-                error => {
-                  console.log('error on adding data ' + error.message);
-                },
-              );
-            });
-          }
-          m++;
-          // console.log('value of m3 '+m);
-          // viewDetails3();
-          // setIsLoading(false);
-        },
-        error => {
-          console.log(error);
-        },
-      );
-    })();
-  };
-  const viewDetails3 = () => {
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM ShipmentRejectReasons',
-        [],
-        (tx1, results) => {
-          // let temp = [];
-          // console.log(results.rows.length);
-          // for (let i = 0; i < results.rows.length; ++i) {
-          //     temp.push(results.rows.item(i));
-          // }
-          // m++;
-          // ToastAndroid.show('Sync Successful3', ToastAndroid.SHORT);
-          // console.log('Data from Local Database 3: \n ', JSON.stringify(temp, null, 4),);
-          // console.log('Table3 DB OK:', temp.length);
-        },
-      );
-    });
-  };
+  // const createTables3 = () => {
+  //   db.transaction(txn => {
+  //     txn.executeSql('DROP TABLE IF EXISTS ShipmentRejectReasons', []);
+  //     txn.executeSql(
+  //       'CREATE TABLE IF NOT EXISTS ShipmentRejectReasons(_id ID VARCHAR(100) PRIMARY KEY ,shipmentExceptionReasonID VARCHAR(200),shipmentExceptionReasonName VARCHAR(200),shipmentExceptionReasonUserID VARCHAR(200),disable VARCHAR(20),createdAt VARCHAR(200),updatedAt VARCHAR(200),__v INT(10))',
+  //       [],
+  //       (sqlTxn, res) => {
+
+  //       error => {
+  //         console.log('error on creating table ' + error.message);
+  //       },
+  //     );
+  //   });
+  // };
+  // const loadAPI_Data3 = () => {
+  //   createTables3();
+  //   (async () => {
+  //     await axios.get(backendUrl + 'ADupdatePrams/getUSER').then(
+  //       res => {
+          
+  //         for (let i = 0; i < res.data.length; i++) {
+  //           db.transaction(txn => {
+  //             txn.executeSql(
+  //               'INSERT OR REPLACE INTO ShipmentRejectReasons( _id,shipmentExceptionReasonID,shipmentExceptionReasonName,shipmentExceptionReasonUserID,disable,createdAt,updatedAt,__v) VALUES (?,?,?,?,?,?,?,?)',
+  //               [
+  //                 res.data[i]._id,
+  //                 res.data[i].shipmentExceptionReasonID,
+  //                 res.data[i].shipmentExceptionReasonName,
+  //                 res.data[i].shipmentExceptionReasonUserID,
+  //                 res.data[i].disable,
+  //                 res.data[i].createdAt,
+  //                 res.data[i].updatedAt,
+  //                 res.data[i].__v,
+  //               ],
+  //               (sqlTxn, _res) => {
+                 
+  //               },
+  //               error => {
+  //                 console.log('error on adding data ' + error.message);
+  //               },
+  //             );
+  //           });
+  //         }
+  //         m++;
+  //       },
+  //       error => {
+  //         console.log(error);
+  //       },
+  //     );
+  //   })();
+  // };
+  // const viewDetails3 = () => {
+  //   db.transaction(tx => {
+  //     tx.executeSql(
+  //       'SELECT * FROM ShipmentRejectReasons',
+  //       [],
+  //       (tx1, results) => {
+  //       },
+  //     );
+  //   });
+  // };
 
   // Table 4
-  const createTables4 = () => {
-    db.transaction(txn => {
-      txn.executeSql('DROP TABLE IF EXISTS ClosePickupReasons', []);
-      txn.executeSql(
-        'CREATE TABLE IF NOT EXISTS ClosePickupReasons( _id ID VARCHAR(100) PRIMARY KEY,pickupFailureReasonID VARCHAR(50),pickupFailureReasonName VARCHAR(200),pickupFailureReasonUserID VARCHAR(50),pickupFailureReasonActiveStatus VARCHAR(20),pickupFailureReasonGroupID VARCHAR(50),pickupFailureReasonGeoFence VARCHAR(20),pickupFailureReasonOTPenable VARCHAR(20),pickupFailureReasonCallMandatory VARCHAR(20),pickupFailureReasonPickupDateEnable VARCHAR(20),pickupFailureReasonGroupName VARCHAR(200),disable VARCHAR(20),createdAt VARCHAR(200),updatedAt VARCHAR(200),__v INT(10))',
-        [],
-        (sqlTxn, res) => {
-          // console.log('table 4 created successfully');
-          // loadAPI_Data();
-        },
-        error => {
-          console.log('error on creating table ' + error.message);
-        },
-      );
-    });
-  };
-  const createTablesCD = () => {
-    db.transaction(txn => {
-      txn.executeSql('DROP TABLE IF EXISTS CloseDeliveryReasons', []);
-      txn.executeSql(
-        'CREATE TABLE IF NOT EXISTS CloseDeliveryReasons( _id ID VARCHAR(100) PRIMARY KEY,deliveryFailureReasonID VARCHAR(50),deliveryFailureReasonName VARCHAR(200),deliveryFailureReasonUserID VARCHAR(50),deliveryFailureReasonActiveStatus VARCHAR(20),deliveryFailureReasonGroupID VARCHAR(50),deliveryFailureReasonGeoFence VARCHAR(20),deliveryFailureReasonOTPenable VARCHAR(20),deliveryFailureReasonCallMandatory VARCHAR(20),deliveryFailureReasonDeliveryDateEnable VARCHAR(20),deliveryFailureReasonGroupName VARCHAR(200),disable VARCHAR(20),createdAt VARCHAR(200),updatedAt VARCHAR(200),__v INT(10))',
-        [],
-        (sqlTxn, res) => {
-          // console.log('table 4 created successfully');
-          // loadAPI_Data();
-        },
-        error => {
-          console.log('error on creating table ' + error.message);
-        },
-      );
-    });
-  };
-  const loadAPI_Data4 = () => {
-    // setIsLoading(!isLoading);
-    createTables4();
-    (async () => {
-      await axios.get(backendUrl + 'ADupdatePrams/getUPFR').then(
-        res => {
-          // console.log('Table4 API OK: ' + res.data.length);
-          // console.log(res.data);
-          for (let i = 0; i < res.data.length; i++) {
-            db.transaction(txn => {
-              txn.executeSql(
-                `INSERT OR REPLACE INTO ClosePickupReasons( _id,pickupFailureReasonID,pickupFailureReasonName,pickupFailureReasonUserID,pickupFailureReasonActiveStatus,pickupFailureReasonGroupID,pickupFailureReasonGeoFence,pickupFailureReasonOTPenable,pickupFailureReasonCallMandatory,pickupFailureReasonPickupDateEnable,pickupFailureReasonGroupName,disable,createdAt,updatedAt,__v
-                    ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-                [
-                  res.data[i]._id,
-                  res.data[i].pickupFailureReasonID,
-                  res.data[i].pickupFailureReasonName,
-                  res.data[i].pickupFailureReasonUserID,
-                  res.data[i].pickupFailureReasonActiveStatus,
-                  res.data[i].pickupFailureReasonGroupID,
-                  res.data[i].pickupFailureReasonGeoFence,
-                  res.data[i].pickupFailureReasonOTPenable,
-                  res.data[i].pickupFailureReasonCallMandatory,
-                  res.data[i].pickupFailureReasonPickupDateEnable,
-                  res.data[i].pickupFailureReasonGroupName,
-                  res.data[i].disable,
-                  res.data[i].createdAt,
-                  res.data[i].updatedAt,
-                  res.data[i].__v,
-                ],
-                (sqlTxn, _res) => {
-                  // console.log('\n Data Added to local db 4 ');
-                  // console.log(res);
-                },
-                error => {
-                  console.log('error on adding data ' + error.message);
-                },
-              );
-            });
-          }
-          m++;
-          // console.log('value of m4 '+m);
-
-          // viewDetails4();
-          // setIsLoading(false);
-        },
-        error => {
-          console.log(error);
-        },
-      );
-    })();
-  };
-  const loadAPI_DataCD = () => {
-    // setIsLoading(!isLoading);
-    createTablesCD();
-    (async () => {
-      await axios.get(backendUrl + 'ADupdatePrams/getUDFR').then(
-        res => {
-          // console.log('Table4 API OK: ' + res.data.length);
-          // console.log(res.data);
-          for (let i = 0; i < res.data.length; i++) {
-            db.transaction(txn => {
-              txn.executeSql(
-                `INSERT OR REPLACE INTO CloseDeliveryReasons( _id,deliveryFailureReasonID,deliveryFailureReasonName,deliveryFailureReasonUserID,deliveryFailureReasonActiveStatus,deliveryFailureReasonGroupID,deliveryFailureReasonGeoFence,deliveryFailureReasonOTPenable,deliveryFailureReasonCallMandatory,deliveryFailureReasonDeliveryDateEnable,deliveryFailureReasonGroupName,disable,createdAt,updatedAt,__v
-                  ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-                [
-                  res.data[i]._id,
-                  res.data[i].deliveryFailureReasonID,
-                  res.data[i].deliveryFailureReasonName,
-                  res.data[i].deliveryFailureReasonUserID,
-                  res.data[i].deliveryFailureReasonActiveStatus,
-                  res.data[i].deliveryFailureReasonGroupID,
-                  res.data[i].deliveryFailureReasonGeoFence,
-                  res.data[i].deliveryFailureReasonOTPenable,
-                  res.data[i].deliveryFailureReasonCallMandatory,
-                  res.data[i].deliveryFailureReasonDeliveryDateEnable,
-                  res.data[i].deliveryFailureReasonGroupName,
-                  res.data[i].disable,
-                  res.data[i].createdAt,
-                  res.data[i].updatedAt,
-                  res.data[i].__v,
-                ],
-                (sqlTxn, _res) => {
-                  // console.log('\n Data Added to local db 4 ');
-                  // console.log(res);
-                },
-                error => {
-                  console.log('error on adding data ' + error.message);
-                },
-              );
-            });
-          }
-          m++;
-          // console.log('value of m4 '+m);
-
-          // viewDetails4();
-          // setIsLoading(false);
-        },
-        error => {
-          console.log(error);
-        },
-      );
-    })();
-  };
-  const viewDetails4 = () => {
-    db.transaction(tx => {
-      tx.executeSql('SELECT * FROM ClosePickupReasons', [], (tx1, results) => {
-        // let temp = [];
-        // console.log(results.rows.length);
-        // for (let i = 0; i < results.rows.length; ++i) {
-        //     temp.push(results.rows.item(i));
-        // }
-        // ToastAndroid.show('Sync Successful4', ToastAndroid.SHORT);
-        // console.log('Data from Local Database 4: \n ', JSON.stringify(temp, null, 4),);
-        // console.log('Data from Local Database 4: \n ',temp);
-        // m++;
-        // console.log('Table4 DB OK:', temp.length);
-      });
-    });
-  };
+  // const createTables4 = () => {
+  //   db.transaction(txn => {
+  //     txn.executeSql('DROP TABLE IF EXISTS ClosePickupReasons', []);
+  //     txn.executeSql(
+  //       'CREATE TABLE IF NOT EXISTS ClosePickupReasons( _id ID VARCHAR(100) PRIMARY KEY,pickupFailureReasonID VARCHAR(50),pickupFailureReasonName VARCHAR(200),pickupFailureReasonUserID VARCHAR(50),pickupFailureReasonActiveStatus VARCHAR(20),pickupFailureReasonGroupID VARCHAR(50),pickupFailureReasonGeoFence VARCHAR(20),pickupFailureReasonOTPenable VARCHAR(20),pickupFailureReasonCallMandatory VARCHAR(20),pickupFailureReasonPickupDateEnable VARCHAR(20),pickupFailureReasonGroupName VARCHAR(200),disable VARCHAR(20),createdAt VARCHAR(200),updatedAt VARCHAR(200),__v INT(10))',
+  //       [],
+  //       (sqlTxn, res) => {
+         
+  //       },
+  //       error => {
+  //         console.log('error on creating table ' + error.message);
+  //       },
+  //     );
+  //   });
+  // };
+  // const createTablesCD = () => {
+  //   db.transaction(txn => {
+  //     txn.executeSql('DROP TABLE IF EXISTS CloseDeliveryReasons', []);
+  //     txn.executeSql(
+  //       'CREATE TABLE IF NOT EXISTS CloseDeliveryReasons( _id ID VARCHAR(100) PRIMARY KEY,deliveryFailureReasonID VARCHAR(50),deliveryFailureReasonName VARCHAR(200),deliveryFailureReasonUserID VARCHAR(50),deliveryFailureReasonActiveStatus VARCHAR(20),deliveryFailureReasonGroupID VARCHAR(50),deliveryFailureReasonGeoFence VARCHAR(20),deliveryFailureReasonOTPenable VARCHAR(20),deliveryFailureReasonCallMandatory VARCHAR(20),deliveryFailureReasonDeliveryDateEnable VARCHAR(20),deliveryFailureReasonGroupName VARCHAR(200),disable VARCHAR(20),createdAt VARCHAR(200),updatedAt VARCHAR(200),__v INT(10))',
+  //       [],
+  //       (sqlTxn, res) => {
+  //       },
+  //       error => {
+  //         console.log('error on creating table ' + error.message);
+  //       },
+  //     );
+  //   });
+  // };
+  // const loadAPI_Data4 = () => {
+  //   createTables4();
+  //   (async () => {
+  //     await axios.get(backendUrl + 'ADupdatePrams/getUPFR').then(
+  //       res => {
+  //         for (let i = 0; i < res.data.length; i++) {
+  //           db.transaction(txn => {
+  //             txn.executeSql(
+  //               `INSERT OR REPLACE INTO ClosePickupReasons( _id,pickupFailureReasonID,pickupFailureReasonName,pickupFailureReasonUserID,pickupFailureReasonActiveStatus,pickupFailureReasonGroupID,pickupFailureReasonGeoFence,pickupFailureReasonOTPenable,pickupFailureReasonCallMandatory,pickupFailureReasonPickupDateEnable,pickupFailureReasonGroupName,disable,createdAt,updatedAt,__v
+  //                   ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+  //               [
+  //                 res.data[i]._id,
+  //                 res.data[i].pickupFailureReasonID,
+  //                 res.data[i].pickupFailureReasonName,
+  //                 res.data[i].pickupFailureReasonUserID,
+  //                 res.data[i].pickupFailureReasonActiveStatus,
+  //                 res.data[i].pickupFailureReasonGroupID,
+  //                 res.data[i].pickupFailureReasonGeoFence,
+  //                 res.data[i].pickupFailureReasonOTPenable,
+  //                 res.data[i].pickupFailureReasonCallMandatory,
+  //                 res.data[i].pickupFailureReasonPickupDateEnable,
+  //                 res.data[i].pickupFailureReasonGroupName,
+  //                 res.data[i].disable,
+  //                 res.data[i].createdAt,
+  //                 res.data[i].updatedAt,
+  //                 res.data[i].__v,
+  //               ],
+  //               (sqlTxn, _res) => {
+  //                 // console.log('\n Data Added to local db 4 ');
+  //                 // console.log(res);
+  //               },
+  //               error => {
+  //                 console.log('error on adding data ' + error.message);
+  //               },
+  //             );
+  //           });
+  //         }
+  //         m++;
+          
+  //       },
+  //       error => {
+  //         console.log(error);
+  //       },
+  //     );
+  //   })();
+  // };
+  // const loadAPI_DataCD = () => {
+  //   createTablesCD();
+  //   (async () => {
+  //     await axios.get(backendUrl + 'ADupdatePrams/getUDFR').then(
+  //       res => {
+  //         // console.log('Table4 API OK: ' + res.data.length);
+  //         // console.log(res.data);
+  //         for (let i = 0; i < res.data.length; i++) {
+  //           db.transaction(txn => {
+  //             txn.executeSql(
+  //               `INSERT OR REPLACE INTO CloseDeliveryReasons( _id,deliveryFailureReasonID,deliveryFailureReasonName,deliveryFailureReasonUserID,deliveryFailureReasonActiveStatus,deliveryFailureReasonGroupID,deliveryFailureReasonGeoFence,deliveryFailureReasonOTPenable,deliveryFailureReasonCallMandatory,deliveryFailureReasonDeliveryDateEnable,deliveryFailureReasonGroupName,disable,createdAt,updatedAt,__v
+  //                 ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+  //               [
+  //                 res.data[i]._id,
+  //                 res.data[i].deliveryFailureReasonID,
+  //                 res.data[i].deliveryFailureReasonName,
+  //                 res.data[i].deliveryFailureReasonUserID,
+  //                 res.data[i].deliveryFailureReasonActiveStatus,
+  //                 res.data[i].deliveryFailureReasonGroupID,
+  //                 res.data[i].deliveryFailureReasonGeoFence,
+  //                 res.data[i].deliveryFailureReasonOTPenable,
+  //                 res.data[i].deliveryFailureReasonCallMandatory,
+  //                 res.data[i].deliveryFailureReasonDeliveryDateEnable,
+  //                 res.data[i].deliveryFailureReasonGroupName,
+  //                 res.data[i].disable,
+  //                 res.data[i].createdAt,
+  //                 res.data[i].updatedAt,
+  //                 res.data[i].__v,
+  //               ],
+  //               (sqlTxn, _res) => {
+  //               },
+  //               error => {
+  //                 console.log('error on adding data ' + error.message);
+  //               },
+  //             );
+  //           });
+  //         }
+  //         m++;
+  //       },
+  //       error => {
+  //         console.log(error);
+  //       },
+  //     );
+  //   })();
+  // };
+  // const viewDetails4 = () => {
+  //   db.transaction(tx => {
+  //     tx.executeSql('SELECT * FROM ClosePickupReasons', [], (tx1, results) => {
+        
+  //     });
+  //   });
+  // };
 
   // Table 5
-  const createTables5 = () => {
-    db.transaction(txn => {
-      txn.executeSql('DROP TABLE IF EXISTS NotAttemptReasons', []);
-      txn.executeSql(
-        'CREATE TABLE IF NOT EXISTS NotAttemptReasons(_id ID VARCHAR(200) PRIMARY KEY,reasonID VARCHAR(200),reasonName VARCHAR(200),reasonUserID VARCHAR(200),disable VARCHAR(200),createdAt VARCHAR(200),updatedAt VARCHAR(200),__v INT(10))',
-        [],
-        (sqlTxn, res) => {
-          // console.log('table 5 created successfully');
-          // loadAPI_Data();
-        },
-        error => {
-          console.log('error on creating table ' + error.message);
-        },
-      );
-    });
-  };
-  const loadAPI_Data5 = () => {
-    // setIsLoading(!isLoading);
-    createTables5();
-    (async () => {
-      await axios.get(backendUrl + 'ADupdatePrams/getNotAttemptedReasons').then(
-        res => {
-          // console.log('Table5 API OK:' , res.data.data.length);
-          // console.log(res.data);
-          for (let i = 0; i < res.data.data.length; i++) {
-            db.transaction(txn => {
-              txn.executeSql(
-                `INSERT OR REPLACE INTO NotAttemptReasons(_id,reasonID,reasonName,reasonUserID,disable,createdAt,updatedAt,__v
-                          ) VALUES (?,?,?,?,?,?,?,?)`,
-                [
-                  res.data.data[i]._id,
-                  res.data.data[i].reasonID,
-                  res.data.data[i].reasonName,
-                  res.data.data[i].reasonUserID,
-                  res.data.data[i].disable,
-                  res.data.data[i].createdAt,
-                  res.data.data[i].updatedAt,
-                  res.data.data[i].__v,
-                ],
-                (sqlTxn, _res) => {
-                  // console.log('\n Data Added to local db 5');
-                  // console.log(res);
-                },
-                error => {
-                  console.log('error on adding data ' + error.message);
-                },
-              );
-            });
-          }
-          m++;
-          // console.log('value of m5 '+m);
+  // const createTables5 = () => {
+  //   db.transaction(txn => {
+  //     txn.executeSql('DROP TABLE IF EXISTS NotAttemptReasons', []);
+  //     txn.executeSql(
+  //       'CREATE TABLE IF NOT EXISTS NotAttemptReasons(_id ID VARCHAR(200) PRIMARY KEY,reasonID VARCHAR(200),reasonName VARCHAR(200),reasonUserID VARCHAR(200),disable VARCHAR(200),createdAt VARCHAR(200),updatedAt VARCHAR(200),__v INT(10))',
+  //       [],
+  //       (sqlTxn, res) => {
 
-          // viewDetails5();
-          // setIsLoading(false);
-        },
-        error => {
-          console.log(error);
-        },
-      );
-    })();
-  };
-  const viewDetails5 = () => {
-    db.transaction(tx => {
-      tx.executeSql('SELECT * FROM NotAttemptReasons', [], (tx1, results) => {
-        // let temp = [];
-        // // console.log(results.rows.length);
-        // for (let i = 0; i < results.rows.length; ++i) {
-        //     temp.push(results.rows.item(i));
-        // }
-        // m++;
-        // ToastAndroid.show("Sync Successful",ToastAndroid.SHORT);
-        // console.log('Data from Local Database 5: \n ', temp);
-        // console.log('Table 5 DB OK:', temp.length);
-      });
-    });
-  };
+  //       },
+  //       error => {
+  //         console.log('error on creating table ' + error.message);
+  //       },
+  //     );
+  //   });
+  // };
+  // const loadAPI_Data5 = () => {
+  //   createTables5();
+  //   (async () => {
+  //     await axios.get(backendUrl + 'ADupdatePrams/getNotAttemptedReasons').then(
+  //       res => {
+  //         for (let i = 0; i < res.data.data.length; i++) {
+  //           db.transaction(txn => {
+  //             txn.executeSql(
+  //               `INSERT OR REPLACE INTO NotAttemptReasons(_id,reasonID,reasonName,reasonUserID,disable,createdAt,updatedAt,__v
+  //                         ) VALUES (?,?,?,?,?,?,?,?)`,
+  //               [
+  //                 res.data.data[i]._id,
+  //                 res.data.data[i].reasonID,
+  //                 res.data.data[i].reasonName,
+  //                 res.data.data[i].reasonUserID,
+  //                 res.data.data[i].disable,
+  //                 res.data.data[i].createdAt,
+  //                 res.data.data[i].updatedAt,
+  //                 res.data.data[i].__v,
+  //               ],
+  //               (sqlTxn, _res) => {
+  //               },
+  //               error => {
+  //                 console.log('error on adding data ' + error.message);
+  //               },
+  //             );
+  //           });
+  //         }
+  //         m++;
+  //       },
+  //       error => {
+  //         console.log(error);
+  //       },
+  //     );
+  //   })();
+  // };
+  // const viewDetails5 = () => {
+  //   db.transaction(tx => {
+  //     tx.executeSql('SELECT * FROM NotAttemptReasons', [], (tx1, results) => {
+        
+  //     });
+  //   });
+  // };
   const createTablesSF = () => {
     db.transaction(txn => {
       txn.executeSql('DROP TABLE IF EXISTS ShipmentFailure', []);
@@ -1086,22 +1026,21 @@ function StackNavigators({navigation}) {
     })();
   };
   // Table 6
-  const createTables6 = () => {
-    db.transaction(txn => {
-      txn.executeSql('DROP TABLE IF EXISTS PartialCloseReasons', []);
-      txn.executeSql(
-        'CREATE TABLE IF NOT EXISTS PartialCloseReasons(_id ID VARCHAR(200) PRIMARY KEY,reasonID VARCHAR(200),reasonName VARCHAR(200),reasonUserID VARCHAR(200),disable VARCHAR(200),createdAt VARCHAR(200),updatedAt VARCHAR(200),__v INT(10))',
-        [],
-        (sqlTxn, res) => {
-          // console.log('table 6 created successfully');
-          // loadAPI_Data();
-        },
-        error => {
-          console.log('error on creating table ' + error.message);
-        },
-      );
-    });
-  };
+  // const createTables6 = () => {
+  //   db.transaction(txn => {
+  //     txn.executeSql('DROP TABLE IF EXISTS PartialCloseReasons', []);
+  //     txn.executeSql(
+  //       'CREATE TABLE IF NOT EXISTS PartialCloseReasons(_id ID VARCHAR(200) PRIMARY KEY,reasonID VARCHAR(200),reasonName VARCHAR(200),reasonUserID VARCHAR(200),disable VARCHAR(200),createdAt VARCHAR(200),updatedAt VARCHAR(200),__v INT(10))',
+  //       [],
+  //       (sqlTxn, res) => {
+         
+  //       },
+  //       error => {
+  //         console.log('error on creating table ' + error.message);
+  //       },
+  //     );
+  //   });
+  // };
   const createTableBag1 = () => {
     AsyncStorage.setItem('acceptedItemData11', '');
     db.transaction(tx => {
@@ -1118,53 +1057,47 @@ function StackNavigators({navigation}) {
       );
     });
   };
-  const loadAPI_Data6 = () => {
-    // setIsLoading(!isLoading);
-    createTables6();
-    (async () => {
-      await axios
-        .get(backendUrl + 'ADupdateprams/getPartialClosureReasons')
-        .then(
-          res => {
-            // console.log('Table6 API OK: ' + res.data.data.length);
-            // console.log(res.data);
-            for (let i = 0; i < res.data.data.length; i++) {
-              db.transaction(txn => {
-                txn.executeSql(
-                  `INSERT OR REPLACE INTO PartialCloseReasons(_id,reasonID,reasonName,reasonUserID,disable,createdAt,updatedAt,__v
-                          ) VALUES (?,?,?,?,?,?,?,?)`,
-                  [
-                    res.data.data[i]._id,
-                    res.data.data[i].reasonID,
-                    res.data.data[i].reasonName,
-                    res.data.data[i].reasonUserID,
-                    res.data.data[i].disable,
-                    res.data.data[i].createdAt,
-                    res.data.data[i].updatedAt,
-                    res.data.data[i].__v,
-                  ],
-                  (sqlTxn, _res) => {
-                    // console.log('\n Data Added to local db 6 ');
-                    // console.log(res);
-                  },
-                  error => {
-                    console.log('error on adding data ' + error.message);
-                  },
-                );
-              });
-            }
-            m++;
-            // console.log('value of m6 '+m);
+  // const loadAPI_Data6 = () => {
+  //   createTables6();
+  //   (async () => {
+  //     await axios
+  //       .get(backendUrl + 'ADupdateprams/getPartialClosureReasons')
+  //       .then(
+  //         res => {
+            
+  //           for (let i = 0; i < res.data.data.length; i++) {
+  //             db.transaction(txn => {
+  //               txn.executeSql(
+  //                 `INSERT OR REPLACE INTO PartialCloseReasons(_id,reasonID,reasonName,reasonUserID,disable,createdAt,updatedAt,__v
+  //                         ) VALUES (?,?,?,?,?,?,?,?)`,
+  //                 [
+  //                   res.data.data[i]._id,
+  //                   res.data.data[i].reasonID,
+  //                   res.data.data[i].reasonName,
+  //                   res.data.data[i].reasonUserID,
+  //                   res.data.data[i].disable,
+  //                   res.data.data[i].createdAt,
+  //                   res.data.data[i].updatedAt,
+  //                   res.data.data[i].__v,
+  //                 ],
+  //                 (sqlTxn, _res) => {
+                   
+  //                 },
+  //                 error => {
+  //                   console.log('error on adding data ' + error.message);
+  //                 },
+  //               );
+  //             });
+  //           }
+  //           m++;
 
-            // viewDetails6();
-            // setIsLoading(false);
-          },
-          error => {
-            console.log(error);
-          },
-        );
-    })();
-  };
+  //         },
+  //         error => {
+  //           console.log(error);
+  //         },
+  //       );
+  //   })();
+  // };
   const viewDetailsSF = () => {
     db.transaction(tx => {
       tx.executeSql('SELECT * FROM ShipmentFailure', [], (tx1, results) => {
@@ -1173,7 +1106,6 @@ function StackNavigators({navigation}) {
         for (let i = 0; i < results.rows.length; ++i) {
             temp.push(results.rows.item(i));
         }
-        m++;
         console.log('1173',temp);
         // if (m <= 6){
         //   // ToastAndroid.show('Sync Successful',ToastAndroid.SHORT);

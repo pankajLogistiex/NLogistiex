@@ -54,7 +54,7 @@ const ShipmentBarcode = ({route}) => {
   const [newrejected, setnewRejected] = useState(0);
   const [newNotPicked, setNewNotPicked] = useState(0);
   const [barcode, setBarcode] = useState('');
-  const [packagingAction, setPackagingAction] = useState(0);
+  const [packagingAction, setPackagingAction] = useState();
   const [packagingID, setPackagingID] = useState('');
   const [len, setLen] = useState(0);
   const [DropDownValue, setDropDownValue] = useState('');
@@ -923,7 +923,7 @@ var barcode11 = barcode;
               );
             });
           } else {
-            if (packagingAction !== 0 && barcode){
+            if (packagingAction !== undefined && packagingAction != 0 && barcode){
               setShowCloseBagModal12(true);
               setShowOuterScanner(false);
             }
@@ -964,6 +964,13 @@ var barcode11 = barcode;
         displayData();
     })();
 }, [text11]);
+
+// useEffect(() => {
+//   if (packagingAction != 0 && barcode) {
+//     setShowCloseBagModal12(true);
+//     setShowOuterScanner(false);
+//   }
+// }, [packagingAction,barcode]);
 
 console.log('pa',packagingAction);
   const updateCategories = data => {
@@ -1078,17 +1085,16 @@ console.log('pa',packagingAction);
     };
 
   useEffect(() => {
-    if (len) {
-      if (packagingAction == 0){
+    if (len ) {
+      if( packagingAction != undefined && packagingAction==0){
       setCheck11(1);
       ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
       updateDetails2();
       displayDataSPScan();
       setLen(false);
-      }
-      
     }
-  }, [len]);
+  }
+  }, [len,packagingAction]);
 
   const displaydata = async () => {
     db.transaction(tx => {
