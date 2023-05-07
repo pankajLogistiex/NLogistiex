@@ -262,6 +262,8 @@ const OpenBags = ({route}) => {
     });
   };
 
+  console.log(acceptedItemData);
+
   return (
     <NativeBaseProvider>
       <Modal
@@ -622,13 +624,25 @@ const OpenBags = ({route}) => {
             <Button
               w="48%"
               size="lg"
-              bg="#004aad"
-              onPress={() => {
-                navigation.navigate('PendingHandover', {
-                  consignorName: 'consignorName',
-                  expected: '0',
-                });
-              }}>
+              bg={
+                Object.keys(acceptedItemData).length === 0
+                  ? '#004aad'
+                  : 'gray.200'
+              }
+              onPress={
+                Object.keys(acceptedItemData).length === 0
+                  ? () => {
+                      navigation.navigate('PendingHandover', {
+                        consignorName: 'consignorName',
+                        expected: '0',
+                      });
+                    }
+                  : () =>
+                      ToastAndroid.show(
+                        'All Bags are not Closed',
+                        ToastAndroid.SHORT,
+                      )
+              }>
               Pending Handover
             </Button>
             <Button

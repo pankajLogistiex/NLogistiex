@@ -24,7 +24,7 @@ import {
   Heading,
   VStack,
   Alert,
-  Modal
+  Modal,
 } from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {openDatabase} from 'react-native-sqlite-storage';
@@ -40,6 +40,8 @@ export default function Main({navigation, route}) {
   const [data, setData] = useState(0);
   // const [data1, setData1] = useState(0);
   // const [data2, setData2] = useState('');
+
+  const [isData, setIsData] = useState(false);
 
   const [spts, setSpts] = useState(0);
   const [spc, setSpc] = useState(0);
@@ -177,6 +179,9 @@ export default function Main({navigation, route}) {
         [],
         (tx1, results) => {
           setSpts(results.rows.item(0).count);
+          if (results.rows.length > 0) {
+            setIsData(true);
+          }
         },
       );
     });
@@ -257,6 +262,9 @@ export default function Main({navigation, route}) {
         [],
         (tx1, results) => {
           setShts(results.rows.item(0).count);
+          if (results.rows.length > 0) {
+            setIsData(true);
+          }
         },
       );
     });
@@ -422,19 +430,17 @@ export default function Main({navigation, route}) {
   //         },);
   //     });
   // };
-  const handleStartTrip=()=>{
-    if(spp==0 && spp1==0 && shp1==0 && tripValue=='Start Trip'){
+  const handleStartTrip = () => {
+    if (spp == 0 && spp1 == 0 && shp1 == 0 && tripValue == 'Start Trip') {
       setMessage1(1);
       setShowModal1(true);
-    }
-    else if(shp1!=0){
+    } else if (shp1 != 0) {
       setMessage1(2);
       setShowModal1(true);
-    }
-    else{
+    } else {
       navigation.navigate('MyTrip', {userId: id});
     }
-  }
+  };
 
   const storeUser = async () => {
     try {
@@ -576,22 +582,25 @@ export default function Main({navigation, route}) {
   return (
     <NativeBaseProvider>
       <Modal isOpen={showModal1} onClose={() => setShowModal1(false)}>
-                <Modal.Content backgroundColor={message1 === 1 ? '#fee2e2' : '#fee2e2'}>
-                  <Modal.CloseButton />
-                  <Modal.Body>
-                    <Alert w="100%" status={message1 === 1 ? 'error' : 'error'}>
-                      <VStack space={1} flexShrink={1} w="100%" alignItems="center">
-                        <Alert.Icon size="4xl" />
-                        <Text my={3} fontSize="md" fontWeight="medium">{message1 === 1 ? 'No Pickup/Delivery Assigned' : 'Please complete handover before Start a trip'}</Text>
-                      </VStack>
-                    </Alert>
-                  </Modal.Body>
-                </Modal.Content>
+        <Modal.Content backgroundColor={message1 === 1 ? '#fee2e2' : '#fee2e2'}>
+          <Modal.CloseButton />
+          <Modal.Body>
+            <Alert w="100%" status={message1 === 1 ? 'error' : 'error'}>
+              <VStack space={1} flexShrink={1} w="100%" alignItems="center">
+                <Alert.Icon size="4xl" />
+                <Text my={3} fontSize="md" fontWeight="medium">
+                  {message1 === 1
+                    ? 'No Pickup/Delivery Assigned'
+                    : 'Please complete handover before Start a trip'}
+                </Text>
+              </VStack>
+            </Alert>
+          </Modal.Body>
+        </Modal.Content>
       </Modal>
       {loading ? (
         <ActivityIndicator size="large" color="blue" style={{marginTop: 44}} />
       ) : (
-        
         <Box flex={1} bg="gray.300">
           <ScrollView>
             <Box flex={1} bg="gray.300" p={4}>
@@ -825,7 +834,11 @@ export default function Main({navigation, route}) {
                             onPress={() =>
                               navigation.navigate('SellerHandover')
                             }>
-                            {tripValue === 'Start Trip' ? 'Start Handover' : spp1 === 0 ? 'Handover completed' : 'Handover in progress'}
+                            {tripValue === 'Start Trip'
+                              ? 'Start Handover'
+                              : spp1 === 0
+                              ? 'Handover completed'
+                              : 'Handover in progress'}
                           </Button>
                         ) : it.title === 'Seller Deliveries' ? (
                           <Button
@@ -838,10 +851,14 @@ export default function Main({navigation, route}) {
                                 Forward: Forward,
                                 Reverse: Reverse,
                                 Trip: tripValue,
-                                PendingHandover:shp1,
+                                PendingHandover: shp1,
                               })
                             }>
-                            {tripValue === 'Start Trip' ? 'New Delivery' : spp1 === 0 ? 'Delivery completed' : 'Delivery in progress'}
+                            {tripValue === 'Start Trip'
+                              ? 'New Delivery'
+                              : spp1 === 0
+                              ? 'Delivery completed'
+                              : 'Delivery in progress'}
                           </Button>
                         ) : (
                           <Button
@@ -855,10 +872,14 @@ export default function Main({navigation, route}) {
                                 Reverse: Reverse,
                                 Trip: tripValue,
                                 userId: id,
-                                PendingHandover:shp1,
+                                PendingHandover: shp1,
                               })
                             }>
-                            {tripValue === 'Start Trip' ? 'New Pickup' : spp === 0 ? 'Pickup completed' : 'Pickup in progress'}
+                            {tripValue === 'Start Trip'
+                              ? 'New Pickup'
+                              : spp === 0
+                              ? 'Pickup completed'
+                              : 'Pickup in progress'}
                           </Button>
                         )}
                       </Box>
@@ -1084,7 +1105,11 @@ export default function Main({navigation, route}) {
                             onPress={() =>
                               navigation.navigate('SellerHandover')
                             }>
-                            {tripValue === 'Start Trip' ? 'Start Handover' : spp1 === 0 ? 'Handover completed' : 'Handover in progress'}
+                            {tripValue === 'Start Trip'
+                              ? 'Start Handover'
+                              : spp1 === 0
+                              ? 'Handover completed'
+                              : 'Handover in progress'}
                           </Button>
                         ) : it.title === 'Seller Deliveries' ? (
                           <Button
@@ -1097,10 +1122,14 @@ export default function Main({navigation, route}) {
                                 Forward: Forward,
                                 Reverse: Reverse,
                                 Trip: tripValue,
-                                PendingHandover:shp1,
+                                PendingHandover: shp1,
                               })
                             }>
-                            {tripValue === 'Start Trip' ? 'New Delivery' : spp1 === 0 ? 'Delivery completed' : 'Delivery in progress'}
+                            {tripValue === 'Start Trip'
+                              ? 'New Delivery'
+                              : spp1 === 0
+                              ? 'Delivery completed'
+                              : 'Delivery in progress'}
                           </Button>
                         ) : (
                           <Button
@@ -1114,10 +1143,14 @@ export default function Main({navigation, route}) {
                                 Reverse: Reverse,
                                 Trip: tripValue,
                                 userId: id,
-                                PendingHandover:shp1,
+                                PendingHandover: shp1,
                               })
                             }>
-                            {tripValue === 'Start Trip' ? 'New Pickup' : spp === 0 ? 'Pickup completed' : 'Pickup in progress'}
+                            {tripValue === 'Start Trip'
+                              ? 'New Pickup'
+                              : spp === 0
+                              ? 'Pickup completed'
+                              : 'Pickup in progress'}
                           </Button>
                         )}
                       </Box>
@@ -1324,16 +1357,26 @@ export default function Main({navigation, route}) {
         <Button w="100%" size="lg" bg="#004aad" onPress={()=>navigation.navigate('SellerHandover')}>Start Handover</Button>
         :
         null} */}
-              <Button
-                variant="outline"
-                onPress={() => {
-                  handleStartTrip();
-                }}
-                mt={4}
-                style={{color: '#004aad', borderColor: '#004aad'}}>
-                <Text style={{color: '#004aad'}}>{tripValue}</Text>
-              </Button>
-              
+              {isData ? (
+                <Button
+                  variant="outline"
+                  onPress={() => {
+                    handleStartTrip();
+                  }}
+                  mt={4}
+                  style={{color: '#004aad', borderColor: '#004aad'}}>
+                  <Text style={{color: '#004aad'}}>{tripValue}</Text>
+                </Button>
+              ) : (
+                <Center style={{marginVertical: 50}}>
+                  {/* <Text style={{color:'black'}}>No assignment for {it.title} </Text> */}
+                  <Image
+                    source={require('../assets/noDataAvailable.jpg')}
+                    alt={'No data Image'}
+                  />
+                </Center>
+              )}
+
               {/* <Fab onPress={()=>{navigation.navigate('MyTrip', {userId: id})}} position="absolute" size="sm" style={{backgroundColor: '#004aad'}} label={<Text style={{color: 'white', fontSize: 16}} >{tripValue}</Text>} /> */}
               {/* <Button w="100%" size="lg" bg="#004aad" mt={-5} onPress={()=>navigation.navigate('SellerHandover')}>Seller Handover</Button> */}
               {/* <Button w="100%" size="lg" bg="#004aad" onPress={()=>navigation.navigate('SellerHandover')}>Start Handover</Button> */}

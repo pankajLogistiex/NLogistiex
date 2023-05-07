@@ -305,204 +305,400 @@ export default function MyTrip({ navigation, route }) {
 
   return (
     <NativeBaseProvider>
-      {loading ? 
-        <ActivityIndicator size="large" color="blue" style={{marginTop: 44}} />
-      :
-        <Box flex={1}>
-          {!tripAlreadyStarted ?
-            <Box flex={1} bg="gray.300" alignItems="center" pt={'4%'}>
-              <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-                <Modal.Content backgroundColor={message === 1 ? '#dcfce7' : '#fee2e2'}>
-                  <Modal.CloseButton />
-                  <Modal.Body>
-                    <Alert w="100%" status={message === 1 ? 'success' : 'error'}>
-                      <VStack space={1} flexShrink={1} w="100%" alignItems="center">
-                        <Alert.Icon size="4xl" />
-                        <Text my={3} fontSize="md" fontWeight="medium">{message === 1 ? 'Data Successfully Submitted' : 'Trip ID already exists'}</Text>
-                      </VStack>
-                    </Alert>
-                  </Modal.Body>
-                </Modal.Content>
-              </Modal>
-              <Modal isOpen={showModal1} onClose={() => {setShowModal1(false); navigation.navigate('Main')}}>
-                <Modal.Content backgroundColor={message1 === 1 ? '#fee2e2' : '#fee2e2'}>
-                  <Modal.CloseButton />
-                  <Modal.Body>
-                    <Alert w="100%" status={message1 === 1 ? 'error' : 'error'}>
-                      <VStack space={1} flexShrink={1} w="100%" alignItems="center">
-                        <Alert.Icon size="4xl" />
-                        <Text my={3} fontSize="md" fontWeight="medium">{message1 === 1 ? 'No Pickup/Delivery Assigned' : 'Please complete handover before Start a trip'}</Text>
-                      </VStack>
-                    </Alert>
-                  </Modal.Body>
-                </Modal.Content>
-              </Modal>
-              <Modal isOpen={modalVisible} onClose={() => setModalVisible(false)} size="lg">
-              <Modal.Content maxWidth="350">
-                <Modal.CloseButton />
-                <Modal.Header />
-                <Modal.Body>
-                <View style={{width: '90%', flexDirection: 'row', justifyContent: 'space-between', alignSelf: 'center'}}>
-                <Image 
-                  source={{ uri: startImageUrl }} 
-                  style={{ width: 400, height: 600 }} 
-                  alt = 'image not shown'
-                />
-                </View>
-                </Modal.Body>
-              </Modal.Content>
-            </Modal>
-                  <Box justifyContent="space-between" py={10} px={6} bg="#fff" rounded="xl" width={"90%"} maxWidth="100%" _text={{fontWeight: "medium",}}>
+      <ScrollView>
+        {loading ? (
+          <ActivityIndicator
+            size="large"
+            color="blue"
+            style={{marginTop: 44}}
+          />
+        ) : (
+          <Box flex={1}>
+            {!tripAlreadyStarted ? (
+              <Box flex={1} bg="gray.300" alignItems="center" pt={'4%'}>
+                <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+                  <Modal.Content
+                    backgroundColor={message === 1 ? '#dcfce7' : '#fee2e2'}>
+                    <Modal.CloseButton />
+                    <Modal.Body>
+                      <Alert
+                        w="100%"
+                        status={message === 1 ? 'success' : 'error'}>
+                        <VStack
+                          space={1}
+                          flexShrink={1}
+                          w="100%"
+                          alignItems="center">
+                          <Alert.Icon size="4xl" />
+                          <Text my={3} fontSize="md" fontWeight="medium">
+                            {message === 1
+                              ? 'Data Successfully Submitted'
+                              : 'Trip ID already exists'}
+                          </Text>
+                        </VStack>
+                      </Alert>
+                    </Modal.Body>
+                  </Modal.Content>
+                </Modal>
+                <Modal
+                  isOpen={showModal1}
+                  onClose={() => {
+                    setShowModal1(false);
+                    navigation.navigate('Main');
+                  }}>
+                  <Modal.Content
+                    backgroundColor={message1 === 1 ? '#fee2e2' : '#fee2e2'}>
+                    <Modal.CloseButton />
+                    <Modal.Body>
+                      <Alert
+                        w="100%"
+                        status={message1 === 1 ? 'error' : 'error'}>
+                        <VStack
+                          space={1}
+                          flexShrink={1}
+                          w="100%"
+                          alignItems="center">
+                          <Alert.Icon size="4xl" />
+                          <Text my={3} fontSize="md" fontWeight="medium">
+                            {message1 === 1
+                              ? 'No Pickup/Delivery Assigned'
+                              : 'Please complete handover before Start a trip'}
+                          </Text>
+                        </VStack>
+                      </Alert>
+                    </Modal.Body>
+                  </Modal.Content>
+                </Modal>
+                <Modal
+                  isOpen={modalVisible}
+                  onClose={() => setModalVisible(false)}
+                  size="lg">
+                  <Modal.Content maxWidth="350">
+                    <Modal.CloseButton />
+                    <Modal.Header />
+                    <Modal.Body>
+                      <View
+                        style={{
+                          width: '90%',
+                          flexDirection: 'row',
+                          justifyContent: 'space-between',
+                          alignSelf: 'center',
+                        }}>
+                        <Image
+                          source={{uri: startImageUrl}}
+                          style={{width: 400, height: 600}}
+                          alt="image not shown"
+                        />
+                      </View>
+                    </Modal.Body>
+                  </Modal.Content>
+                </Modal>
+                <Box
+                  justifyContent="space-between"
+                  py={10}
+                  px={6}
+                  bg="#fff"
+                  rounded="xl"
+                  width={'90%'}
+                  maxWidth="100%"
+                  _text={{fontWeight: 'medium'}}>
                   <ScrollView>
-                  <VStack space={6}>
-                  <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-                  <Text style={{fontSize:16, fontWeight:'500',color: 'gray'}} mb={2}>Start Your Trip</Text>
-                  </View>                    
-                    <View flexDirection="column">
-                      <Text style={{fontSize:16, fontWeight:'500',color: 'gray'}} mb={1}>Vehicle Number:</Text>
-                      <Input disabled selectTextOnFocus={false} editable={false} backgroundColor='gray.300' value={vehicle} size="lg" type={"number"} placeholder="Vehicle Number" />
+                    <VStack space={6}>
+                      <View
+                        style={{
+                          flex: 1,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}>
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            fontWeight: '500',
+                            color: 'gray',
+                          }}
+                          mb={2}>
+                          Start Your Trip
+                        </Text>
                       </View>
                       <View flexDirection="column">
-                      <Text style={{fontSize:16, fontWeight:'500',color: 'gray'}} mb={1}>Start KMs:</Text>
-                    <Input keyboardType="numeric" value={startkm} onChangeText={setStartKm} size="lg" type={"number"} placeholder="Start km" style={{fontSize: 18,
-                    color: '#000',
-                    paddingVertical: 6,
-                    paddingHorizontal: 12,
-                    borderWidth: 1,
-                    borderColor: '#ccc',
-                    borderRadius: 4,}} />
-                  </View>
-                      <Button py={3} variant='outline' _text={{ color: 'white', fontSize: 20 }} onPress={takeStartPhoto}>
-                      {uploadStatus === 'idle' && <MaterialIcons name="cloud-upload" size={22} color="gray">  Image</MaterialIcons>}
-                      {uploadStatus === 'uploading' && <ActivityIndicator size="small" color="gray" />}
-                      {uploadStatus === 'done' && <MaterialIcons name="check" size={22} color="green" />}
-                      {uploadStatus === 'error' && <MaterialIcons name="error" size={22} color="red" />}
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            fontWeight: '500',
+                            color: 'gray',
+                          }}
+                          mb={1}>
+                          Vehicle Number:
+                        </Text>
+                        <Input
+                          disabled
+                          selectTextOnFocus={false}
+                          editable={false}
+                          backgroundColor="gray.300"
+                          value={vehicle}
+                          size="lg"
+                          type={'number'}
+                          placeholder="Vehicle Number"
+                        />
+                      </View>
+                      <View flexDirection="column">
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            fontWeight: '500',
+                            color: 'gray',
+                          }}
+                          mb={1}>
+                          Start KMs:
+                        </Text>
+                        <Input
+                          keyboardType="numeric"
+                          value={startkm}
+                          onChangeText={setStartKm}
+                          size="lg"
+                          type={'number'}
+                          placeholder="Start km"
+                          style={{
+                            fontSize: 18,
+                            color: '#000',
+                            paddingVertical: 6,
+                            paddingHorizontal: 12,
+                            borderWidth: 1,
+                            borderColor: '#ccc',
+                            borderRadius: 4,
+                          }}
+                        />
+                      </View>
+                      <Button
+                        py={3}
+                        variant="outline"
+                        _text={{color: 'white', fontSize: 20}}
+                        onPress={takeStartPhoto}>
+                        {uploadStatus === 'idle' && (
+                          <MaterialIcons
+                            name="cloud-upload"
+                            size={22}
+                            color="gray">
+                            {' '}
+                            Image
+                          </MaterialIcons>
+                        )}
+                        {uploadStatus === 'uploading' && (
+                          <ActivityIndicator size="small" color="gray" />
+                        )}
+                        {uploadStatus === 'done' && (
+                          <MaterialIcons name="check" size={22} color="green" />
+                        )}
+                        {uploadStatus === 'error' && (
+                          <MaterialIcons name="error" size={22} color="red" />
+                        )}
                       </Button>
-                      {
-                        startImageUrl ? (
-                          <TouchableOpacity onPress={() => setModalVisible(true)} >
-                            <Image 
-                            source={{ uri: startImageUrl }} 
-                            style={{ width: 300, height: 200 }} 
-                            alt = 'image not shown'
+                      {startImageUrl ? (
+                        <TouchableOpacity onPress={() => setModalVisible(true)}>
+                          <Image
+                            source={{uri: startImageUrl}}
+                            style={{width: 300, height: 200}}
+                            alt="image not shown"
                           />
-                          </TouchableOpacity>
-                        ):(
-                          null
-                        )
-                      }
+                        </TouchableOpacity>
+                      ) : null}
                       {startkm && vehicle && startImageUrl && tripid ? (
-                          <Button title="Login" backgroundColor= {'#004aad'} _text={{ color: 'white', fontSize: 20 }} onPress={()=>{submitStartTrip()}}>Start Trip</Button>
-                        ) : (
-                          <Button opacity={0.5}  disabled={true} title="Login" backgroundColor= {'#004aad'} _text={{ color: 'white', fontSize: 20 }}>Start Trip</Button>
-                        )
-                      }
-                  </VStack>
+                        <Button
+                          title="Login"
+                          backgroundColor={'#004aad'}
+                          _text={{color: 'white', fontSize: 20}}
+                          onPress={() => {
+                            submitStartTrip();
+                          }}>
+                          Start Trip
+                        </Button>
+                      ) : (
+                        <Button
+                          opacity={0.5}
+                          disabled={true}
+                          title="Login"
+                          backgroundColor={'#004aad'}
+                          _text={{color: 'white', fontSize: 20}}>
+                          Start Trip
+                        </Button>
+                      )}
+                    </VStack>
                   </ScrollView>
                   <Center>
-                <Image style={{ width: 150, height: 100 }} source={require('../assets/image.png')} alt={'Logo Image'} />
-              </Center>
+                    <Image
+                      style={{width: 150, height: 100}}
+                      source={require('../assets/image.png')}
+                      alt={'Logo Image'}
+                    />
+                  </Center>
+                </Box>
               </Box>
-            </Box>
-          :
-            <Box flex={1} bg="#004aad" alignItems="center" pt={'4%'}>
-              <Modal isOpen={modalVisible} onClose={() => setModalVisible(false)} size="lg">
-                <Modal.Content maxWidth="350">
-                  <Modal.CloseButton />
-                  <Modal.Header />
-                  <Modal.Body>
-                    <View style={{ alignSelf: 'center', marginVertical: 5 }}>
-                      <Image
-                        source={{ uri: endImageUrl }}
-                        style={{ width: 400, height: 500 }}
-                        alt='image not shown'
+            ) : (
+              <Box flex={1} bg="#004aad" alignItems="center" pt={'4%'}>
+                <Modal
+                  isOpen={modalVisible}
+                  onClose={() => setModalVisible(false)}
+                  size="lg">
+                  <Modal.Content maxWidth="350">
+                    <Modal.CloseButton />
+                    <Modal.Header />
+                    <Modal.Body>
+                      <View style={{alignSelf: 'center', marginVertical: 5}}>
+                        <Image
+                          source={{uri: endImageUrl}}
+                          style={{width: 400, height: 500}}
+                          alt="image not shown"
+                        />
+                      </View>
+                    </Modal.Body>
+                  </Modal.Content>
+                </Modal>
+                <Box
+                  justifyContent="space-between"
+                  py={10}
+                  px={6}
+                  bg="#fff"
+                  rounded="xl"
+                  width={'90%'}
+                  maxWidth="100%"
+                  _text={{fontWeight: 'medium'}}>
+                  <VStack space={6}>
+                    <View
+                      style={{justifyContent: 'center', alignItems: 'center'}}>
+                      <Text
+                        style={{fontSize: 16, fontWeight: '500', color: 'gray'}}
+                        mb={2}>
+                        Trip Started
+                      </Text>
+                    </View>
+                    <View flexDirection="column">
+                      <Text
+                        style={{fontSize: 16, fontWeight: '500', color: 'gray'}}
+                        mb={1}>
+                        Vehicle Number:
+                      </Text>
+                      <Input
+                        disabled
+                        selectTextOnFocus={false}
+                        editable={false}
+                        backgroundColor="gray.300"
+                        value={vehicle}
+                        size="lg"
+                        type={'number'}
+                        placeholder="Vehicle Number"
                       />
                     </View>
-                  </Modal.Body>
-                </Modal.Content>
-              </Modal>
-              <Box justifyContent="space-between" py={10} px={6} bg="#fff" rounded="xl" width={"90%"} maxWidth="100%" _text={{ fontWeight: "medium", }}>
-                <VStack space={6}> 
-                <View style={{justifyContent: 'center', alignItems: 'center'}}>
-                  <Text style={{fontSize:16, fontWeight:'500',color: 'gray'}} mb={2}>Trip Started</Text>
-                  </View> 
-                  <View flexDirection="column">
-                  <Text style={{fontSize:16, fontWeight:'500',color: 'gray'}} mb={1}>Vehicle Number:</Text>
-                  <Input disabled selectTextOnFocus={false} editable={false} backgroundColor='gray.300' value={vehicle} size="lg" type={"number"} placeholder="Vehicle Number" />
-                  </View>
-                  <View flexDirection="column">
-                  <Text style={{fontSize:16, fontWeight:'500',color: 'gray'}} mb={1}>Start KMs:</Text>
-                  <Input selectTextOnFocus={false} editable={false} disabled backgroundColor='gray.300' value={startkm} size="lg" type={"number"} placeholder="Start Km" />
-                  </View>
-                  <View flexDirection="column">
-                  <Text style={{fontSize:16, fontWeight:'500',color: 'gray'}} mb={1}>End KMs:</Text>
-                  <Input value={endkm} keyboardType="numeric" onChangeText={setEndkm} size="lg" type={"number"} placeholder="Input End KMs" style={{fontSize: 18,
-                  color: '#000',
-                  paddingVertical: 6,
-                  paddingHorizontal: 12,
-                  borderWidth: 1,
-                  borderColor: '#ccc',
-                  borderRadius: 4,}} />
-                </View>
-                  <Button py={3} variant='outline' _text={{ color: 'white', fontSize: 20 }} onPress={takeEndPhoto}>
-                    {uploadStatus === 'idle' && <MaterialIcons name="cloud-upload" size={22} color="gray">  Image</MaterialIcons>}
-                    {uploadStatus === 'uploading' && <ActivityIndicator size="small" color="gray" />}
-                    {uploadStatus === 'done' && <MaterialIcons name="check" size={22} color="green" />}
-                    {uploadStatus === 'error' && <MaterialIcons name="error" size={22} color="red" />}
-                  </Button>
-                  {
-                    endImageUrl ? (
-                      <TouchableOpacity onPress={() => setModalVisible(true)} >
-                            <Image 
-                            source={{ uri: endImageUrl }} 
-                            style={{ width: 300, height: 200 }} 
-                            alt = 'image not shown'
-                          />
-                          </TouchableOpacity>
+                    <View flexDirection="column">
+                      <Text
+                        style={{fontSize: 16, fontWeight: '500', color: 'gray'}}
+                        mb={1}>
+                        Start KMs:
+                      </Text>
+                      <Input
+                        selectTextOnFocus={false}
+                        editable={false}
+                        disabled
+                        backgroundColor="gray.300"
+                        value={startkm}
+                        size="lg"
+                        type={'number'}
+                        placeholder="Start Km"
+                      />
+                    </View>
+                    <View flexDirection="column">
+                      <Text
+                        style={{fontSize: 16, fontWeight: '500', color: 'gray'}}
+                        mb={1}>
+                        End KMs:
+                      </Text>
+                      <Input
+                        value={endkm}
+                        keyboardType="numeric"
+                        onChangeText={setEndkm}
+                        size="lg"
+                        type={'number'}
+                        placeholder="Input End KMs"
+                        style={{
+                          fontSize: 18,
+                          color: '#000',
+                          paddingVertical: 6,
+                          paddingHorizontal: 12,
+                          borderWidth: 1,
+                          borderColor: '#ccc',
+                          borderRadius: 4,
+                        }}
+                      />
+                    </View>
+                    <Button
+                      py={3}
+                      variant="outline"
+                      _text={{color: 'white', fontSize: 20}}
+                      onPress={takeEndPhoto}>
+                      {uploadStatus === 'idle' && (
+                        <MaterialIcons
+                          name="cloud-upload"
+                          size={22}
+                          color="gray">
+                          {' '}
+                          Image
+                        </MaterialIcons>
+                      )}
+                      {uploadStatus === 'uploading' && (
+                        <ActivityIndicator size="small" color="gray" />
+                      )}
+                      {uploadStatus === 'done' && (
+                        <MaterialIcons name="check" size={22} color="green" />
+                      )}
+                      {uploadStatus === 'error' && (
+                        <MaterialIcons name="error" size={22} color="red" />
+                      )}
+                    </Button>
+                    {endImageUrl ? (
+                      <TouchableOpacity onPress={() => setModalVisible(true)}>
+                        <Image
+                          source={{uri: endImageUrl}}
+                          style={{width: 300, height: 200}}
+                          alt="image not shown"
+                        />
+                      </TouchableOpacity>
+                    ) : null}
+                    {pendingPickup > 0 || pendingDelivery > 0 ? (
+                      <Button
+                        backgroundColor="#004aad"
+                        _text={{color: 'white', fontSize: 20}}
+                        onPress={() => navigation.navigate('PendingWork')}>
+                        Pending Work
+                      </Button>
+                    ) : endkm && endImageUrl && parseInt(endkm) > parseInt(startkm) ? (
+                      <Button
+                        backgroundColor="#004aad"
+                        _text={{color: 'white', fontSize: 20}}
+                        onPress={() => submitEndTrip()}>
+                        End Trip
+                      </Button>
                     ) : (
-                      null
-                    )
-                  }
-                  {
-          (pendingPickup>0 || pendingDelivery>0) ? (
-          <Button 
-         backgroundColor='#004aad' 
-         _text={{ color: 'white', fontSize: 20 }} 
-         onPress={() => navigation.navigate('PendingWork')}
-        >
-        Pending Work
-      </Button>
-      ) : (
-    ( endkm && endImageUrl && (endkm > startkm) )? (
-      <Button 
-        backgroundColor='#004aad' 
-        _text={{ color: 'white', fontSize: 20 }} 
-        onPress={() => submitEndTrip()}
-      >
-        End Trip
-      </Button>
-    ) : (
-      <Button 
-        opacity={0.5} 
-        disabled={true}  
-        backgroundColor='#004aad' 
-        _text={{ color: 'white', fontSize: 20 }}
-      >
-        End Trip
-      </Button>
-    )
-  )
-}
-                </VStack>
+                      <Button
+                        opacity={0.5}
+                        disabled={true}
+                        backgroundColor="#004aad"
+                        _text={{color: 'white', fontSize: 20}}>
+                        End Trip
+                      </Button>
+                    )}
+                  </VStack>
+                </Box>
+                <Center>
+                  <Image
+                    style={{width: 200, height: 200}}
+                    source={require('../assets/logo.png')}
+                    alt={'Logo Image'}
+                  />
+                </Center>
               </Box>
-              <Center>
-                <Image style={{ width: 200, height: 200 }} source={require('../assets/logo.png')} alt={"Logo Image"} />
-
-              </Center>
-            </Box>
-          }
-        </Box>
-      }
+            )}
+          </Box>
+        )}
+      </ScrollView>
     </NativeBaseProvider>
   );
 }

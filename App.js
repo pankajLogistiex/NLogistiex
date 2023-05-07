@@ -1171,7 +1171,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Notification
                 </Heading>
               </NativeBaseProvider>
@@ -1192,7 +1192,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Notification
                 </Heading>
               </NativeBaseProvider>
@@ -1213,7 +1213,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Notification
                 </Heading>
               </NativeBaseProvider>
@@ -1234,7 +1234,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Notification
                 </Heading>
               </NativeBaseProvider>
@@ -1255,7 +1255,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Dashboard
                 </Heading>
               </NativeBaseProvider>
@@ -1322,7 +1322,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Seller Pickups
                 </Heading>
               </NativeBaseProvider>
@@ -1397,7 +1397,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Seller Handover
                 </Heading>
               </NativeBaseProvider>
@@ -1459,7 +1459,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Shipment
                 </Heading>
               </NativeBaseProvider>
@@ -1521,7 +1521,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Open Bags
                 </Heading>
               </NativeBaseProvider>
@@ -1583,7 +1583,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Pending Handover
                 </Heading>
               </NativeBaseProvider>
@@ -1645,7 +1645,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Pending Work
                 </Heading>
               </NativeBaseProvider>
@@ -1707,7 +1707,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Pending Work
                 </Heading>
               </NativeBaseProvider>
@@ -1769,7 +1769,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Pending Work
                 </Heading>
               </NativeBaseProvider>
@@ -1831,7 +1831,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Handover Summary
                 </Heading>
               </NativeBaseProvider>
@@ -1894,7 +1894,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Handover Scan
                 </Heading>
               </NativeBaseProvider>
@@ -1957,7 +1957,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Seller Summary
                 </Heading>
               </NativeBaseProvider>
@@ -2020,7 +2020,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Scan Products
                 </Heading>
               </NativeBaseProvider>
@@ -2082,7 +2082,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Seller Deliveries
                 </Heading>
               </NativeBaseProvider>
@@ -2144,7 +2144,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Seller Handover
                 </Heading>
               </NativeBaseProvider>
@@ -2206,7 +2206,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Scan Shipment
                 </Heading>
               </NativeBaseProvider>
@@ -2268,7 +2268,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Seller Deliveries
                 </Heading>
               </NativeBaseProvider>
@@ -2328,7 +2328,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Bag to Dispatch
                 </Heading>
               </NativeBaseProvider>
@@ -2349,7 +2349,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Map Navigation
                 </Heading>
               </NativeBaseProvider>
@@ -2412,7 +2412,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Pickup Summary
                 </Heading>
               </NativeBaseProvider>
@@ -2433,7 +2433,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   My Trip
                 </Heading>
               </NativeBaseProvider>
@@ -2454,7 +2454,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Trip Details
                 </Heading>
               </NativeBaseProvider>
@@ -2475,7 +2475,7 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white', marginTop: 15}} size="md">
+                <Heading style={{color: 'white'}} size="md">
                   Notification
                 </Heading>
               </NativeBaseProvider>
