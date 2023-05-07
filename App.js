@@ -13,6 +13,8 @@ import {
   Select,
   Divider,
   Center,
+  VStack,
+  Modal
 } from 'native-base';
 import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
@@ -312,7 +314,7 @@ function StackNavigators({navigation}) {
       awbNo: row.awbNo,
       clientRefId: row.clientRefId,
       expectedPackagingId: row.packagingId,
-      packagingId: row.packagingId,
+      packagingId: row.expectedPackagingId,
       courierCode: row.courierCode,
       consignorCode: row.consignorCode,
       packagingAction: row.packagingAction,
@@ -338,7 +340,7 @@ function StackNavigators({navigation}) {
         awbNo: row.awbNo,
         clientRefId: row.clientRefId,
         expectedPackagingId: row.packagingId,
-        packagingId: row.packagingId,
+        packagingId: row.expectedPackagingId,
         courierCode: row.courierCode,
         consignorCode: row.consignorCode,
         packagingAction: row.packagingAction,
@@ -476,7 +478,7 @@ function StackNavigators({navigation}) {
     createTables1();
     (async () => {
       await axios
-        .get(backendUrl + `SellerMainScreen/consignorslist/${userId}`)
+        .get(backendUrl + `SellerMainScreen/consignorsList/${userId}`)
         .then(
           res => {
             console.log('API 1 OK: ' + res.data.data.length);
@@ -581,6 +583,7 @@ function StackNavigators({navigation}) {
           consignorCode VARCHAR(200),
           packagingStatus VARCHAR(200),
           packagingId VARCHAR(200),
+          expectedPackagingId VARCHAR(200),
           runSheetNumber VARCHAR(200),
           shipmentStatus VARCHAR(200),
           shipmentAction VARCHAR(200),
@@ -628,6 +631,7 @@ function StackNavigators({navigation}) {
                   consignorCode,
                   packagingStatus,
                   packagingId,
+                  expectedPackagingId,
                   runSheetNumber,
                   shipmentStatus,
                   shipmentAction,
@@ -641,7 +645,7 @@ function StackNavigators({navigation}) {
                   syncHandoverStatus,
                   bagId,
                   packagingAction
-                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
                 [
                   res.data.data[i].clientShipmentReferenceNumber,
                   res.data.data[i].clientRefId,
@@ -650,6 +654,7 @@ function StackNavigators({navigation}) {
                   res.data.data[i].consignorCode,
                   res.data.data[i].packagingStatus,
                   res.data.data[i].expectedPackagingId,
+                  res.data.data[i].scannedPackageingId,
                   res.data.data[i].runsheetNo,
                   res.data.data[i].shipmentStatus,
                   res.data.data[i].shipmentAction,
@@ -2516,6 +2521,7 @@ function CustomDrawerContent({navigation}) {
   const [email, SetEmail] = useState('');
   const [name, setName] = useState('');
   const [id, setId] = useState('');
+  
   const getData = async () => {
     try {
       const value = await AsyncStorage.getItem('@storage_Key');
@@ -2540,7 +2546,8 @@ function CustomDrawerContent({navigation}) {
     }, 1000);
     return () => clearInterval(StartValue);
   }, []);
-
+  
+useEffect
   const LogoutHandle = async () => {
     try {
       await AsyncStorage.removeItem('@storage_Key');
@@ -2655,8 +2662,7 @@ function CustomDrawerContent({navigation}) {
               variant="outline"
               onPress={() => {
                 navigation.navigate('MyTrip', {userId: id});
-                navigation.closeDrawer();
-              }}
+                navigation.closeDrawer();                }}
               mt={4}
               style={{color: '#004aad', borderColor: '#004aad'}}>
               <Text style={{color: '#004aad'}}>My Trip</Text>

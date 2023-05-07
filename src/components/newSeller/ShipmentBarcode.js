@@ -79,6 +79,7 @@ const ShipmentBarcode = ({route}) => {
   const [check11, setCheck11] = useState(0);
   const [pdCheck, setPDCheck] = useState(false);
   const [expectedPackagingId, setExpectedPackaging] = useState('');
+  const [scannedValue, setScannedValue] = useState(expectedPackagingId);
   const [showScanner, setShowScanner] = useState(true);
 
   const buttonColor = acceptedArray.length === 0 ? 'gray.300' : '#004aad';
@@ -693,9 +694,10 @@ var dingAccept = new Sound(dingAccept11, error => {
     console.log(acceptedArray);
     db.transaction(tx => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="accepted", packagingId=?, eventTime=?, latitude=?, longitude=? WHERE  consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+        'UPDATE SellerMainScreenDetails SET status="accepted", packagingId=?, expectedPackagingId=?, eventTime=?, latitude=?, longitude=? WHERE  consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
         [
-          expectedPackagingId,
+          packagingID,
+          scannedValue,
           new Date().valueOf(),
           latitude,
           longitude,
@@ -706,10 +708,10 @@ var dingAccept = new Sound(dingAccept11, error => {
         ],
         (tx1, results) => {
           let temp = [];
-          console.log('Results', results.rowsAffected);
-
           if (results.rowsAffected > 0) {
             console.log(barcode + 'accepted');
+            console.log('accepted at pa 1', scannedValue)
+
             Vibration.vibrate(200);
             dingAccept.play(success => {
               if (success) {
@@ -721,6 +723,7 @@ var dingAccept = new Sound(dingAccept11, error => {
             });
             displayDataSPScan();
             // ToastAndroid.show(barcode + ' Accepted',ToastAndroid.SHORT);
+            
           } else {
             console.log(barcode + 'not accepted');
           }
@@ -728,34 +731,32 @@ var dingAccept = new Sound(dingAccept11, error => {
           for (let i = 0; i < results.rows.length; ++i) {
             temp.push(results.rows.item(i));
           }
+          
           // console.log("Data updated: \n ", JSON.stringify(temp, null, 4));
           // viewDetails2();
         },
+       
       );
     });
+    setExpectedPackaging('');
+    setPackagingAction();
   };
   
 console.log('packagingId',packagingID)
-    const rejectDetails2 = () => {
-      console.log('scan 45456');
+const rejectDetails2 = () => {
 var barcode11 = barcode;
       if (packagingAction == 0){
         db.transaction((tx) => {
           tx.executeSql('UPDATE SellerMainScreenDetails SET status="rejected" ,rejectionReasonL1=?  WHERE status="accepted" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ', [DropDownValue,route.params.consignorCode, barcode11,barcode11,barcode11], (tx1, results) => {
             let temp = [];
-            console.log('Rejected Reason : ', DropDownValue);
-            console.log('Results', results.rowsAffected);
-            console.log(results);
             if (results.rowsAffected > 0) {
               // ContinueHandle11();
               console.log(barcode11 + 'rejected');
               ToastAndroid.show(barcode11 + ' Rejected', ToastAndroid.SHORT);
               setCheck11(0);
-              // Vibration.vibrate(100);
               Vibration.vibrate(200);
               dingAccept.play(success => {
                 if (success) {
-                  // Vibration.vibrate(800);
                   console.log('successfully finished playing');
                 } else {
                   console.log('playback failed due to audio decoding errors');
@@ -782,10 +783,10 @@ var barcode11 = barcode;
         );
       });
       }
-      else {
+      else if(packagingAction==1 ||  packagingAction==2){
         db.transaction((tx) => {
-          tx.executeSql('UPDATE SellerMainScreenDetails SET status="rejected" ,packagingId=?, rejectionReasonL1=?  WHERE consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ', 
-          [expectedPackagingId, DropDownValue,route.params.consignorCode, barcode11,barcode11,barcode11], (tx1, results) => {
+          tx.executeSql('UPDATE SellerMainScreenDetails SET status="rejected" ,packagingId=?, expectedPackagingId=?, rejectionReasonL1=?  WHERE consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ', 
+          [packagingID, expectedPackagingId, DropDownValue,route.params.consignorCode, barcode11,barcode11,barcode11], (tx1, results) => {
             let temp = [];
             console.log('Rejected Reason : ', DropDownValue);
             console.log('Results', results.rowsAffected);
@@ -808,7 +809,6 @@ var barcode11 = barcode;
               setDropDownValue('');
               setBarcode('');
               displayDataSPScan();
-              setExpectedPackaging('');
             }
             for (let i = 0; i < results.rows.length; ++i) {
               temp.push(results.rows.item(i));
@@ -817,6 +817,38 @@ var barcode11 = barcode;
         );
       });
       }
+      else {
+        db.transaction((tx) => {
+          tx.executeSql('UPDATE SellerMainScreenDetails SET status="rejected" ,packagingId=?,expectedPackagingId=?, rejectionReasonL1="WPF"  WHERE consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ', 
+          [packagingID,expectedPackagingId, route.params.consignorCode, barcode11,barcode11,barcode11], (tx1, results) => {
+            let temp = [];
+            if (results.rowsAffected > 0) {
+              // ContinueHandle11();
+              console.log(barcode11 + 'rejected');
+              ToastAndroid.show(barcode11 + ' Rejected', ToastAndroid.SHORT);
+              setCheck11(0);
+              // Vibration.vibrate(100);
+              Vibration.vibrate(200);
+              dingAccept.play(success => {
+                if (success) {
+                  // Vibration.vibrate(800);
+                  console.log('successfully finished playing');
+                } else {
+                  console.log('playback failed due to audio decoding errors');
+                }
+              });
+              setBarcode('');
+              displayDataSPScan();
+            }
+            for (let i = 0; i < results.rows.length; ++i) {
+              temp.push(results.rows.item(i));
+            }
+          },
+        );
+      });
+      }
+      setExpectedPackaging('');
+      setPackagingAction();
   };
 
   const viewDetails2 = () => {
@@ -872,25 +904,14 @@ var barcode11 = barcode;
         'SELECT * FROM SellerMainScreenDetails WHERE status IS NULL AND shipmentAction="Seller Pickup" AND  consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber = ?)',
         [route.params.consignorCode, data, data, data],
         (sqlTxn, res) => {
-          // console.log('categories retrieved successfully', res.rows.length);
-          console.log('ok1111', data);
-          console.log(data, data, data);
           setLen(res.rows.length);
           setBarcode(data);
           if (!res.rows.length) {
-            // alert('You are scanning wrong product, Please check.');
-            console.log(data);
-            console.log('ok2222', data);
-            // barcodeCheck11();
             db.transaction(tx => {
-              console.log('ok3333', data);
               tx.executeSql(
                 'Select * FROM SellerMainScreenDetails WHERE status IS NOT NULL And shipmentAction="Seller Pickup" And consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?)',
                 [route.params.consignorCode, data, data, data],
                 (tx1, results) => {
-                  console.log('Results121', results.rows.length);
-                  console.log('ok4444', data);
-                  console.log(data);
                   if (results.rows.length === 0) {
                     ToastAndroid.show(
                       'Scanning wrong product',
@@ -984,7 +1005,7 @@ console.log('pa',packagingAction);
       );
     });
   };
-
+console.log('scanned',scannedValue);
     const updateCategories1 = (data) => {
       db.transaction((tx) => {
         tx.executeSql(
@@ -1001,43 +1022,54 @@ console.log('pa',packagingAction);
         ToastAndroid.show(value + ' Saved', ToastAndroid.SHORT);
         setCheck11(1);
         ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
+        setScannedValue(value);
         updateDetails2();
         displayDataSPScan();
         setLen(false);
-        setShowCloseBagModal12(false);
       } else if (packagingAction == 2) {
         if (packagingID.trim() === value.trim()) {
           setCheck11(1);
           ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
+          setScannedValue(value);
           updateDetails2();
           displayDataSPScan();
           setLen(false);
-          setModal(false);
-          setShowCloseBagModal12(false);
         } else {
           setModal(true);
-          setShowCloseBagModal12(false);
         }
       } else if (packagingAction == 3) {
         if (packagingID.trim() === value.trim()) {
           setCheck11(1);
           ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
+          setScannedValue(value);
           updateDetails2();
           displayDataSPScan();
           setLen(false);
-          setModal(false);
-          setShowCloseBagModal12(false);
         } else {
           setModal1(true);
-          setShowCloseBagModal12(false);
         }
       } else {
         console.log(packagingID, "is not equal to", value)
       }
-      setPackagingAction();
-      setExpectedPackaging('');
+      setShowCloseBagModal12(false);
       setShowOuterScanner(true);
     };
+    const handleReScan=()=>{
+      setExpectedPackaging('')
+      setShowOuterScanner(false);
+      setShowCloseBagModal12(true);
+      if (packagingID.trim() === expectedPackagingId.trim()) {
+        setCheck11(1);
+        ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
+        setScannedValue(expectedPackagingId);
+        updateDetails2();
+        displayDataSPScan();
+        setLen(false);
+      } else {
+        setModal1(true);
+        console.log("values not matched ")
+      }
+    }
     
     const onSuccess = e => {
       console.log(e.data, 'barcode');
@@ -1390,9 +1422,7 @@ console.log("Expected",expectedPackagingId);
         isOpen={showCloseBagModal12}
         onClose={() => {
           setShowCloseBagModal12(false);
-          setExpectedPackaging('');
           reloadScanner();
-          setShowScanner(true)
           setShowOuterScanner(true)
         }}
         size="lg">
@@ -1400,7 +1430,6 @@ console.log("Expected",expectedPackagingId);
           <Modal.CloseButton />
           <Modal.Header>Packaging ID</Modal.Header>
           <Modal.Body>
-            {showCloseBagModal12 && (
               <QRCodeScanner
                 onRead={onSuccess12}
                 reactivate={true}
@@ -1419,7 +1448,6 @@ console.log("Expected",expectedPackagingId);
                   justifyContent: 'center',
                 }}
               />
-            )}
             {'\n'}
             <Input
               placeholder="Enter Packaging ID"
@@ -1458,7 +1486,6 @@ console.log("Expected",expectedPackagingId);
         isOpen={showCloseBagModal}
         onClose={() => {
           setShowCloseBagModal(false);
-          setShowQRCodeModal(true);
           reloadScanner();
           setShowOuterScanner(true)
         }}
@@ -1515,7 +1542,7 @@ console.log("Expected",expectedPackagingId);
           <Modal.CloseButton />
           <Modal.Header>Accept/Reject Shipment</Modal.Header>
           <Modal.Body>
-            <Text>Mismatch Packaging ID</Text>
+            <Text>Packaging ID Mismatch</Text>
             <View style={{
               width: '95%',
               flexDirection: 'row',
@@ -1531,11 +1558,11 @@ console.log("Expected",expectedPackagingId);
               onPress={() => {
                 setCheck11(1);
                 ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
+                setScannedValue(expectedPackagingId);
                 updateDetails2();
                 displayDataSPScan();
                 setLen(false);
                 setModal(false);
-                setExpectedPackaging('');
               }}>
               Accept Anyway
             </Button>
@@ -1547,7 +1574,6 @@ console.log("Expected",expectedPackagingId);
               onPress={() => {
                 setModalVisible(true)
                 setModal(false);
-                setExpectedPackaging('');
               }}>
               Reject
             </Button>
@@ -1566,16 +1592,35 @@ console.log("Expected",expectedPackagingId);
           <Modal.Header>Reject Shipment</Modal.Header>
           <Modal.Body>
             <Text>Mismatch Packaging ID</Text>
+            <View style={{
+              width: '95%',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignSelf: 'center',
+              marginTop: 10,
+            }}>
             <Button
               flex="1"
               mt={2}
               bg="#004aad"
               onPress={() => {
               setModal1(false);
-              setModalVisible(true);
+              handleRejectAction();
               }}>
               Reject Shipment
             </Button>
+            <Button
+              flex="1"
+              mt={2}
+              bg="#004aad"
+              onPress={() => {
+              handleReScan();
+              setModal1(false);
+              }}>
+              ReScan
+            </Button>
+            </View>
+            
           </Modal.Body>
         </Modal.Content>
       </Modal>

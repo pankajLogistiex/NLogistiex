@@ -303,14 +303,11 @@ const ScanShipment = ({route}) => {
         'SELECT * FROM SellerMainScreenDetails where awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?',
         [barcode,barcode,barcode],
         (tx1, results) => {
-          // ToastAndroid.show("Loading...", ToastAndroid.SHORT);
-          let temp = [];
-          console.log(results.rows.length);
-          for (let i = 0; i < results.rows.length; ++i) {
-            temp.push(results.rows.item(i));
+          if (results.rows.length > 0) { 
+            const row = results.rows.item(0); 
+            setPackagingAction(row.packagingAction);
+            setPackagingID(row.packagingId);
           }
-          setPackagingAction(temp[0].packagingAction);
-          setPackagingID(temp[0].packagingId)
         },
       );
     });
@@ -335,8 +332,9 @@ console.log("packagingId",packagingID)
     console.log(acceptedArray);
     db.transaction(tx => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="accepted", packagingId=?, eventTime=?, latitude=?, longitude=? WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+        'UPDATE SellerMainScreenDetails SET status="accepted", packagingId=?,expectedPackagingId=?, eventTime=?, latitude=?, longitude=? WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
         [
+          packagingID,
           expectedPackagingId,
           new Date().valueOf(),
           latitude,
@@ -373,6 +371,8 @@ console.log("packagingId",packagingID)
         },
       );
     });
+    setExpectedPackaging('');
+    setPackagingAction();
   };
   
   const rejectDetails2 = () => {
@@ -414,8 +414,8 @@ console.log("packagingId",packagingID)
     else{
       db.transaction(tx => {
         tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET status="rejected" ,packagingId=?, rejectionReasonL1=?  WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-          [expectedPackagingId,DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
+          'UPDATE SellerMainScreenDetails SET status="rejected" ,packagingId=?, expectedPackagingId=?, rejectionReasonL1="WPR"  WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+          [packagingID, expectedPackagingId, route.params.consignorCode, barcode, barcode, barcode],
           (tx1, results) => {
             let temp = [];
             console.log('Rejected Reason : ', DropDownValue);
@@ -442,13 +442,15 @@ console.log("packagingId",packagingID)
       submitForm();
       setImageUrls([]);
     }
+    setExpectedPackaging('');
+    setPackagingAction();
   };
   const taggedDetails = () => {
     if(packagingAction==0){
       db.transaction(tx => {
         tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET status="tagged" ,rejectionReasonL1=?  WHERE status="accepted" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-          [DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
+          'UPDATE SellerMainScreenDetails SET status="tagged" ,packagingId=?, expectedPackagingId=?, rejectionReasonL1=?  WHERE status="accepted" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+          [packagingID ,expectedPackagingId,DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
           (tx1, results) => {
             let temp = [];
             console.log('Rejected Reason : ', DropDownValue);
@@ -484,8 +486,8 @@ console.log("packagingId",packagingID)
     else{
       db.transaction(tx => {
         tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET status="tagged" ,rejectionReasonL1=?  WHERE consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-          [DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
+          'UPDATE SellerMainScreenDetails SET status="tagged" ,packagingId=?, expectedPackagingId=?, rejectionReasonL1=?  WHERE consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+          [packagingID,expectedPackagingId,DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
           (tx1, results) => {
             let temp = [];
             console.log('Rejected Reason : ', DropDownValue);
@@ -514,6 +516,8 @@ console.log("packagingId",packagingID)
       submitForm1();
       setImageUrls([]);
     }
+    setExpectedPackaging('');
+    setPackagingAction();
   };
 
   const getCategories = data => {
@@ -522,17 +526,10 @@ console.log("packagingId",packagingID)
         'SELECT * FROM SellerMainScreenDetails WHERE status IS NULL AND shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber = ?) ',
         [route.params.consignorCode, data, data, data],
         (sqlTxn, res) => {
-          console.log('ok1111', data);
-          console.log(res);
           setLen(res.rows.length);
           setBarcode(data);
           if (!res.rows.length) {
-            console.log(data);
-            console.log('ok2222', data);
-  
-            db.transaction(tx => {
-              console.log('ok3333', data);
-  
+            db.transaction(tx => {  
               tx.executeSql(
                 'Select * FROM SellerMainScreenDetails WHERE status IS NOT NULL And shipmentAction="Seller Delivery" And consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?)',
                 [route.params.consignorCode, data, data, data],
@@ -565,47 +562,32 @@ console.log("packagingId",packagingID)
   
 
   const handlepackaging = (value) => {
-    if (packagingAction == 1) {
-      ToastAndroid.show(value + ' Saved', ToastAndroid.SHORT);
+      if ((packagingID!=null) && (packagingID.trim() === value.trim())) {
+        setCheck11(1);
+        ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
+        updateDetails2();
+        displayDataSPScan();
+        setLen(false);
+      } else {
+        setModal1(true);
+      }
+    setShowCloseBagModal12(false);
+    setScanned(true);
+  };
+  const handleReScan = () => {
+    setExpectedPackaging('');
+    setScanned(false);
+    setShowCloseBagModal12(true);
+    if ((packagingID!=null) && (packagingID.trim() === expectedPackagingId.trim())){
       setCheck11(1);
       ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
       updateDetails2();
       displayDataSPScan();
       setLen(false);
-      setShowCloseBagModal12(false);
-    } else if (packagingAction == 2) {
-      if (packagingID.trim() === value.trim()) {
-        setCheck11(1);
-        ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
-        updateDetails2();
-        displayDataSPScan();
-        setLen(false);
-        setModal(false);
-        setShowCloseBagModal12(false);
-      } else {
-        setModal(true);
-        setShowCloseBagModal12(false);
-      }
-    } else if (packagingAction == 3) {
-      if (packagingID.trim() === value.trim()) {
-        setCheck11(1);
-        ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
-        updateDetails2();
-        displayDataSPScan();
-        setLen(false);
-        setModal(false);
-        setShowCloseBagModal12(false);
-      } else {
-        setModal1(true);
-        setShowCloseBagModal12(false);
-      }
     } else {
-      console.log(packagingID, "is not equal to", value)
+      setModal1(true);
     }
-    setPackagingAction();
-    setExpectedPackaging('');
-    setScanned(true);
-  };
+};
 
   const updateCategories = data => {
     db.transaction(tx => {
@@ -1092,7 +1074,6 @@ console.log("packagingId",packagingID)
         isOpen={showCloseBagModal12}
         onClose={() => {
           setShowCloseBagModal12(false);
-          setExpectedPackaging('');
           reloadScanner();
           setScanned(true);
         }}
@@ -1101,7 +1082,6 @@ console.log("packagingId",packagingID)
           <Modal.CloseButton />
           <Modal.Header>Packaging ID</Modal.Header>
           <Modal.Body>
-            {showCloseBagModal12 && (
               <QRCodeScanner
                 onRead={onSuccess12}
                 reactivate={true}
@@ -1120,7 +1100,6 @@ console.log("packagingId",packagingID)
                   justifyContent: 'center',
                 }}
               />
-            )}
             {'\n'}
             <Input
               placeholder="Enter Packaging ID"
@@ -1184,7 +1163,6 @@ console.log("packagingId",packagingID)
                 displayDataSPScan();
                 setLen(false);
                 setModal(false);
-                setExpectedPackaging('');
               }}>
               Accept Anyway
             </Button>
@@ -1211,19 +1189,37 @@ console.log("packagingId",packagingID)
         size="lg">
         <Modal.Content maxWidth="350">
           <Modal.CloseButton />
-          <Modal.Header>Reject/Tag Shipment</Modal.Header>
+          <Modal.Header>Reject Shipment</Modal.Header>
           <Modal.Body>
-            <Text>Mismatch Packaging ID</Text>
+            <Text>Packaging ID Mismatch</Text>
+            <View style={{
+              width: '95%',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignSelf: 'center',
+              marginTop: 10,
+            }}>
             <Button
               flex="1"
               mt={2}
               bg="#004aad"
               onPress={() => {
+              rejectDetails2();
               setModal1(false);
-              setModalVisible1(true);
               }}>
-              Reject/Tag Shipment
+              Reject Shipment
             </Button>
+            <Button
+              flex="1"
+              mt={2}
+              bg="#004aad"
+              onPress={() => {
+              handleReScan();
+              setModal1(false);
+              }}>
+              ReScan
+            </Button>
+            </View>
           </Modal.Body>
         </Modal.Content>
       </Modal>
