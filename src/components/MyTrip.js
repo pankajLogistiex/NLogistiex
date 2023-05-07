@@ -256,10 +256,13 @@ export default function MyTrip({ navigation, route }) {
   currentDate.setHours(0, 0, 0, 0);
   currentDate = currentDate.valueOf();
   const submitStartTrip = () =>  {
-    if(pendingHandover!==0){
+    if(pendingPickup== 0 && pendingDelivery==0 && pendingHandover==0){
+      setMessage1(1);
+      setShowModal1(true);
+    }
+    else if(pendingHandover!==0){
       setMessage1(2);
       setShowModal1(true);
-      navigation.navigate('Main');
     }
     else{
       (async() => {
@@ -321,14 +324,14 @@ export default function MyTrip({ navigation, route }) {
                   </Modal.Body>
                 </Modal.Content>
               </Modal>
-              <Modal isOpen={showModal1} onClose={() => setShowModal1(false)}>
-                <Modal.Content backgroundColor={message1 === 1 ? '#dcfce7' : '#fee2e2'}>
+              <Modal isOpen={showModal1} onClose={() => {setShowModal1(false); navigation.navigate('Main')}}>
+                <Modal.Content backgroundColor={message1 === 1 ? '#fee2e2' : '#fee2e2'}>
                   <Modal.CloseButton />
                   <Modal.Body>
-                    <Alert w="100%" status={message1 === 1 ? 'success' : 'error'}>
+                    <Alert w="100%" status={message1 === 1 ? 'error' : 'error'}>
                       <VStack space={1} flexShrink={1} w="100%" alignItems="center">
                         <Alert.Icon size="4xl" />
-                        <Text my={3} fontSize="md" fontWeight="medium">{message1 === 1 ? '' : 'Please complete handover before Start a trip'}</Text>
+                        <Text my={3} fontSize="md" fontWeight="medium">{message1 === 1 ? 'No Pickup/Delivery Assigned' : 'Please complete handover before Start a trip'}</Text>
                       </VStack>
                     </Alert>
                   </Modal.Body>

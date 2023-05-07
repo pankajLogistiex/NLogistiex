@@ -423,7 +423,7 @@ export default function Main({navigation, route}) {
   //     });
   // };
   const handleStartTrip=()=>{
-    if(spp==0 && spp1==0 && shp1==0){
+    if(spp==0 && spp1==0 && shp1==0 && tripValue=='Start Trip'){
       setMessage1(1);
       setShowModal1(true);
     }
@@ -648,7 +648,7 @@ export default function Main({navigation, route}) {
                                 it.title === 'Seller Handover'
                                   ? //  || it.title === 'Seller Deliveries'
                                     'Total Sellers'
-                                  : 'Total Customers'}
+                                  : 'Total Sellers'}
                               </Heading>
                               <Heading size="sm">{it.totalUsers}</Heading>
                             </View>
@@ -908,7 +908,7 @@ export default function Main({navigation, route}) {
                                 it.title === 'Seller Handover'
                                   ? //  || it.title === 'Seller Deliveries'
                                     'Total Sellers'
-                                  : 'Total Customers'}
+                                  : 'Total Sellers'}
                               </Heading>
                               <Heading size="sm">{it.totalUsers}</Heading>
                             </View>
