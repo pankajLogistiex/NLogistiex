@@ -185,7 +185,6 @@ const PendingHandover = ({route}) => {
   //   ];
   function handleButtonPress(item) {
     if (item == 'CNA') {
-      setModalVisibleCNA(true);
       setModalVisible(false);
     }
     setDropDownValue(item);
@@ -418,7 +417,7 @@ const PendingHandover = ({route}) => {
                 data11
                   .filter(
                     d =>
-                      d.applies_to.includes('PWEF') && d.parentCode !== 'CNA',
+                      d.applies_to.includes('PRHC')
                   )
                   .map(d => (
                     <Button
@@ -455,72 +454,6 @@ const PendingHandover = ({route}) => {
                   setModalVisible(false);
                 }}>
                 Submit
-              </Button>
-            </Modal.Body>
-          </Modal.Content>
-        </Modal>
-        <Modal
-          isOpen={modalVisibleCNA}
-          onClose={() => {
-            setModalVisibleCNA(false);
-            setDropDownValue('');
-          }}
-          size="lg">
-          <Modal.Content maxWidth="350">
-            <Modal.CloseButton />
-            <Modal.Header>Could Not Attempt Reason</Modal.Header>
-            <Modal.Body>
-              {data11 &&
-                data11
-                  .filter(
-                    d => d.applies_to.includes('PWEF') && d.parentCode == 'CNA',
-                  )
-                  .map((d, index) => (
-                    <Button
-                      key={d._id}
-                      flex="1"
-                      mt={2}
-                      marginBottom={1.5}
-                      marginTop={1.5}
-                      style={{
-                        backgroundColor:
-                          d.short_code === DropDownValue
-                            ? '#6666FF'
-                            : '#C8C8C8',
-                      }}
-                      title={d.description}
-                      onPress={() => handleButtonPress(d.short_code)}>
-                      <Text
-                        style={{
-                          color:
-                            d.short_code == DropDownValue ? 'white' : 'black',
-                        }}>
-                        {d.description}
-                      </Text>
-                    </Button>
-                  ))}
-              <Button
-                flex="1"
-                mt={2}
-                bg="#004aad"
-                marginBottom={1.5}
-                marginTop={1.5}
-                onPress={() => {
-                  setModalVisibleCNA(false);
-                  pendingHandover11();
-                }}>
-                Submit
-              </Button>
-              <Button
-                flex="1"
-                mt={2}
-                bg="#004aad"
-                marginBottom={1.5}
-                marginTop={1.5}
-                onPress={() => {
-                  setModalVisible(true), setModalVisibleCNA(false);
-                }}>
-                Back
               </Button>
             </Modal.Body>
           </Modal.Content>
