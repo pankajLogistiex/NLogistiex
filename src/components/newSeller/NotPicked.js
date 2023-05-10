@@ -84,6 +84,19 @@ const NotPicked = ({route}) => {
       AsyncStorage.setItem('refresh11', 'refresh');
       db.transaction(tx => {
         tx.executeSql(
+          'UPDATE SyncSellerPickUp  SET otpSubmitted="true" WHERE consignorCode=? ',
+          [route.params.consignorCode],
+          (tx1, results) => {
+            if (results.rowsAffected > 0) {
+              console.log('otp status updated  in seller table ');
+            } else {
+              console.log('opt status not updated in local table');
+            }
+          },
+        );
+      });
+      db.transaction(tx => {
+        tx.executeSql(
           'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Pickup" AND status IS Null And consignorCode=?',
           [
             rejectionCode,

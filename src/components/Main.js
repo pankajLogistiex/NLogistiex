@@ -33,6 +33,7 @@ import PieChart from 'react-native-pie-chart';
 import {StyleSheet} from 'react-native';
 import {useIsFocused} from '@react-navigation/native';
 import {backendUrl} from '../utils/backendUrl';
+import { convertAbsoluteToRem } from 'native-base/lib/typescript/theme/tools';
 
 export default function Main({navigation, route}) {
   // const userId = route.params.userId;
@@ -441,7 +442,6 @@ export default function Main({navigation, route}) {
       navigation.navigate('MyTrip', {userId: id});
     }
   };
-
   const storeUser = async () => {
     try {
       await AsyncStorage.setItem('user', JSON.stringify(value));

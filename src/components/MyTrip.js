@@ -256,11 +256,7 @@ export default function MyTrip({ navigation, route }) {
   currentDate.setHours(0, 0, 0, 0);
   currentDate = currentDate.valueOf();
   const submitStartTrip = () =>  {
-    if(pendingPickup== 0 && pendingDelivery==0 && pendingHandover==0){
-      setMessage1(1);
-      setShowModal1(true);
-    }
-    else if(pendingHandover!==0){
+    if(pendingHandover!==0){
       setMessage1(2);
       setShowModal1(true);
     }
