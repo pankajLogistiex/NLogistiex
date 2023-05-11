@@ -14,7 +14,7 @@ import {
   Divider,
   Center,
   VStack,
-  Modal
+  Modal,
 } from 'native-base';
 import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {
@@ -186,33 +186,41 @@ function StackNavigators({navigation}) {
 
     return unsubscribe;
     // return () => {
-      // unsubscribeNotification();
-      // unsubscribe();
+    // unsubscribeNotification();
+    // unsubscribe();
     // };
-    
   }, []);
 
-
   useEffect(() => {
-    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
       // Handle FCM message here
     });
 
-    const unsubscribeNotification = messaging().onNotificationOpenedApp((notificationOpen) => {
-      console.log('Opened via notification11:', notificationOpen.notification);
-      
-      // navigation.navigate('NewSellerAdditionNotification');
-    });
+    const unsubscribeNotification = messaging().onNotificationOpenedApp(
+      notificationOpen => {
+        console.log(
+          'Opened via notification11:',
+          notificationOpen.notification,
+        );
 
-    messaging().getInitialNotification().then((notificationOpen) => {
-      if (notificationOpen) {
-        console.log('Opened via notification:', notificationOpen.notification);
-        note11();
         // navigation.navigate('NewSellerAdditionNotification');
-      } else {
-        console.log('Opened normally');
-      }
-    });
+      },
+    );
+
+    messaging()
+      .getInitialNotification()
+      .then(notificationOpen => {
+        if (notificationOpen) {
+          console.log(
+            'Opened via notification:',
+            notificationOpen.notification,
+          );
+          note11();
+          // navigation.navigate('NewSellerAdditionNotification');
+        } else {
+          console.log('Opened normally');
+        }
+      });
 
     return () => {
       unsubscribe();
@@ -257,9 +265,9 @@ function StackNavigators({navigation}) {
 
   // Sync button function
   const note11 = () => {
-    if(!isLoading){
-    console.log('call notification');
-    navigation.navigate('NewSellerAdditionNotification');
+    if (!isLoading) {
+      console.log('call notification');
+      navigation.navigate('NewSellerAdditionNotification');
     }
   };
 
@@ -620,10 +628,28 @@ function StackNavigators({navigation}) {
           createTables2();
           console.log('API 2 OK: ' + res.data.data.length);
           for (let i = 0; i < res.data.data.length; i++) {
-            //console.log(res.data.data[i].shipmentStatus);
+            let isExist = false;
             db.transaction(txn => {
               txn.executeSql(
-                `INSERT OR REPLACE INTO SellerMainScreenDetails( 
+                'SELECT * FROM SellerMainScreenDetails where clientShipmentReferenceNumber = ?',
+                [res.data.data[i].clientShipmentReferenceNumber],
+                (tx, result) => {
+                  console.log(result);
+                  if (result.rows.length > 0) {
+                    // console.log('ID exists in table');
+                    isExist = true;
+                  } else {
+                    isExist = false;
+                    // console.log('ID does not exist in table');
+                  }
+                },
+              );
+            });
+            
+            if (!isExist) {
+              db.transaction(txn => {
+                txn.executeSql(
+                  `INSERT OR REPLACE INTO SellerMainScreenDetails( 
                   clientShipmentReferenceNumber,
                   clientRefId,
                   awbNo,
@@ -646,53 +672,54 @@ function StackNavigators({navigation}) {
                   bagId,
                   packagingAction
                 ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-                [
-                  res.data.data[i].clientShipmentReferenceNumber,
-                  res.data.data[i].clientRefId,
-                  res.data.data[i].awbNo,
-                  res.data.data[i].courierCode,
-                  res.data.data[i].consignorCode,
-                  res.data.data[i].packagingStatus,
-                  res.data.data[i].expectedPackagingId,
-                  res.data.data[i].scannedPackageingId,
-                  res.data.data[i].runsheetNo,
-                  res.data.data[i].shipmentStatus,
-                  res.data.data[i].shipmentAction,
-                  '',
-                  '',
-                  0,
-                  res.data.data[i].actionTime,
-                  res.data.data[i].shipmentStatus == 'PUS' ||
-                  res.data.data[i].shipmentStatus == 'PUC' ||
-                  res.data.data[i].shipmentStatus == 'DLR' ||
-                  res.data.data[i].shipmentStatus == 'RDS'
-                    ? 'accepted'
-                    : res.data.data[i].shipmentStatus == 'PUR' ||
-                      res.data.data[i].shipmentStatus == 'RDR' ||
-                      res.data.data[i].shipmentStatus == 'UDU' ||
-                      res.data.data[i].shipmentStatus == 'PUF'
-                    ? 'rejected'
-                    : null,
-                  // null,
-                  res.data.data[i].handoverStatus == 1
-                    ? 'accepted'
-                    : res.data.data[i].handoverStatus == 2
-                    ? 'rejected'
-                    : null,
-                  null,
-                  null,
-                  '',
-                  res.data.data[i].packagingAction,
-                ],
-                (sqlTxn, _res) => {
-                  // console.log(`\n Data Added to local db successfully`);
-                  // console.log(res);
-                },
-                error => {
-                  console.log('error on adding data ' + error.message);
-                },
-              );
-            });
+                  [
+                    res.data.data[i].clientShipmentReferenceNumber,
+                    res.data.data[i].clientRefId,
+                    res.data.data[i].awbNo,
+                    res.data.data[i].courierCode,
+                    res.data.data[i].consignorCode,
+                    res.data.data[i].packagingStatus,
+                    res.data.data[i].expectedPackagingId,
+                    res.data.data[i].scannedPackageingId,
+                    res.data.data[i].runsheetNo,
+                    res.data.data[i].shipmentStatus,
+                    res.data.data[i].shipmentAction,
+                    '',
+                    '',
+                    0,
+                    res.data.data[i].actionTime,
+                    res.data.data[i].shipmentStatus == 'PUS' ||
+                    res.data.data[i].shipmentStatus == 'PUC' ||
+                    res.data.data[i].shipmentStatus == 'DLR' ||
+                    res.data.data[i].shipmentStatus == 'RDS'
+                      ? 'accepted'
+                      : res.data.data[i].shipmentStatus == 'PUR' ||
+                        res.data.data[i].shipmentStatus == 'RDR' ||
+                        res.data.data[i].shipmentStatus == 'UDU' ||
+                        res.data.data[i].shipmentStatus == 'PUF'
+                      ? 'rejected'
+                      : null,
+                    // null,
+                    res.data.data[i].handoverStatus == 1
+                      ? 'accepted'
+                      : res.data.data[i].handoverStatus == 2
+                      ? 'rejected'
+                      : null,
+                    null,
+                    null,
+                    '',
+                    res.data.data[i].packagingAction,
+                  ],
+                  (sqlTxn, _res) => {
+                    // console.log(`\n Data Added to local db successfully`);
+                    // console.log(res);
+                  },
+                  error => {
+                    console.log('error on adding data ' + error.message);
+                  },
+                );
+              });
+            }
           }
           m++;
           // console.log('value of m2 '+m);
@@ -725,7 +752,7 @@ function StackNavigators({navigation}) {
   //   (async () => {
   //     await axios.get(backendUrl + 'ADupdatePrams/getUSER').then(
   //       res => {
-          
+
   //         for (let i = 0; i < res.data.length; i++) {
   //           db.transaction(txn => {
   //             txn.executeSql(
@@ -741,7 +768,7 @@ function StackNavigators({navigation}) {
   //                 res.data[i].__v,
   //               ],
   //               (sqlTxn, _res) => {
-                 
+
   //               },
   //               error => {
   //                 console.log('error on adding data ' + error.message);
@@ -776,7 +803,7 @@ function StackNavigators({navigation}) {
   //       'CREATE TABLE IF NOT EXISTS ClosePickupReasons( _id ID VARCHAR(100) PRIMARY KEY,pickupFailureReasonID VARCHAR(50),pickupFailureReasonName VARCHAR(200),pickupFailureReasonUserID VARCHAR(50),pickupFailureReasonActiveStatus VARCHAR(20),pickupFailureReasonGroupID VARCHAR(50),pickupFailureReasonGeoFence VARCHAR(20),pickupFailureReasonOTPenable VARCHAR(20),pickupFailureReasonCallMandatory VARCHAR(20),pickupFailureReasonPickupDateEnable VARCHAR(20),pickupFailureReasonGroupName VARCHAR(200),disable VARCHAR(20),createdAt VARCHAR(200),updatedAt VARCHAR(200),__v INT(10))',
   //       [],
   //       (sqlTxn, res) => {
-         
+
   //       },
   //       error => {
   //         console.log('error on creating table ' + error.message);
@@ -836,7 +863,7 @@ function StackNavigators({navigation}) {
   //           });
   //         }
   //         m++;
-          
+
   //       },
   //       error => {
   //         console.log(error);
@@ -892,7 +919,7 @@ function StackNavigators({navigation}) {
   // const viewDetails4 = () => {
   //   db.transaction(tx => {
   //     tx.executeSql('SELECT * FROM ClosePickupReasons', [], (tx1, results) => {
-        
+
   //     });
   //   });
   // };
@@ -952,7 +979,7 @@ function StackNavigators({navigation}) {
   // const viewDetails5 = () => {
   //   db.transaction(tx => {
   //     tx.executeSql('SELECT * FROM NotAttemptReasons', [], (tx1, results) => {
-        
+
   //     });
   //   });
   // };
@@ -976,58 +1003,56 @@ function StackNavigators({navigation}) {
     // setIsLoading(!isLoading);
     createTablesSF();
     (async () => {
-      await axios
-        .get(backendUrl + 'ADshipmentFailure/getList')
-        .then(
-          res => {
-            // console.log('Table6 API OK: ' + res.data.data.length);
-            // console.log(res.data);
-            for (let i = 0; i < res.data.data.length; i++) {
-              // const appliesto=JSON.parse(JSON.stringify(res.data.data[i].appliesTo))
-              const appliesto= String(res.data.data[i].appliesTo.slice());
-              db.transaction(txn => {
-                txn.executeSql(
-                  `INSERT OR REPLACE INTO ShipmentFailure(_id ,description , parentCode, short_code , consignor_failure , fe_failure , operational_failure , system_failure , enable_geo_fence , enable_future_scheduling , enable_otp , enable_call_validation, created_by , last_updated_by, applies_to ,life_cycle_code , __v
+      await axios.get(backendUrl + 'ADshipmentFailure/getList').then(
+        res => {
+          // console.log('Table6 API OK: ' + res.data.data.length);
+          // console.log(res.data);
+          for (let i = 0; i < res.data.data.length; i++) {
+            // const appliesto=JSON.parse(JSON.stringify(res.data.data[i].appliesTo))
+            const appliesto = String(res.data.data[i].appliesTo.slice());
+            db.transaction(txn => {
+              txn.executeSql(
+                `INSERT OR REPLACE INTO ShipmentFailure(_id ,description , parentCode, short_code , consignor_failure , fe_failure , operational_failure , system_failure , enable_geo_fence , enable_future_scheduling , enable_otp , enable_call_validation, created_by , last_updated_by, applies_to ,life_cycle_code , __v
                           ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-                  [
-                    res.data.data[i]._id,
-                    res.data.data[i].description,
-                    res.data.data[i].parentCode,
-                    res.data.data[i].shortCode,
-                    res.data.data[i].consignorFailure,
-                    res.data.data[i].feFailure,
-                    res.data.data[i].operationalFailure,
-                    res.data.data[i].systemFailure,
-                    res.data.data[i].enableGeoFence,
-                    res.data.data[i].enableFutureScheduling,
-                    res.data.data[i].enableOTP,
-                    res.data.data[i].enableCallValidation,
-                    res.data.data[i].createdBy,
-                    res.data.data[i].lastUpdatedBy,
-                    appliesto,
-                    res.data.data[i].lifeCycleCode,
-                    res.data.data[i].__v,
-                  ],
-                  (sqlTxn, _res) => {
-                    // console.log('\n Data Added to local db 6 ');
-                    // console.log(res);
-                  },
-                  error => {
-                    console.log('error on adding data ' + error.message);
-                  },
-                );
-              });
-            }
-            m++;
-            // console.log('value of m6 '+m);
+                [
+                  res.data.data[i]._id,
+                  res.data.data[i].description,
+                  res.data.data[i].parentCode,
+                  res.data.data[i].shortCode,
+                  res.data.data[i].consignorFailure,
+                  res.data.data[i].feFailure,
+                  res.data.data[i].operationalFailure,
+                  res.data.data[i].systemFailure,
+                  res.data.data[i].enableGeoFence,
+                  res.data.data[i].enableFutureScheduling,
+                  res.data.data[i].enableOTP,
+                  res.data.data[i].enableCallValidation,
+                  res.data.data[i].createdBy,
+                  res.data.data[i].lastUpdatedBy,
+                  appliesto,
+                  res.data.data[i].lifeCycleCode,
+                  res.data.data[i].__v,
+                ],
+                (sqlTxn, _res) => {
+                  // console.log('\n Data Added to local db 6 ');
+                  // console.log(res);
+                },
+                error => {
+                  console.log('error on adding data ' + error.message);
+                },
+              );
+            });
+          }
+          m++;
+          // console.log('value of m6 '+m);
 
-            // viewDetailsSF();
-            // setIsLoading(false);
-          },
-          error => {
-            console.log(error);
-          },
-        );
+          // viewDetailsSF();
+          // setIsLoading(false);
+        },
+        error => {
+          console.log(error);
+        },
+      );
     })();
   };
   // Table 6
@@ -1038,7 +1063,7 @@ function StackNavigators({navigation}) {
   //       'CREATE TABLE IF NOT EXISTS PartialCloseReasons(_id ID VARCHAR(200) PRIMARY KEY,reasonID VARCHAR(200),reasonName VARCHAR(200),reasonUserID VARCHAR(200),disable VARCHAR(200),createdAt VARCHAR(200),updatedAt VARCHAR(200),__v INT(10))',
   //       [],
   //       (sqlTxn, res) => {
-         
+
   //       },
   //       error => {
   //         console.log('error on creating table ' + error.message);
@@ -1069,7 +1094,7 @@ function StackNavigators({navigation}) {
   //       .get(backendUrl + 'ADupdateprams/getPartialClosureReasons')
   //       .then(
   //         res => {
-            
+
   //           for (let i = 0; i < res.data.data.length; i++) {
   //             db.transaction(txn => {
   //               txn.executeSql(
@@ -1086,7 +1111,7 @@ function StackNavigators({navigation}) {
   //                   res.data.data[i].__v,
   //                 ],
   //                 (sqlTxn, _res) => {
-                   
+
   //                 },
   //                 error => {
   //                   console.log('error on adding data ' + error.message);
@@ -1109,9 +1134,9 @@ function StackNavigators({navigation}) {
         let temp = [];
         // console.log(results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
-            temp.push(results.rows.item(i));
+          temp.push(results.rows.item(i));
         }
-        console.log('1173',temp);
+        console.log('1173', temp);
         // if (m <= 6){
         //   // ToastAndroid.show('Sync Successful',ToastAndroid.SHORT);
         //   console.log('Waiting for ' + ( 7 - m ) + ' API to load. Plz wait...');
@@ -2521,7 +2546,7 @@ function CustomDrawerContent({navigation}) {
   const [email, SetEmail] = useState('');
   const [name, setName] = useState('');
   const [id, setId] = useState('');
-  
+
   const getData = async () => {
     try {
       const value = await AsyncStorage.getItem('@storage_Key');
@@ -2546,8 +2571,8 @@ function CustomDrawerContent({navigation}) {
     }, 1000);
     return () => clearInterval(StartValue);
   }, []);
-  
-useEffect
+
+  useEffect;
   const LogoutHandle = async () => {
     try {
       await AsyncStorage.removeItem('@storage_Key');
@@ -2662,7 +2687,8 @@ useEffect
               variant="outline"
               onPress={() => {
                 navigation.navigate('MyTrip', {userId: id});
-                navigation.closeDrawer();                }}
+                navigation.closeDrawer();
+              }}
               mt={4}
               style={{color: '#004aad', borderColor: '#004aad'}}>
               <Text style={{color: '#004aad'}}>My Trip</Text>
