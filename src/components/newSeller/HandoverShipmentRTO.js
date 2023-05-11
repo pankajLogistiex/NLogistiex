@@ -14,7 +14,7 @@ import {
 } from 'native-base';
 import React, {useEffect, useState} from 'react';
 import axios from 'axios';
-
+import {ProgressBar} from '@react-native-community/progress-bar-android';
 import {
   Text,
   View,
@@ -887,6 +887,8 @@ var dingAccept = new Sound(dingAccept11, error => {
                 color: 'black',
                 marginTop: 10,
               }}>
+                {data && data.length && sellerNoOfShipment>0 ?(
+                  <>
               The seller has{' '}
               {data && data.length ? (
                 <Text style={{fontSize: 16, fontWeight: '500', color: 'black'}}>
@@ -894,7 +896,9 @@ var dingAccept = new Sound(dingAccept11, error => {
                 </Text>
               ) : null}{' '}
               shipments. Would you like to open a bag?
-            </Text>
+              </>)
+            :<ProgressBar width={70} />}
+            </Text> 
             <View
               style={{
                 width: '90%',
