@@ -466,7 +466,7 @@ function StackNavigators({navigation}) {
   // Table 1
   const createTables1 = () => {
     db.transaction(txn => {
-      txn.executeSql('DROP TABLE IF EXISTS SyncSellerPickUp', []);
+      // txn.executeSql('DROP TABLE IF EXISTS SyncSellerPickUp', []);
       txn.executeSql(
         `CREATE TABLE IF NOT EXISTS SyncSellerPickUp( consignorCode ID VARCHAR(200) PRIMARY KEY ,userId VARCHAR(100), 
             consignorName VARCHAR(200),consignorAddress1 VARCHAR(200),consignorAddress2 VARCHAR(200),consignorCity VARCHAR(200),consignorPincode,consignorLatitude INT(20),consignorLongitude DECIMAL(20,10),consignorContact VARCHAR(200),ReverseDeliveries INT(20),runSheetNumber VARCHAR(200),ForwardPickups INT(20), BagOpenClose11 VARCHAR(200), ShipmentListArray VARCHAR(800),contactPersonName VARCHAR(100),otpSubmitted VARCHAR(50),otpSubmittedDelivery VARCHAR(50))`,
@@ -580,7 +580,7 @@ function StackNavigators({navigation}) {
   // Table 2
   const createTables2 = () => {
     db.transaction(txn => {
-      txn.executeSql('DROP TABLE IF EXISTS SellerMainScreenDetails', []);
+      // txn.executeSql('DROP TABLE IF EXISTS SellerMainScreenDetails', []);
       txn.executeSql(
         `CREATE TABLE IF NOT EXISTS SellerMainScreenDetails( 
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -628,98 +628,88 @@ function StackNavigators({navigation}) {
           createTables2();
           console.log('API 2 OK: ' + res.data.data.length);
           for (let i = 0; i < res.data.data.length; i++) {
-            let isExist = false;
             db.transaction(txn => {
               txn.executeSql(
                 'SELECT * FROM SellerMainScreenDetails where clientShipmentReferenceNumber = ?',
                 [res.data.data[i].clientShipmentReferenceNumber],
                 (tx, result) => {
-                  console.log(result);
-                  if (result.rows.length > 0) {
-                    // console.log('ID exists in table');
-                    isExist = true;
-                  } else {
-                    isExist = false;
-                    // console.log('ID does not exist in table');
+                  if (result.rows.length <= 0) {
+                    db.transaction(txn => {
+                      txn.executeSql(
+                        `INSERT OR REPLACE INTO SellerMainScreenDetails( 
+                          clientShipmentReferenceNumber,
+                          clientRefId,
+                          awbNo,
+                          courierCode,
+                          consignorCode,
+                          packagingStatus,
+                          packagingId,
+                          expectedPackagingId,
+                          runSheetNumber,
+                          shipmentStatus,
+                          shipmentAction,
+                          rejectionReasonL1,
+                          rejectionReasonL2,
+                          rejectionStage,
+                          eventTime,
+                          status,
+                          handoverStatus,
+                          syncStatus,
+                          syncHandoverStatus,
+                          bagId,
+                          packagingAction
+                        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                        [
+                          res.data.data[i].clientShipmentReferenceNumber,
+                          res.data.data[i].clientRefId,
+                          res.data.data[i].awbNo,
+                          res.data.data[i].courierCode,
+                          res.data.data[i].consignorCode,
+                          res.data.data[i].packagingStatus,
+                          res.data.data[i].expectedPackagingId,
+                          res.data.data[i].scannedPackageingId,
+                          res.data.data[i].runsheetNo,
+                          res.data.data[i].shipmentStatus,
+                          res.data.data[i].shipmentAction,
+                          '',
+                          '',
+                          0,
+                          res.data.data[i].actionTime,
+                          res.data.data[i].shipmentStatus == 'PUS' ||
+                          res.data.data[i].shipmentStatus == 'PUC' ||
+                          res.data.data[i].shipmentStatus == 'DLR' ||
+                          res.data.data[i].shipmentStatus == 'RDS'
+                            ? 'accepted'
+                            : res.data.data[i].shipmentStatus == 'PUR' ||
+                              res.data.data[i].shipmentStatus == 'RDR' ||
+                              res.data.data[i].shipmentStatus == 'UDU' ||
+                              res.data.data[i].shipmentStatus == 'PUF'
+                            ? 'rejected'
+                            : null,
+                          // null,
+                          res.data.data[i].handoverStatus == 1
+                            ? 'accepted'
+                            : res.data.data[i].handoverStatus == 2
+                            ? 'rejected'
+                            : null,
+                          null,
+                          null,
+                          '',
+                          res.data.data[i].packagingAction,
+                        ],
+                        (sqlTxn, _res) => {
+                          // console.log(`\n Data Added to local db successfully`);
+                          // console.log(res);
+                        },
+                        error => {
+                          console.log('error on adding data ' + error.message);
+                        },
+                      );
+                    });
                   }
                 },
               );
             });
-            
-            if (!isExist) {
-              db.transaction(txn => {
-                txn.executeSql(
-                  `INSERT OR REPLACE INTO SellerMainScreenDetails( 
-                  clientShipmentReferenceNumber,
-                  clientRefId,
-                  awbNo,
-                  courierCode,
-                  consignorCode,
-                  packagingStatus,
-                  packagingId,
-                  expectedPackagingId,
-                  runSheetNumber,
-                  shipmentStatus,
-                  shipmentAction,
-                  rejectionReasonL1,
-                  rejectionReasonL2,
-                  rejectionStage,
-                  eventTime,
-                  status,
-                  handoverStatus,
-                  syncStatus,
-                  syncHandoverStatus,
-                  bagId,
-                  packagingAction
-                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-                  [
-                    res.data.data[i].clientShipmentReferenceNumber,
-                    res.data.data[i].clientRefId,
-                    res.data.data[i].awbNo,
-                    res.data.data[i].courierCode,
-                    res.data.data[i].consignorCode,
-                    res.data.data[i].packagingStatus,
-                    res.data.data[i].expectedPackagingId,
-                    res.data.data[i].scannedPackageingId,
-                    res.data.data[i].runsheetNo,
-                    res.data.data[i].shipmentStatus,
-                    res.data.data[i].shipmentAction,
-                    '',
-                    '',
-                    0,
-                    res.data.data[i].actionTime,
-                    res.data.data[i].shipmentStatus == 'PUS' ||
-                    res.data.data[i].shipmentStatus == 'PUC' ||
-                    res.data.data[i].shipmentStatus == 'DLR' ||
-                    res.data.data[i].shipmentStatus == 'RDS'
-                      ? 'accepted'
-                      : res.data.data[i].shipmentStatus == 'PUR' ||
-                        res.data.data[i].shipmentStatus == 'RDR' ||
-                        res.data.data[i].shipmentStatus == 'UDU' ||
-                        res.data.data[i].shipmentStatus == 'PUF'
-                      ? 'rejected'
-                      : null,
-                    // null,
-                    res.data.data[i].handoverStatus == 1
-                      ? 'accepted'
-                      : res.data.data[i].handoverStatus == 2
-                      ? 'rejected'
-                      : null,
-                    null,
-                    null,
-                    '',
-                    res.data.data[i].packagingAction,
-                  ],
-                  (sqlTxn, _res) => {
-                    // console.log(`\n Data Added to local db successfully`);
-                    // console.log(res);
-                  },
-                  error => {
-                    console.log('error on adding data ' + error.message);
-                  },
-                );
-              });
-            }
           }
           m++;
           // console.log('value of m2 '+m);
@@ -732,260 +722,9 @@ function StackNavigators({navigation}) {
     })();
   };
 
-  // Table 3
-  // const createTables3 = () => {
-  //   db.transaction(txn => {
-  //     txn.executeSql('DROP TABLE IF EXISTS ShipmentRejectReasons', []);
-  //     txn.executeSql(
-  //       'CREATE TABLE IF NOT EXISTS ShipmentRejectReasons(_id ID VARCHAR(100) PRIMARY KEY ,shipmentExceptionReasonID VARCHAR(200),shipmentExceptionReasonName VARCHAR(200),shipmentExceptionReasonUserID VARCHAR(200),disable VARCHAR(20),createdAt VARCHAR(200),updatedAt VARCHAR(200),__v INT(10))',
-  //       [],
-  //       (sqlTxn, res) => {
-
-  //       error => {
-  //         console.log('error on creating table ' + error.message);
-  //       },
-  //     );
-  //   });
-  // };
-  // const loadAPI_Data3 = () => {
-  //   createTables3();
-  //   (async () => {
-  //     await axios.get(backendUrl + 'ADupdatePrams/getUSER').then(
-  //       res => {
-
-  //         for (let i = 0; i < res.data.length; i++) {
-  //           db.transaction(txn => {
-  //             txn.executeSql(
-  //               'INSERT OR REPLACE INTO ShipmentRejectReasons( _id,shipmentExceptionReasonID,shipmentExceptionReasonName,shipmentExceptionReasonUserID,disable,createdAt,updatedAt,__v) VALUES (?,?,?,?,?,?,?,?)',
-  //               [
-  //                 res.data[i]._id,
-  //                 res.data[i].shipmentExceptionReasonID,
-  //                 res.data[i].shipmentExceptionReasonName,
-  //                 res.data[i].shipmentExceptionReasonUserID,
-  //                 res.data[i].disable,
-  //                 res.data[i].createdAt,
-  //                 res.data[i].updatedAt,
-  //                 res.data[i].__v,
-  //               ],
-  //               (sqlTxn, _res) => {
-
-  //               },
-  //               error => {
-  //                 console.log('error on adding data ' + error.message);
-  //               },
-  //             );
-  //           });
-  //         }
-  //         m++;
-  //       },
-  //       error => {
-  //         console.log(error);
-  //       },
-  //     );
-  //   })();
-  // };
-  // const viewDetails3 = () => {
-  //   db.transaction(tx => {
-  //     tx.executeSql(
-  //       'SELECT * FROM ShipmentRejectReasons',
-  //       [],
-  //       (tx1, results) => {
-  //       },
-  //     );
-  //   });
-  // };
-
-  // Table 4
-  // const createTables4 = () => {
-  //   db.transaction(txn => {
-  //     txn.executeSql('DROP TABLE IF EXISTS ClosePickupReasons', []);
-  //     txn.executeSql(
-  //       'CREATE TABLE IF NOT EXISTS ClosePickupReasons( _id ID VARCHAR(100) PRIMARY KEY,pickupFailureReasonID VARCHAR(50),pickupFailureReasonName VARCHAR(200),pickupFailureReasonUserID VARCHAR(50),pickupFailureReasonActiveStatus VARCHAR(20),pickupFailureReasonGroupID VARCHAR(50),pickupFailureReasonGeoFence VARCHAR(20),pickupFailureReasonOTPenable VARCHAR(20),pickupFailureReasonCallMandatory VARCHAR(20),pickupFailureReasonPickupDateEnable VARCHAR(20),pickupFailureReasonGroupName VARCHAR(200),disable VARCHAR(20),createdAt VARCHAR(200),updatedAt VARCHAR(200),__v INT(10))',
-  //       [],
-  //       (sqlTxn, res) => {
-
-  //       },
-  //       error => {
-  //         console.log('error on creating table ' + error.message);
-  //       },
-  //     );
-  //   });
-  // };
-  // const createTablesCD = () => {
-  //   db.transaction(txn => {
-  //     txn.executeSql('DROP TABLE IF EXISTS CloseDeliveryReasons', []);
-  //     txn.executeSql(
-  //       'CREATE TABLE IF NOT EXISTS CloseDeliveryReasons( _id ID VARCHAR(100) PRIMARY KEY,deliveryFailureReasonID VARCHAR(50),deliveryFailureReasonName VARCHAR(200),deliveryFailureReasonUserID VARCHAR(50),deliveryFailureReasonActiveStatus VARCHAR(20),deliveryFailureReasonGroupID VARCHAR(50),deliveryFailureReasonGeoFence VARCHAR(20),deliveryFailureReasonOTPenable VARCHAR(20),deliveryFailureReasonCallMandatory VARCHAR(20),deliveryFailureReasonDeliveryDateEnable VARCHAR(20),deliveryFailureReasonGroupName VARCHAR(200),disable VARCHAR(20),createdAt VARCHAR(200),updatedAt VARCHAR(200),__v INT(10))',
-  //       [],
-  //       (sqlTxn, res) => {
-  //       },
-  //       error => {
-  //         console.log('error on creating table ' + error.message);
-  //       },
-  //     );
-  //   });
-  // };
-  // const loadAPI_Data4 = () => {
-  //   createTables4();
-  //   (async () => {
-  //     await axios.get(backendUrl + 'ADupdatePrams/getUPFR').then(
-  //       res => {
-  //         for (let i = 0; i < res.data.length; i++) {
-  //           db.transaction(txn => {
-  //             txn.executeSql(
-  //               `INSERT OR REPLACE INTO ClosePickupReasons( _id,pickupFailureReasonID,pickupFailureReasonName,pickupFailureReasonUserID,pickupFailureReasonActiveStatus,pickupFailureReasonGroupID,pickupFailureReasonGeoFence,pickupFailureReasonOTPenable,pickupFailureReasonCallMandatory,pickupFailureReasonPickupDateEnable,pickupFailureReasonGroupName,disable,createdAt,updatedAt,__v
-  //                   ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-  //               [
-  //                 res.data[i]._id,
-  //                 res.data[i].pickupFailureReasonID,
-  //                 res.data[i].pickupFailureReasonName,
-  //                 res.data[i].pickupFailureReasonUserID,
-  //                 res.data[i].pickupFailureReasonActiveStatus,
-  //                 res.data[i].pickupFailureReasonGroupID,
-  //                 res.data[i].pickupFailureReasonGeoFence,
-  //                 res.data[i].pickupFailureReasonOTPenable,
-  //                 res.data[i].pickupFailureReasonCallMandatory,
-  //                 res.data[i].pickupFailureReasonPickupDateEnable,
-  //                 res.data[i].pickupFailureReasonGroupName,
-  //                 res.data[i].disable,
-  //                 res.data[i].createdAt,
-  //                 res.data[i].updatedAt,
-  //                 res.data[i].__v,
-  //               ],
-  //               (sqlTxn, _res) => {
-  //                 // console.log('\n Data Added to local db 4 ');
-  //                 // console.log(res);
-  //               },
-  //               error => {
-  //                 console.log('error on adding data ' + error.message);
-  //               },
-  //             );
-  //           });
-  //         }
-  //         m++;
-
-  //       },
-  //       error => {
-  //         console.log(error);
-  //       },
-  //     );
-  //   })();
-  // };
-  // const loadAPI_DataCD = () => {
-  //   createTablesCD();
-  //   (async () => {
-  //     await axios.get(backendUrl + 'ADupdatePrams/getUDFR').then(
-  //       res => {
-  //         // console.log('Table4 API OK: ' + res.data.length);
-  //         // console.log(res.data);
-  //         for (let i = 0; i < res.data.length; i++) {
-  //           db.transaction(txn => {
-  //             txn.executeSql(
-  //               `INSERT OR REPLACE INTO CloseDeliveryReasons( _id,deliveryFailureReasonID,deliveryFailureReasonName,deliveryFailureReasonUserID,deliveryFailureReasonActiveStatus,deliveryFailureReasonGroupID,deliveryFailureReasonGeoFence,deliveryFailureReasonOTPenable,deliveryFailureReasonCallMandatory,deliveryFailureReasonDeliveryDateEnable,deliveryFailureReasonGroupName,disable,createdAt,updatedAt,__v
-  //                 ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-  //               [
-  //                 res.data[i]._id,
-  //                 res.data[i].deliveryFailureReasonID,
-  //                 res.data[i].deliveryFailureReasonName,
-  //                 res.data[i].deliveryFailureReasonUserID,
-  //                 res.data[i].deliveryFailureReasonActiveStatus,
-  //                 res.data[i].deliveryFailureReasonGroupID,
-  //                 res.data[i].deliveryFailureReasonGeoFence,
-  //                 res.data[i].deliveryFailureReasonOTPenable,
-  //                 res.data[i].deliveryFailureReasonCallMandatory,
-  //                 res.data[i].deliveryFailureReasonDeliveryDateEnable,
-  //                 res.data[i].deliveryFailureReasonGroupName,
-  //                 res.data[i].disable,
-  //                 res.data[i].createdAt,
-  //                 res.data[i].updatedAt,
-  //                 res.data[i].__v,
-  //               ],
-  //               (sqlTxn, _res) => {
-  //               },
-  //               error => {
-  //                 console.log('error on adding data ' + error.message);
-  //               },
-  //             );
-  //           });
-  //         }
-  //         m++;
-  //       },
-  //       error => {
-  //         console.log(error);
-  //       },
-  //     );
-  //   })();
-  // };
-  // const viewDetails4 = () => {
-  //   db.transaction(tx => {
-  //     tx.executeSql('SELECT * FROM ClosePickupReasons', [], (tx1, results) => {
-
-  //     });
-  //   });
-  // };
-
-  // Table 5
-  // const createTables5 = () => {
-  //   db.transaction(txn => {
-  //     txn.executeSql('DROP TABLE IF EXISTS NotAttemptReasons', []);
-  //     txn.executeSql(
-  //       'CREATE TABLE IF NOT EXISTS NotAttemptReasons(_id ID VARCHAR(200) PRIMARY KEY,reasonID VARCHAR(200),reasonName VARCHAR(200),reasonUserID VARCHAR(200),disable VARCHAR(200),createdAt VARCHAR(200),updatedAt VARCHAR(200),__v INT(10))',
-  //       [],
-  //       (sqlTxn, res) => {
-
-  //       },
-  //       error => {
-  //         console.log('error on creating table ' + error.message);
-  //       },
-  //     );
-  //   });
-  // };
-  // const loadAPI_Data5 = () => {
-  //   createTables5();
-  //   (async () => {
-  //     await axios.get(backendUrl + 'ADupdatePrams/getNotAttemptedReasons').then(
-  //       res => {
-  //         for (let i = 0; i < res.data.data.length; i++) {
-  //           db.transaction(txn => {
-  //             txn.executeSql(
-  //               `INSERT OR REPLACE INTO NotAttemptReasons(_id,reasonID,reasonName,reasonUserID,disable,createdAt,updatedAt,__v
-  //                         ) VALUES (?,?,?,?,?,?,?,?)`,
-  //               [
-  //                 res.data.data[i]._id,
-  //                 res.data.data[i].reasonID,
-  //                 res.data.data[i].reasonName,
-  //                 res.data.data[i].reasonUserID,
-  //                 res.data.data[i].disable,
-  //                 res.data.data[i].createdAt,
-  //                 res.data.data[i].updatedAt,
-  //                 res.data.data[i].__v,
-  //               ],
-  //               (sqlTxn, _res) => {
-  //               },
-  //               error => {
-  //                 console.log('error on adding data ' + error.message);
-  //               },
-  //             );
-  //           });
-  //         }
-  //         m++;
-  //       },
-  //       error => {
-  //         console.log(error);
-  //       },
-  //     );
-  //   })();
-  // };
-  // const viewDetails5 = () => {
-  //   db.transaction(tx => {
-  //     tx.executeSql('SELECT * FROM NotAttemptReasons', [], (tx1, results) => {
-
-  //     });
-  //   });
-  // };
   const createTablesSF = () => {
     db.transaction(txn => {
-      txn.executeSql('DROP TABLE IF EXISTS ShipmentFailure', []);
+      // txn.executeSql('DROP TABLE IF EXISTS ShipmentFailure', []);
       txn.executeSql(
         'CREATE TABLE IF NOT EXISTS ShipmentFailure(_id VARCHAR(24) PRIMARY KEY,description VARCHAR(255),parentCode VARCHAR(20), short_code VARCHAR(20), consignor_failure BOOLEAN, fe_failure BOOLEAN, operational_failure BOOLEAN, system_failure BOOLEAN, enable_geo_fence BOOLEAN, enable_future_scheduling BOOLEAN, enable_otp BOOLEAN, enable_call_validation BOOLEAN, created_by VARCHAR(10), last_updated_by VARCHAR(10), applies_to VARCHAR(255),life_cycle_code INT(20), __v INT(10))',
         [],
@@ -1055,26 +794,11 @@ function StackNavigators({navigation}) {
       );
     })();
   };
-  // Table 6
-  // const createTables6 = () => {
-  //   db.transaction(txn => {
-  //     txn.executeSql('DROP TABLE IF EXISTS PartialCloseReasons', []);
-  //     txn.executeSql(
-  //       'CREATE TABLE IF NOT EXISTS PartialCloseReasons(_id ID VARCHAR(200) PRIMARY KEY,reasonID VARCHAR(200),reasonName VARCHAR(200),reasonUserID VARCHAR(200),disable VARCHAR(200),createdAt VARCHAR(200),updatedAt VARCHAR(200),__v INT(10))',
-  //       [],
-  //       (sqlTxn, res) => {
 
-  //       },
-  //       error => {
-  //         console.log('error on creating table ' + error.message);
-  //       },
-  //     );
-  //   });
-  // };
   const createTableBag1 = () => {
     AsyncStorage.setItem('acceptedItemData11', '');
     db.transaction(tx => {
-      tx.executeSql('DROP TABLE IF EXISTS closeHandoverBag1', []);
+      // tx.executeSql('DROP TABLE IF EXISTS closeHandoverBag1', []);
       tx.executeSql(
         'CREATE TABLE IF NOT EXISTS closeHandoverBag1 (bagSeal TEXT , bagId TEXT PRIMARY KEY, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode Text,consignorName Text)',
         [],
@@ -2606,6 +2330,7 @@ function CustomDrawerContent({navigation}) {
       );
     });
   };
+
   return (
     <NativeBaseProvider>
       {email ? (
