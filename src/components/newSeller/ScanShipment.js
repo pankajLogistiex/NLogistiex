@@ -333,7 +333,7 @@ console.log("packagingId",packagingID)
     console.log(acceptedArray);
     db.transaction(tx => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="accepted",expectedPackagingId=?, eventTime=?, latitude=?, longitude=? WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+        'UPDATE SellerMainScreenDetails SET status="accepted", expectedPackagingId=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
         [
           expectedPackagingId,
           new Date().valueOf(),
@@ -441,72 +441,72 @@ console.log("packagingId",packagingID)
     setPackagingAction();
   };
   const taggedDetails = () => {
-      // db.transaction(tx => {
-      //   tx.executeSql(
-      //     'UPDATE SellerMainScreenDetails SET status="tagged" , eventTime=?, latitude=?, longitude=? ,packagingId=?, expectedPackagingId=?, rejectionReasonL1=?  WHERE status="accepted" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-      //     [new Date().valueOf(), latitude, longitude,packagingID ,expectedPackagingId,DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
-      //     (tx1, results) => {
-      //       let temp = [];
-      //       console.log('Rejected Reason : ', DropDownValue);
-      //       console.log('Results', results.rowsAffected);
-      //       console.log(results);
-      //       if (results.rowsAffected > 0) {
-      //         console.log(barcode + 'tagged');
-      //         ToastAndroid.show(barcode + ' Tagged', ToastAndroid.SHORT);
-      //         Vibration.vibrate(100);
-      //         RNBeep.beep();
-      //         setDropDownValue('');
-      //         console.log(acceptedArray);
-      //         const newArray = acceptedArray.filter(item => item !== barcode);
-      //         console.log(newArray);
-      //         setAcceptedArray(newArray);
-      //         displayDataSPScan();
-      //       } else {
-      //         console.log(barcode + 'failed to tagged item locally');
-      //       }
-      //       console.log(results.rows.length);
-      //       for (let i = 0; i < results.rows.length; ++i) {
-      //         temp.push(results.rows.item(i));
-      //       }
-            
-      //     },
-      //   );
-      // });
-      // submitForm1();
-      // setImageUrls([]);
-    
-      db.transaction(tx => {
-        tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET status="tagged", eventTime=?, latitude=?, longitude=? , expectedPackagingId=?, rejectionReasonL1=?  WHERE consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-          [new Date().valueOf(), latitude, longitude, expectedPackagingId, DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
-          (tx1, results) => {
-            let temp = [];
-            console.log('Rejected Reason : ', DropDownValue);
-            console.log('Results', results.rowsAffected);
-            console.log(results);
-            if (results.rowsAffected > 0) {
-              // ContinueHandle11();
-              console.log(barcode + 'tagged');
-              ToastAndroid.show(barcode + ' Tagged', ToastAndroid.SHORT);
-              Vibration.vibrate(100);
-              RNBeep.beep();
-              setDropDownValue('');
-              displayDataSPScan();
-            } else {
-              console.log(barcode + 'failed to tagged item locally');
-            }
-            console.log(results.rows.length);
-            for (let i = 0; i < results.rows.length; ++i) {
-              temp.push(results.rows.item(i));
-            }
-          },
-        );
-      });
-      submitForm1();
-      setImageUrls([]);
-    setExpectedPackaging('');
-    setPackagingAction();
-  };
+    // db.transaction(tx => {
+    //   tx.executeSql(
+    //     'UPDATE SellerMainScreenDetails SET status="tagged" , eventTime=?, latitude=?, longitude=? ,packagingId=?, expectedPackagingId=?, rejectionReasonL1=?  WHERE status="accepted" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+    //     [new Date().valueOf(), latitude, longitude,packagingID ,expectedPackagingId,DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
+    //     (tx1, results) => {
+    //       let temp = [];
+    //       console.log('Rejected Reason : ', DropDownValue);
+    //       console.log('Results', results.rowsAffected);
+    //       console.log(results);
+    //       if (results.rowsAffected > 0) {
+    //         console.log(barcode + 'tagged');
+    //         ToastAndroid.show(barcode + ' Tagged', ToastAndroid.SHORT);
+    //         Vibration.vibrate(100);
+    //         RNBeep.beep();
+    //         setDropDownValue('');
+    //         console.log(acceptedArray);
+    //         const newArray = acceptedArray.filter(item => item !== barcode);
+    //         console.log(newArray);
+    //         setAcceptedArray(newArray);
+    //         displayDataSPScan();
+    //       } else {
+    //         console.log(barcode + 'failed to tagged item locally');
+    //       }
+    //       console.log(results.rows.length);
+    //       for (let i = 0; i < results.rows.length; ++i) {
+    //         temp.push(results.rows.item(i));
+    //       }
+          
+    //     },
+    //   );
+    // });
+    // submitForm1();
+    // setImageUrls([]);
+  
+    db.transaction(tx => {
+      tx.executeSql(
+        'UPDATE SellerMainScreenDetails SET status="tagged", eventTime=?, latitude=?, longitude=? , expectedPackagingId=?, rejectionReasonL1=?  WHERE consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+        [new Date().valueOf(), latitude, longitude, expectedPackagingId, DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
+        (tx1, results) => {
+          let temp = [];
+          console.log('Rejected Reason : ', DropDownValue);
+          console.log('Results', results.rowsAffected);
+          console.log(results);
+          if (results.rowsAffected > 0) {
+            // ContinueHandle11();
+            console.log(barcode + 'tagged');
+            ToastAndroid.show(barcode + ' Tagged', ToastAndroid.SHORT);
+            Vibration.vibrate(100);
+            RNBeep.beep();
+            setDropDownValue('');
+            displayDataSPScan();
+          } else {
+            console.log(barcode + 'failed to tagged item locally');
+          }
+          console.log(results.rows.length);
+          for (let i = 0; i < results.rows.length; ++i) {
+            temp.push(results.rows.item(i));
+          }
+        },
+      );
+    });
+    submitForm1();
+    setImageUrls([]);
+  setExpectedPackaging('');
+  setPackagingAction();
+};
 
   const getCategories = data => {
     db.transaction(txn => {
