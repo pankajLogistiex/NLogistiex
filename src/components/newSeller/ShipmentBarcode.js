@@ -11,7 +11,7 @@ import {
   Modal,
   Input,
 } from 'native-base';
-import React, {useEffect, useState, useRef} from 'react';
+import React, {useEffect, useState, useRef,useCallback} from 'react';
 import axios from 'axios';
 import {
   Text,
@@ -109,21 +109,6 @@ const [text12,setText12] = useState('');
   const [scanned, setScanned] = useState(true);
   const scannerRef = useRef(null);
 
-  // const acceptSound = new Sound('accept.mp3', Sound.MAIN_BUNDLE);
-  // const rejectSound = new Sound('reject.mp3', Sound.MAIN_BUNDLE);
-
-
-  // useEffect(() => {
-  //   // Get the current location of the device
-  //   Geolocation.getCurrentPosition(
-  //     position => {
-  //       setCurrentLocation({ lat: position.coords.latitude, long: position.coords.longitude });
-  //     },
-  //     error => console.log(error),
-  //     { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 },
-  //   );
-  // }, []);
-
   // Calculate the distance between the two locations using the Haversine formula
   const calculateDistance = (lat1, long1, lat2, long2) => {
     const R = 6371; // radius of the earth in km
@@ -143,8 +128,6 @@ const [text12,setText12] = useState('');
 
   // Check if the current location is within 100 meters of the seller location
   const isWithin100Meters = (cLatitude,cLongitude) => {
-    console.log(cLatitude,cLongitude,sellerLatitude,
-      sellerLongitude,);
     const distance = calculateDistance(
       cLatitude,
       cLongitude,
@@ -164,7 +147,6 @@ const [text12,setText12] = useState('');
       timeout: 10000,
     })
       .then(location => {
-        console.log('lat long updating ');
         setLatitude(location.latitude);
         setLongitude(location.longitude);
         let m = isWithin100Meters(location.latitude,location.longitude);
@@ -176,7 +158,7 @@ const [text12,setText12] = useState('');
 
             {
               text: 'Cancel reject',
-              onPress: () =>{ console.log('Cancel Pressed'); setDropDownValue('');},
+              onPress: () =>{ console.log('Cancel Pressed'); setDropDownValue(''); setExpectedPackaging(''); setLen(0)},
               style: 'cancel',
             },{
               text: 'Retry',
@@ -222,7 +204,6 @@ const [text12,setText12] = useState('');
         'SELECT * FROM SyncSellerPickUp where  consignorCode=? ',
         [route.params.consignorCode],
         (tx1, results) => {
-          console.log(results);
           setSellerLatitude(results.rows.item(0).consignorLatitude);
           setSellerLongitude(results.rows.item(0).consignorLongitude);
         },
@@ -285,13 +266,10 @@ var dingAccept = new Sound(dingAccept11, error => {
     db.transaction(tx => {
       tx.executeSql('SELECT * FROM ShipmentFailure', [], (tx1, results) => {
         let temp = [];
-        // console.log(results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
         }
-        // console.log('Data from Local Database partialClosure : \n ', temp);
         setPartialCloseData(temp);
-        // console.log('Table6 DB OK:', temp.length);
       });
     });
   };
@@ -459,12 +437,7 @@ var dingAccept = new Sound(dingAccept11, error => {
       })
       .then(setShowModal11(true))
       .catch(err => console.log('OTP not send'));
-    // if (response.status === 200) {
-    //   setShowModal11(true);
-    // }
-    // else {
-    //   console.log('Otp not send', response);
-    // }
+    
   };
 
   function handleButtonPress11(item) {
@@ -902,12 +875,13 @@ var barcode11 = barcode;
                 },
               );
             });
-          } else {
-            if (packagingAction !== undefined && packagingAction != 0 && barcode){
-              setShowCloseBagModal12(true);
-              setShowOuterScanner(false);
-            }
-          }
+          } 
+          // else {
+          //   if (packagingAction !== undefined && packagingAction != 0 && barcode){
+          //     setShowCloseBagModal12(true);
+          //     setShowOuterScanner(false);
+          //   }
+          // }
         },
         error => {
           console.log('error on getting categories ' + error.message);
@@ -983,14 +957,14 @@ console.log('scanned',scannedValue);
         ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
         updateDetails2(value);
         displayDataSPScan();
-        setLen(false);
+        setLen(0);
       } else if (packagingAction == 2) {
         if (packagingID.trim() === value.trim()) {
           setCheck11(1);
           ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
           updateDetails2(value);
           displayDataSPScan();
-          setLen(false);
+          setLen(0);
         } else {
           setModal(true);
         }
@@ -1000,7 +974,7 @@ console.log('scanned',scannedValue);
           ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
           updateDetails2(value);
           displayDataSPScan();
-          setLen(false);
+          setLen(0);
         } else {
           setModal1(true);
         }
@@ -1019,7 +993,7 @@ console.log('scanned',scannedValue);
         ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
         updateDetails2(expectedPackagingId);
         displayDataSPScan();
-        setLen(false);
+        setLen(0);
       } else {
         setModal1(true);
         console.log("values not matched ")
@@ -1070,19 +1044,22 @@ console.log('scanned',scannedValue);
       setBarcode(data21);
       getCategories(data21);
     };
-
   useEffect(() => {
-    if (len ) {
-      if( packagingAction !== undefined && packagingAction==0){
+    if (len && packagingAction !== undefined ) {
+      if(packagingAction==0){
       setCheck11(1);
       ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
       updateDetails2();
       displayDataSPScan();
-      setLen(false);
+      setLen(0);
+    }
+    else{
+      setShowCloseBagModal12(true);
+      setShowOuterScanner(false);
     }
   }
-  }, [len,packagingAction]);
-
+  }, [packagingAction,len]);
+  
   const displaydata = async () => {
     db.transaction(tx => {
       tx.executeSql(
@@ -1090,15 +1067,12 @@ console.log('scanned',scannedValue);
         [],
         (tx1, results) => {
           let temp = [];
-          // console.log(results.rows.length);
           for (let i = 0; i < results.rows.length; ++i) {
             temp.push(results.rows.item(i));
           }
           // ToastAndroid.show('Sync Successful3', ToastAndroid.SHORT);
           setRejectedData(temp);
 
-          // console.log('Data from Local Database reject reasons: \n ', JSON.stringify(temp, null, 4),);
-          // console.log('Table3 DB OK:', temp.length);
         },
       );
     });
@@ -1113,7 +1087,6 @@ console.log('scanned',scannedValue);
   function handleButtonPress(item) {
     setDropDownValue(item);
   }
-console.log("Expected",expectedPackagingId);
   return (
     <NativeBaseProvider>
       <Modal
@@ -1220,7 +1193,6 @@ console.log("Expected",expectedPackagingId);
               onPress={() => {
                 partialClose();
                 setModalVisible11(false);
-                console.log(latitude, longitude);
                 navigation.navigate('POD', {
                   Forward: route.params.Forward,
                   accepted: newaccepted,
@@ -1378,7 +1350,9 @@ console.log("Expected",expectedPackagingId);
         onClose={() => {
           setShowCloseBagModal12(false);
           reloadScanner();
-          setShowOuterScanner(true)
+          setExpectedPackaging('')
+          setLen(0)
+          setShowOuterScanner(true);
         }}
         size="lg">
         <Modal.Content maxWidth="350">
@@ -1491,6 +1465,8 @@ console.log("Expected",expectedPackagingId);
         isOpen={showModal}
         onClose={() => {
           setModal(false);
+          setExpectedPackaging('')
+          setLen(0);
         }}
         size="lg">
         <Modal.Content maxWidth="350">
@@ -1515,7 +1491,7 @@ console.log("Expected",expectedPackagingId);
                 ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
                 updateDetails2(expectedPackagingId);
                 displayDataSPScan();
-                setLen(false);
+                setLen(0);
                 setModal(false);
               }}>
               Accept Anyway
@@ -1539,6 +1515,8 @@ console.log("Expected",expectedPackagingId);
         isOpen={showModal1}
         onClose={() => {
           setModal1(false);
+          setExpectedPackaging('');
+          setLen(0);
         }}
         size="lg">
         <Modal.Content maxWidth="350">
