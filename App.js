@@ -493,38 +493,51 @@ function StackNavigators({navigation}) {
             // console.log(res);
             for (let i = 0; i < res.data.data.length; i++) {
               // let m21 = JSON.stringify(res.data[i].consignorAddress, null, 4);
+
               db.transaction(txn => {
                 txn.executeSql(
-                  'INSERT OR REPLACE INTO SyncSellerPickUp( contactPersonName,consignorCode ,userId ,consignorName,consignorAddress1,consignorAddress2,consignorCity,consignorPincode,consignorLatitude,consignorLongitude,consignorContact,ReverseDeliveries,runSheetNumber,ForwardPickups,BagOpenClose11, ShipmentListArray,otpSubmitted,otpSubmittedDelivery) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-                  [
-                    res.data.data[i].contactPersonName,
-                    res.data.data[i].consignorCode,
-                    userId,
-                    res.data.data[i].consignorName,
-                    res.data.data[i].consignorAddress1,
-                    res.data.data[i].consignorAddress2,
-                    res.data.data[i].consignorCity,
-                    res.data.data[i].consignorPincode,
-                    res.data.data[i].consignorLatitude,
-                    res.data.data[i].consignorLongitude,
-                    res.data.data[i].consignorContact,
-                    res.data.data[i].ReverseDeliveries,
-                    res.data.data[i].runsheetNo,
-                    res.data.data[i].ForwardPickups,
-                    'true',
-                    ' ',
-                    'false',
-                    'false',
-                  ],
-                  (sqlTxn, _res) => {
-                    console.log('\n Data Added to local db successfully1212');
-                    // console.log(res);
-                  },
-                  error => {
-                    console.log(
-                      'error on loading  data from api SellerMainScreen/consignorslist/' +
-                        error.message,
-                    );
+                  'SELECT * FROM SyncSellerPickUp where consignorCode = ?',
+                  [res.data.data[i].consignorCode],
+                  (tx, result) => {
+                    if (result.rows.length <= 0) {
+                      db.transaction(txn => {
+                        txn.executeSql(
+                          'INSERT OR REPLACE INTO SyncSellerPickUp( contactPersonName,consignorCode ,userId ,consignorName,consignorAddress1,consignorAddress2,consignorCity,consignorPincode,consignorLatitude,consignorLongitude,consignorContact,ReverseDeliveries,runSheetNumber,ForwardPickups,BagOpenClose11, ShipmentListArray,otpSubmitted,otpSubmittedDelivery) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                          [
+                            res.data.data[i].contactPersonName,
+                            res.data.data[i].consignorCode,
+                            userId,
+                            res.data.data[i].consignorName,
+                            res.data.data[i].consignorAddress1,
+                            res.data.data[i].consignorAddress2,
+                            res.data.data[i].consignorCity,
+                            res.data.data[i].consignorPincode,
+                            res.data.data[i].consignorLatitude,
+                            res.data.data[i].consignorLongitude,
+                            res.data.data[i].consignorContact,
+                            res.data.data[i].ReverseDeliveries,
+                            res.data.data[i].runsheetNo,
+                            res.data.data[i].ForwardPickups,
+                            'true',
+                            ' ',
+                            'false',
+                            'false',
+                          ],
+                          (sqlTxn, _res) => {
+                            console.log(
+                              '\n Data Added to local db successfully1212',
+                            );
+                            // console.log(res);
+                          },
+                          error => {
+                            console.log(
+                              'error on loading  data from api SellerMainScreen/consignorslist/' +
+                                error.message,
+                            );
+                          },
+                        );
+                      });
+                    }
                   },
                 );
               });
@@ -811,47 +824,7 @@ function StackNavigators({navigation}) {
       );
     });
   };
-  // const loadAPI_Data6 = () => {
-  //   createTables6();
-  //   (async () => {
-  //     await axios
-  //       .get(backendUrl + 'ADupdateprams/getPartialClosureReasons')
-  //       .then(
-  //         res => {
 
-  //           for (let i = 0; i < res.data.data.length; i++) {
-  //             db.transaction(txn => {
-  //               txn.executeSql(
-  //                 `INSERT OR REPLACE INTO PartialCloseReasons(_id,reasonID,reasonName,reasonUserID,disable,createdAt,updatedAt,__v
-  //                         ) VALUES (?,?,?,?,?,?,?,?)`,
-  //                 [
-  //                   res.data.data[i]._id,
-  //                   res.data.data[i].reasonID,
-  //                   res.data.data[i].reasonName,
-  //                   res.data.data[i].reasonUserID,
-  //                   res.data.data[i].disable,
-  //                   res.data.data[i].createdAt,
-  //                   res.data.data[i].updatedAt,
-  //                   res.data.data[i].__v,
-  //                 ],
-  //                 (sqlTxn, _res) => {
-
-  //                 },
-  //                 error => {
-  //                   console.log('error on adding data ' + error.message);
-  //                 },
-  //               );
-  //             });
-  //           }
-  //           m++;
-
-  //         },
-  //         error => {
-  //           console.log(error);
-  //         },
-  //       );
-  //   })();
-  // };
   const viewDetailsSF = () => {
     db.transaction(tx => {
       tx.executeSql('SELECT * FROM ShipmentFailure', [], (tx1, results) => {
@@ -2296,7 +2269,6 @@ function CustomDrawerContent({navigation}) {
     return () => clearInterval(StartValue);
   }, []);
 
-  useEffect;
   const LogoutHandle = async () => {
     try {
       await AsyncStorage.removeItem('@storage_Key');
