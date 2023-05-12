@@ -327,14 +327,15 @@ console.log("packagingId",packagingID)
 }, [barcode]);
   
 
-  const updateDetails2 = () => {
+  const updateDetails2 = (expectedPackagingId) => {
     console.log('scan ' + barcode.toString());
     setAcceptedArray([...acceptedArray, barcode.toString()]);
     console.log(acceptedArray);
     db.transaction(tx => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="accepted", eventTime=?, latitude=?, longitude=? WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+        'UPDATE SellerMainScreenDetails SET status="accepted",expectedPackagingId=?, eventTime=?, latitude=?, longitude=? WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
         [
+          expectedPackagingId,
           new Date().valueOf(),
           latitude,
           longitude,
@@ -409,8 +410,8 @@ console.log("packagingId",packagingID)
       // setImageUrls([]);
       db.transaction(tx => {
         tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET status="rejected" , eventTime=?, latitude=?, longitude=? , rejectionReasonL1=?  WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-          [new Date().valueOf(), latitude, longitude, reason, route.params.consignorCode, barcode, barcode, barcode],
+          'UPDATE SellerMainScreenDetails SET status="rejected" , eventTime=?, latitude=?, longitude=? , expectedPackagingId=?, rejectionReasonL1=?  WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+          [new Date().valueOf(), latitude, longitude, expectedPackagingId, reason, route.params.consignorCode, barcode, barcode, barcode],
           (tx1, results) => {
             let temp = [];
             console.log('Rejected Reason : ', reason);
@@ -476,8 +477,8 @@ console.log("packagingId",packagingID)
     
       db.transaction(tx => {
         tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET status="tagged", eventTime=?, latitude=?, longitude=? ,  rejectionReasonL1=?  WHERE consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-          [new Date().valueOf(), latitude, longitude, DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
+          'UPDATE SellerMainScreenDetails SET status="tagged", eventTime=?, latitude=?, longitude=? , expectedPackagingId=?, rejectionReasonL1=?  WHERE consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+          [new Date().valueOf(), latitude, longitude, expectedPackagingId, DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
           (tx1, results) => {
             let temp = [];
             console.log('Rejected Reason : ', DropDownValue);
@@ -550,10 +551,10 @@ console.log("packagingId",packagingID)
   
 
   const handlepackaging = (value) => {
-      if ((packagingID!=null) && (packagingID.trim() === value.trim())) {
+      if ((packagingID!=null) && (packagingID.trim() == value.trim())) {
         setCheck11(1);
         ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
-        updateDetails2();
+        updateDetails2(value);
         displayDataSPScan();
         setLen(0);
       } else {
@@ -566,10 +567,10 @@ console.log("packagingId",packagingID)
     setExpectedPackaging('');
     setScanned(false);
     setShowCloseBagModal12(true);
-    if ((packagingID!=null) && (packagingID.trim() === expectedPackagingId.trim())){
+    if ((packagingID!=null) && (packagingID.trim() == expectedPackagingId.trim())){
       setCheck11(1);
       ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
-      updateDetails2();
+      updateDetails2(expectedPackagingId);
       displayDataSPScan();
       setLen(0);
     } else {
@@ -640,7 +641,7 @@ console.log("packagingId",packagingID)
       Vibration.vibrate(100);
       RNBeep.beep();
       ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
-      updateDetails2();
+      updateDetails2(expectedPackagingId);
       displayDataSPScan();
       setLen(0);
       }
@@ -1233,7 +1234,7 @@ console.log("packagingId",packagingID)
                 Vibration.vibrate(100);
                 RNBeep.beep();
                 ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
-                updateDetails2();
+                updateDetails2(expectedPackagingId);
                 displayDataSPScan();
                 setLen(0);
                 setModal(false);
