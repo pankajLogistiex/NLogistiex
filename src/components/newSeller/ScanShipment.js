@@ -437,6 +437,7 @@ console.log("packagingId",packagingID)
       });
       submitForm();
       setImageUrls([]);
+      setCheck11(0);
     setExpectedPackaging('');
     setPackagingAction();
   };
@@ -504,6 +505,7 @@ console.log("packagingId",packagingID)
     });
     submitForm1();
     setImageUrls([]);
+    setCheck11(0);
   setExpectedPackaging('');
   setPackagingAction();
 };
