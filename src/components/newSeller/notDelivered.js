@@ -84,12 +84,8 @@ const NotDelivered = ({route}) => {
       });
       db.transaction(tx => {
         tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET status="notDelivered" , rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND status IS Null And consignorCode=?',
-          [rejectionCode, 
-            new Date().valueOf(),
-            latitude,
-            longitude,
-            route.params.consignorCode],
+          'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND status IS NULL AND consignorCode=?',
+          [new Date().valueOf(), latitude, longitude, rejectionCode, route.params.consignorCode],
           (tx1, results) => {
             let temp = [];
             console.log(results.rows.length);
