@@ -252,15 +252,20 @@ export default function MyTrip({ navigation, route }) {
         });
     })();
   }
+  useEffect(() => {
+    if(pendingPickup==0 && pendingDelivery==0 && pendingHandover==0 && tripAlreadyStarted==false){
+      setMessage1(1);
+      setShowModal1(true);
+    }
+    if(pendingHandover!=0){
+      setMessage1(2);
+      setShowModal1(true);
+    }
+  }, [pendingPickup, pendingDelivery, pendingHandover]);
   let currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
   currentDate = currentDate.valueOf();
   const submitStartTrip = () =>  {
-    if(pendingHandover!==0){
-      setMessage1(2);
-      setShowModal1(true);
-    }
-    else{
       (async() => {
         await axios
           .post(backendUrl + 'UserTripInfo/userTripDetails', {
@@ -287,7 +292,6 @@ export default function MyTrip({ navigation, route }) {
             console.log(error);
           });
       })();
-    }
   }
 
   const handleInputChange = (value) => {

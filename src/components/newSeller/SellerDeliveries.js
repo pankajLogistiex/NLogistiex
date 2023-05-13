@@ -95,7 +95,7 @@ import {
           data.forEach((single) => {
             db.transaction((tx) => {
               tx.executeSql(
-                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=?',
+                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND handoverStatus="accepted"',
                 [single.consignorCode],
                 (tx1, results) => {
                   counts.push(results.rows.length);
