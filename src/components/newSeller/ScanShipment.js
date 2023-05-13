@@ -88,6 +88,7 @@ const ScanShipment = ({route}) => {
   const [expectedPackagingId, setExpectedPackaging] = useState('');
   const [scanned, setScanned] = useState(true);
   const [check11, setCheck11] = useState(0);
+  const [modalVisibleCNA, setModalVisibleCNA] = useState(false);
   const buttonColorRejected = check11 === 0 ? 'gray.300' : '#004aad';
   var otpInput = useRef(null);
   const [ImageUrl, setImageUrl] = useState('');
@@ -332,9 +333,8 @@ console.log("packagingId",packagingID)
     console.log(acceptedArray);
     db.transaction(tx => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="accepted", packagingId=?,expectedPackagingId=?, eventTime=?, latitude=?, longitude=? WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+        'UPDATE SellerMainScreenDetails SET status="accepted", expectedPackagingId=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
         [
-          packagingID,
           expectedPackagingId,
           new Date().valueOf(),
           latitude,
@@ -410,8 +410,8 @@ console.log("packagingId",packagingID)
       // setImageUrls([]);
       db.transaction(tx => {
         tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET status="rejected" , eventTime=?, latitude=?, longitude=? ,packagingId=?, expectedPackagingId=?, rejectionReasonL1=?  WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-          [new Date().valueOf(), latitude, longitude,packagingID, expectedPackagingId, reason, route.params.consignorCode, barcode, barcode, barcode],
+          'UPDATE SellerMainScreenDetails SET status="rejected" , eventTime=?, latitude=?, longitude=? , expectedPackagingId=?, rejectionReasonL1=?  WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+          [new Date().valueOf(), latitude, longitude, expectedPackagingId, reason, route.params.consignorCode, barcode, barcode, barcode],
           (tx1, results) => {
             let temp = [];
             console.log('Rejected Reason : ', reason);
@@ -437,83 +437,78 @@ console.log("packagingId",packagingID)
       });
       submitForm();
       setImageUrls([]);
+      setCheck11(0);
     setExpectedPackaging('');
     setPackagingAction();
   };
   const taggedDetails = () => {
-    if(packagingAction==0){
-      db.transaction(tx => {
-        tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET status="tagged" , eventTime=?, latitude=?, longitude=? ,packagingId=?, expectedPackagingId=?, rejectionReasonL1=?  WHERE status="accepted" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-          [new Date().valueOf(), latitude, longitude,packagingID ,expectedPackagingId,DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
-          (tx1, results) => {
-            let temp = [];
-            console.log('Rejected Reason : ', DropDownValue);
-            console.log('Results', results.rowsAffected);
-            console.log(results);
-            if (results.rowsAffected > 0) {
-              // ContinueHandle11();
-              console.log(barcode + 'tagged');
-              ToastAndroid.show(barcode + ' Tagged', ToastAndroid.SHORT);
-              Vibration.vibrate(100);
-              RNBeep.beep();
-              setDropDownValue('');
-              console.log(acceptedArray);
-              const newArray = acceptedArray.filter(item => item !== barcode);
-              console.log(newArray);
-              setAcceptedArray(newArray);
-              displayDataSPScan();
-            } else {
-              console.log(barcode + 'failed to tagged item locally');
-            }
-            console.log(results.rows.length);
-            for (let i = 0; i < results.rows.length; ++i) {
-              temp.push(results.rows.item(i));
-            }
-            // console.log("Data updated: \n ", JSON.stringify(temp, null, 4));
-            // viewDetailsR2();
-          },
-        );
-      });
-      submitForm1();
-      setImageUrls([]);
-    }
-    else{
-      db.transaction(tx => {
-        tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET status="tagged", eventTime=?, latitude=?, longitude=? ,packagingId=?, expectedPackagingId=?, rejectionReasonL1=?  WHERE consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-          [new Date().valueOf(), latitude, longitude, packagingID,expectedPackagingId,DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
-          (tx1, results) => {
-            let temp = [];
-            console.log('Rejected Reason : ', DropDownValue);
-            console.log('Results', results.rowsAffected);
-            console.log(results);
-            if (results.rowsAffected > 0) {
-              // ContinueHandle11();
-              console.log(barcode + 'tagged');
-              ToastAndroid.show(barcode + ' Tagged', ToastAndroid.SHORT);
-              Vibration.vibrate(100);
-              RNBeep.beep();
-              setDropDownValue('');
-              displayDataSPScan();
-            } else {
-              console.log(barcode + 'failed to tagged item locally');
-            }
-            console.log(results.rows.length);
-            for (let i = 0; i < results.rows.length; ++i) {
-              temp.push(results.rows.item(i));
-            }
-            // console.log("Data updated: \n ", JSON.stringify(temp, null, 4));
-            // viewDetailsR2();
-          },
-        );
-      });
-      submitForm1();
-      setImageUrls([]);
-    }
-    setExpectedPackaging('');
-    setPackagingAction();
-  };
+    // db.transaction(tx => {
+    //   tx.executeSql(
+    //     'UPDATE SellerMainScreenDetails SET status="tagged" , eventTime=?, latitude=?, longitude=? ,packagingId=?, expectedPackagingId=?, rejectionReasonL1=?  WHERE status="accepted" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+    //     [new Date().valueOf(), latitude, longitude,packagingID ,expectedPackagingId,DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
+    //     (tx1, results) => {
+    //       let temp = [];
+    //       console.log('Rejected Reason : ', DropDownValue);
+    //       console.log('Results', results.rowsAffected);
+    //       console.log(results);
+    //       if (results.rowsAffected > 0) {
+    //         console.log(barcode + 'tagged');
+    //         ToastAndroid.show(barcode + ' Tagged', ToastAndroid.SHORT);
+    //         Vibration.vibrate(100);
+    //         RNBeep.beep();
+    //         setDropDownValue('');
+    //         console.log(acceptedArray);
+    //         const newArray = acceptedArray.filter(item => item !== barcode);
+    //         console.log(newArray);
+    //         setAcceptedArray(newArray);
+    //         displayDataSPScan();
+    //       } else {
+    //         console.log(barcode + 'failed to tagged item locally');
+    //       }
+    //       console.log(results.rows.length);
+    //       for (let i = 0; i < results.rows.length; ++i) {
+    //         temp.push(results.rows.item(i));
+    //       }
+          
+    //     },
+    //   );
+    // });
+    // submitForm1();
+    // setImageUrls([]);
+  
+    db.transaction(tx => {
+      tx.executeSql(
+        'UPDATE SellerMainScreenDetails SET status="tagged", eventTime=?, latitude=?, longitude=? , expectedPackagingId=?, rejectionReasonL1=?  WHERE consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+        [new Date().valueOf(), latitude, longitude, expectedPackagingId, DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
+        (tx1, results) => {
+          let temp = [];
+          console.log('Rejected Reason : ', DropDownValue);
+          console.log('Results', results.rowsAffected);
+          console.log(results);
+          if (results.rowsAffected > 0) {
+            // ContinueHandle11();
+            console.log(barcode + 'tagged');
+            ToastAndroid.show(barcode + ' Tagged', ToastAndroid.SHORT);
+            Vibration.vibrate(100);
+            RNBeep.beep();
+            setDropDownValue('');
+            displayDataSPScan();
+          } else {
+            console.log(barcode + 'failed to tagged item locally');
+          }
+          console.log(results.rows.length);
+          for (let i = 0; i < results.rows.length; ++i) {
+            temp.push(results.rows.item(i));
+          }
+        },
+      );
+    });
+    submitForm1();
+    setImageUrls([]);
+    setCheck11(0);
+  setExpectedPackaging('');
+  setPackagingAction();
+};
 
   const getCategories = data => {
     db.transaction(txn => {
@@ -543,10 +538,11 @@ console.log("packagingId",packagingID)
                 },
               );
             });
-          } else if (packagingAction !== undefined && packagingAction != 0 && barcode) {
-            setShowCloseBagModal12(true);
-            setScanned(false);
           }
+          //  else if (packagingAction !== undefined && packagingAction != 0 && barcode) {
+          //   setShowCloseBagModal12(true);
+          //   setScanned(false);
+          // }
         },
         error => {
           console.log('error on getting categories ' + error.message);
@@ -557,12 +553,12 @@ console.log("packagingId",packagingID)
   
 
   const handlepackaging = (value) => {
-      if ((packagingID!=null) && (packagingID.trim() === value.trim())) {
+      if ((packagingID!=null) && (packagingID.trim() == value.trim())) {
         setCheck11(1);
         ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
         updateDetails2(value);
         displayDataSPScan();
-        setLen(false);
+        setLen(0);
       } else {
         setModal1(true);
       }
@@ -573,12 +569,12 @@ console.log("packagingId",packagingID)
     setExpectedPackaging('');
     setScanned(false);
     setShowCloseBagModal12(true);
-    if ((packagingID!=null) && (packagingID.trim() === expectedPackagingId.trim())){
+    if ((packagingID!=null) && (packagingID.trim() == expectedPackagingId.trim())){
       setCheck11(1);
       ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
       updateDetails2(expectedPackagingId);
       displayDataSPScan();
-      setLen(false);
+      setLen(0);
     } else {
       setModal1(true);
     }
@@ -641,15 +637,19 @@ console.log("packagingId",packagingID)
 
 
   useEffect(() => {
-    if (len) {
-      if(packagingAction !== undefined && packagingAction==0){
+    if (len && packagingAction !== undefined) {
+      if(packagingAction==0){
       setCheck11(1)
       Vibration.vibrate(100);
       RNBeep.beep();
       ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
       updateDetails2(expectedPackagingId);
       displayDataSPScan();
-      setLen(false);
+      setLen(0);
+      }
+      else{
+        setShowCloseBagModal12(true);
+        setScanned(false);
       }
     }
   }, [len, packagingAction]);
@@ -827,6 +827,10 @@ console.log("packagingId",packagingID)
     setDropDownValue(item);
   }
   function handleButtonPress2(item) {
+    if(item == 'CNA'){
+      setModalVisibleCNA(true);
+      setModalVisible2(false);
+    }
     setDropDownValue11(item);
   }
   return (
@@ -843,7 +847,7 @@ console.log("packagingId",packagingID)
             <Modal.Header>Partial Close Reason</Modal.Header>
             <Modal.Body>
               {rejectedData &&
-                rejectedData.filter(d => d.applies_to.includes("PDCF")).map((d, index) => (
+                rejectedData.filter(d => d.applies_to.includes("PDCF") && d.parentCode !== "CNA").map((d, index) => (
                   <Button
                     key={d._id}
                     flex="1"
@@ -892,6 +896,82 @@ console.log("packagingId",packagingID)
                   });
                 }}>
                 Submit
+              </Button>
+            </Modal.Body>
+          </Modal.Content>
+        </Modal>
+        <Modal
+          isOpen={modalVisibleCNA}
+          onClose={() => {
+            setModalVisibleCNA(false);
+            setDropDownValue11('');
+          }}
+          size="lg">
+          <Modal.Content maxWidth="350">
+            <Modal.CloseButton />
+            <Modal.Header>Could Not Attempt Reason</Modal.Header>
+            <Modal.Body>
+              {rejectedData &&
+              rejectedData.filter(d => d.applies_to.includes("PDCF") && d.parentCode == "CNA").map((d, index) => (
+                  <Button
+                    key={d._id}
+                    flex="1"
+                    mt={2}
+                    marginBottom={1.5}
+                    marginTop={1.5}
+                    style={{
+                      backgroundColor:
+                        d.short_code === DropDownValue11 ? '#6666FF' : '#C8C8C8',
+                    }}
+                    title={d.description}
+                    onPress={() =>
+                      handleButtonPress2(d.short_code)
+                    }>
+                    <Text
+                      style={{
+                        color:
+                          d.short_code == DropDownValue11 ? 'white' : 'black',
+                      }}>
+                      {d.description}
+                    </Text>
+                  </Button>
+                ))}
+              <Button
+                flex="1"
+                mt={2}
+                bg="#004aad"
+                marginBottom={1.5}
+                marginTop={1.5}
+                onPress={() => {
+                  setModalVisibleCNA(false);
+                  navigation.navigate('CollectPOD', {
+                    Forward: route.params.Forward,
+                    accepted: newaccepted,
+                    rejected: newrejected,
+                    tagged: newtagged,
+                    phone: route.params.phone,
+                    userId: route.params.userId,
+                    consignorCode: route.params.consignorCode,
+                    contactPersonName: route.params.contactPersonName,
+                    notDelivered: notDelivered,
+                    runsheetno: route.params.PRSNumber,
+                    latitude: latitude,
+                    longitude: longitude,
+                    DropDownValue: DropDownValue11,
+                  });
+                }}>
+                Submit
+              </Button>
+              <Button
+                flex="1"
+                mt={2}
+                bg="#004aad"
+                marginBottom={1.5}
+                marginTop={1.5}
+                onPress={() => {
+                  setModalVisible2(true), setModalVisibleCNA(false);
+                }}>
+                Back
               </Button>
             </Modal.Body>
           </Modal.Content>
@@ -1070,6 +1150,8 @@ console.log("packagingId",packagingID)
         onClose={() => {
           setShowCloseBagModal12(false);
           reloadScanner();
+          setExpectedPackaging('');
+          setLen(0);
           setScanned(true);
         }}
         size="lg">
@@ -1156,7 +1238,7 @@ console.log("packagingId",packagingID)
                 ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
                 updateDetails2(expectedPackagingId);
                 displayDataSPScan();
-                setLen(false);
+                setLen(0);
                 setModal(false);
               }}>
               Accept Anyway
@@ -1180,6 +1262,8 @@ console.log("packagingId",packagingID)
         isOpen={showModal1}
         onClose={() => {
           setModal1(false);
+          setExpectedPackaging('');
+          setLen(0);
         }}
         size="lg">
         <Modal.Content maxWidth="350">
