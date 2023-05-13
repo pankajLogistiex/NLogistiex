@@ -68,6 +68,7 @@ const HandoverShipmentRTO = ({route}) => {
   const [sellerCode11, setCode11] = useState('');
   const [sellerName11, setSellerName11] = useState('');
   const [sellerNoOfShipment, setSellerNoOfShipment] = useState(0);
+  const [sellerNoOfShipment11, setSellerNoOfShipment11] = useState(0);
   const [scanprogressRD, setScanProgressRD] = useState(0);
   const [sellerBagOpen11, setSellerbagOpen11] = useState('Yes');
   const currentDate = new Date().toISOString().slice(0, 10);
@@ -473,6 +474,7 @@ var dingAccept = new Sound(dingAccept11, error => {
           [data333],
           (tx1, results) => {
             setSellerNoOfShipment(results.rows.length);
+            setSellerNoOfShipment11(results.rows.length);
           },
         );
       });
@@ -869,7 +871,7 @@ var dingAccept = new Sound(dingAccept11, error => {
 
       <Modal
         isOpen={modalVisible}
-        onClose={() => setModalVisible(false)}
+        onClose={() => {setModalVisible(false);setSellerNoOfShipment11(0);}}
         size="lg">
         <Modal.Content maxWidth="350">
           <Modal.CloseButton />
@@ -887,7 +889,7 @@ var dingAccept = new Sound(dingAccept11, error => {
                 color: 'black',
                 marginTop: 10,
               }}>
-                {data && data.length && sellerNoOfShipment>0 ?(
+                {data && data.length && sellerNoOfShipment11>0 ?(
                   <>
               The seller has{' '}
               {data && data.length ? (
