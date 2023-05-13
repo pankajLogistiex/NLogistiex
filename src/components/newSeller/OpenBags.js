@@ -55,7 +55,7 @@ const OpenBags = ({route}) => {
       });
     });
   };
-
+  
   useEffect(() => {
     (async () => {
       loadDetails();
@@ -627,7 +627,7 @@ const OpenBags = ({route}) => {
               bg={
                 Object.keys(acceptedItemData).length === 0
                   ? '#004aad'
-                  : 'gray.200'
+                  : 'gray.300'
               }
               onPress={
                 Object.keys(acceptedItemData).length === 0
