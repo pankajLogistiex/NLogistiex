@@ -253,15 +253,17 @@ export default function MyTrip({ navigation, route }) {
     })();
   }
   useEffect(() => {
-    if(pendingPickup==0 && pendingDelivery==0 && pendingHandover==0 && tripAlreadyStarted==false){
-      setMessage1(1);
-      setShowModal1(true);
-    }
-    if(pendingHandover!=0){
+    // if (!tripAlreadyStarted && pendingPickup == 0 && pendingDelivery == 0 && pendingHandover == 0) {
+    //   setMessage1(1);
+    //   setShowModal1(true);
+    // }
+     if (pendingHandover !== 0) {
       setMessage1(2);
       setShowModal1(true);
     }
-  }, [pendingPickup, pendingDelivery, pendingHandover]);
+    
+  }, [pendingPickup, pendingDelivery, pendingHandover, tripAlreadyStarted]);
+  
   let currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
   currentDate = currentDate.valueOf();
@@ -394,14 +396,14 @@ export default function MyTrip({ navigation, route }) {
                   </Modal.Content>
                 </Modal>
                 <Box
-                  justifyContent="space-between"
-                  py={10}
-                  px={6}
-                  bg="#fff"
-                  rounded="xl"
-                  width={'90%'}
-                  maxWidth="100%"
-                  _text={{fontWeight: 'medium'}}>
+                   justifyContent="space-between"
+                   py={10}
+                   px={6}
+                   bg="#fff"
+                   rounded="xl"
+                   width={'90%'}
+                   maxWidth="100%"
+                   _text={{fontWeight: 'medium'}}>
                   <ScrollView>
                     <VStack space={6}>
                       <View
@@ -534,7 +536,7 @@ export default function MyTrip({ navigation, route }) {
                 </Box>
               </Box>
             ) : (
-              <Box flex={1} bg="#004aad" alignItems="center" pt={'4%'}>
+              <Box flex={1} bg="gray.300" alignItems="center" pt={'4%'}>
                 <Modal
                   isOpen={modalVisible}
                   onClose={() => setModalVisible(false)}
@@ -686,14 +688,21 @@ export default function MyTrip({ navigation, route }) {
                       </Button>
                     )}
                   </VStack>
+                  <Center>
+                    <Image
+                      style={{width: 150, height: 100}}
+                      source={require('../assets/image.png')}
+                      alt={'Logo Image'}
+                    />
+                  </Center>
                 </Box>
-                <Center>
+                {/* <Center>
                   <Image
                     style={{width: 200, height: 200}}
                     source={require('../assets/logo.png')}
                     alt={'Logo Image'}
                   />
-                </Center>
+                </Center> */}
               </Box>
             )}
           </Box>

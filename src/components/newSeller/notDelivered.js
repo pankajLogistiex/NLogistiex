@@ -103,7 +103,7 @@ const NotDelivered = ({route}) => {
           latitude: parseFloat(latitude),
           longitude: parseFloat(longitude),
           eventTime: new Date().valueOf(),
-          rejectionStage: 1,
+          rejectionStage: rejectStage,
         })
         .then(function (response) {
           console.log(response.data);

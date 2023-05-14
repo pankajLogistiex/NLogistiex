@@ -148,7 +148,7 @@ const SellerHandoverSelection = ({route}) => {
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
         eventTime: new Date().valueOf(),
-        rejectionStage: 1,
+        rejectionStage: rejectStage,
       })
       .then(function (response) {
         console.log(response.data);
@@ -278,7 +278,7 @@ const SellerHandoverSelection = ({route}) => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND status IS NULL',
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND (handoverStatus="accepted" AND status IS NULL)',
         [route.params.consignorCode],
         (tx1, results) => {
           setPending(results.rows.length);
