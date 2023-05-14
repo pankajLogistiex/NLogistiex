@@ -328,7 +328,7 @@ export default function Main({navigation, route}) {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND handoverStatus="accepted" AND status IS NULL',
+        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL)',
         [],
         (tx1, results) => {
           setSpp1(results.rows.length);
