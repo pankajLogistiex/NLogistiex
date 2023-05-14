@@ -893,18 +893,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Notification
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Notification
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
           }}
         />
 
@@ -914,18 +920,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Notification
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Notification
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
           }}
         />
 
@@ -935,18 +947,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Notification
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Notification
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
           }}
         />
 
@@ -956,18 +974,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Notification
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Notification
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
           }}
         />
 
@@ -977,21 +1001,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Dashboard
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Dashboard
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => {
-                  // console.log('dashboard menu clicked');
-                  navigation.dispatch(DrawerActions.openDrawer());
-                }}
-              />
-            ),
+            headerLeft: () => null,
             headerRight: () => (
               <View style={{flexDirection: 'row', marginRight: 10}}>
                 <Text style={{fontSize: 12, color: 'white'}}>
@@ -1044,18 +1071,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Seller Pickups
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Seller Pickups
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
             headerRight: () => (
               <View style={{flexDirection: 'row', marginRight: 10}}>
                 <Text style={{fontSize: 12, color: 'white'}}>
@@ -1119,18 +1152,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Seller Handover
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Seller Handover
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
             headerRight: () => (
               <View style={{flexDirection: 'row', marginRight: 10}}>
                 <Text style={{fontSize: 12, color: 'white'}}>
@@ -1181,18 +1220,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Shipment
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Shipment
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
             headerRight: () => (
               <View style={{flexDirection: 'row', marginRight: 10}}>
                 <Text style={{fontSize: 12, color: 'white'}}>
@@ -1243,18 +1288,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Open Bags
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Open Bags
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
             headerRight: () => (
               <View style={{flexDirection: 'row', marginRight: 10}}>
                 <Text style={{fontSize: 12, color: 'white'}}>
@@ -1305,18 +1356,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Pending Handover
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Pending Handover
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
             headerRight: () => (
               <View style={{flexDirection: 'row', marginRight: 10}}>
                 <Text style={{fontSize: 12, color: 'white'}}>
@@ -1367,18 +1424,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Pending Work
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Pending Work
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
             headerRight: () => (
               <View style={{flexDirection: 'row', marginRight: 10}}>
                 <Text style={{fontSize: 12, color: 'white'}}>
@@ -1429,18 +1492,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Pending Work
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Pending Work
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
             headerRight: () => (
               <View style={{flexDirection: 'row', marginRight: 10}}>
                 <Text style={{fontSize: 12, color: 'white'}}>
@@ -1491,18 +1560,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Pending Work
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Pending Work
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
             headerRight: () => (
               <View style={{flexDirection: 'row', marginRight: 10}}>
                 <Text style={{fontSize: 12, color: 'white'}}>
@@ -1553,18 +1628,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Handover Summary
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Handover Summary
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
             headerRight: () => (
               <View style={{flexDirection: 'row', marginRight: 10}}>
                 <Text style={{fontSize: 12, color: 'white'}}>
@@ -1616,18 +1697,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Handover Scan
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Handover Scan
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
             headerRight: () => (
               <View style={{flexDirection: 'row', marginRight: 10}}>
                 <Text style={{fontSize: 12, color: 'white'}}>
@@ -1679,18 +1766,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Seller Summary
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Seller Summary
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
             headerRight: () => (
               <View style={{flexDirection: 'row', marginRight: 10}}>
                 <Text style={{fontSize: 12, color: 'white'}}>
@@ -1742,18 +1835,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Scan Products
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Scan Products
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
             headerRight: () => (
               <View style={{flexDirection: 'row', marginRight: 10}}>
                 <Text style={{fontSize: 12, color: 'white'}}>
@@ -1804,18 +1903,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Seller Deliveries
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Seller Deliveries
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
             headerRight: () => (
               <View style={{flexDirection: 'row', marginRight: 10}}>
                 <Text style={{fontSize: 12, color: 'white'}}>
@@ -1866,18 +1971,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Seller Handover
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Seller Handover
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
             headerRight: () => (
               <View style={{flexDirection: 'row', marginRight: 10}}>
                 <Text style={{fontSize: 12, color: 'white'}}>
@@ -1928,18 +2039,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Scan Shipment
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Scan Shipment
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
             headerRight: () => (
               <View style={{flexDirection: 'row', marginRight: 10}}>
                 <Text style={{fontSize: 12, color: 'white'}}>
@@ -1990,18 +2107,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Seller Deliveries
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Seller Deliveries
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
             headerRight: () => (
               <View style={{flexDirection: 'row', marginRight: 10}}>
                 {/* <Text style={{fontSize: 12, color: 'white'}}>{lastSyncTime11}</Text>
@@ -2050,18 +2173,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Bag to Dispatch
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Bag to Dispatch
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
           }}
         />
 
@@ -2071,18 +2200,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Map Navigation
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Map Navigation
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
             headerRight: () => (
               <View style={{flexDirection: 'row', marginRight: 10}}>
                 {/* <TouchableOpacity
@@ -2134,18 +2269,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Pickup Summary
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Pickup Summary
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
           }}
         />
 
@@ -2155,18 +2296,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  My Trip
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    My Trip
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
           }}
         />
 
@@ -2176,18 +2323,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Trip Details
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Trip Details
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
           }}
         />
 
@@ -2197,18 +2350,24 @@ function StackNavigators({navigation}) {
           options={{
             headerTitle: props => (
               <NativeBaseProvider>
-                <Heading style={{color: 'white'}} size="md">
-                  Notification
-                </Heading>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    Notification
+                  </Heading>
+                </View>
               </NativeBaseProvider>
             ),
-            headerLeft: () => (
-              <MaterialIcons
-                name="menu"
-                style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                onPress={() => navigation.toggleDrawer()}
-              />
-            ),
+            headerLeft: () => null,
           }}
         />
       </Stack.Navigator>

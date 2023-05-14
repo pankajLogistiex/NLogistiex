@@ -8,7 +8,13 @@ import {
   Modal,
   Input,
 } from 'native-base';
-import {StyleSheet, ScrollView, View, ToastAndroid} from 'react-native';
+import {
+  StyleSheet,
+  ScrollView,
+  View,
+  ToastAndroid,
+  ActivityIndicator,
+} from 'react-native';
 import {DataTable, Searchbar, Text, Card} from 'react-native-paper';
 import {openDatabase} from 'react-native-sqlite-storage';
 import React, {useEffect, useState} from 'react';
@@ -44,7 +50,6 @@ const PendingHandover = ({route}) => {
   const [data11, setData11] = useState([]);
   const [longitude, setLongitude] = useState(0);
   const [modalVisibleCNA, setModalVisibleCNA] = useState(false);
-  const [handoverData, setHandoverData] = useState([]);
   const [handoverStatus, setHandoverStatus] = useState([]);
   const [runSheetNumbers, setRunSheetNumbers] = useState([]);
   const [totalDone, setTotalDone] = useState(0);
@@ -137,7 +142,7 @@ const PendingHandover = ({route}) => {
                         expected: results11.rows.length,
                         pending: results22.rows.length,
                       };
-                      console.log(newData);
+                      // console.log(newData);
                       if (newData != null) {
                         setDisplayData(prevData => ({
                           ...prevData,
@@ -200,7 +205,6 @@ const PendingHandover = ({route}) => {
         'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? ',
         [consignorCode],
         (tx1, results111) => {
-          setTotalDone(totalDone + rejected11);
           const consignorData = {
             expected: expected11,
             accepted: expected11 - rejected11,
@@ -208,8 +212,17 @@ const PendingHandover = ({route}) => {
             consignorCode: consignorCode,
             rejectReason: DropDownValue112,
           };
-          setHandoverData(prevArray => [...prevArray, consignorCode]);
-          setHandoverStatus(prevArray => [...prevArray, consignorData]);
+          const tempHandoverStatus = [...handoverStatus];
+          const conIndex = tempHandoverStatus.findIndex(
+            obj => obj.consignorCode === consignorCode,
+          );
+          if (conIndex != -1) {
+            tempHandoverStatus[conIndex] = consignorData;
+          } else {
+            tempHandoverStatus.push(consignorData);
+            setTotalDone(totalDone + rejected11);
+          }
+          setHandoverStatus(tempHandoverStatus);
           const tempRunsheetArray = [...runSheetNumbers];
           for (var i = 0; i < results111.rows.length; i++) {
             if (
@@ -268,13 +281,14 @@ const PendingHandover = ({route}) => {
       for (var i = 0; i < handoverStatus.length; i++) {
         updateQueryLocal(
           time11,
-          handoverStatus[i].rejectReason,
-          handoverStatus[i].consignorCode,
+          handoverStatus[i]?.rejectReason,
+          handoverStatus[i]?.consignorCode,
         );
       }
     } catch (error) {
       console.log('==err====', error);
     }
+    navigation.navigate('HandOverSummary');
   }
 
   function closeHandover() {
@@ -297,11 +311,12 @@ const PendingHandover = ({route}) => {
         longitude: parseFloat(longitude),
       })
       .then(response => {
-        console.log('Response close handover:', response.data);
         changeLocalStatus(time11);
-        navigation.navigate('HandOverSummary');
+        ToastAndroid.show('Successfully Handover Closed', ToastAndroid.SHORT);
+        console.log('Response close handover:', response.data);
       })
       .catch(error => {
+        ToastAndroid.show('Somthing Went Wrong', ToastAndroid.SHORT);
         console.error('Error:', error);
       });
   }
@@ -344,97 +359,73 @@ const PendingHandover = ({route}) => {
                 <DataTable.Cell style={{flex: 1}}><Text style={styles.fontvalue} >{0}</Text></DataTable.Cell>
               </DataTable.Row> */}
 
-              {displayData && data.length > 0
-                ? Object.keys(displayData11).map((consignorCode, index) =>
-                    displayData11[consignorCode].pending > 0 &&
-                    !handoverData.includes(consignorCode) ? (
-                      <>
-                        <DataTable.Row
-                          style={{
-                            height: 'auto',
-                            backgroundColor: '#eeeeee',
-                            borderBottomWidth: 1,
-                          }}
-                          key={consignorCode}>
-                          <DataTable.Cell style={{flex: 1.7}}>
-                            <Text style={styles.fontvalue}>
-                              {displayData11[consignorCode].consignorName}
-                            </Text>
-                          </DataTable.Cell>
+              {displayData && data.length > 0 ? (
+                Object.keys(displayData11).map((consignorCode, index) =>
+                  displayData11[consignorCode].pending > 0 ? (
+                    <>
+                      <DataTable.Row
+                        style={{
+                          height: 'auto',
+                          backgroundColor: '#eeeeee',
+                          borderBottomWidth: 1,
+                        }}
+                        key={consignorCode}>
+                        <DataTable.Cell style={{flex: 1.7}}>
+                          <Text style={styles.fontvalue}>
+                            {displayData11[consignorCode].consignorName}
+                          </Text>
+                        </DataTable.Cell>
 
-                          <DataTable.Cell style={{flex: 1, marginRight: 5}}>
-                            <Text style={styles.fontvalue}>
-                              {displayData11[consignorCode].expected}
-                            </Text>
-                          </DataTable.Cell>
-                          <DataTable.Cell style={{flex: 1, marginRight: -45}}>
-                            <Text style={styles.fontvalue}>
-                              {displayData11[consignorCode].pending}
-                            </Text>
-                          </DataTable.Cell>
-                          {/* <MaterialIcons name="check" style={{ fontSize: 30, color: 'green', marginTop: 8 }} /> */}
-                        </DataTable.Row>
-                        <Button
-                          title="Pending Handover"
-                          onPress={() => {
-                            setConsignorCode(consignorCode);
-                            setExpected11(
-                              displayData11[consignorCode].expected,
-                            );
-                            setRejected11(displayData11[consignorCode].pending);
-                            setModalVisible(true);
-                          }}
-                          w="100%"
-                          size="lg"
-                          bg="#004aad"
-                          mb={4}
-                          mt={4}>
-                          Select Exception Reason
-                        </Button>
-                        {/* <Modal isOpen={modalVisible} onClose={() => {setModalVisible(false); setDropDownValue('');}} size="lg">
-        <Modal.Content maxWidth="350">
-          <Modal.CloseButton />
-          <Modal.Header>Pending Handover Reason</Modal.Header>
-          <Modal.Body>
-          {data11.map((d) => (
-            <Button key={d.value} flex="1" mt={2}  marginBottom={1.5} marginTop={1.5} title={d.value} style={{backgroundColor: d.value === DropDownValue ? '#6666FF' : '#C8C8C8'}} onPress={() => handleButtonPress(d.value)} >
-            <Text style={{color:DropDownValue == d.value ? 'white' : 'black'}}>{d.value}</Text></Button>
-            ))}
-            <Button flex="1" mt={2} bg="#004aad" marginBottom={1.5} marginTop={1.5} onPress={() => {pendingHandover11(); setModalVisible(false);}} >
-            Submit</Button>
-          </Modal.Body>
-        </Modal.Content>
-      </Modal> */}
-
-                        {/* <View>
-                      <Picker
-                      mode="dropdown"
-                      selectedValue={selected}
-                      onValueChange={value => setSelected(value)}
-                     >
-                        {data11.map(item => (
-                        <Picker.Item color='black' key={item.value} label={item.label} value={item.value} />
-                        ))}
-                        </Picker>
-                      </View> */}
-                      </>
-                    ) : // null
-
-                    null,
-                  )
-                : null}
-
-              {/* <View>
-              <Picker
-              mode="dropdown"
-              selectedValue={selected}
-              onValueChange={value => setSelected(value)}
-             >
-                {data11.map(item => (
-                <Picker.Item color='black' key={item.value} label={item.label} value={item.value} />
-                ))}
-                </Picker>
-              </View> */}
+                        <DataTable.Cell style={{flex: 1, marginRight: 5}}>
+                          <Text style={styles.fontvalue}>
+                            {displayData11[consignorCode].expected}
+                          </Text>
+                        </DataTable.Cell>
+                        <DataTable.Cell style={{flex: 1, marginRight: -45}}>
+                          <Text style={styles.fontvalue}>
+                            {displayData11[consignorCode].pending}
+                          </Text>
+                        </DataTable.Cell>
+                        {/* <MaterialIcons name="check" style={{ fontSize: 30, color: 'green', marginTop: 8 }} /> */}
+                      </DataTable.Row>
+                      <Button
+                        title="Pending Handover"
+                        onPress={() => {
+                          setConsignorCode(consignorCode);
+                          setExpected11(displayData11[consignorCode].expected);
+                          setRejected11(displayData11[consignorCode].pending);
+                          setModalVisible(true);
+                        }}
+                        w="100%"
+                        size="lg"
+                        bg="#004aad"
+                        mb={4}
+                        mt={4}>
+                        {handoverStatus.length > 0 &&
+                        handoverStatus.filter(
+                          obj => obj.consignorCode === consignorCode,
+                        )[0]?.rejectReason
+                          ? (data11
+                              ?.filter(d => d.applies_to.includes('PRHC'))
+                              .filter(
+                                obj =>
+                                  obj.short_code ==
+                                  handoverStatus.filter(
+                                    obj => obj.consignorCode === consignorCode,
+                                  )[0].rejectReason,
+                              ))[0]?.description
+                          : 'Select Exception Reason'}
+                      </Button>
+                    </>
+                  ) : null,
+                )
+              ) : (
+                <ActivityIndicator
+                  size="large"
+                  color="#004aad"
+                  style={{marginVertical: 15}}
+                />
+              )}
             </DataTable>
           </Card>
         </ScrollView>
@@ -491,44 +482,46 @@ const PendingHandover = ({route}) => {
             </Modal.Body>
           </Modal.Content>
         </Modal>
-        <View
-          style={{
-            width: '90%',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignSelf: 'center',
-            marginTop: 10,
-          }}>
-          <Button
-            w="48%"
-            size="lg"
-            bg="#004aad"
-            onPress={() => navigation.navigate('HandoverShipmentRTO')}>
-            Resume Scanning
-          </Button>
-          {totalPending == totalDone ? (
+        {displayData && data.length > 0 ? (
+          <View
+            style={{
+              width: '90%',
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignSelf: 'center',
+              marginTop: 10,
+            }}>
             <Button
               w="48%"
               size="lg"
               bg="#004aad"
-              onPress={() => closeHandover()}>
-              Close Handover
+              onPress={() => navigation.navigate('HandoverShipmentRTO')}>
+              Resume Scanning
             </Button>
-          ) : (
-            <Button
-              w="48%"
-              size="lg"
-              bg="gray.300"
-              onPress={() =>
-                ToastAndroid.show(
-                  'All shipments not scanned',
-                  ToastAndroid.SHORT,
-                )
-              }>
-              Close Handover
-            </Button>
-          )}
-        </View>
+            {totalPending == totalDone ? (
+              <Button
+                w="48%"
+                size="lg"
+                bg="#004aad"
+                onPress={() => closeHandover()}>
+                Close Handover
+              </Button>
+            ) : (
+              <Button
+                w="48%"
+                size="lg"
+                bg="gray.300"
+                onPress={() =>
+                  ToastAndroid.show(
+                    'All shipments not scanned',
+                    ToastAndroid.SHORT,
+                  )
+                }>
+                Close Handover
+              </Button>
+            )}
+          </View>
+        ) : null}
         <Center>
           <Image
             style={{width: 150, height: 150}}

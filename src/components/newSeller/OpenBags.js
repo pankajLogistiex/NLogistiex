@@ -55,7 +55,7 @@ const OpenBags = ({route}) => {
       });
     });
   };
-  
+
   useEffect(() => {
     (async () => {
       loadDetails();
@@ -262,8 +262,6 @@ const OpenBags = ({route}) => {
     });
   };
 
-  console.log(acceptedItemData);
-
   return (
     <NativeBaseProvider>
       <Modal
@@ -394,90 +392,6 @@ const OpenBags = ({route}) => {
         </Modal.Content>
       </Modal>
 
-      {/* <Modal
-        isOpen={showCloseBagModal}
-        onClose={() => setShowCloseBagModal(false)}
-        size="lg">
-        <Modal.Content maxWidth="350">
-          <Modal.CloseButton />
-          <Modal.Header />
-          <Modal.Body>
-            <Input
-              placeholder="Enter Bag Seal"
-              size="md"
-              onChangeText={text => setBagSeal(text)}
-            />
-            <Button
-              flex="1"
-              mt={2}
-              bg="#004aad"
-              onPress={() => {
-                setShowCloseBagModal(false),
-                  navigation.navigate('PendingHandover');
-              }}>
-              Submit
-            </Button>
-            <View style={{alignItems: 'center', marginTop: 15}}>
-              <View
-                style={{
-                  width: '98%',
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  borderWidth: 1,
-                  borderBottomWidth: 0,
-                  borderColor: 'lightgray',
-                  borderTopLeftRadius: 5,
-                  borderTopRightRadius: 5,
-                  padding: 10,
-                }}>
-                <Text style={{fontSize: 16, fontWeight: '500'}}>
-                  Seller Code
-                </Text>
-                <Text style={{fontSize: 16, fontWeight: '500'}}>
-                  {consignorCode}
-                </Text>
-              </View>
-              <View
-                style={{
-                  width: '98%',
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  borderWidth: 1,
-                  borderBottomWidth: 0,
-                  borderColor: 'lightgray',
-                  padding: 10,
-                }}>
-                <Text style={{fontSize: 16, fontWeight: '500'}}>
-                  Seller Name
-                </Text>
-                <Text style={{fontSize: 16, fontWeight: '500'}}>
-                  {consignorNames}
-                </Text>
-              </View>
-              <View
-                style={{
-                  width: '98%',
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  borderWidth: 1,
-                  borderBottomWidth: 1,
-                  borderColor: 'lightgray',
-                  borderTopLeftRadius: 5,
-                  borderTopRightRadius: 5,
-                  padding: 10,
-                }}>
-                <Text style={{fontSize: 16, fontWeight: '500'}}>
-                  Number of Shipments
-                </Text>
-                <Text style={{fontSize: 16, fontWeight: '500'}}>
-                  {NoShipment}
-                </Text>
-              </View>
-            </View>
-          </Modal.Body>
-        </Modal.Content>
-      </Modal> */}
-
       <Box flex={1} bg="#fff" width="auto" maxWidth="100%">
         <ScrollView
           style={styles.homepage}
@@ -566,7 +480,7 @@ const OpenBags = ({route}) => {
                               ToastAndroid.SHORT,
                             );
                           }}>
-                          Close Bag
+                          Closed Bag
                         </Button>
                       </DataTable.Cell>
                       {/* <DataTable.Cell style={{flex: 1}}><Button style={{backgroundColor:'#004aad', color:'#fff'}} onPress={
@@ -576,6 +490,18 @@ const OpenBags = ({route}) => {
                   ))
                 : null}
             </DataTable>
+            {(tableData && tableData.length > 0) ||
+            Object.keys(acceptedItemData).length > 0 ? null : (
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  alignText: 'center',
+                  padding: 10,
+                }}>
+                <Text style={{fontSize: 16}}>No Bags Created By you</Text>
+              </View>
+            )}
           </Card>
 
           {/* {acceptedItemData &&  <View style={{width: '90%', flexDirection: 'row', justifyContent: 'space-between', alignSelf: 'center', marginTop: 10 }}>
