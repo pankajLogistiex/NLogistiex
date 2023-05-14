@@ -44,6 +44,10 @@ const PendingHandover = ({route}) => {
   const [data11, setData11] = useState([]);
   const [longitude, setLongitude] = useState(0);
   const [modalVisibleCNA, setModalVisibleCNA] = useState(false);
+  const [handoverData, setHandoverData] = useState([]);
+  const [handoverStatus, setHandoverStatus] = useState([]);
+  const [runSheetNumbers, setRunSheetNumbers] = useState([]);
+  const [totalDone, setTotalDone] = useState(0);
 
   const [userId, setUserID] = useState('');
 
@@ -190,71 +194,37 @@ const PendingHandover = ({route}) => {
     setDropDownValue(item);
   }
   const pendingHandover11 = () => {
-    console.log(
-      'ok' + consignorCode,
-      DropDownValue,
-      DropDownValue,
-      new Date().valueOf(),
-      latitude,
-      longitude,
-      consignorCode,
-    );
-    let time11 = parseInt(new Date().valueOf(), 10);
     const DropDownValue112 = DropDownValue;
     db.transaction(tx => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? ',
         [consignorCode],
         (tx1, results111) => {
-          axios
-            .post(backendUrl + 'SellerMainScreen/closeHandover', {
-              runsheetNo: results111.rows.item(0).runSheetNumber,
-              expected: expected11,
-              accepted: expected11 - rejected11,
-              rejected: rejected11,
-              feUserID: userId,
-              receivingTime: time11,
-              latitude: latitude,
-              longitude: longitude,
-              consignorCode: consignorCode,
-              rejectReason: DropDownValue112,
-            })
-            .then(response => {
-              console.log('Response close handover:', response.data);
-            })
-            .catch(error => {
-              console.error('Error:', error);
-            });
+          setTotalDone(totalDone + rejected11);
+          const consignorData = {
+            expected: expected11,
+            accepted: expected11 - rejected11,
+            rejected: rejected11,
+            consignorCode: consignorCode,
+            rejectReason: DropDownValue112,
+          };
+          setHandoverData(prevArray => [...prevArray, consignorCode]);
+          setHandoverStatus(prevArray => [...prevArray, consignorData]);
+          const tempRunsheetArray = [...runSheetNumbers];
+          for (var i = 0; i < results111.rows.length; i++) {
+            if (
+              !tempRunsheetArray.includes(
+                results111.rows.item(i).runSheetNumber,
+              )
+            ) {
+              tempRunsheetArray.push(results111.rows.item(i).runSheetNumber);
+            }
+          }
+          setRunSheetNumbers(tempRunsheetArray);
         },
       );
     });
-    db.transaction(tx => {
-      tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET handoverStatus="pendingHandover" , rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Delivery" AND handoverStatus IS Null And consignorCode=?',
-        [DropDownValue, time11, latitude, longitude, consignorCode],
-        (tx1, results) => {
-          let temp = [];
-          // console.log(tx1);
-          console.log('Not Picked Reason', DropDownValue);
-          console.log('Results', results.rowsAffected);
-          // console.log(results);
-          if (results.rowsAffected > 0) {
-            console.log('notPicked done');
-
-            loadDetails();
-            loadDetails112();
-          } else {
-            console.log('notPicked not done/already done');
-          }
-          setDropDownValue('');
-          // console.log(results.rows.length);
-          for (let i = 0; i < results.rows.length; ++i) {
-            temp.push(results.rows.item(i));
-          }
-          // console.log("Data updated: \n ", JSON.stringify(temp, null, 4));
-        },
-      );
-    });
+    setDropDownValue('');
   };
   useEffect(() => {
     loadDetails112();
@@ -270,6 +240,71 @@ const PendingHandover = ({route}) => {
       );
     });
   };
+
+  function updateQueryLocal(eventTime, rejectReason, consignorCode) {
+    db.transaction(tx => {
+      tx.executeSql(
+        'UPDATE SellerMainScreenDetails SET handoverStatus=?, rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Delivery" AND handoverStatus IS Null And consignorCode=?',
+        [
+          'pendingHandover',
+          rejectReason,
+          eventTime,
+          latitude,
+          longitude,
+          consignorCode,
+        ],
+        (tx1, results) => {
+          console.log(results);
+        },
+        error => {
+          console.log('Status Update Local DB bug', error);
+        },
+      );
+    });
+  }
+
+  function changeLocalStatus(time11) {
+    try {
+      for (var i = 0; i < handoverStatus.length; i++) {
+        updateQueryLocal(
+          time11,
+          handoverStatus[i].rejectReason,
+          handoverStatus[i].consignorCode,
+        );
+      }
+    } catch (error) {
+      console.log('==err====', error);
+    }
+  }
+
+  function closeHandover() {
+    let time11 = new Date().valueOf();
+    console.log('===handover close data===', {
+      handoverStatus: handoverStatus,
+      runsheets: runSheetNumbers,
+      feUserID: userId,
+      receivingTime: parseInt(time11),
+      latitude: parseFloat(latitude),
+      longitude: parseFloat(longitude),
+    });
+    axios
+      .post(backendUrl + 'SellerMainScreen/closeHandover', {
+        handoverStatus: handoverStatus,
+        runsheets: runSheetNumbers,
+        feUserID: userId,
+        receivingTime: parseInt(time11),
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude),
+      })
+      .then(response => {
+        console.log('Response close handover:', response.data);
+        changeLocalStatus(time11);
+        navigation.navigate('HandOverSummary');
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+  }
 
   return (
     <NativeBaseProvider>
@@ -311,7 +346,8 @@ const PendingHandover = ({route}) => {
 
               {displayData && data.length > 0
                 ? Object.keys(displayData11).map((consignorCode, index) =>
-                    displayData11[consignorCode].pending > 0 ? (
+                    displayData11[consignorCode].pending > 0 &&
+                    !handoverData.includes(consignorCode) ? (
                       <>
                         <DataTable.Row
                           style={{
@@ -415,10 +451,7 @@ const PendingHandover = ({route}) => {
             <Modal.Body>
               {data11 &&
                 data11
-                  .filter(
-                    d =>
-                      d.applies_to.includes('PRHC')
-                  )
+                  .filter(d => d.applies_to.includes('PRHC'))
                   .map(d => (
                     <Button
                       key={d.short_code}
@@ -466,31 +499,19 @@ const PendingHandover = ({route}) => {
             alignSelf: 'center',
             marginTop: 10,
           }}>
-          {totalPending === 0 ? (
-            <Button
-              w="48%"
-              size="lg"
-              bg="gray.300"
-              onPress={() =>
-                ToastAndroid.show('All shipments scanned', ToastAndroid.SHORT)
-              }>
-              Start Scanning
-            </Button>
-          ) : (
-            <Button
-              w="48%"
-              size="lg"
-              bg="#004aad"
-              onPress={() => navigation.navigate('HandoverShipmentRTO')}>
-              Start Scanning
-            </Button>
-          )}
-          {totalPending === 0 ? (
+          <Button
+            w="48%"
+            size="lg"
+            bg="#004aad"
+            onPress={() => navigation.navigate('HandoverShipmentRTO')}>
+            Resume Scanning
+          </Button>
+          {totalPending == totalDone ? (
             <Button
               w="48%"
               size="lg"
               bg="#004aad"
-              onPress={() => navigation.navigate('HandOverSummary')}>
+              onPress={() => closeHandover()}>
               Close Handover
             </Button>
           ) : (
