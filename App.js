@@ -239,6 +239,7 @@ function StackNavigators({navigation}) {
     // loadAPI_DataCD();
     createTableBag1();
     loadAPI_DataSF();
+    tripValues();
   };
   useEffect(() => {
     // This useEffect  is use to hide warnings in mobile screen .
@@ -569,7 +570,7 @@ function StackNavigators({navigation}) {
           // console.log("Address from local db : " + address_json.consignorAddress1 + " " + address_json.consignorAddress2);
           // ToastAndroid.show('consignorName:' + results.rows.item(i).consignorName + "\n" + 'PRSNumber : ' + results.rows.item(i).PRSNumber, ToastAndroid.SHORT);
         }
-        if (m === 3) {
+        if (m === 4) {
           ToastAndroid.show('Sync Successful', ToastAndroid.SHORT);
           setIsLoading(false);
           setIsLogin(true);
@@ -579,7 +580,7 @@ function StackNavigators({navigation}) {
 
           AsyncStorage.setItem('refresh11', 'refresh');
         } else {
-          console.log('Only ' + m + ' APIs loaded out of 3 ');
+          console.log('Only ' + m + ' APIs loaded out of 4 ');
         }
         // m++;
         // ToastAndroid.show("Sync Successful",ToastAndroid.SHORT);
@@ -733,6 +734,55 @@ function StackNavigators({navigation}) {
         },
       );
     })();
+  };
+  const createTripTable = () => {
+    db.transaction(txn => {
+      txn.executeSql(
+        'CREATE TABLE IF NOT EXISTS TripStatus (istripstarted BOOLEAN)',
+        [],
+        (sqlTxn, res) => {
+          console.log('table TripStatus created successfully');
+        },
+        error => {
+          console.log('error on creating table ' + error.message);
+        },
+      );
+    });
+  };
+  async function tripValues() {
+    let current = new Date();
+    let tripid = current.toString();
+    let time = tripid.match(/\d{2}:\d{2}:\d{2}/)[0];
+    let dateStart = 0;
+    let dateEnd = tripid.indexOf(" ", tripid.indexOf(" ", tripid.indexOf(" ") + 1) + 1);
+    let date = dateEnd ? tripid.substring(dateStart, dateEnd + 5) : "No match found";
+    const tripId= userId + "_" + date;
+    console.log(tripId);
+    const res = await axios.get(backendUrl + 'UserTripInfo/getUserTripInfo', {
+      params: {
+        tripID: tripId,
+      },
+    });
+    createTripTable();
+    const TripStatus = res.data.res_data;
+    const istripstarted = (TripStatus && TripStatus.startTime && !TripStatus.endTime) ? 1 : 0;
+    console.log("istripStarted",istripstarted)
+    db.transaction(txn => {
+    txn.executeSql(
+    `INSERT INTO TripStatus (istripstarted) VALUES (?)`,
+    [
+      istripstarted,
+    ],
+    (sqlTxn, _res) => {
+      console.log("Data added successfully");
+    },
+    error => {
+      console.log('Error on adding data: ' + error.message);
+    },
+   
+  );
+  m++;
+});
   };
 
   const createTablesSF = () => {
@@ -2548,6 +2598,16 @@ function CustomDrawerContent({navigation}) {
               mt={4}
               style={{color: '#004aad', borderColor: '#004aad'}}>
               <Text style={{color: '#004aad'}}>My Trip</Text>
+            </Button>
+            <Button
+              variant="outline"
+              onPress={() => {
+                navigation.navigate('NewSellerAdditionNotification', {userId: id});
+                navigation.closeDrawer();
+              }}
+              mt={4}
+              style={{color: '#004aad', borderColor: '#004aad'}}>
+              <Text style={{color: '#004aad'}}> Additional Workload</Text>
             </Button>
           </Box>
         </View>
