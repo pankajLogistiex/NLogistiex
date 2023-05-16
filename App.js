@@ -2,6 +2,8 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, {useEffect, useState} from 'react';
 import 'react-native-gesture-handler';
+import {Provider, useSelector} from 'react-redux';
+import {store} from './src/redux/store';
 import {
   NativeBaseProvider,
   Box,
@@ -77,8 +79,9 @@ const db = openDatabase({name: 'rn_sqlite'});
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 function StackNavigators({navigation}) {
+  const userId = useSelector(state => state.user.user_id);
+
   const [isLoading, setIsLoading] = useState(false);
-  const [userId, setUserId] = useState('');
   const [data, setData] = useState([]);
   const [isLogin, setIsLogin] = useState(false);
   const [lastSyncTime11, setLastSyncTime] = useState('');
@@ -145,26 +148,6 @@ function StackNavigators({navigation}) {
       }
     } catch (error) {
       console.warn(error);
-    }
-  };
-
-  const getData = async () => {
-    try {
-      const value = await AsyncStorage.getItem('@storage_Key');
-      // console.log(value);
-      if (value !== null) {
-        const data = JSON.parse(value);
-        setUserId(data.userId);
-        Login_Data_load();
-        if (!isLogin) {
-          setIsLogin(true);
-          Login_Data_load();
-        }
-      } else {
-        setUserId(' ');
-      }
-    } catch (e) {
-      console.log(e);
     }
   };
 
@@ -239,19 +222,11 @@ function StackNavigators({navigation}) {
     // loadAPI_DataCD();
     createTableBag1();
     loadAPI_DataSF();
-    tripValues();
   };
   useEffect(() => {
     // This useEffect  is use to hide warnings in mobile screen .
     // LogBox.ignoreLogs(['Warning: Each child in a list should have a unique "key" prop.']);
     LogBox.ignoreAllLogs(true);
-  }, []);
-
-  useEffect(() => {
-    const StartValue = setInterval(() => {
-      getData();
-    }, 1000);
-    return () => clearInterval(StartValue);
   }, []);
 
   useEffect(() => {
@@ -735,56 +710,7 @@ function StackNavigators({navigation}) {
       );
     })();
   };
-  const createTripTable = () => {
-    db.transaction(txn => {
-      txn.executeSql(
-        'CREATE TABLE IF NOT EXISTS TripStatus (istripstarted BOOLEAN)',
-        [],
-        (sqlTxn, res) => {
-          console.log('table TripStatus created successfully');
-        },
-        error => {
-          console.log('error on creating table ' + error.message);
-        },
-      );
-    });
-  };
-  async function tripValues() {
-    let current = new Date();
-    let tripid = current.toString();
-    let time = tripid.match(/\d{2}:\d{2}:\d{2}/)[0];
-    let dateStart = 0;
-    let dateEnd = tripid.indexOf(" ", tripid.indexOf(" ", tripid.indexOf(" ") + 1) + 1);
-    let date = dateEnd ? tripid.substring(dateStart, dateEnd + 5) : "No match found";
-    const tripId= userId + "_" + date;
-    console.log(tripId);
-    const res = await axios.get(backendUrl + 'UserTripInfo/getUserTripInfo', {
-      params: {
-        tripID: tripId,
-      },
-    });
-    createTripTable();
-    const TripStatus = res.data.res_data;
-    const istripstarted = (TripStatus && TripStatus.startTime && !TripStatus.endTime) ? 1 : 0;
-    console.log("istripStarted",istripstarted)
-    db.transaction(txn => {
-    txn.executeSql(
-    `INSERT INTO TripStatus (istripstarted) VALUES (?)`,
-    [
-      istripstarted,
-    ],
-    (sqlTxn, _res) => {
-      console.log("Data added successfully");
-    },
-    error => {
-      console.log('Error on adding data: ' + error.message);
-    },
-   
-  );
-  m++;
-});
-  };
-
+  
   const createTablesSF = () => {
     db.transaction(txn => {
       // txn.executeSql('DROP TABLE IF EXISTS ShipmentFailure', []);
@@ -2447,41 +2373,23 @@ function StackNavigators({navigation}) {
     </NativeBaseProvider>
   );
 }
+
 function CustomDrawerContent({navigation}) {
   const [language, setLanguage] = useState('');
-  const [email, SetEmail] = useState('');
-  const [name, setName] = useState('');
-  const [id, setId] = useState('');
 
-  const getData = async () => {
-    try {
-      const value = await AsyncStorage.getItem('@storage_Key');
-      if (value !== null) {
-        const data = JSON.parse(value);
-        setName(data.UserName);
-        SetEmail(data.UserEmail);
-        setId(data.userId);
-      } else {
-        setName('');
-        SetEmail('');
-        setId('');
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  useEffect(() => {
-    const StartValue = setInterval(() => {
-      getData();
-    }, 1000);
-    return () => clearInterval(StartValue);
-  }, []);
+  const email = useSelector(state => state.user.user_email);
+  const id = useSelector(state => state.user.user_id);
+  const name = useSelector(state => state.user.user_name);
 
   const LogoutHandle = async () => {
     try {
-      await AsyncStorage.removeItem('@storage_Key');
-      // await AsyncStorage.removeItem('@StartEndTrip');
+      await AsyncStorage.removeItem('userId');
+      await AsyncStorage.removeItem('name');
+      await AsyncStorage.removeItem('email');
+
+      dispatch(setUserId(''));
+      dispatch(setUserEmail(''));
+      dispatch(setUserName(''));
     } catch (e) {
       console.log(e);
     }
@@ -2602,7 +2510,9 @@ function CustomDrawerContent({navigation}) {
             <Button
               variant="outline"
               onPress={() => {
-                navigation.navigate('NewSellerAdditionNotification', {userId: id});
+                navigation.navigate('NewSellerAdditionNotification', {
+                  userId: id,
+                });
                 navigation.closeDrawer();
               }}
               mt={4}
@@ -2643,19 +2553,21 @@ function CustomDrawerContent({navigation}) {
 
 export default function App({navigation}) {
   return (
-    <NavigationContainer>
-      <Drawer.Navigator
-        initialRouteName="home"
-        key={'home'}
-        drawerContent={props => <CustomDrawerContent {...props} />}>
-        <Drawer.Screen
-          name="home"
-          component={StackNavigators}
-          options={{
-            header: () => null,
-          }}
-        />
-      </Drawer.Navigator>
-    </NavigationContainer>
+    <Provider store={store}>
+      <NavigationContainer>
+        <Drawer.Navigator
+          initialRouteName="home"
+          key={'home'}
+          drawerContent={props => <CustomDrawerContent {...props} />}>
+          <Drawer.Screen
+            name="home"
+            component={StackNavigators}
+            options={{
+              header: () => null,
+            }}
+          />
+        </Drawer.Navigator>
+      </NavigationContainer>
+    </Provider>
   );
 }

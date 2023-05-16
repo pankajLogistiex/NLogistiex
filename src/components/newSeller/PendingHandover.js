@@ -23,9 +23,9 @@ import {Picker} from '@react-native-picker/picker';
 const db = openDatabase({name: 'rn_sqlite'});
 import GetLocation from 'react-native-get-location';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
 import {backendUrl} from '../../utils/backendUrl';
+import {useSelector} from 'react-redux';
 
 const PendingHandover = ({route}) => {
   // const [data, setData] = useState([]);
@@ -54,25 +54,7 @@ const PendingHandover = ({route}) => {
   const [runSheetNumbers, setRunSheetNumbers] = useState([]);
   const [totalDone, setTotalDone] = useState(0);
 
-  const [userId, setUserID] = useState('');
-
-  const getUserId = async () => {
-    try {
-      const value = await AsyncStorage.getItem('@storage_Key');
-      if (value !== null) {
-        const data = JSON.parse(value);
-        setUserID(data.userId);
-      } else {
-        setUserID('');
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  useEffect(() => {
-    getUserId();
-  }, []);
+  const userId = useSelector(state => state.user.user_id);
 
   useEffect(() => {
     current_location();
@@ -149,9 +131,6 @@ const PendingHandover = ({route}) => {
                           ...newData,
                         }));
                       }
-                      // if (i === (results.rows.length - 1) && MM + results22.rows.length === 0){
-                      //   tx.executeSql('DROP TABLE IF EXISTS closeHandoverBag1', []);
-                      //   AsyncStorage.setItem('acceptedItemData11','');}
                     },
                   );
                 },
@@ -159,9 +138,6 @@ const PendingHandover = ({route}) => {
             });
           });
         }
-        // if (MM === 0 && displayData != null){
-        //   tx.executeSql('DROP TABLE IF EXISTS closeHandoverBag1', []);
-        //   AsyncStorage.setItem('acceptedItemData11','');}
         setData(temp);
       });
     });

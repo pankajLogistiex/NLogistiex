@@ -49,13 +49,16 @@ import {truncate} from 'fs/promises';
 import dingReject11 from '../../assets/rejected_sound.mp3';
 import dingAccept11 from '../../assets/beep_accepted.mp3';
 import Sound from 'react-native-sound';
-import { backendUrl } from '../../utils/backendUrl';
+import {backendUrl} from '../../utils/backendUrl';
+import {useSelector} from 'react-redux';
 
 const db = openDatabase({
   name: 'rn_sqlite',
 });
 
 const HandoverShipmentRTO = ({route}) => {
+  const userId = useSelector(state => state.user.user_id);
+
   const [barcode, setBarcode] = useState('');
   const [len, setLen] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
@@ -78,42 +81,21 @@ const HandoverShipmentRTO = ({route}) => {
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
 
-  const [userId, setUserID] = useState('');
-
-  const getUserId = async () => {
-    try {
-      const value = await AsyncStorage.getItem('@storage_Key');
-      if (value !== null) {
-        const data = JSON.parse(value);
-        setUserID(data.userId);
-      } else {
-        setId('');
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  useEffect(() => {
-    getUserId();
-  }, []);
-
-
   Sound.setCategory('Playback');
 
-var dingAccept = new Sound(dingAccept11, error => {
-  if (error) {
-    console.log('failed to load the sound', error);
-    return;
-  }
-  // if loaded successfully
-  // console.log(
-  //   'duration in seconds: ' +
-  //     dingAccept.getDuration() +
-  //     'number of channels: ' +
-  //     dingAccept.getNumberOfChannels(),
-  // );
-});
+  var dingAccept = new Sound(dingAccept11, error => {
+    if (error) {
+      console.log('failed to load the sound', error);
+      return;
+    }
+    // if loaded successfully
+    // console.log(
+    //   'duration in seconds: ' +
+    //     dingAccept.getDuration() +
+    //     'number of channels: ' +
+    //     dingAccept.getNumberOfChannels(),
+    // );
+  });
 
   useEffect(() => {
     dingAccept.setVolume(1);
@@ -135,14 +117,13 @@ var dingAccept = new Sound(dingAccept11, error => {
     //     dingReject.getNumberOfChannels(),
     // );
   });
-  
-    useEffect(() => {
-      dingReject.setVolume(1);
-      return () => {
-        dingReject.release();
-      };
-    }, []);
 
+  useEffect(() => {
+    dingReject.setVolume(1);
+    return () => {
+      dingReject.release();
+    };
+  }, []);
 
   useEffect(() => {
     current_location();
@@ -225,20 +206,6 @@ var dingAccept = new Sound(dingAccept11, error => {
       });
   };
 
-  // useEffect(() => {
-  //   // const saveAcceptedItemData = async () => {
-  //     // try {
-  //        AsyncStorage.setItem('acceptedItemData11',JSON.stringify(acceptedItemData));
-  //     // } catch (error) {
-  //       console.log('aaaa',acceptedItemData);
-  //     // }
-  //   // };
-
-  //   // saveAcceptedItemData();
-  // }, [
-  //   // data && data.length  && data[0].consignorCode && acceptedItemData[data[0].consignorCode] &&
-  //   scanprogressRD]);
-
   useEffect(() => {
     setBagId();
   }, [bagId]);
@@ -310,17 +277,7 @@ var dingAccept = new Sound(dingAccept11, error => {
                   ),
                 ),
               );
-              // .then(
-              // AsyncStorage.setItem('acceptedItemData11',JSON.stringify(acceptedItemData))
-              // )
-              // .catch(e => {
-              // console.log(e);
-              // });
-              // .then(()=>AsyncStorage.setItem('acceptedItemData11',JSON.stringify(acceptedItemData)).catch();
-              // setTimeout(()=> AsyncStorage.setItem('acceptedItemData11',JSON.stringify(acceptedItemData)),1000);
-              console.log(
-                ' Data Added to local db successfully Handover closeBag',
-              );
+              
               ToastAndroid.show('Bag closed successfully', ToastAndroid.SHORT);
               console.log(results11);
               viewDetailBag();
@@ -423,11 +380,7 @@ var dingAccept = new Sound(dingAccept11, error => {
               ],
             },
           }))
-        : // .then(
-          //   AsyncStorage.setItem('acceptedItemData11',JSON.stringify(acceptedItemData)))
-          // .catch(e => {
-          // console.log(e);
-          // })
+        :
           null
       : db.transaction(tx => {
           tx.executeSql(
@@ -442,8 +395,6 @@ var dingAccept = new Sound(dingAccept11, error => {
             },
           );
         });
-
-    // setTimeout(()=> AsyncStorage.setItem('acceptedItemData11',JSON.stringify(acceptedItemData)),1000);
 
     db.transaction(tx => {
       tx.executeSql(
@@ -546,10 +497,11 @@ var dingAccept = new Sound(dingAccept11, error => {
                     Vibration.vibrate(800);
                     dingReject.play(success => {
                       if (success) {
-                        
                         console.log('successfully finished playing');
                       } else {
-                        console.log('playback failed due to audio decoding errors');
+                        console.log(
+                          'playback failed due to audio decoding errors',
+                        );
                       }
                     });
                   } else {
@@ -560,10 +512,11 @@ var dingAccept = new Sound(dingAccept11, error => {
                     Vibration.vibrate(800);
                     dingReject.play(success => {
                       if (success) {
-                        
                         console.log('successfully finished playing');
                       } else {
-                        console.log('playback failed due to audio decoding errors');
+                        console.log(
+                          'playback failed due to audio decoding errors',
+                        );
                       }
                     });
                     setBarcode(() => data);
@@ -639,7 +592,6 @@ var dingAccept = new Sound(dingAccept11, error => {
     // Vibration.vibrate(800);
     dingAccept.play(success => {
       if (success) {
-        
         console.log('successfully finished playing');
       } else {
         console.log('playback failed due to audio decoding errors');
@@ -667,8 +619,7 @@ var dingAccept = new Sound(dingAccept11, error => {
     });
   };
 
-
-  const onSucessThroughButton=(data21)=>{
+  const onSucessThroughButton = data21 => {
     console.log(data21, 'barcode');
     setBarcode(data21);
 
@@ -684,24 +635,6 @@ var dingAccept = new Sound(dingAccept11, error => {
       consignorName: consName11,
     };
     setAcceptedItemData(prevData => ({...prevData, ...newData}));
-    // .then(
-    //   AsyncStorage.setItem('acceptedItemData11',JSON.stringify(acceptedItemData))
-    // )
-    // .catch(e => {
-    // console.log(e);
-    // });
-    // setTimeout(()=> AsyncStorage.setItem('acceptedItemData11',JSON.stringify(acceptedItemData)),1000);
-
-    // db.transaction((tx) => {
-    //   tx.executeSql('UPDATE SyncSellerPickUp SET BagOpenClose="open" WHERE consignorCode=?', [barcode], (tx1, results) => {
-    //     setAcceptedArray(prevarr => [...prevarr, barcode.toString()]);
-    //     UpdateShipmentList();
-    //   },
-    //   error => {
-    //     console.log('error on adding data ' + error.message);
-    // },);
-
-    // });
   };
 
   // useEffect(() => {
@@ -871,7 +804,10 @@ var dingAccept = new Sound(dingAccept11, error => {
 
       <Modal
         isOpen={modalVisible}
-        onClose={() => {setModalVisible(false);setSellerNoOfShipment11(0);}}
+        onClose={() => {
+          setModalVisible(false);
+          setSellerNoOfShipment11(0);
+        }}
         size="lg">
         <Modal.Content maxWidth="350">
           <Modal.CloseButton />
@@ -889,18 +825,21 @@ var dingAccept = new Sound(dingAccept11, error => {
                 color: 'black',
                 marginTop: 10,
               }}>
-                {data && data.length && sellerNoOfShipment11>0 ?(
-                  <>
-              The seller has{' '}
-              {data && data.length ? (
-                <Text style={{fontSize: 16, fontWeight: '500', color: 'black'}}>
-                  {sellerNoOfShipment}
-                </Text>
-              ) : null}{' '}
-              shipments. Would you like to open a bag?
-              </>)
-            :<ProgressBar width={70} />}
-            </Text> 
+              {data && data.length && sellerNoOfShipment11 > 0 ? (
+                <>
+                  The seller has{' '}
+                  {data && data.length ? (
+                    <Text
+                      style={{fontSize: 16, fontWeight: '500', color: 'black'}}>
+                      {sellerNoOfShipment}
+                    </Text>
+                  ) : null}{' '}
+                  shipments. Would you like to open a bag?
+                </>
+              ) : (
+                <ProgressBar width={70} />
+              )}
+            </Text>
             <View
               style={{
                 width: '90%',
@@ -962,20 +901,37 @@ var dingAccept = new Sound(dingAccept11, error => {
         <View>
           <View style={{backgroundColor: 'white'}}>
             <View style={{alignItems: 'center', marginTop: 15}}>
-            <View style={{backgroundColor: 'lightgrey', padding:0, flexDirection: 'row', justifyContent: 'space-between', width: '90%', borderRadius: 10, flex:1}}>
+              <View
+                style={{
+                  backgroundColor: 'lightgrey',
+                  padding: 0,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  width: '90%',
+                  borderRadius: 10,
+                  flex: 1,
+                }}>
+                <Input
+                  placeholder="Shipment ID"
+                  value={barcode}
+                  onChangeText={text => {
+                    setBarcode(text);
+                  }}
+                  style={{
+                    fontSize: 18,
+                    fontWeight: '500',
+                    width: 320,
+                    backgroundColor: 'lightgrey',
+                  }}
+                />
 
-<Input placeholder="Shipment ID"  value={barcode} onChangeText={(text)=>{ setBarcode(text);}}  style={{
-fontSize: 18, fontWeight: '500',
-width: 320,
-backgroundColor:'lightgrey',
-}} />
-
-<TouchableOpacity style={{flex:1,backgroundColor:'lightgrey',paddingTop:8}} onPress={()=>onSucessThroughButton(barcode)}>
-  <Center>
- 
-  <MaterialIcons name="send" size={30} color="#004aad" />
-  </Center>
-</TouchableOpacity>
+                <TouchableOpacity
+                  style={{flex: 1, backgroundColor: 'lightgrey', paddingTop: 8}}
+                  onPress={() => onSucessThroughButton(barcode)}>
+                  <Center>
+                    <MaterialIcons name="send" size={30} color="#004aad" />
+                  </Center>
+                </TouchableOpacity>
 
                 {/* <Text style={{fontSize: 18, fontWeight: '500'}}>
                   Shipment ID{' '}

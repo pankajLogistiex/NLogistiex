@@ -62,10 +62,6 @@ const OpenBags = ({route}) => {
     })();
   }, []);
 
-  // useEffect(() => {
-  //        AsyncStorage.setItem('acceptedItemData11',JSON.stringify(acceptedItemData));
-  // }, [ acceptedItemData && bagSeal]);
-
   const searched = keyword1 => c => {
     let f = c.consignorName;
     return f.includes(keyword1);
@@ -148,18 +144,6 @@ const OpenBags = ({route}) => {
     loadDetails112();
     // loadAcceptedItemData12();
   }, []);
-  // const loadAcceptedItemData12 = async () => {
-
-  //   AsyncStorage.getItem('acceptedItemData11')
-  //   .then(data99 => {
-  //     // setAcceptedItemData(JSON.parse(data99));
-  //     console.log("ghghg11",data99);
-  //     console.log("ghghg11",acceptedItemData);
-  //   })
-  //   .catch(e => {
-  //   console.log(e);
-  //   });
-  // };
 
   const loadDetails112 = () => {
     db.transaction(tx => {
@@ -216,13 +200,6 @@ const OpenBags = ({route}) => {
                   ),
                 ),
               );
-              // .then(
-              //   AsyncStorage.setItem('acceptedItemData11',JSON.stringify(acceptedItemData))
-              // )
-              // .catch(e => {
-              // console.log(e);
-              // });
-              // setTimeout(()=> AsyncStorage.setItem('acceptedItemData11',JSON.stringify(acceptedItemData)),1000);
               setBagSeal('');
               console.log(
                 ' Data Added to local db successfully Handover closeBag',

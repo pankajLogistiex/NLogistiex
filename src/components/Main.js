@@ -33,10 +33,16 @@ import PieChart from 'react-native-pie-chart';
 import {StyleSheet} from 'react-native';
 import {useIsFocused} from '@react-navigation/native';
 import {backendUrl} from '../utils/backendUrl';
-import { convertAbsoluteToRem } from 'native-base/lib/typescript/theme/tools';
+import {convertAbsoluteToRem} from 'native-base/lib/typescript/theme/tools';
+import {useSelector, useDispatch} from 'react-redux';
+import {setUserEmail, setUserId, setUserName} from '../redux/slice/userSlice';
+import {setTripStatus} from '../redux/slice/tripSlice';
 
 export default function Main({navigation, route}) {
-  // const userId = route.params.userId;
+  const dispatch = useDispatch();
+
+  const id = useSelector(state => state.user.user_id);
+  const tripStatus = useSelector(state => state.trip.tripStatus);
 
   const [data, setData] = useState(0);
   // const [data1, setData1] = useState(0);
@@ -68,73 +74,79 @@ export default function Main({navigation, route}) {
   const [tripValue, setTripValue] = useState('Start Trip');
   const [Forward, setForward] = useState(0);
   const [Reverse, setReverse] = useState(0);
-  const [id, setId] = useState('');
   const [tripData, setTripData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal1, setShowModal1] = useState(false);
   const [message1, setMessage1] = useState(0);
-  const [tripAlreadyStarted, setTripAlreadyStarted] = useState(0);
   const focus = useIsFocused();
-  const getUserId = async () => {
-    try {
-      const value = await AsyncStorage.getItem('@storage_Key');
-      if (value !== null) {
-        const data = JSON.parse(value);
-        setId(data.userId);
-      } else {
-        setId('');
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  };
+
+  async function getUserDetails() {
+    await AsyncStorage.getItem('email')
+      .then(value => {
+        dispatch(setUserEmail(value));
+      })
+      .catch(err => {
+        console.log(err);
+      });
+
+    await AsyncStorage.getItem('userId')
+      .then(value => {
+        dispatch(setUserId(value));
+      })
+      .catch(err => {
+        console.log(err);
+      });
+
+    await AsyncStorage.getItem('name')
+      .then(value => {
+        dispatch(setUserName(value));
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
+
+  function getTripDetails(tripId) {
+    axios
+      .get(backendUrl + 'UserTripInfo/getUserTripInfo', {
+        params: {
+          tripID: tripId,
+        },
+      })
+      .then(response => {
+        if (response?.data?.res_data) {
+          if (response.data.res_data.endkilometer) {
+            dispatch(setTripStatus(2));
+          } else if (response.data.res_data.startKilometer) {
+            dispatch(setTripStatus(1));
+          } else {
+            dispatch(setTripStatus(0));
+          }
+        }
+      })
+      .catch(error => {
+        console.log(error, 'error');
+      });
+  }
+
   useEffect(() => {
-    getUserId();
+    getUserDetails();
   }, []);
-  // let current = new Date();
-  // let tripid = current.toString();
-  // let dateStart = 0;
-  // let dateEnd = tripid.indexOf(
-  //   ' ',
-  //   tripid.indexOf(' ', tripid.indexOf(' ') + 1) + 1,
-  // );
-  // let date = dateEnd
-  //   ? tripid.substring(dateStart, dateEnd + 5)
-  //   : 'No match found';
 
-  // useEffect(() => {
-  //   fetchData(id);
-  // }, [id]);
-
-  // const fetchData = id => {
-  //   if (id) {
-  //     axios
-  //       .get(backendUrl + 'UserTripInfo/getUserTripInfo', {
-  //         params: {
-  //           tripID: id + '_' + date,
-  //         },
-  //       })
-  //       .then(response => {
-  //         setTripData(response.data.res_data);
-  //       })
-  //       .catch(error => {
-  //         console.log(error, 'error');
-  //       });
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (focus == true) {
-  //     fetchData(id);
-  //   }
-  // }, [focus]);
-  // useEffect(() => {
-  //   if (tripData && tripData.startTime && !tripData.endTime) {
-  //     setTripValue('End Trip');
-  //   } else {
-  //     setTripValue('Start Trip');
-  //   }
-  // }, [tripData]);
+  useEffect(() => {
+    let current = new Date();
+    let tripid = current.toString();
+    let time = tripid.match(/\d{2}:\d{2}:\d{2}/)[0];
+    let dateStart = 0;
+    let dateEnd = tripid.indexOf(
+      ' ',
+      tripid.indexOf(' ', tripid.indexOf(' ') + 1) + 1,
+    );
+    let date = dateEnd
+      ? tripid.substring(dateStart, dateEnd + 5)
+      : 'No match found';
+    getTripDetails(id + '_' + date);
+  }, [id]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -166,28 +178,19 @@ export default function Main({navigation, route}) {
     }, 100);
     return () => clearInterval(StartValue);
   }, []);
-  const loadtripdetails= async()=>{
+
+  const loadtripdetails = async () => {
     setIsLoading(!isLoading);
-    db.transaction(txn => {
-      txn.executeSql(
-        'SELECT * FROM TripStatus',
-        [],
-        (sqlTxn, res) => {
-          setTripAlreadyStarted(res.rows.item(0).istripstarted);
-          console.log(res.rows.item(0).istripstarted)
-          setIsLoading(false);       
-         }
-      );
-    });
-  }
-  useEffect(()=>{
-    if (tripAlreadyStarted == 1) {
+  };
+
+  useEffect(() => {
+    if (tripStatus == 1) {
       setTripValue('End Trip');
     } else {
       setTripValue('Start Trip');
     }
-  },[tripAlreadyStarted])
- 
+  }, [tripStatus]);
+
   const loadSellerPickupDetails = async () => {
     setIsLoading(!isLoading);
     // setSpp(1);
@@ -852,8 +855,11 @@ export default function Main({navigation, route}) {
                             // size="lg"
                             // bg="#004aad"
                             rounded="md"
-                            style={{ height: 'auto', backgroundColor: '#004aad', 
-                            elevation: 10, }}
+                            style={{
+                              height: 'auto',
+                              backgroundColor: '#004aad',
+                              elevation: 10,
+                            }}
                             onPress={() =>
                               navigation.navigate('SellerHandover')
                             }>
@@ -869,8 +875,11 @@ export default function Main({navigation, route}) {
                             // size="lg"
                             // bg="#004aad"
                             rounded="md"
-                            style={{ height: 'auto', backgroundColor: '#004aad', 
-                            elevation: 10, }}
+                            style={{
+                              height: 'auto',
+                              backgroundColor: '#004aad',
+                              elevation: 10,
+                            }}
                             onPress={() =>
                               navigation.navigate('SellerDeliveries', {
                                 Forward: Forward,
@@ -891,8 +900,11 @@ export default function Main({navigation, route}) {
                             // size="lg"
                             // bg="#004aad"
                             rounded="md"
-                            style={{ height: 'auto', backgroundColor: '#004aad', 
-                            elevation: 10, }}
+                            style={{
+                              height: 'auto',
+                              backgroundColor: '#004aad',
+                              elevation: 10,
+                            }}
                             onPress={() =>
                               navigation.navigate('NewSellerPickup', {
                                 Forward: Forward,
@@ -1130,8 +1142,11 @@ export default function Main({navigation, route}) {
                             // size="lg"
                             // bg="#004aad"
                             rounded="md"
-                            style={{ height: 'auto', backgroundColor: '#004aad', 
-                            elevation: 10, }}
+                            style={{
+                              height: 'auto',
+                              backgroundColor: '#004aad',
+                              elevation: 10,
+                            }}
                             onPress={() =>
                               navigation.navigate('SellerHandover')
                             }>
@@ -1147,8 +1162,11 @@ export default function Main({navigation, route}) {
                             // size="lg"
                             // bg="#004aad"
                             rounded="md"
-                            style={{ height: 'auto', backgroundColor: '#004aad', 
-                            elevation: 10, }}
+                            style={{
+                              height: 'auto',
+                              backgroundColor: '#004aad',
+                              elevation: 10,
+                            }}
                             onPress={() =>
                               navigation.navigate('SellerDeliveries', {
                                 Forward: Forward,
@@ -1169,8 +1187,11 @@ export default function Main({navigation, route}) {
                             // size="lg"
                             // bg="#004aad"
                             rounded="md"
-                            style={{ height: 'auto', backgroundColor: '#004aad', 
-                            elevation: 10, }}
+                            style={{
+                              height: 'auto',
+                              backgroundColor: '#004aad',
+                              elevation: 10,
+                            }}
                             onPress={() =>
                               navigation.navigate('NewSellerPickup', {
                                 Forward: Forward,
@@ -1403,16 +1424,15 @@ export default function Main({navigation, route}) {
                     height: 'auto',
                     color: 'gray.300',
                     borderColor: '#004aad',
-                  elevation: 15,
-                  shadowColor: 'rgba(154, 160, 166, 0.3)', 
-                  shadowOpacity: 0.3,
-                  shadowRadius: 2,
-                  shadowOffset: {
-                  width: 0,
-                  height: 2,
-                  },
-                  }}
-                  >
+                    elevation: 15,
+                    shadowColor: 'rgba(154, 160, 166, 0.3)',
+                    shadowOpacity: 0.3,
+                    shadowRadius: 2,
+                    shadowOffset: {
+                      width: 0,
+                      height: 2,
+                    },
+                  }}>
                   <Text style={{color: '#004aad'}}>{tripValue}</Text>
                 </Button>
               ) : (

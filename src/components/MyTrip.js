@@ -1,26 +1,50 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import axios from 'axios';
-import { NativeBaseProvider, Box, Image, Center, VStack, Button, Input, Alert, Text, Modal, FloatingLabel, Label, Item } from 'native-base';
+import {
+  NativeBaseProvider,
+  Box,
+  Image,
+  Center,
+  VStack,
+  Button,
+  Input,
+  Alert,
+  Text,
+  Modal,
+  FloatingLabel,
+  Label,
+  Item,
+} from 'native-base';
 import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { ActivityIndicator, PermissionsAndroid, TouchableOpacity, View, ScrollView,TextInput } from 'react-native';
-import { launchCamera } from 'react-native-image-picker';
+import {
+  ActivityIndicator,
+  PermissionsAndroid,
+  TouchableOpacity,
+  View,
+  ScrollView,
+  TextInput,
+} from 'react-native';
+import {launchCamera} from 'react-native-image-picker';
 import {openDatabase} from 'react-native-sqlite-storage';
 const db = openDatabase({name: 'rn_sqlite'});
-import { useIsFocused } from "@react-navigation/native"; 
-import { backendUrl } from '../utils/backendUrl';
+import {useIsFocused} from '@react-navigation/native';
+import {backendUrl} from '../utils/backendUrl';
+import {useDispatch, useSelector} from 'react-redux';
+import { setTripStatus } from '../redux/slice/tripSlice';
 
-export default function MyTrip({ navigation, route }) {
+export default function MyTrip({navigation, route}) {
+  const dispatch = useDispatch();
+  const tripStatus = useSelector(state => state.trip.tripStatus);
 
   const [vehicle, setVehicle] = useState('');
   const [startkm, setStartKm] = useState(0);
   const [endkm, setEndkm] = useState(0);
   const [startImageUrl, setStartImageUrl] = useState('');
   const [endImageUrl, setEndImageUrl] = useState('');
-  const [tripID, setTripID] = useState("");
+  const [tripID, setTripID] = useState('');
   const [userId, setUserId] = useState(route.params.userId);
   const [uploadStatus, setUploadStatus] = useState('idle');
   const [modalVisible, setModalVisible] = useState(false);
-  const [tripAlreadyStarted, setTripAlreadyStarted] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState(0);
   const [showModal1, setShowModal1] = useState(false);
@@ -37,17 +61,22 @@ export default function MyTrip({ navigation, route }) {
   let tripid = current.toString();
   let time = tripid.match(/\d{2}:\d{2}:\d{2}/)[0];
   let dateStart = 0;
-  let dateEnd = tripid.indexOf(" ", tripid.indexOf(" ", tripid.indexOf(" ") + 1) + 1);
-  let date = dateEnd ? tripid.substring(dateStart, dateEnd + 5) : "No match found";
+  let dateEnd = tripid.indexOf(
+    ' ',
+    tripid.indexOf(' ', tripid.indexOf(' ') + 1) + 1,
+  );
+  let date = dateEnd
+    ? tripid.substring(dateStart, dateEnd + 5)
+    : 'No match found';
 
   useEffect(() => {
-    if(userId){
-      setTripID(userId + "_" + date);
+    if (userId) {
+      setTripID(userId + '_' + date);
       getVehicleNumber(userId);
-      getTripDetails(userId + "_" + date);
+      getTripDetails(userId + '_' + date);
     }
   }, [userId]);
-  function getVehicleNumber(userId){
+  function getVehicleNumber(userId) {
     axios
       .get(backendUrl + `SellerMainScreen/vehicleNumber/${userId}`)
       .then(response => {
@@ -60,7 +89,7 @@ export default function MyTrip({ navigation, route }) {
       });
   }
 
-  function getTripDetails(tripId){
+  function getTripDetails(tripId) {
     axios
       .get(backendUrl + 'UserTripInfo/getUserTripInfo', {
         params: {
@@ -69,7 +98,6 @@ export default function MyTrip({ navigation, route }) {
       })
       .then(response => {
         if (response?.data?.res_data) {
-          // setTripAlreadyStarted(true);
           setVehicle(response.data.res_data.vehicleNumber);
           setStartKm(response.data.res_data.startKilometer);
           if (response.data.res_data.endkilometer) {
@@ -83,22 +111,30 @@ export default function MyTrip({ navigation, route }) {
         setLoading(false);
       });
   }
-  useEffect(() => {   
-    if(focus == true){ 
+  useEffect(() => {
+    if (focus == true) {
       getTripDetails();
     }
   }, [focus]);
   const loadDetails = async () => {
-    db.transaction((tx) => {
-      tx.executeSql('SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND status IS NULL', [], (tx1, results) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND status IS NULL',
+        [],
+        (tx1, results) => {
           setPendingPickup(results.rows.length);
-      });
-  });
+        },
+      );
+    });
 
-    db.transaction((tx) => {
-        tx.executeSql('SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status IS NULL', [], (tx1, results) => {
-            setPendingDelivery(results.rows.length);
-        });
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status IS NULL',
+        [],
+        (tx1, results) => {
+          setPendingDelivery(results.rows.length);
+        },
+      );
     });
     db.transaction(tx => {
       tx.executeSql(
@@ -109,25 +145,15 @@ export default function MyTrip({ navigation, route }) {
         },
       );
     });
-    db.transaction(txn => {
-      txn.executeSql(
-        'SELECT istripstarted FROM TripStatus ',
-        [],
-        (sqlTxn, res) => {
-        setTripAlreadyStarted(res.rows.item(0).istripstarted);
-        console.log('istripstarted value:', res.rows.item(0).istripstarted);
-        }
-      );
-    });
     setLoading(false);
-  }
+  };
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       loadDetails();
     });
     return unsubscribe;
   }, [navigation]);
-  
+
   const requestCameraPermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -147,11 +173,13 @@ export default function MyTrip({ navigation, route }) {
   const createFormData = (photo, body) => {
     const data = new FormData();
 
-    data.append("file", {
+    data.append('file', {
       name: photo.fileName,
       type: photo.type,
       uri:
-        Platform.OS === "android" ? photo.uri : photo.uri.replace("file://", "")
+        Platform.OS === 'android'
+          ? photo.uri
+          : photo.uri.replace('file://', ''),
     });
 
     Object.keys(body).forEach(key => {
@@ -160,26 +188,26 @@ export default function MyTrip({ navigation, route }) {
     return data;
   };
 
-  const takeStartPhoto= async()=>{
+  const takeStartPhoto = async () => {
     setUploadStatus('uploading');
-    setStartImageUrl("");
+    setStartImageUrl('');
     let options = {
-      mediaType:'photo',
-      quality:1,
-      cameraType:'back',
-      maxWidth : 480,
-      maxHeight : 480,
+      mediaType: 'photo',
+      quality: 1,
+      cameraType: 'back',
+      maxWidth: 480,
+      maxHeight: 480,
       storageOptions: {
         skipBackup: true,
         path: 'images',
       },
-    }
+    };
     let isGranted = await requestCameraPermission();
     let result = null;
-    if(isGranted){
+    if (isGranted) {
       result = await launchCamera(options);
     }
-    if(result.assets !== undefined){          
+    if (result.assets !== undefined) {
       fetch(backendUrl + 'DSQCPicture/uploadPicture', {
         method: 'POST',
         body: createFormData(result.assets[0], {
@@ -200,11 +228,11 @@ export default function MyTrip({ navigation, route }) {
           setUploadStatus('error');
         });
     }
-  }
+  };
 
   const takeEndPhoto = async () => {
     setUploadStatus('uploading');
-    setEndImageUrl("");
+    setEndImageUrl('');
     let options = {
       mediaType: 'photo',
       quality: 1,
@@ -215,7 +243,7 @@ export default function MyTrip({ navigation, route }) {
         skipBackup: true,
         path: 'images',
       },
-    }
+    };
     let isGranted = await requestCameraPermission();
     let result = null;
     if (isGranted) {
@@ -242,7 +270,7 @@ export default function MyTrip({ navigation, route }) {
           setUploadStatus('error');
         });
     }
-  }
+  };
 
   const submitEndTrip = () => {
     (async () => {
@@ -254,19 +282,7 @@ export default function MyTrip({ navigation, route }) {
           endVehicleImageUrl: endImageUrl,
         })
         .then(function (res) {
-          db.transaction(tx => {
-            tx.executeSql(
-              'UPDATE TripStatus SET istripstarted=?',
-              [0],
-              (tx1, results) => {
-                if (results.rowsAffected > 0) {
-                  console.log('Trip Ended Successfully');
-                } else {
-                  console.log('Trip values not updated');
-                }
-              },
-            );
-          });
+          dispatch(setTripStatus(2));
           getTripDetails(tripID);
           setMessage(1);
           navigation.navigate('StartEndDetails', {tripID: tripID});
@@ -275,65 +291,48 @@ export default function MyTrip({ navigation, route }) {
           console.log(error);
         });
     })();
-  }
+  };
   useEffect(() => {
-    // if (tripAlreadyStarted==0 && pendingPickup == 0 && pendingDelivery == 0 && pendingHandover == 0) {
-    //   setMessage1(1);
-    //   setShowModal1(true);
-    // }
-     if (pendingHandover !== 0) {
+    if (pendingHandover !== 0) {
       setMessage1(2);
       setShowModal1(true);
     }
-    
-  }, [pendingPickup, pendingDelivery, pendingHandover, tripAlreadyStarted]);
-  
+  }, [pendingPickup, pendingDelivery, pendingHandover, tripStatus]);
+
   let currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
   currentDate = currentDate.valueOf();
-  const submitStartTrip = () =>  {
-      (async() => {
-        await axios
-          .post(backendUrl + 'UserTripInfo/userTripDetails', {
-            tripID: tripID,
-            userID: userId,
-            date: currentDate,
-            startTime: new Date().valueOf(),
-            vehicleNumber: vehicle,
-            startKilometer: startkm,
-            startVehicleImageUrl: startImageUrl,
-          })
-          .then(function (res) {
-            if (res.data.msg == 'TripID already exists') {
-              getTripDetails(tripID);
-              setMessage(2);
-            } else {
-              db.transaction(tx => {
-                tx.executeSql(
-                  'UPDATE TripStatus SET istripstarted=?',
-                  [1],
-                  (tx1, results) => {
-                    if (results.rowsAffected > 0) {
-                      console.log('Trip Started Successfully');
-                    } else {
-                      console.log('Trip values not updated');
-                    }
-                  },
-                );
-              });
-              getTripDetails(tripID);
-              setMessage(1);
-              navigation.navigate('Main', {tripID: tripID});
-            }
-            setShowModal(true);
-          })
-          .catch(function (error) {
-            console.log(error);
-          });
-      })();
-  }
+  const submitStartTrip = () => {
+    (async () => {
+      await axios
+        .post(backendUrl + 'UserTripInfo/userTripDetails', {
+          tripID: tripID,
+          userID: userId,
+          date: currentDate,
+          startTime: new Date().valueOf(),
+          vehicleNumber: vehicle,
+          startKilometer: startkm,
+          startVehicleImageUrl: startImageUrl,
+        })
+        .then(function (res) {
+          if (res.data.msg == 'TripID already exists') {
+            getTripDetails(tripID);
+            setMessage(2);
+          } else {
+            dispatch(setTripStatus(1));
+            getTripDetails(tripID);
+            setMessage(1);
+            navigation.navigate('Main', {tripID: tripID});
+          }
+          setShowModal(true);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    })();
+  };
 
-  const handleInputChange = (value) => {
+  const handleInputChange = value => {
     setStartKm(value);
     // if (value) {
     //   setLabel('Vehicle KMs');
@@ -353,8 +352,13 @@ export default function MyTrip({ navigation, route }) {
           />
         ) : (
           <Box flex={1}>
-            { !tripAlreadyStarted ? (
-              <Box flex={1} bg="gray.300" alignItems="center" pt={'4%'} pb={'50%'}>
+            {tripStatus == 0 ? (
+              <Box
+                flex={1}
+                bg="gray.300"
+                alignItems="center"
+                pt={'4%'}
+                pb={'50%'}>
                 <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
                   <Modal.Content
                     backgroundColor={message === 1 ? '#dcfce7' : '#fee2e2'}>
@@ -433,14 +437,14 @@ export default function MyTrip({ navigation, route }) {
                   </Modal.Content>
                 </Modal>
                 <Box
-                   justifyContent="space-between"
-                   py={10}
-                   px={6}
-                   bg="#fff"
-                   rounded="xl"
-                   width={'90%'}
-                   maxWidth="100%"
-                   _text={{fontWeight: 'medium'}}>
+                  justifyContent="space-between"
+                  py={10}
+                  px={6}
+                  bg="#fff"
+                  rounded="xl"
+                  width={'90%'}
+                  maxWidth="100%"
+                  _text={{fontWeight: 'medium'}}>
                   <ScrollView>
                     <VStack space={6}>
                       <View
@@ -532,16 +536,22 @@ export default function MyTrip({ navigation, route }) {
                           <MaterialIcons name="error" size={22} color="red" />
                         )}
                       </Button>
-                      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                      {startImageUrl ? (
-                        <TouchableOpacity onPress={() => setModalVisible(true)}>
-                          <Image
-                            source={{uri: startImageUrl}}
-                            style={{width: 300, height: 200}}
-                            alt="image not shown"
-                          />
-                        </TouchableOpacity>
-                      ) : null}
+                      <View
+                        style={{
+                          flex: 1,
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                        }}>
+                        {startImageUrl ? (
+                          <TouchableOpacity
+                            onPress={() => setModalVisible(true)}>
+                            <Image
+                              source={{uri: startImageUrl}}
+                              style={{width: 300, height: 200}}
+                              alt="image not shown"
+                            />
+                          </TouchableOpacity>
+                        ) : null}
                       </View>
                       {startkm && vehicle && startImageUrl && tripid ? (
                         <Button
@@ -575,7 +585,12 @@ export default function MyTrip({ navigation, route }) {
                 </Box>
               </Box>
             ) : (
-              <Box flex={1} bg="gray.300" alignItems="center" pt={'4%'} pb={'50%'}>
+              <Box
+                flex={1}
+                bg="gray.300"
+                alignItems="center"
+                pt={'4%'}
+                pb={'50%'}>
                 <Modal
                   isOpen={modalVisible}
                   onClose={() => setModalVisible(false)}
@@ -694,16 +709,21 @@ export default function MyTrip({ navigation, route }) {
                         <MaterialIcons name="error" size={22} color="red" />
                       )}
                     </Button>
-                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    {endImageUrl ? (
-                    <TouchableOpacity onPress={() => setModalVisible(true)}>
-                    <Image
-                    source={{ uri: endImageUrl }}
-                    style={{ width: 300, height: 200 }}
-                    alt="image not shown"
-                    />
-                    </TouchableOpacity>
-                    ) : null}
+                    <View
+                      style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                      }}>
+                      {endImageUrl ? (
+                        <TouchableOpacity onPress={() => setModalVisible(true)}>
+                          <Image
+                            source={{uri: endImageUrl}}
+                            style={{width: 300, height: 200}}
+                            alt="image not shown"
+                          />
+                        </TouchableOpacity>
+                      ) : null}
                     </View>
                     {pendingPickup > 0 || pendingDelivery > 0 ? (
                       <Button
@@ -712,7 +732,9 @@ export default function MyTrip({ navigation, route }) {
                         onPress={() => navigation.navigate('PendingWork')}>
                         Pending Work
                       </Button>
-                    ) : endkm && endImageUrl && parseInt(endkm) > parseInt(startkm) ? (
+                    ) : endkm &&
+                      endImageUrl &&
+                      parseInt(endkm) > parseInt(startkm) ? (
                       <Button
                         backgroundColor="#004aad"
                         _text={{color: 'white', fontSize: 20}}
