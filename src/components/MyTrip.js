@@ -20,7 +20,7 @@ export default function MyTrip({ navigation, route }) {
   const [userId, setUserId] = useState(route.params.userId);
   const [uploadStatus, setUploadStatus] = useState('idle');
   const [modalVisible, setModalVisible] = useState(false);
-  const [tripAlreadyStarted, setTripAlreadyStarted] = useState(false);
+  const [tripAlreadyStarted, setTripAlreadyStarted] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState(0);
   const [showModal1, setShowModal1] = useState(false);
@@ -69,7 +69,7 @@ export default function MyTrip({ navigation, route }) {
       })
       .then(response => {
         if (response?.data?.res_data) {
-          setTripAlreadyStarted(true);
+          // setTripAlreadyStarted(true);
           setVehicle(response.data.res_data.vehicleNumber);
           setStartKm(response.data.res_data.startKilometer);
           if (response.data.res_data.endkilometer) {
@@ -109,6 +109,17 @@ export default function MyTrip({ navigation, route }) {
         },
       );
     });
+    db.transaction(txn => {
+      txn.executeSql(
+        'SELECT istripstarted FROM TripStatus ',
+        [],
+        (sqlTxn, res) => {
+        setTripAlreadyStarted(res.rows.item(0).istripstarted);
+        console.log('istripstarted value:', res.rows.item(0).istripstarted);
+        }
+      );
+    });
+    setLoading(false);
   }
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -243,6 +254,19 @@ export default function MyTrip({ navigation, route }) {
           endVehicleImageUrl: endImageUrl,
         })
         .then(function (res) {
+          db.transaction(tx => {
+            tx.executeSql(
+              'UPDATE TripStatus SET istripstarted=?',
+              [0],
+              (tx1, results) => {
+                if (results.rowsAffected > 0) {
+                  console.log('Trip Ended Successfully');
+                } else {
+                  console.log('Trip values not updated');
+                }
+              },
+            );
+          });
           getTripDetails(tripID);
           setMessage(1);
           navigation.navigate('StartEndDetails', {tripID: tripID});
@@ -253,7 +277,7 @@ export default function MyTrip({ navigation, route }) {
     })();
   }
   useEffect(() => {
-    // if (!tripAlreadyStarted && pendingPickup == 0 && pendingDelivery == 0 && pendingHandover == 0) {
+    // if (tripAlreadyStarted==0 && pendingPickup == 0 && pendingDelivery == 0 && pendingHandover == 0) {
     //   setMessage1(1);
     //   setShowModal1(true);
     // }
@@ -284,6 +308,19 @@ export default function MyTrip({ navigation, route }) {
               getTripDetails(tripID);
               setMessage(2);
             } else {
+              db.transaction(tx => {
+                tx.executeSql(
+                  'UPDATE TripStatus SET istripstarted=?',
+                  [1],
+                  (tx1, results) => {
+                    if (results.rowsAffected > 0) {
+                      console.log('Trip Started Successfully');
+                    } else {
+                      console.log('Trip values not updated');
+                    }
+                  },
+                );
+              });
               getTripDetails(tripID);
               setMessage(1);
               navigation.navigate('Main', {tripID: tripID});
@@ -316,8 +353,8 @@ export default function MyTrip({ navigation, route }) {
           />
         ) : (
           <Box flex={1}>
-            {!tripAlreadyStarted ? (
-              <Box flex={1} bg="gray.300" alignItems="center" pt={'4%'}>
+            { !tripAlreadyStarted ? (
+              <Box flex={1} bg="gray.300" alignItems="center" pt={'4%'} pb={'50%'}>
                 <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
                   <Modal.Content
                     backgroundColor={message === 1 ? '#dcfce7' : '#fee2e2'}>
@@ -495,6 +532,7 @@ export default function MyTrip({ navigation, route }) {
                           <MaterialIcons name="error" size={22} color="red" />
                         )}
                       </Button>
+                      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                       {startImageUrl ? (
                         <TouchableOpacity onPress={() => setModalVisible(true)}>
                           <Image
@@ -504,6 +542,7 @@ export default function MyTrip({ navigation, route }) {
                           />
                         </TouchableOpacity>
                       ) : null}
+                      </View>
                       {startkm && vehicle && startImageUrl && tripid ? (
                         <Button
                           title="Login"
@@ -536,7 +575,7 @@ export default function MyTrip({ navigation, route }) {
                 </Box>
               </Box>
             ) : (
-              <Box flex={1} bg="gray.300" alignItems="center" pt={'4%'}>
+              <Box flex={1} bg="gray.300" alignItems="center" pt={'4%'} pb={'50%'}>
                 <Modal
                   isOpen={modalVisible}
                   onClose={() => setModalVisible(false)}
@@ -655,15 +694,17 @@ export default function MyTrip({ navigation, route }) {
                         <MaterialIcons name="error" size={22} color="red" />
                       )}
                     </Button>
+                    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     {endImageUrl ? (
-                      <TouchableOpacity onPress={() => setModalVisible(true)}>
-                        <Image
-                          source={{uri: endImageUrl}}
-                          style={{width: 300, height: 200}}
-                          alt="image not shown"
-                        />
-                      </TouchableOpacity>
+                    <TouchableOpacity onPress={() => setModalVisible(true)}>
+                    <Image
+                    source={{ uri: endImageUrl }}
+                    style={{ width: 300, height: 200 }}
+                    alt="image not shown"
+                    />
+                    </TouchableOpacity>
                     ) : null}
+                    </View>
                     {pendingPickup > 0 || pendingDelivery > 0 ? (
                       <Button
                         backgroundColor="#004aad"

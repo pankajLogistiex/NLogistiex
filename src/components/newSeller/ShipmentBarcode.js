@@ -1473,19 +1473,25 @@ console.log('scanned',scannedValue);
           <Modal.CloseButton />
           <Modal.Header>Accept/Reject Shipment</Modal.Header>
           <Modal.Body>
-            <Text>Packaging ID Mismatch</Text>
-            <View style={{
-              width: '95%',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignSelf: 'center',
-              marginTop: 10,
-            }}>
+          <View style={{ alignItems: 'center' }}>
+          <Text style={{ fontSize: 22, fontWeight: 'bold', textAlign: 'center' }}>
+          Packaging ID Mismatch
+          </Text>
+          </View>
+           <View style={{
+                width: '90%',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignSelf: 'center',
+                marginTop: 10,
+              }}>
             <Button
               flex="1"
               mt={2}
               bg="#004aad"
-              w="45%"
+              marginBottom={1.5}
+              marginTop={1.5}
+              marginRight={1}
               onPress={() => {
                 setCheck11(1);
                 ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
@@ -1500,7 +1506,8 @@ console.log('scanned',scannedValue);
               flex="1"
               mt={2}
               bg="#004aad"
-              w="45%"
+              marginBottom={1.5}
+              marginTop={1.5}
               onPress={() => {
                 handleRejectAction('WPF');
                 setModal(false);
@@ -1523,18 +1530,25 @@ console.log('scanned',scannedValue);
           <Modal.CloseButton />
           <Modal.Header>Reject Shipment</Modal.Header>
           <Modal.Body>
-            <Text>Mismatch Packaging ID</Text>
+          <View style={{ alignItems: 'center' }}>
+          <Text style={{ fontSize: 22, fontWeight: 'bold', textAlign: 'center' }}>
+          Packaging ID Mismatch
+          </Text>
+          </View>
             <View style={{
-              width: '95%',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignSelf: 'center',
-              marginTop: 10,
-            }}>
+                width: '90%',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignSelf: 'center',
+                marginTop: 10,
+              }}>
             <Button
               flex="1"
               mt={2}
               bg="#004aad"
+              marginBottom={1.5}
+              marginTop={1.5}
+              marginRight={1}
               onPress={() => {
               setModal1(false);
               handleRejectAction('WPF');
@@ -1545,6 +1559,8 @@ console.log('scanned',scannedValue);
               flex="1"
               mt={2}
               bg="#004aad"
+              marginBottom={1.5}
+              marginTop={1.5}
               onPress={() => {
               handleReScan();
               setModal1(false);

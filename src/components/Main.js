@@ -73,6 +73,7 @@ export default function Main({navigation, route}) {
   const [loading, setLoading] = useState(true);
   const [showModal1, setShowModal1] = useState(false);
   const [message1, setMessage1] = useState(0);
+  const [tripAlreadyStarted, setTripAlreadyStarted] = useState(0);
   const focus = useIsFocused();
   const getUserId = async () => {
     try {
@@ -80,7 +81,6 @@ export default function Main({navigation, route}) {
       if (value !== null) {
         const data = JSON.parse(value);
         setId(data.userId);
-        fetchData(data.userId);
       } else {
         setId('');
       }
@@ -91,57 +91,57 @@ export default function Main({navigation, route}) {
   useEffect(() => {
     getUserId();
   }, []);
-  let current = new Date();
-  let tripid = current.toString();
-  let dateStart = 0;
-  let dateEnd = tripid.indexOf(
-    ' ',
-    tripid.indexOf(' ', tripid.indexOf(' ') + 1) + 1,
-  );
-  let date = dateEnd
-    ? tripid.substring(dateStart, dateEnd + 5)
-    : 'No match found';
+  // let current = new Date();
+  // let tripid = current.toString();
+  // let dateStart = 0;
+  // let dateEnd = tripid.indexOf(
+  //   ' ',
+  //   tripid.indexOf(' ', tripid.indexOf(' ') + 1) + 1,
+  // );
+  // let date = dateEnd
+  //   ? tripid.substring(dateStart, dateEnd + 5)
+  //   : 'No match found';
 
-  useEffect(() => {
-    fetchData(id);
-  }, [id]);
+  // useEffect(() => {
+  //   fetchData(id);
+  // }, [id]);
 
-  const fetchData = id => {
-    if (id) {
-      axios
-        .get(backendUrl + 'UserTripInfo/getUserTripInfo', {
-          params: {
-            tripID: id + '_' + date,
-          },
-        })
-        .then(response => {
-          setTripData(response.data.res_data);
-        })
-        .catch(error => {
-          console.log(error, 'error');
-        });
-    }
-  };
+  // const fetchData = id => {
+  //   if (id) {
+  //     axios
+  //       .get(backendUrl + 'UserTripInfo/getUserTripInfo', {
+  //         params: {
+  //           tripID: id + '_' + date,
+  //         },
+  //       })
+  //       .then(response => {
+  //         setTripData(response.data.res_data);
+  //       })
+  //       .catch(error => {
+  //         console.log(error, 'error');
+  //       });
+  //   }
+  // };
 
-  useEffect(() => {
-    if (focus == true) {
-      fetchData(id);
-    }
-  }, [focus]);
-  useEffect(() => {
-    if (tripData && tripData.startTime && !tripData.endTime) {
-      setTripValue('End Trip');
-    } else {
-      setTripValue('Start Trip');
-    }
-  }, [tripData]);
+  // useEffect(() => {
+  //   if (focus == true) {
+  //     fetchData(id);
+  //   }
+  // }, [focus]);
+  // useEffect(() => {
+  //   if (tripData && tripData.startTime && !tripData.endTime) {
+  //     setTripValue('End Trip');
+  //   } else {
+  //     setTripValue('Start Trip');
+  //   }
+  // }, [tripData]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       loadSellerPickupDetails();
       loadHanoverDetails();
       loadSellerDeliveryDetails();
-      fetchData(id);
+      loadtripdetails();
     });
     return unsubscribe;
   }, [navigation]);
@@ -153,7 +153,7 @@ export default function Main({navigation, route}) {
         loadSellerPickupDetails();
         loadHanoverDetails();
         loadSellerDeliveryDetails();
-        fetchData(id);
+        loadtripdetails();
       }
     } catch (e) {
       console.log(e);
@@ -166,7 +166,28 @@ export default function Main({navigation, route}) {
     }, 100);
     return () => clearInterval(StartValue);
   }, []);
-
+  const loadtripdetails= async()=>{
+    setIsLoading(!isLoading);
+    db.transaction(txn => {
+      txn.executeSql(
+        'SELECT * FROM TripStatus',
+        [],
+        (sqlTxn, res) => {
+          setTripAlreadyStarted(res.rows.item(0).istripstarted);
+          console.log(res.rows.item(0).istripstarted)
+          setIsLoading(false);       
+         }
+      );
+    });
+  }
+  useEffect(()=>{
+    if (tripAlreadyStarted == 1) {
+      setTripValue('End Trip');
+    } else {
+      setTripValue('Start Trip');
+    }
+  },[tripAlreadyStarted])
+ 
   const loadSellerPickupDetails = async () => {
     setIsLoading(!isLoading);
     // setSpp(1);
@@ -828,9 +849,11 @@ export default function Main({navigation, route}) {
                         {it.title === 'Seller Handover' ? (
                           <Button
                             w="100%"
-                            size="lg"
-                            bg="#004aad"
+                            // size="lg"
+                            // bg="#004aad"
                             rounded="md"
+                            style={{ height: 'auto', backgroundColor: '#004aad', 
+                            elevation: 10, }}
                             onPress={() =>
                               navigation.navigate('SellerHandover')
                             }>
@@ -843,9 +866,11 @@ export default function Main({navigation, route}) {
                         ) : it.title === 'Seller Deliveries' ? (
                           <Button
                             w="100%"
-                            size="lg"
-                            bg="#004aad"
+                            // size="lg"
+                            // bg="#004aad"
                             rounded="md"
+                            style={{ height: 'auto', backgroundColor: '#004aad', 
+                            elevation: 10, }}
                             onPress={() =>
                               navigation.navigate('SellerDeliveries', {
                                 Forward: Forward,
@@ -863,9 +888,11 @@ export default function Main({navigation, route}) {
                         ) : (
                           <Button
                             w="100%"
-                            size="lg"
-                            bg="#004aad"
+                            // size="lg"
+                            // bg="#004aad"
                             rounded="md"
+                            style={{ height: 'auto', backgroundColor: '#004aad', 
+                            elevation: 10, }}
                             onPress={() =>
                               navigation.navigate('NewSellerPickup', {
                                 Forward: Forward,
@@ -1100,8 +1127,11 @@ export default function Main({navigation, route}) {
                         {it.title === 'Seller Handover' ? (
                           <Button
                             w="100%"
-                            size="lg"
-                            bg="#004aad"
+                            // size="lg"
+                            // bg="#004aad"
+                            rounded="md"
+                            style={{ height: 'auto', backgroundColor: '#004aad', 
+                            elevation: 10, }}
                             onPress={() =>
                               navigation.navigate('SellerHandover')
                             }>
@@ -1114,9 +1144,11 @@ export default function Main({navigation, route}) {
                         ) : it.title === 'Seller Deliveries' ? (
                           <Button
                             w="100%"
-                            size="lg"
-                            bg="#004aad"
+                            // size="lg"
+                            // bg="#004aad"
                             rounded="md"
+                            style={{ height: 'auto', backgroundColor: '#004aad', 
+                            elevation: 10, }}
                             onPress={() =>
                               navigation.navigate('SellerDeliveries', {
                                 Forward: Forward,
@@ -1134,9 +1166,11 @@ export default function Main({navigation, route}) {
                         ) : (
                           <Button
                             w="100%"
-                            size="lg"
-                            bg="#004aad"
+                            // size="lg"
+                            // bg="#004aad"
                             rounded="md"
+                            style={{ height: 'auto', backgroundColor: '#004aad', 
+                            elevation: 10, }}
                             onPress={() =>
                               navigation.navigate('NewSellerPickup', {
                                 Forward: Forward,
@@ -1364,7 +1398,21 @@ export default function Main({navigation, route}) {
                     handleStartTrip();
                   }}
                   mt={4}
-                  style={{color: '#004aad', borderColor: '#004aad'}}>
+                  // style={{color: '#004aad', borderColor: '#004aad'}}
+                  style={{
+                    height: 'auto',
+                    color: 'gray.300',
+                    borderColor: '#004aad',
+                  elevation: 15,
+                  shadowColor: 'rgba(154, 160, 166, 0.3)', 
+                  shadowOpacity: 0.3,
+                  shadowRadius: 2,
+                  shadowOffset: {
+                  width: 0,
+                  height: 2,
+                  },
+                  }}
+                  >
                   <Text style={{color: '#004aad'}}>{tripValue}</Text>
                 </Button>
               ) : (

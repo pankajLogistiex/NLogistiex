@@ -94,6 +94,8 @@ const ScanShipment = ({route}) => {
   const [ImageUrl, setImageUrl] = useState('');
   const [imageUrls, setImageUrls] = useState([]);
   const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const requestCameraPermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -297,6 +299,7 @@ const ScanShipment = ({route}) => {
         },
       );
     });
+    setLoading(false);
   };
   const displayData = async () => {
     db.transaction(tx => {
@@ -835,7 +838,7 @@ console.log("packagingId",packagingID)
   }
   return (
     <NativeBaseProvider>
-      <Modal
+          <Modal
           isOpen={modalVisible2}
           onClose={() => {
             setModalVisible2(false);
@@ -1211,54 +1214,6 @@ console.log("packagingId",packagingID)
         </Modal.Content>
       </Modal>
       <Modal
-        isOpen={showModal}
-        onClose={() => {
-          setModal(false);
-        }}
-        size="lg">
-        <Modal.Content maxWidth="350">
-          <Modal.CloseButton />
-          <Modal.Header>Accept Shipment</Modal.Header>
-          <Modal.Body>
-            <Text>Mismatch Packaging ID</Text>
-            <View style={{
-              width: '95%',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignSelf: 'center',
-              marginTop: 10,
-            }}>
-            <Button
-              flex="1"
-              mt={2}
-              bg="#004aad"
-              onPress={() => {
-                Vibration.vibrate(100);
-                RNBeep.beep();
-                ToastAndroid.show(barcode + ' Accepted', ToastAndroid.SHORT);
-                updateDetails2(expectedPackagingId);
-                displayDataSPScan();
-                setLen(0);
-                setModal(false);
-              }}>
-              Accept Anyway
-            </Button>
-            <Button
-              flex="1"
-              mt={2}
-              bg="#004aad"
-              onPress={() => {
-                setModalVisible1(true)
-                setModal(false);
-                setExpectedPackaging('');
-              }}>
-              Reject/Tag
-            </Button>
-            </View>
-          </Modal.Body>
-        </Modal.Content>
-      </Modal>
-      <Modal
         isOpen={showModal1}
         onClose={() => {
           setModal1(false);
@@ -1270,18 +1225,25 @@ console.log("packagingId",packagingID)
           <Modal.CloseButton />
           <Modal.Header>Reject Shipment</Modal.Header>
           <Modal.Body>
-            <Text>Packaging ID Mismatch</Text>
+          <View style={{ alignItems: 'center' }}>
+          <Text style={{ fontSize: 22, fontWeight: 'bold', textAlign: 'center' }}>
+          Packaging ID Mismatch
+          </Text>
+          </View>
             <View style={{
-              width: '95%',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignSelf: 'center',
-              marginTop: 10,
-            }}>
+                width: '90%',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignSelf: 'center',
+                marginTop: 10,
+              }}>
             <Button
               flex="1"
               mt={2}
               bg="#004aad"
+              marginBottom={1.5}
+              marginTop={1.5}
+              marginRight={1}
               onPress={() => {
               rejectDetails2('WPR');
               setModal1(false);
@@ -1292,6 +1254,8 @@ console.log("packagingId",packagingID)
               flex="1"
               mt={2}
               bg="#004aad"
+              marginBottom={1.5}
+              marginTop={1.5}
               onPress={() => {
               handleReScan();
               setModal1(false);
@@ -1304,8 +1268,17 @@ console.log("packagingId",packagingID)
       </Modal>
       <ScrollView
         style={{paddingTop: 20, paddingBottom: 50}}
-        showsVerticalScrollIndicator={false}>
-        {scanned && (
+        showsVerticalScrollIndicator={false}> 
+        {
+          loading ? (
+            <ActivityIndicator
+              size="large"
+              color="blue"
+              style={{marginTop: 44}}
+            />
+          ) : (
+            <>
+          {scanned && (
           <QRCodeScanner
             onRead={onSuccess}
             reactivate={true}
@@ -1331,34 +1304,17 @@ console.log("packagingId",packagingID)
         <View>
           <View style={{backgroundColor: 'white'}}>
             <View style={{alignItems: 'center', marginTop: 15}}>
-              {/* <View
-                style={{
-                  backgroundColor: 'lightgray',
-                  padding: 10,
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  width: '90%',
-                  borderRadius: 5,
-                }}>
-                <Text style={{fontSize: 18, fontWeight: '500'}}>
-                  shipment ID:{' '}
-                </Text>
-                <Text style={{fontSize: 18, fontWeight: '500'}}>{barcode}</Text> */}
-
                 <View style={{backgroundColor: 'lightgrey', padding:0, flexDirection: 'row', justifyContent: 'space-between', width: '90%', borderRadius: 10, flex:1}}>
-
-<Input placeholder="Shipment ID"  value={barcode} onChangeText={(text)=>{ setBarcode(text);}}  style={{
-fontSize: 18, fontWeight: '500',
-width: 320,
-backgroundColor:'lightgrey',
-}} />
-
-<TouchableOpacity style={{flex:1,backgroundColor:'lightgrey',paddingTop:8}} onPress={()=>onSucessThroughButton(barcode)}>
-  <Center>
- 
-  <MaterialIcons name="send" size={30} color="#004aad" />
-  </Center>
-</TouchableOpacity>
+                <Input placeholder="Shipment ID"  value={barcode} onChangeText={(text)=>{ setBarcode(text);}}  style={{
+                fontSize: 18, fontWeight: '500',
+                width: 320,
+                backgroundColor:'lightgrey',
+                }} />
+                <TouchableOpacity style={{flex:1,backgroundColor:'lightgrey',paddingTop:8}} onPress={()=>onSucessThroughButton(barcode)}>
+                <Center>
+                <MaterialIcons name="send" size={30} color="#004aad" />
+                </Center>
+                </TouchableOpacity>
               </View>
               <Button
               title="Reject/Tag Shipment"
@@ -1474,8 +1430,11 @@ backgroundColor:'lightgrey',
             />
           </Center>
         </View>
-        {/* <Fab onPress={() => handleSync()} position="absolute" size="sm" style={{backgroundColor: '#004aad'}} icon={<Icon color="white" as={<MaterialIcons name="sync" />} size="sm" />} /> */}
+            </>
+        )}
+        
       </ScrollView>
+      
     </NativeBaseProvider>
   );
 };
