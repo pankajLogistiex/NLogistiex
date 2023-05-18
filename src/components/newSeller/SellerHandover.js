@@ -23,6 +23,7 @@ const SellerHandover = ({route}) => {
   const [keyword, setKeyword] = useState('');
   const [numScanned, setNumScanned] = useState(0);
   const [displayData, setDisplayData] = useState({});
+  const [results, setResults] = useState({});
   const [MM,setMM] = useState(0);
   const navigation = useNavigation();
   useEffect(() => {
@@ -63,7 +64,7 @@ const SellerHandover = ({route}) => {
                         expected: results11.rows.length,
                         scanned: results22.rows.length,
                       };
-                      console.log(newData);
+                      // console.log(newData);
                       if (newData != null) {
                         setDisplayData(prevData => ({
                           ...prevData,
@@ -81,6 +82,29 @@ const SellerHandover = ({route}) => {
         setData(temp);
       });
     });
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        `SELECT consignorCode, COUNT(AcceptedList) AS AcceptedListCount
+        FROM closeHandoverBag1
+        GROUP BY consignorCode`,
+        [],
+        (tx, resultSet) => {
+          console.log("resulatset",resultSet.rows.raw());
+          const rows = resultSet.rows.raw();
+          const updatedResults = {};
+
+          rows.forEach((item) => {
+            updatedResults[item.consignorCode] = item.AcceptedListCount;
+            console.log("item",item);
+          });
+
+          setResults(updatedResults);
+          console.log(updatedResults);
+        }
+      );
+    });
+
   };
 //   useEffect(() => {
 //     loadDetails()
@@ -98,7 +122,7 @@ const SellerHandover = ({route}) => {
   //     let f = c.consignorName;
   //     return (f.includes(keyword1));
   // };
-
+  
   return (
     <NativeBaseProvider>
       <Box flex={1} bg="#fff" width="auto" maxWidth="100%">
@@ -161,6 +185,7 @@ const SellerHandover = ({route}) => {
                         {/* <MaterialIcons name="check" style={{ fontSize: 30, color: 'green', marginTop: 8 }} /> */}
 
                       </DataTable.Row>) : (
+                       results && results[consignorCode]  && results[consignorCode] === displayData11[consignorCode].expected ? 
                         <DataTable.Row
                         style={{
                           height: 'auto',
@@ -186,6 +211,33 @@ const SellerHandover = ({route}) => {
                         </DataTable.Cell>
                         <MaterialIcons name="check" style={{ fontSize: 30, color: 'green', marginTop: 8 }} />
                       </DataTable.Row>
+                      : <DataTable.Row
+                      style={{
+                        height: 'auto',
+                        backgroundColor: '#eeeeee',
+                        borderBottomWidth: 1,
+                      }}
+                      key={consignorCode}>
+                      <DataTable.Cell style={{flex: 1.7}}>
+                        <Text style={styles.fontvalue}>
+                          {displayData11[consignorCode].consignorName}
+                        </Text>
+                      </DataTable.Cell>
+
+                      <DataTable.Cell style={{flex: 1, marginRight: 20 }}>
+                        <Text style={styles.fontvalue}>
+                          {displayData11[consignorCode].expected}
+                        </Text>
+                      </DataTable.Cell>
+                      <DataTable.Cell style={{flex: 1, marginRight: -30}}>
+                        <Text style={styles.fontvalue}>
+                          {displayData11[consignorCode].scanned}
+                        </Text>
+                      </DataTable.Cell>
+                      {/* <MaterialIcons name="check" style={{ fontSize: 30, color: 'green', marginTop: 8 }} /> */}
+
+                    </DataTable.Row>
+
                         // null
 
                         )

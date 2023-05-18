@@ -165,7 +165,7 @@ const HandoverShipmentRTO = ({route}) => {
   useEffect(() => {
     loadAcceptedItemData12();
   }, []);
-
+  console.log(userId);
   const buttonColor =
     data &&
     data.length &&
@@ -217,9 +217,11 @@ const HandoverShipmentRTO = ({route}) => {
   useEffect(() => {
     // console.log('fdfdd ', acceptedItemData);
   });
-  // useEffect(() => {
-  //   loadAcceptedItemData12();
-  // },[]);
+  useEffect(() => {
+    if(modalVisible){
+      setSellerNoOfShipment11(0);
+    }
+  },[modalVisible]);
 
   // useEffect(() => {
   //   createTableBag1();
@@ -805,8 +807,8 @@ const HandoverShipmentRTO = ({route}) => {
       <Modal
         isOpen={modalVisible}
         onClose={() => {
-          setModalVisible(false);
           setSellerNoOfShipment11(0);
+          setModalVisible(false);
         }}
         size="lg">
         <Modal.Content maxWidth="350">
@@ -829,6 +831,7 @@ const HandoverShipmentRTO = ({route}) => {
                 <>
                   The seller has{' '}
                   {data && data.length ? (
+                    
                     <Text
                       style={{fontSize: 16, fontWeight: '500', color: 'black'}}>
                       {sellerNoOfShipment}
@@ -854,7 +857,9 @@ const HandoverShipmentRTO = ({route}) => {
                     data[0].consignorCode,
                     data[0].consignorName,
                   );
+                  setSellerNoOfShipment11(0);
                   setModalVisible(false);
+
                 }}
                 w="48%"
                 size="lg"
@@ -863,6 +868,7 @@ const HandoverShipmentRTO = ({route}) => {
               </Button>
               <Button
                 onPress={() => {
+                  setSellerNoOfShipment11(0);
                   setModalVisible(false);
                   updateBagStatus11(data[0].consignorCode);
                 }}
@@ -879,7 +885,7 @@ const HandoverShipmentRTO = ({route}) => {
       <ScrollView
         style={{paddingTop: 20, paddingBottom: 50, backgroundColor: 'white'}}
         showsVerticalScrollIndicator={false}>
-        {!showCloseBagModal && (
+        {(!showCloseBagModal && !modalVisible) && (
           <QRCodeScanner
             onRead={onSuccess}
             reactivate={true}
