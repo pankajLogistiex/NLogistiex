@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, {useEffect, useState} from 'react';
 import 'react-native-gesture-handler';
-import {Provider, useSelector} from 'react-redux';
+import {Provider, useDispatch, useSelector} from 'react-redux';
 import {store} from './src/redux/store';
 import {
   NativeBaseProvider,
@@ -74,11 +74,20 @@ import {LogBox} from 'react-native';
 import MyTrip from './src/components/MyTrip';
 import {backendUrl} from './src/utils/backendUrl';
 import messaging from '@react-native-firebase/messaging';
+import {setIsNewSync} from './src/redux/slice/isNewSync';
+import {
+  setUserEmail,
+  setUserId,
+  setUserName,
+} from './src/redux/slice/userSlice';
 const db = openDatabase({name: 'rn_sqlite'});
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
+
 function StackNavigators({navigation}) {
+  const dispatch = useDispatch();
+
   const userId = useSelector(state => state.user.user_id);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -212,6 +221,17 @@ function StackNavigators({navigation}) {
   }, []);
 
   const pull_API_Data = () => {
+    var date = new Date();
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    var datetime = 'Last Sync\n' + hours + ':' + minutes + ' ' + ampm;
+    setLastSyncTime(datetime);
+    AsyncStorage.setItem('lastSyncTime112', datetime);
+
     console.log('api pull');
     loadAPI_Data1();
     loadAPI_Data2();
@@ -222,6 +242,9 @@ function StackNavigators({navigation}) {
     // loadAPI_DataCD();
     createTableBag1();
     loadAPI_DataSF();
+
+    const randomValue = Math.floor(Math.random() * (100 - 1 + 1)) + 1;
+    dispatch(setIsNewSync(randomValue));
   };
   useEffect(() => {
     // This useEffect  is use to hide warnings in mobile screen .
@@ -610,7 +633,7 @@ function StackNavigators({navigation}) {
   };
 
   const loadAPI_Data2 = () => {
-    // setIsLoading(!isLoading);
+    setIsLoading(!isLoading);
     (async () => {
       await axios.get(backendUrl + `SellerMainScreen/workload/${userId}`).then(
         res => {
@@ -710,7 +733,7 @@ function StackNavigators({navigation}) {
       );
     })();
   };
-  
+
   const createTablesSF = () => {
     db.transaction(txn => {
       // txn.executeSql('DROP TABLE IF EXISTS ShipmentFailure', []);
@@ -2375,6 +2398,8 @@ function StackNavigators({navigation}) {
 }
 
 function CustomDrawerContent({navigation}) {
+  const dispatch = useDispatch();
+
   const [language, setLanguage] = useState('');
 
   const email = useSelector(state => state.user.user_email);

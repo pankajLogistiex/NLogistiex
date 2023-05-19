@@ -43,6 +43,7 @@ export default function Main({navigation, route}) {
 
   const id = useSelector(state => state.user.user_id);
   const tripStatus = useSelector(state => state.trip.tripStatus);
+  const isNewSync = useSelector(state => state.newSync.value);
 
   const [data, setData] = useState(0);
   // const [data1, setData1] = useState(0);
@@ -173,11 +174,11 @@ export default function Main({navigation, route}) {
   };
 
   useEffect(() => {
-    const StartValue = setInterval(() => {
-      getData();
-    }, 100);
-    return () => clearInterval(StartValue);
-  }, []);
+    loadSellerPickupDetails();
+    loadHanoverDetails();
+    loadSellerDeliveryDetails();
+    loadtripdetails();
+  }, [isNewSync]);
 
   const loadtripdetails = async () => {
     setIsLoading(!isLoading);

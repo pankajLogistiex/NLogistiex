@@ -165,7 +165,7 @@ const HandoverShipmentRTO = ({route}) => {
   useEffect(() => {
     loadAcceptedItemData12();
   }, []);
-  console.log(userId);
+
   const buttonColor =
     data &&
     data.length &&
@@ -177,19 +177,21 @@ const HandoverShipmentRTO = ({route}) => {
   // let serialNo = 0;
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const storedValue = await AsyncStorage.getItem(data[0].consignorCode);
-        if (storedValue !== null) {
-          setBagStatus(JSON.parse(storedValue));
-        } else {
-          setBagStatus(true);
+    if (data && data.length > 0) {
+      const fetchData = async () => {
+        try {
+          const storedValue = await AsyncStorage.getItem(data[0].consignorCode);
+          if (storedValue !== null) {
+            setBagStatus(JSON.parse(storedValue));
+          } else {
+            setBagStatus(true);
+          }
+        } catch (e) {
+          console.error(e);
         }
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    fetchData();
+      };
+      fetchData();
+    }
   }, [data && data.length > 0]);
 
   const loadAcceptedItemData12 = async () => {
@@ -218,10 +220,10 @@ const HandoverShipmentRTO = ({route}) => {
     // console.log('fdfdd ', acceptedItemData);
   });
   useEffect(() => {
-    if(modalVisible){
+    if (modalVisible) {
       setSellerNoOfShipment11(0);
     }
-  },[modalVisible]);
+  }, [modalVisible]);
 
   // useEffect(() => {
   //   createTableBag1();
@@ -279,7 +281,7 @@ const HandoverShipmentRTO = ({route}) => {
                   ),
                 ),
               );
-              
+
               ToastAndroid.show('Bag closed successfully', ToastAndroid.SHORT);
               console.log(results11);
               viewDetailBag();
@@ -382,8 +384,7 @@ const HandoverShipmentRTO = ({route}) => {
               ],
             },
           }))
-        :
-          null
+        : null
       : db.transaction(tx => {
           tx.executeSql(
             'SELECT BagOpenClose11 FROM SyncSellerPickUp where  consignorCode=? ',
@@ -831,7 +832,6 @@ const HandoverShipmentRTO = ({route}) => {
                 <>
                   The seller has{' '}
                   {data && data.length ? (
-                    
                     <Text
                       style={{fontSize: 16, fontWeight: '500', color: 'black'}}>
                       {sellerNoOfShipment}
@@ -859,7 +859,6 @@ const HandoverShipmentRTO = ({route}) => {
                   );
                   setSellerNoOfShipment11(0);
                   setModalVisible(false);
-
                 }}
                 w="48%"
                 size="lg"
@@ -885,7 +884,7 @@ const HandoverShipmentRTO = ({route}) => {
       <ScrollView
         style={{paddingTop: 20, paddingBottom: 50, backgroundColor: 'white'}}
         showsVerticalScrollIndicator={false}>
-        {(!showCloseBagModal && !modalVisible) && (
+        {!showCloseBagModal && !modalVisible && (
           <QRCodeScanner
             onRead={onSuccess}
             reactivate={true}
