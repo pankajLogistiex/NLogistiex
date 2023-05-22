@@ -465,6 +465,7 @@ var dingAccept = new Sound(dingAccept11, error => {
       });
     }
     if(item == 'CNA'){
+      setDropDownValue11('');
       setModalVisibleCNA(true);
       setModalVisible11(false);
     }
@@ -1207,22 +1208,26 @@ console.log('scanned',scannedValue);
               marginBottom={1.5}
               marginTop={1.5}
               onPress={() => {
-                partialClose();
-                setModalVisible11(false);
-                navigation.navigate('POD', {
-                  Forward: route.params.Forward,
-                  accepted: newaccepted,
-                  rejected: newrejected,
-                  notPicked: newNotPicked,
-                  phone: route.params.phone,
-                  userId: route.params.userId,
-                  consignorCode: route.params.consignorCode,
-                  DropDownValue: DropDownValue11,
-                  contactPersonName: route.params.contactPersonName,
-                  runsheetno: route.params.PRSNumber,
-                  latitude: latitude,
-                  longitude: longitude,
-                });
+                if (!DropDownValue11) {
+                  ToastAndroid.show('Please Select Reason ', ToastAndroid.SHORT);                  
+                } else {
+                  partialClose();
+                  setModalVisible11(false);
+                  navigation.navigate('POD', {
+                    Forward: route.params.Forward,
+                    accepted: newaccepted,
+                    rejected: newrejected,
+                    notPicked: newNotPicked,
+                    phone: route.params.phone,
+                    userId: route.params.userId,
+                    consignorCode: route.params.consignorCode,
+                    DropDownValue: DropDownValue11,
+                    contactPersonName: route.params.contactPersonName,
+                    runsheetno: route.params.PRSNumber,
+                    latitude: latitude,
+                    longitude: longitude,
+                  });
+                }
               }}>
               Submit
             </Button>
@@ -1272,7 +1277,10 @@ console.log('scanned',scannedValue);
                 marginBottom={1.5}
                 marginTop={1.5}
                 onPress={() => {
-                  setModalVisibleCNA(false);
+                  if (!DropDownValue11) {
+                    ToastAndroid.show('Please Select Reason ', ToastAndroid.SHORT);                  
+                  } else {
+                    setModalVisibleCNA(false);
                   navigation.navigate('POD', {
                     Forward: route.params.Forward,
                     accepted: newaccepted,
@@ -1287,6 +1295,7 @@ console.log('scanned',scannedValue);
                     latitude: latitude,
                     longitude: longitude,
                   })
+                  }
                 }}>
                 Submit
               </Button>
@@ -1634,8 +1643,12 @@ console.log('scanned',scannedValue);
               marginTop={1.5}
               onPress={() => {
                 // rejectDetails2();
-                  handleRejectAction(DropDownValue,enableGeoFence);
+                if (!DropDownValue) {
+                  ToastAndroid.show('Please Select Reason ', ToastAndroid.SHORT);                  
+                } else {
+                handleRejectAction(DropDownValue,enableGeoFence);
                 setModalVisible(false);
+                }
               }}>
               Submit
             </Button>

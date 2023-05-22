@@ -880,8 +880,11 @@ console.log("packagingId",packagingID)
                 marginBottom={1.5}
                 marginTop={1.5}
                 onPress={() => {
-                  setModalVisible2(false);
-                  navigation.navigate('CollectPOD', {
+                  if (!DropDownValue11) {
+                    ToastAndroid.show('Please Select Reason ', ToastAndroid.SHORT);                  
+                  } else {
+                    setModalVisible2(false);
+                    navigation.navigate('CollectPOD', {
                     Forward: route.params.Forward,
                     accepted: newaccepted,
                     rejected: newrejected,
@@ -896,6 +899,7 @@ console.log("packagingId",packagingID)
                     longitude: longitude,
                     DropDownValue: DropDownValue11,
                   });
+                  }
                 }}>
                 Submit
               </Button>
@@ -1030,8 +1034,12 @@ console.log("packagingId",packagingID)
                 marginTop={1.5}
                 marginRight={1}
                 onPress={() => {
-                  setModalVisible(false);
-                  rejectDetails2(DropDownValue);
+                  if (!DropDownValue) {
+                    ToastAndroid.show('Please Select Reason ', ToastAndroid.SHORT);                  
+                  } else {
+                    setModalVisible(false);
+                    rejectDetails2(DropDownValue);
+                  }
                 }}>
                 Reject Shipment
               </Button>
@@ -1042,8 +1050,12 @@ console.log("packagingId",packagingID)
                 marginBottom={1.5}
                 marginTop={1.5}
                 onPress={() => {
+                  if (!DropDownValue) {
+                    ToastAndroid.show('Please Select Reason ', ToastAndroid.SHORT);                  
+                  } else {
                   setModalVisible(false);
                   taggedDetails();
+                  }
                 }}>
                 Tag Shipment
               </Button>
