@@ -210,8 +210,12 @@ return (
                   marginBottom={1.5}
                   marginTop={1.5}
                   onPress={() => {
-                    NotDelivered();
-                    navigation.navigate('PendingWork');
+                    if (!DropDownValue) {
+                      ToastAndroid.show('Please Select Reason ', ToastAndroid.SHORT);                  
+                    } else {
+                      NotDelivered();
+                      navigation.navigate('PendingWork');
+                    }
                   }}>
                   Submit
                 </Button>
@@ -257,8 +261,12 @@ return (
                   marginBottom={1.5}
                   marginTop={1.5}
                   onPress={() => {
-                    NotDelivered();
-                    navigation.navigate('PendingWork');
+                    if (!DropDownValue1) {
+                      ToastAndroid.show('Please Select Reason ', ToastAndroid.SHORT);                  
+                    } else {
+                      NotDelivered();
+                      navigation.navigate('PendingWork');
+                    }
                   }}>
                   Submit
                 </Button>

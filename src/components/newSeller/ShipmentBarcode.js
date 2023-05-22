@@ -62,7 +62,7 @@ const ShipmentBarcode = ({route}) => {
   const [acceptedArray, setAcceptedArray] = useState([]);
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
-
+  const[enableGeoFence, setEnableGeoFence]= useState(0);
   const [sellerLatitude, setSellerLatitude] = useState(0);
   const [sellerLongitude, setSellerLongitude] = useState(0);
 
@@ -140,8 +140,7 @@ const [text12,setText12] = useState('');
   };
 
   // Handle the action based on the geofencing logic
-  const handleRejectAction = (reason) => {
-
+  const handleRejectAction = (reason,geofencing) => {
     GetLocation.getCurrentPosition({
       enableHighAccuracy: true,
       timeout: 10000,
@@ -149,22 +148,37 @@ const [text12,setText12] = useState('');
       .then(location => {
         setLatitude(location.latitude);
         setLongitude(location.longitude);
-        let m = isWithin100Meters(location.latitude,location.longitude);
-        if (m <= 100) {
+        let m = isWithin100Meters(location.latitude, location.longitude);
+        if (geofencing==0) {
           rejectDetails2(location.latitude, location.longitude, reason);
         } else {
-
-          Alert.alert('Shipment cannot be rejected',  Math.floor(m) < 1000 ? 'You are currently ' + Math.floor(m) + ' meters away from the seller.' : 'You are currently ' + Math.floor(m) / 1000 + ' Km away from the seller.', [
-
-            {
-              text: 'Cancel reject',
-              onPress: () =>{ console.log('Cancel Pressed'); setDropDownValue(''); setExpectedPackaging(''); setLen(0)},
-              style: 'cancel',
-            },{
-              text: 'Retry',
-              onPress: () => handleRejectAction(reason),
-            },
-          ]);
+          if (m <= 100) {
+            rejectDetails2(location.latitude, location.longitude, reason);
+          } else {
+            Alert.alert(
+              'Shipment cannot be rejected',
+              Math.floor(m) < 1000
+                ? 'You are currently ' + Math.floor(m) + ' meters away from the seller.'
+                : 'You are currently ' + Math.floor(m) / 1000 + ' Km away from the seller.',
+              [
+                {
+                  text: 'Cancel reject',
+                  onPress: () => {
+                    console.log('Cancel Pressed');
+                    setEnableGeoFence(0);
+                    setDropDownValue('');
+                    setExpectedPackaging('');
+                    setLen(0);
+                  },
+                  style: 'cancel',
+                },
+                {
+                  text: 'Retry',
+                  onPress: () => handleRejectAction(reason,geofencing),
+                },
+              ]
+            );
+          }
         }
       })
       .catch(error => {
@@ -183,7 +197,7 @@ const [text12,setText12] = useState('');
         console.log('Location Lat long error', error);
       });
   };
-
+  
   const vibrateDevice = (type) => {
     const options = {
       enableVibrateFallback: true,
@@ -770,6 +784,7 @@ var barcode11 = barcode;
                 }
               });
               setDropDownValue('');
+              setEnableGeoFence(0);
               setBarcode('');
               displayDataSPScan();
             }
@@ -1084,8 +1099,9 @@ console.log('scanned',scannedValue);
     displaydata();
   }, []);
 
-  function handleButtonPress(item) {
+  function handleButtonPress(item, item2) {
     setDropDownValue(item);
+    setEnableGeoFence(item2);
   }
   return (
     <NativeBaseProvider>
@@ -1509,7 +1525,7 @@ console.log('scanned',scannedValue);
               marginBottom={1.5}
               marginTop={1.5}
               onPress={() => {
-                handleRejectAction('WPF');
+                handleRejectAction('WPF',0);
                 setModal(false);
               }}>
               Reject
@@ -1551,7 +1567,7 @@ console.log('scanned',scannedValue);
               marginRight={1}
               onPress={() => {
               setModal1(false);
-              handleRejectAction('WPF');
+              handleRejectAction('WPF',0);
               }}>
               Reject Shipment
             </Button>
@@ -1598,7 +1614,7 @@ console.log('scanned',scannedValue);
                       ? '#6666FF'
                       : '#C8C8C8',
                 }}
-                onPress={() => handleButtonPress(d.short_code)}>
+                onPress={() => handleButtonPress(d.short_code, d.enable_geo_fence)}>
                 <Text
                   style={{
                     color:
@@ -1618,7 +1634,7 @@ console.log('scanned',scannedValue);
               marginTop={1.5}
               onPress={() => {
                 // rejectDetails2();
-                handleRejectAction(DropDownValue);
+                  handleRejectAction(DropDownValue,enableGeoFence);
                 setModalVisible(false);
               }}>
               Submit

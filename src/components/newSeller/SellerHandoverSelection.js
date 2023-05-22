@@ -237,7 +237,7 @@ const SellerHandoverSelection = ({route}) => {
     db.transaction(tx => {
       db.transaction(tx => {
         tx.executeSql(
-          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? ',
+          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND handoverStatus="accepted"',
           [route.params.consignorCode],
           (tx1, results) => {
             setForward(results.rows.length);
@@ -482,8 +482,12 @@ const SellerHandoverSelection = ({route}) => {
                 marginBottom={1.5}
                 marginTop={1.5}
                 onPress={() => {
-                  notPicked();
-                  setModalVisible(false);
+                  if (!DropDownValue) {
+                    ToastAndroid.show('Please Select Reason ', ToastAndroid.SHORT);                  
+                  } else {
+                    notPicked();
+                    setModalVisible(false);
+                  }
                 }}>
                 Submit
               </Button>
@@ -530,8 +534,12 @@ const SellerHandoverSelection = ({route}) => {
                 marginBottom={1.5}
                 marginTop={1.5}
                 onPress={() => {
-                  notPicked();
-                  setModalVisible2(false);
+                  if (!DropDownValue1) {
+                    ToastAndroid.show('Please Select Reason ', ToastAndroid.SHORT);                  
+                  } else {
+                    notPicked();
+                    setModalVisible2(false);
+                  }
                 }}>
                 Submit
               </Button>
