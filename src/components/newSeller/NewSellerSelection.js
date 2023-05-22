@@ -519,8 +519,12 @@ const NewSellerSelection = ({route}) => {
                 marginBottom={1.5}
                 marginTop={1.5}
                 onPress={() => {
-                  notPicked();
-                  setModalVisible(false);
+                  if (!DropDownValue) {
+                    ToastAndroid.show('Please Select Reason ', ToastAndroid.SHORT);                  
+                  } else {
+                    notPicked();
+                    setModalVisible(false);
+                  }
                 }}>
                 Submit
               </Button>
@@ -569,8 +573,12 @@ const NewSellerSelection = ({route}) => {
                 marginBottom={1.5}
                 marginTop={1.5}
                 onPress={() => {
-                  notPicked();
-                  setModalVisible2(false);
+                  if (!DropDownValue1) {
+                    ToastAndroid.show('Please Select Reason ', ToastAndroid.SHORT);                  
+                  } else {
+                    notPicked();
+                    setModalVisible2(false);
+                  }
                 }}>
                 Submit
               </Button>
