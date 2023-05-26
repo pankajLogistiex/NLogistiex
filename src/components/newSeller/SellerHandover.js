@@ -12,6 +12,7 @@ import {
 import {StyleSheet, ScrollView} from 'react-native';
 import {DataTable, Searchbar, Text, Card} from 'react-native-paper';
 import {openDatabase} from 'react-native-sqlite-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 
@@ -25,6 +26,7 @@ const SellerHandover = ({route}) => {
   const [displayData, setDisplayData] = useState({});
   const [results, setResults] = useState({});
   const [MM,setMM] = useState(0);
+  const [acceptedItemData, setAcceptedItemData] = useState({});
   const navigation = useNavigation();
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -32,6 +34,25 @@ const SellerHandover = ({route}) => {
     });
     return unsubscribe;
   }, [navigation]);
+
+useEffect(() => {
+  AsyncStorage.getItem('acceptedItemData11')
+  .then((data) => {
+    if (data !== null) {
+      // Data retrieved successfully
+      const acceptedItemData123 = JSON.parse(data);
+      console.log(acceptedItemData123);
+      setAcceptedItemData(acceptedItemData123);
+      // Use the retrieved data as needed
+    } else {
+      console.log("Data with the specified key doesn't exist",data);
+    }
+  })
+  .catch((error) => {
+    // Error retrieving data
+    console.log(error);
+  });
+}, []);
 
   const loadDetails = () => {
     db.transaction(tx => {
@@ -83,24 +104,32 @@ const SellerHandover = ({route}) => {
       });
     });
 
+
     db.transaction((tx) => {
       tx.executeSql(
-        `SELECT consignorCode, COUNT(AcceptedList) AS AcceptedListCount
-        FROM closeHandoverBag1
-        GROUP BY consignorCode`,
+        `SELECT consignorCode, AcceptedList
+        FROM closeHandoverBag1`,
         [],
         (tx, resultSet) => {
-          console.log("resulatset",resultSet.rows.raw());
+          // console.log("resultSet", resultSet.rows.raw());
           const rows = resultSet.rows.raw();
           const updatedResults = {};
-
+    
           rows.forEach((item) => {
-            updatedResults[item.consignorCode] = item.AcceptedListCount;
-            console.log("item",item);
+            const consignorCode = item.consignorCode;
+            const acceptedList = JSON.parse(item.AcceptedList);
+    
+            if (!updatedResults[consignorCode]) {
+              updatedResults[consignorCode] = 0;
+            }
+    
+            updatedResults[consignorCode] += acceptedList.length;
+    
+            // console.log("item", item);
           });
-
+               
           setResults(updatedResults);
-          console.log(updatedResults);
+          console.log("Seller Closed Bags Count : ",updatedResults);
         }
       );
     });
@@ -252,7 +281,9 @@ const SellerHandover = ({route}) => {
             w="50%"
             size="lg"
             style={{backgroundColor: '#004aad', color: '#fff'}}
-            onPress={() => navigation.navigate('HandoverShipmentRTO')}>
+            onPress={() => navigation.navigate('HandoverShipmentRTO', {
+              allCloseBAgData: acceptedItemData,
+            })}>
             Start Scanning
           </Button>
         </Center>

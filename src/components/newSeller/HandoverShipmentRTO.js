@@ -76,7 +76,7 @@ const HandoverShipmentRTO = ({route}) => {
   const [sellerBagOpen11, setSellerbagOpen11] = useState('Yes');
   const currentDate = new Date().toISOString().slice(0, 10);
   const [alreadyBag, setAlreadyBag] = useState(false);
-  const [acceptedItemData, setAcceptedItemData] = useState({});
+  const [acceptedItemData, setAcceptedItemData] = useState(route.params.allCloseBAgData || {});
   const [bagStatus, setBagStatus] = useState(true);
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
@@ -96,6 +96,37 @@ const HandoverShipmentRTO = ({route}) => {
     //     dingAccept.getNumberOfChannels(),
     // );
   });
+
+// console.log(userId);
+
+AsyncStorage.getItem('acceptedItemData11')
+  .then((data) => {
+    if (data !== null) {
+      // Data retrieved successfully
+      const acceptedItemData = JSON.parse(data);
+      console.log(acceptedItemData);
+      // Use the retrieved data as needed
+    } else {
+      console.log("Data with the specified key doesn't exist");
+    }
+  })
+  .catch((error) => {
+    // Error retrieving data
+    console.log(error);
+  });
+
+  useEffect(() => {
+    console.log(acceptedItemData);
+      if (Object.keys(acceptedItemData).length > 0) {
+        try {
+          AsyncStorage.setItem('acceptedItemData11',JSON.stringify(acceptedItemData));
+          console.log('aaaa!1', acceptedItemData);
+        } catch (error) {
+          console.error('Failed to update AsyncStorage:', error);
+        }
+      }
+    },[acceptedItemData]);
+
 
   useEffect(() => {
     dingAccept.setVolume(1);
@@ -199,8 +230,8 @@ const HandoverShipmentRTO = ({route}) => {
       .then(data99 => {
         if (data99 != null) {
           setAcceptedItemData(JSON.parse(data99));
-          // console.log('ghghg', data99);
-          // console.log('ghghg', acceptedItemData);
+          console.log('ghghg', data99);
+          console.log('ghghg', acceptedItemData);
         }
       })
       .catch(e => {
@@ -565,7 +596,7 @@ const HandoverShipmentRTO = ({route}) => {
             // RNBeep.beep();
             updateDetails2(data);
             // loadDetails(data);
-            uploadDataToServer(res.rows);
+            // uploadDataToServer(res.rows);
           }
         },
         error => {
