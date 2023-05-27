@@ -31,6 +31,7 @@ import {useIsFocused} from '@react-navigation/native';
 import {backendUrl} from '../utils/backendUrl';
 import {useDispatch, useSelector} from 'react-redux';
 import { setTripStatus } from '../redux/slice/tripSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function MyTrip({navigation, route}) {
   const dispatch = useDispatch();
@@ -49,6 +50,7 @@ export default function MyTrip({navigation, route}) {
   const [message, setMessage] = useState(0);
   const [showModal1, setShowModal1] = useState(false);
   const [message1, setMessage1] = useState(0);
+  const [tripDetails, setTripDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pendingPickup, setPendingPickup] = useState(0);
   const [pendingDelivery, setPendingDelivery] = useState(0);
@@ -69,13 +71,26 @@ export default function MyTrip({navigation, route}) {
     ? tripid.substring(dateStart, dateEnd + 5)
     : 'No match found';
 
-  useEffect(() => {
-    if (userId) {
-      setTripID(userId + '_' + date);
-      getVehicleNumber(userId);
-      getTripDetails(userId + '_' + date);
-    }
-  }, [userId]);
+    useEffect(() => {
+      if (userId) {
+        AsyncStorage.getItem('tripID')
+          .then((storedTripID) => {
+            if (storedTripID) {
+              setTripID(storedTripID);
+            } else {
+              const tripID = userId + '_' + date + '_' + new Date().valueOf();
+              setTripID(tripID);
+              AsyncStorage.setItem('tripID', tripID);
+            }
+            getVehicleNumber(userId);
+            getTripDetails(tripID);
+            getTripData(userId);
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
+    }, [userId,tripID]);
   function getVehicleNumber(userId) {
     axios
       .get(backendUrl + `SellerMainScreen/vehicleNumber/${userId}`)
@@ -89,19 +104,20 @@ export default function MyTrip({navigation, route}) {
       });
   }
 
-  function getTripDetails(tripId) {
+  function getTripDetails(tripID) {
     axios
       .get(backendUrl + 'UserTripInfo/getUserTripInfo', {
         params: {
-          tripID: tripId,
+          tripID: tripID,
         },
       })
       .then(response => {
         if (response?.data?.res_data) {
-          setVehicle(response.data.res_data.vehicleNumber);
-          setStartKm(response.data.res_data.startKilometer);
+          // setVehicle(response.data.res_data.vehicleNumber);
+          const startKm = response.data.res_data.startKilometer; 
+          setStartKm(startKm);         
           if (response.data.res_data.endkilometer) {
-            navigation.navigate('StartEndDetails', {tripID: tripId});
+            navigation.navigate('StartEndDetails', {tripID: tripID});
           }
         }
         setLoading(false);
@@ -111,9 +127,26 @@ export default function MyTrip({navigation, route}) {
         setLoading(false);
       });
   }
+  function getTripData(userId) {
+    axios
+      .get(backendUrl + 'UserTripInfo/getUserTripInfo', {
+        params: {
+          feUserID:userId,
+        },
+      })
+      .then(response => {
+        setTripDetails(response.data.res_data)
+        setLoading(false);
+      })
+      .catch(error => {
+        console.log(error, 'error');
+        setLoading(false);
+      });
+  }
   useEffect(() => {
     if (focus == true) {
-      getTripDetails();
+      getTripDetails(tripID);
+      getTripData();
     }
   }, [focus]);
   const loadDetails = async () => {
@@ -285,20 +318,22 @@ export default function MyTrip({navigation, route}) {
           dispatch(setTripStatus(2));
           getTripDetails(tripID);
           setMessage(1);
-          navigation.navigate('StartEndDetails', {tripID: tripID});
+          navigation.navigate('StartEndDetails', { tripID: tripID });
+          AsyncStorage.removeItem('tripID');
         })
         .catch(function (error) {
           console.log(error);
         });
     })();
   };
+  
   useEffect(() => {
     if (pendingHandover !== 0) {
       setMessage1(2);
       setShowModal1(true);
     }
   }, [pendingPickup, pendingDelivery, pendingHandover, tripStatus]);
-
+console.log("Trip Id",tripID)
   let currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
   currentDate = currentDate.valueOf();
@@ -315,14 +350,14 @@ export default function MyTrip({navigation, route}) {
           startVehicleImageUrl: startImageUrl,
         })
         .then(function (res) {
-          if (res.data.msg == 'TripID already exists') {
+          if (res.data.msg === 'TripID already exists') {
             getTripDetails(tripID);
             setMessage(2);
           } else {
             dispatch(setTripStatus(1));
             getTripDetails(tripID);
             setMessage(1);
-            navigation.navigate('Main', {tripID: tripID});
+            navigation.navigate('Main', { tripID: tripID });
           }
           setShowModal(true);
         })
@@ -331,6 +366,7 @@ export default function MyTrip({navigation, route}) {
         });
     })();
   };
+  
 
   const handleInputChange = value => {
     setStartKm(value);
@@ -352,6 +388,139 @@ export default function MyTrip({navigation, route}) {
           />
         ) : (
           <Box flex={1}>
+  {tripDetails && tripDetails.length > 0 && tripDetails.some(data => data.startTime && data.endTime) && (
+    <Box
+      flex={1}
+      bg="gray.300"
+      alignItems="center"
+      pt={'4%'}
+      pb={'4%'}
+    >
+      <Box
+        justifyContent="space-between"
+        py={10}
+        px={6}
+        bg="#fff"
+        rounded="xl"
+        width={'90%'}
+        maxWidth="100%"
+        _text={{ fontWeight: 'medium' }}
+      >
+        <ScrollView>
+          <VStack space={6}>
+            <View
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: '500',
+                  color: 'gray',
+                }}
+                mb={2}
+              >
+                Previously Ended Trips
+              </Text>
+            </View>
+            {tripDetails.map((data, i) =>
+              data.startTime && data.endTime ? (
+                <View key={i}>
+                  <View flexDirection="row">
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: '500',
+                        color: 'gray',
+                        marginRight: 8,
+                      }}
+                      mb={1}
+                    >
+                      Vehicle Number:
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: '500',
+                        color: 'gray',
+                      }}
+                      mb={1}
+                    >
+                      {data.vehicleNumber}
+                    </Text>
+                  </View>
+                  <View flexDirection="row">
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: '500',
+                        color: 'gray',
+                        marginRight: 8,
+                      }}
+                      mb={1}
+                    >
+                      Start KMs:
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: '500',
+                        color: 'gray',
+                      }}
+                      mb={1}
+                    >
+                      {data.startKilometer}
+                    </Text>
+                  </View>
+                  <View flexDirection="row">
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: '500',
+                        color: 'gray',
+                        marginRight: 8,
+                      }}
+                      mb={2}
+                    >
+                      End KMs:
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: '500',
+                        color: 'gray',
+                      }}
+                      mb={2}
+                    >
+                      {data.endkilometer}
+                    </Text>
+                  </View>
+                  <Button
+                    w="100%"
+                    rounded="md"
+                    style={{
+                      height: 'auto',
+                      backgroundColor: '#004aad',
+                      elevation: 10,
+                      marginTop: 1,
+                    }}
+                    onPress={() => {
+                      navigation.navigate('StartEndDetails', { tripID: data.tripID });
+                    }}
+                  >
+                    View Details
+                  </Button>
+                </View>
+              ) : null
+            )}
+          </VStack>
+        </ScrollView>
+      </Box>
+    </Box>
+  )}
             {tripStatus == 0 ? (
               <Box
                 flex={1}
