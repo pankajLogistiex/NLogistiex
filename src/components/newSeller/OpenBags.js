@@ -25,7 +25,7 @@ import {RNCamera} from 'react-native-camera';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNBeep from 'react-native-a-beep';
 const db = openDatabase({name: 'rn_sqlite'});
-
+ 
 const OpenBags = ({route}) => {
   const [data, setData] = useState([]);
   const navigation = useNavigation();
@@ -99,7 +99,7 @@ const OpenBags = ({route}) => {
     // try {
     AsyncStorage.setItem(
       'acceptedItemData11',
-      JSON.stringify(acceptedItemData),
+      JSON.stringify(acceptedItemData)
     );
     // } catch (error) {
     console.log('aaaa', acceptedItemData);
