@@ -124,6 +124,10 @@ AsyncStorage.getItem('acceptedItemData11')
         } catch (error) {
           console.error('Failed to update AsyncStorage:', error);
         }
+      }else{
+        if(barcode.length>0){
+          AsyncStorage.setItem('acceptedItemData11',JSON.stringify(acceptedItemData));
+        }
       }
     },[acceptedItemData]);
 
@@ -596,7 +600,7 @@ AsyncStorage.getItem('acceptedItemData11')
             // RNBeep.beep();
             updateDetails2(data);
             // loadDetails(data);
-            // uploadDataToServer(res.rows);
+            uploadDataToServer(res.rows);
           }
         },
         error => {
