@@ -25,6 +25,7 @@ import {
   VStack,
   Alert,
   Modal,
+  TouchableOpacity
 } from 'native-base';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {openDatabase} from 'react-native-sqlite-storage';
@@ -1414,28 +1415,57 @@ export default function Main({navigation, route}) {
         :
         null} */}
               {isData ? (
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <Button
                   variant="outline"
                   onPress={() => {
                     handleStartTrip();
                   }}
                   mt={4}
-                  // style={{color: '#004aad', borderColor: '#004aad'}}
                   style={{
                     height: 'auto',
-                    color: 'gray.300',
+                    width:'48%',
+                    backgroundColor: '#fff',
+                    borderWidth: 2,
                     borderColor: '#004aad',
                     elevation: 15,
-                    shadowColor: 'rgba(154, 160, 166, 0.3)',
-                    shadowOpacity: 0.3,
-                    shadowRadius: 2,
+                    shadowColor: 'rgba(154, 160, 166, 0.5)',
+                    shadowOpacity: 0.5,
+                    shadowRadius: 4,
                     shadowOffset: {
                       width: 0,
-                      height: 2,
+                      height: 4,
                     },
-                  }}>
-                  <Text style={{color: '#004aad'}}>{tripValue}</Text>
+                  }}
+                >
+                  <Text style={{ color: '#004aad' }}>{tripValue}</Text>
                 </Button>
+                <Button
+                  variant="outline"
+                  onPress={() => {
+                    navigation.navigate('TripHistory', { userId: id , tripValue:tripValue});
+                  }}
+                  mt={4}
+                  style={{
+                    height: 'auto',
+                    width:'48%',
+                    backgroundColor: '#fff',
+                    borderWidth: 2,
+                    borderColor: '#004aad',
+                    elevation: 15,
+                    shadowColor: 'rgba(154, 160, 166, 0.5)',
+                    shadowOpacity: 0.5,
+                    shadowRadius: 4,
+                    shadowOffset: {
+                      width: 0,
+                      height: 4,
+                    },
+                  }}
+                >
+                  <Text style={{ color: '#004aad' }}>Trip History</Text>
+                </Button>
+              </View>              
+              
               ) : (
                 <Center style={{marginVertical: 50}}>
                   {/* <Text style={{color:'black'}}>No assignment for {it.title} </Text> */}
