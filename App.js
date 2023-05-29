@@ -1,9 +1,9 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, {useEffect, useState} from 'react';
-import 'react-native-gesture-handler';
-import {Provider, useDispatch, useSelector} from 'react-redux';
-import {store} from './src/redux/store';
+import React, { useEffect, useState } from "react";
+import "react-native-gesture-handler";
+import { Provider, useDispatch, useSelector } from "react-redux";
+import { store } from "./src/redux/store";
 import {
   NativeBaseProvider,
   Box,
@@ -17,38 +17,38 @@ import {
   Center,
   VStack,
   Modal,
-} from 'native-base';
-import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+} from "native-base";
+import MaterialIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import {
   NavigationContainer,
   DrawerActions,
   useIsFocused,
-} from '@react-navigation/native';
-import {CommonActions} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
-import {createDrawerNavigator} from '@react-navigation/drawer';
-import Login from './src/components/Login';
-import Main from './src/components/Main';
-import NewSellerPickup from './src/components/newSeller/NewSellerPickup';
-import SellerHandover from './src/components/newSeller/SellerHandover';
-import HandoverShipment from './src/components/newSeller/HandoverShipment';
-import OpenBags from './src/components/newSeller/OpenBags';
-import PendingHandover from './src/components/newSeller/PendingHandover';
-import NotPicked from './src/components/newSeller/NotPicked';
-import NotDelivered from './src/components/newSeller/notDelivered';
-import PendingWork from './src/components/newSeller/PendingWork';
-import HandOverSummary from './src/components/newSeller/HandOverSummary';
-import NewSellerSelection from './src/components/newSeller/NewSellerSelection';
-import ShipmentBarcode from './src/components/newSeller/ShipmentBarcode';
-import SellerDeliveries from './src/components/newSeller/SellerDeliveries';
-import SellerHandoverSelection from './src/components/newSeller/SellerHandoverSelection';
-import ScanShipment from './src/components/newSeller/ScanShipment';
-import CollectPOD from './src/components/newSeller/CollectPOD';
-import Dispatch from './src/components/newSeller/Dispatch';
-import MapScreen from './src/components/MapScreen';
-import Reject from './src/components/RejectReason';
-import POD from './src/components/newSeller/POD';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+} from "@react-navigation/native";
+import { CommonActions } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import { createDrawerNavigator } from "@react-navigation/drawer";
+import Login from "./src/components/Login";
+import Main from "./src/components/Main";
+import NewSellerPickup from "./src/components/newSeller/NewSellerPickup";
+import SellerHandover from "./src/components/newSeller/SellerHandover";
+import HandoverShipment from "./src/components/newSeller/HandoverShipment";
+import OpenBags from "./src/components/newSeller/OpenBags";
+import PendingHandover from "./src/components/newSeller/PendingHandover";
+import NotPicked from "./src/components/newSeller/NotPicked";
+import NotDelivered from "./src/components/newSeller/notDelivered";
+import PendingWork from "./src/components/newSeller/PendingWork";
+import HandOverSummary from "./src/components/newSeller/HandOverSummary";
+import NewSellerSelection from "./src/components/newSeller/NewSellerSelection";
+import ShipmentBarcode from "./src/components/newSeller/ShipmentBarcode";
+import SellerDeliveries from "./src/components/newSeller/SellerDeliveries";
+import SellerHandoverSelection from "./src/components/newSeller/SellerHandoverSelection";
+import ScanShipment from "./src/components/newSeller/ScanShipment";
+import CollectPOD from "./src/components/newSeller/CollectPOD";
+import Dispatch from "./src/components/newSeller/Dispatch";
+import MapScreen from "./src/components/MapScreen";
+import Reject from "./src/components/RejectReason";
+import POD from "./src/components/newSeller/POD";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   TouchableOpacity,
   View,
@@ -56,45 +56,66 @@ import {
   ToastAndroid,
   PermissionsAndroid,
   Alert,
-} from 'react-native';
-import {Badge} from 'react-native-paper';
-import Lottie from 'lottie-react-native';
-import {ProgressBar} from '@react-native-community/progress-bar-android';
-import NetInfo from '@react-native-community/netinfo';
-import axios from 'axios';
-import {openDatabase} from 'react-native-sqlite-storage';
-import NewSellerAdditionNotification from './src/components/NewSellerAdditionNotification';
-import StartEndDetails from './src/components/StartEndDetails';
-import SellerSelection from './src/components/newSeller/SellerSelection';
-import UpdateSellerCloseReasonCode from './src/components/newSeller/UpdateSellerCloseReasonCode';
-import CloseReasonCode from './src/components/newSeller/CloseReasonCode';
-import ReturnHandoverRejectionTag from './src/components/newSeller/ReturnHandoverRejectionTag';
-import HandoverShipmentRTO from './src/components/newSeller/HandoverShipmentRTO';
-import {LogBox} from 'react-native';
-import MyTrip from './src/components/MyTrip';
-import TripHistory from './src/components/TripHistory';
-import {backendUrl} from './src/utils/backendUrl';
-import messaging from '@react-native-firebase/messaging';
-import {setIsNewSync} from './src/redux/slice/isNewSync';
+} from "react-native";
+import { Badge } from "react-native-paper";
+import Lottie from "lottie-react-native";
+import { ProgressBar } from "@react-native-community/progress-bar-android";
+import NetInfo from "@react-native-community/netinfo";
+import axios from "axios";
+import { openDatabase } from "react-native-sqlite-storage";
+import NewSellerAdditionNotification from "./src/components/NewSellerAdditionNotification";
+import StartEndDetails from "./src/components/StartEndDetails";
+import SellerSelection from "./src/components/newSeller/SellerSelection";
+import UpdateSellerCloseReasonCode from "./src/components/newSeller/UpdateSellerCloseReasonCode";
+import CloseReasonCode from "./src/components/newSeller/CloseReasonCode";
+import ReturnHandoverRejectionTag from "./src/components/newSeller/ReturnHandoverRejectionTag";
+import HandoverShipmentRTO from "./src/components/newSeller/HandoverShipmentRTO";
+import { LogBox } from "react-native";
+import MyTrip from "./src/components/MyTrip";
+import TripHistory from "./src/components/TripHistory";
+import { backendUrl } from "./src/utils/backendUrl";
+import messaging from "@react-native-firebase/messaging";
+import { setIsNewSync } from "./src/redux/slice/isNewSync";
 import {
+  setToken,
   setUserEmail,
   setUserId,
   setUserName,
-} from './src/redux/slice/userSlice';
-const db = openDatabase({name: 'rn_sqlite'});
+} from "./src/redux/slice/userSlice";
+import { logout, revoke } from "react-native-app-auth";
+
+const config = {
+  issuer: "https://uacc.logistiex.com/realms/Logistiex-Demo",
+  clientId: "logistiex-demo",
+  redirectUrl: "com.demoproject.app://Login",
+  scopes: [
+    "openid",
+    "web-origins",
+    "acr",
+    "offline_access",
+    "email",
+    "microprofile-jwt",
+    "profile",
+    "address",
+    "phone",
+    "roles",
+  ],
+};
+
+const db = openDatabase({ name: "rn_sqlite" });
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
-function StackNavigators({navigation}) {
+function StackNavigators({ navigation }) {
   const dispatch = useDispatch();
 
-  const userId = useSelector(state => state.user.user_id);
+  const userId = useSelector((state) => state.user.user_id);
 
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState([]);
   const [isLogin, setIsLogin] = useState(false);
-  const [lastSyncTime11, setLastSyncTime] = useState('');
+  const [lastSyncTime11, setLastSyncTime] = useState("");
   const [scannedStatus, SetScannedStatus] = useState(0);
   let m = 0;
   useEffect(() => {
@@ -105,56 +126,56 @@ function StackNavigators({navigation}) {
       const cameraPermission = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.CAMERA,
         {
-          title: 'Camera Permission',
-          message: 'This app needs access to your camera.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
+          title: "Camera Permission",
+          message: "This app needs access to your camera.",
+          buttonNeutral: "Ask Me Later",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK",
+        }
       );
       if (cameraPermission !== PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('Camera permission denied');
+        console.log("Camera permission denied");
       }
 
       const storagePermission = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
         {
-          title: 'Storage Permission',
-          message: 'This app needs access to your storage.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
+          title: "Storage Permission",
+          message: "This app needs access to your storage.",
+          buttonNeutral: "Ask Me Later",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK",
+        }
       );
       if (storagePermission !== PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('Storage permission denied');
+        console.log("Storage permission denied");
       }
 
       messaging()
         .requestPermission()
-        .then(permission => {
+        .then((permission) => {
           if (permission) {
-            console.log('Notification permission granted');
+            console.log("Notification permission granted");
             // messaging().getToken().then((token) => {
             // console.log('FCM Token:', token);
             // });
           } else {
-            console.log('Notification permission denied');
+            console.log("Notification permission denied");
           }
         });
 
       const locationPermission = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         {
-          title: 'Location Permission',
-          message: 'This app needs access to your location.',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
+          title: "Location Permission",
+          message: "This app needs access to your location.",
+          buttonNeutral: "Ask Me Later",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK",
+        }
       );
       if (locationPermission !== PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('Location permission denied');
+        console.log("Location permission denied");
       }
     } catch (error) {
       console.warn(error);
@@ -162,10 +183,10 @@ function StackNavigators({navigation}) {
   };
 
   useEffect(() => {
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
+    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       Alert.alert(
         remoteMessage.notification.title,
-        remoteMessage.notification.body,
+        remoteMessage.notification.body
       );
       // messaging().getInitialNotification().then((notificationOpen) => {
       //   if (notificationOpen) {
@@ -185,33 +206,33 @@ function StackNavigators({navigation}) {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
+    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       // Handle FCM message here
     });
 
     const unsubscribeNotification = messaging().onNotificationOpenedApp(
-      notificationOpen => {
+      (notificationOpen) => {
         console.log(
-          'Opened via notification11:',
-          notificationOpen.notification,
+          "Opened via notification11:",
+          notificationOpen.notification
         );
 
         // navigation.navigate('NewSellerAdditionNotification');
-      },
+      }
     );
 
     messaging()
       .getInitialNotification()
-      .then(notificationOpen => {
+      .then((notificationOpen) => {
         if (notificationOpen) {
           console.log(
-            'Opened via notification:',
-            notificationOpen.notification,
+            "Opened via notification:",
+            notificationOpen.notification
           );
           note11();
           // navigation.navigate('NewSellerAdditionNotification');
         } else {
-          console.log('Opened normally');
+          console.log("Opened normally");
         }
       });
 
@@ -225,15 +246,15 @@ function StackNavigators({navigation}) {
     var date = new Date();
     var hours = date.getHours();
     var minutes = date.getMinutes();
-    var ampm = hours >= 12 ? 'PM' : 'AM';
+    var ampm = hours >= 12 ? "PM" : "AM";
     hours = hours % 12;
     hours = hours ? hours : 12;
-    minutes = minutes < 10 ? '0' + minutes : minutes;
-    var datetime = 'Last Sync\n' + hours + ':' + minutes + ' ' + ampm;
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
     setLastSyncTime(datetime);
-    AsyncStorage.setItem('lastSyncTime112', datetime);
+    AsyncStorage.setItem("lastSyncTime112", datetime);
 
-    console.log('api pull');
+    console.log("api pull");
     loadAPI_Data1();
     loadAPI_Data2();
     // loadAPI_Data3();
@@ -258,7 +279,7 @@ function StackNavigators({navigation}) {
       if (userId) {
         pull_API_Data();
       } else {
-        navigation.navigate('Login');
+        navigation.navigate("Login");
       }
     })();
   }, [userId]);
@@ -266,8 +287,8 @@ function StackNavigators({navigation}) {
   // Sync button function
   const note11 = () => {
     if (!isLoading) {
-      console.log('call notification');
-      navigation.navigate('NewSellerAdditionNotification');
+      console.log("call notification");
+      navigation.navigate("NewSellerAdditionNotification");
     }
   };
 
@@ -281,11 +302,11 @@ function StackNavigators({navigation}) {
 
   useEffect(() => {
     if (userId !== null) {
-      AsyncStorage.getItem('lastSyncTime112')
-        .then(data11 => {
+      AsyncStorage.getItem("lastSyncTime112")
+        .then((data11) => {
           setLastSyncTime(data11);
         })
-        .catch(e => {
+        .catch((e) => {
           console.log(e);
         });
     }
@@ -293,31 +314,31 @@ function StackNavigators({navigation}) {
 
   const Login_Data_load = () => {
     // console.log('Login Data Load called');
-    AsyncStorage.getItem('apiDataLoaded')
-      .then(data11 => {
+    AsyncStorage.getItem("apiDataLoaded")
+      .then((data11) => {
         // console.log( 'Api Data Loaded value : ',data11);
         setIsLogin(data11);
-        if (data11 === 'false') {
-          console.log('1st time call');
+        if (data11 === "false") {
+          console.log("1st time call");
           pull_API_Data();
-          AsyncStorage.setItem('apiDataLoaded', 'true');
+          AsyncStorage.setItem("apiDataLoaded", "true");
           // return;
         }
       })
-      .catch(e => {
+      .catch((e) => {
         console.log(e);
       });
-    AsyncStorage.getItem('lastSyncTime112')
-      .then(data11 => {
+    AsyncStorage.getItem("lastSyncTime112")
+      .then((data11) => {
         setLastSyncTime(data11);
       })
-      .catch(e => {
+      .catch((e) => {
         console.log(e);
       });
   };
   // console.log(userId);
   async function postSPSCalling(row) {
-    console.log('===========row=========', {
+    console.log("===========row=========", {
       clientShipmentReferenceNumber: row.clientShipmentReferenceNumber,
       awbNo: row.awbNo,
       clientRefId: row.clientRefId,
@@ -340,10 +361,10 @@ function StackNavigators({navigation}) {
       longitude: parseFloat(row.longitude),
       packagingStatus: 1,
       scanStatus:
-        row.status == 'accepted' ? 1 : row.status == 'rejected' ? 2 : 0,
+        row.status == "accepted" ? 1 : row.status == "rejected" ? 2 : 0,
     });
     await axios
-      .post(backendUrl + 'SellerMainScreen/postSPS', {
+      .post(backendUrl + "SellerMainScreen/postSPS", {
         clientShipmentReferenceNumber: row.clientShipmentReferenceNumber,
         awbNo: row.awbNo,
         clientRefId: row.clientRefId,
@@ -366,40 +387,40 @@ function StackNavigators({navigation}) {
         longitude: parseFloat(row.longitude),
         packagingStatus: 1,
         scanStatus:
-          row.status == 'accepted' ? 1 : row.status == 'rejected' ? 2 : 0,
+          row.status == "accepted" ? 1 : row.status == "rejected" ? 2 : 0,
       })
-      .then(response => {
-        console.log('sync Successfully pushed');
+      .then((response) => {
+        console.log("sync Successfully pushed");
         console.log(response);
-        db.transaction(tx => {
+        db.transaction((tx) => {
           tx.executeSql(
             'UPDATE SellerMainScreenDetails SET syncStatus="done" WHERE clientShipmentReferenceNumber = ?',
             [row.clientShipmentReferenceNumber],
             (tx1, results) => {
               let temp = [];
               console.log(
-                '===========Local Sync Status Results==========',
-                results.rowsAffected,
+                "===========Local Sync Status Results==========",
+                results.rowsAffected
               );
               if (results.rowsAffected > 0) {
-                console.log('Sync status done in localDB');
+                console.log("Sync status done in localDB");
               } else {
                 console.log(
-                  'Sync Status not changed in localDB or already synced',
+                  "Sync Status not changed in localDB or already synced"
                 );
               }
-            },
+            }
           );
         });
       })
-      .catch(error => {
+      .catch((error) => {
         setIsLoading(false);
-        console.log('sync error', {error});
+        console.log("sync error", { error });
       });
   }
 
   async function postSPS(data) {
-    await data.map(row => {
+    await data.map((row) => {
       postSPSCalling(row);
     });
     pull_API_Data();
@@ -407,8 +428,8 @@ function StackNavigators({navigation}) {
 
   const push_Data = () => {
     console.log(
-      'push data function',
-      new Date().toJSON().slice(0, 10).replace(/-/g, '/'),
+      "push data function",
+      new Date().toJSON().slice(0, 10).replace(/-/g, "/")
     );
 
     Login_Data_load();
@@ -416,22 +437,22 @@ function StackNavigators({navigation}) {
     var date = new Date();
     var hours = date.getHours();
     var minutes = date.getMinutes();
-    var ampm = hours >= 12 ? 'PM' : 'AM';
+    var ampm = hours >= 12 ? "PM" : "AM";
     hours = hours % 12;
     hours = hours ? hours : 12;
-    minutes = minutes < 10 ? '0' + minutes : minutes;
-    var time = hours + ':' + minutes + ' ' + ampm;
-    var datetime = 'Last Sync\n' + hours + ':' + minutes + ' ' + ampm;
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    var time = hours + ":" + minutes + " " + ampm;
+    var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
     setLastSyncTime(datetime);
-    AsyncStorage.setItem('lastSyncTime112', datetime);
+    AsyncStorage.setItem("lastSyncTime112", datetime);
 
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE status IS NOT Null AND syncStatus IS Null',
+        "SELECT * FROM SellerMainScreenDetails WHERE status IS NOT Null AND syncStatus IS Null",
         [],
         (tx1, results) => {
           if (results.rows.length > 0) {
-            ToastAndroid.show('Synchronizing data...', ToastAndroid.SHORT);
+            ToastAndroid.show("Synchronizing data...", ToastAndroid.SHORT);
             let temp = [];
             for (let i = 0; i < results.rows.length; ++i) {
               temp.push(results.rows.item(i));
@@ -439,24 +460,24 @@ function StackNavigators({navigation}) {
             postSPS(temp);
             setIsLoading(false);
             ToastAndroid.show(
-              'Synchronizing data finished',
-              ToastAndroid.SHORT,
+              "Synchronizing data finished",
+              ToastAndroid.SHORT
             );
           } else {
-            console.log('Only Pulling Data.No data to push...');
+            console.log("Only Pulling Data.No data to push...");
             pull_API_Data();
           }
-        },
+        }
       );
     });
   };
 
   const sync11 = () => {
-    NetInfo.fetch().then(state => {
+    NetInfo.fetch().then((state) => {
       if (state.isConnected && state.isInternetReachable) {
         push_Data();
       } else {
-        ToastAndroid.show('You are Offline!', ToastAndroid.SHORT);
+        ToastAndroid.show("You are Offline!", ToastAndroid.SHORT);
       }
     });
   };
@@ -465,7 +486,7 @@ function StackNavigators({navigation}) {
 
   // Table 1
   const createTables1 = () => {
-    db.transaction(txn => {
+    db.transaction((txn) => {
       // txn.executeSql('DROP TABLE IF EXISTS SyncSellerPickUp', []);
       txn.executeSql(
         `CREATE TABLE IF NOT EXISTS SyncSellerPickUp( consignorCode ID VARCHAR(200) PRIMARY KEY ,userId VARCHAR(100), 
@@ -475,9 +496,9 @@ function StackNavigators({navigation}) {
           // console.log("table created successfully1212");
           // loadAPI_Data();
         },
-        error => {
-          console.log('error on creating table ' + error.message);
-        },
+        (error) => {
+          console.log("error on creating table " + error.message);
+        }
       );
     });
   };
@@ -488,21 +509,21 @@ function StackNavigators({navigation}) {
       await axios
         .get(backendUrl + `SellerMainScreen/consignorsList/${userId}`)
         .then(
-          res => {
-            console.log('API 1 OK: ' + res.data.data.length);
+          (res) => {
+            console.log("API 1 OK: " + res.data.data.length);
             // console.log(res);
             for (let i = 0; i < res.data.data.length; i++) {
               // let m21 = JSON.stringify(res.data[i].consignorAddress, null, 4);
 
-              db.transaction(txn => {
+              db.transaction((txn) => {
                 txn.executeSql(
-                  'SELECT * FROM SyncSellerPickUp where consignorCode = ?',
+                  "SELECT * FROM SyncSellerPickUp where consignorCode = ?",
                   [res.data.data[i].consignorCode],
                   (tx, result) => {
                     if (result.rows.length <= 0) {
-                      db.transaction(txn => {
+                      db.transaction((txn) => {
                         txn.executeSql(
-                          'INSERT OR REPLACE INTO SyncSellerPickUp( contactPersonName,consignorCode ,userId ,consignorName,consignorAddress1,consignorAddress2,consignorCity,consignorPincode,consignorLatitude,consignorLongitude,consignorContact,ReverseDeliveries,runSheetNumber,ForwardPickups,BagOpenClose11, ShipmentListArray,otpSubmitted,otpSubmittedDelivery) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                          "INSERT OR REPLACE INTO SyncSellerPickUp( contactPersonName,consignorCode ,userId ,consignorName,consignorAddress1,consignorAddress2,consignorCity,consignorPincode,consignorLatitude,consignorLongitude,consignorContact,ReverseDeliveries,runSheetNumber,ForwardPickups,BagOpenClose11, ShipmentListArray,otpSubmitted,otpSubmittedDelivery) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                           [
                             res.data.data[i].contactPersonName,
                             res.data.data[i].consignorCode,
@@ -518,45 +539,45 @@ function StackNavigators({navigation}) {
                             res.data.data[i].ReverseDeliveries,
                             res.data.data[i].runsheetNo,
                             res.data.data[i].ForwardPickups,
-                            'true',
-                            ' ',
-                            'false',
-                            'false',
+                            "true",
+                            " ",
+                            "false",
+                            "false",
                           ],
                           (sqlTxn, _res) => {
                             console.log(
-                              '\n Data Added to local db successfully1212',
+                              "\n Data Added to local db successfully1212"
                             );
                             // console.log(res);
                           },
-                          error => {
+                          (error) => {
                             console.log(
-                              'error on loading  data from api SellerMainScreen/consignorslist/' +
-                                error.message,
+                              "error on loading  data from api SellerMainScreen/consignorslist/" +
+                                error.message
                             );
-                          },
+                          }
                         );
                       });
                     }
-                  },
+                  }
                 );
               });
             }
             viewDetails1();
             m++;
             // console.log('value of m1 '+m);
-            AsyncStorage.setItem('load11', 'notload');
+            AsyncStorage.setItem("load11", "notload");
             setIsLoading(false);
           },
-          error => {
-            console.log('error api SellerMainScreen/consignorslist/', error);
-          },
+          (error) => {
+            console.log("error api SellerMainScreen/consignorslist/", error);
+          }
         );
     })();
   };
   const viewDetails1 = () => {
-    db.transaction(tx => {
-      tx.executeSql('SELECT * FROM SyncSellerPickUp', [], (tx1, results) => {
+    db.transaction((tx) => {
+      tx.executeSql("SELECT * FROM SyncSellerPickUp", [], (tx1, results) => {
         let temp = [];
         // console.log(results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
@@ -570,16 +591,16 @@ function StackNavigators({navigation}) {
           // ToastAndroid.show('consignorName:' + results.rows.item(i).consignorName + "\n" + 'PRSNumber : ' + results.rows.item(i).PRSNumber, ToastAndroid.SHORT);
         }
         if (m === 4) {
-          ToastAndroid.show('Sync Successful', ToastAndroid.SHORT);
+          ToastAndroid.show("Sync Successful", ToastAndroid.SHORT);
           setIsLoading(false);
           setIsLogin(true);
-          AsyncStorage.setItem('apiDataLoaded', 'true');
-          console.log('All ' + m + ' APIs loaded successfully ');
+          AsyncStorage.setItem("apiDataLoaded", "true");
+          console.log("All " + m + " APIs loaded successfully ");
           m = 0;
 
-          AsyncStorage.setItem('refresh11', 'refresh');
+          AsyncStorage.setItem("refresh11", "refresh");
         } else {
-          console.log('Only ' + m + ' APIs loaded out of 4 ');
+          console.log("Only " + m + " APIs loaded out of 4 ");
         }
         // m++;
         // ToastAndroid.show("Sync Successful",ToastAndroid.SHORT);
@@ -592,7 +613,7 @@ function StackNavigators({navigation}) {
 
   // Table 2
   const createTables2 = () => {
-    db.transaction(txn => {
+    db.transaction((txn) => {
       // txn.executeSql('DROP TABLE IF EXISTS SellerMainScreenDetails', []);
       txn.executeSql(
         `CREATE TABLE IF NOT EXISTS SellerMainScreenDetails( 
@@ -623,12 +644,12 @@ function StackNavigators({navigation}) {
           )`,
         [],
         (sqlTxn, res) => {
-          console.log('table created successfully SellerMainScreenDetails');
+          console.log("table created successfully SellerMainScreenDetails");
           // loadAPI_Data();
         },
-        error => {
-          console.log('error on creating table ' + error.message);
-        },
+        (error) => {
+          console.log("error on creating table " + error.message);
+        }
       );
     });
   };
@@ -637,17 +658,17 @@ function StackNavigators({navigation}) {
     setIsLoading(!isLoading);
     (async () => {
       await axios.get(backendUrl + `SellerMainScreen/workload/${userId}`).then(
-        res => {
+        (res) => {
           createTables2();
-          console.log('API 2 OK: ' + res.data.data.length);
+          console.log("API 2 OK: " + res.data.data.length);
           for (let i = 0; i < res.data.data.length; i++) {
-            db.transaction(txn => {
+            db.transaction((txn) => {
               txn.executeSql(
-                'SELECT * FROM SellerMainScreenDetails where clientShipmentReferenceNumber = ?',
+                "SELECT * FROM SellerMainScreenDetails where clientShipmentReferenceNumber = ?",
                 [res.data.data[i].clientShipmentReferenceNumber],
                 (tx, result) => {
                   if (result.rows.length <= 0) {
-                    db.transaction(txn => {
+                    db.transaction((txn) => {
                       txn.executeSql(
                         `INSERT OR REPLACE INTO SellerMainScreenDetails( 
                           clientShipmentReferenceNumber,
@@ -684,43 +705,43 @@ function StackNavigators({navigation}) {
                           res.data.data[i].runsheetNo,
                           res.data.data[i].shipmentStatus,
                           res.data.data[i].shipmentAction,
-                          '',
-                          '',
+                          "",
+                          "",
                           0,
                           res.data.data[i].actionTime,
-                          res.data.data[i].shipmentStatus == 'PUS' ||
-                          res.data.data[i].shipmentStatus == 'PUC' ||
-                          res.data.data[i].shipmentStatus == 'DLR' ||
-                          res.data.data[i].shipmentStatus == 'RDS'
-                            ? 'accepted'
-                            : res.data.data[i].shipmentStatus == 'PUR' ||
-                              res.data.data[i].shipmentStatus == 'RDR' ||
-                              res.data.data[i].shipmentStatus == 'UDU' ||
-                              res.data.data[i].shipmentStatus == 'PUF'
-                            ? 'rejected'
+                          res.data.data[i].shipmentStatus == "PUS" ||
+                          res.data.data[i].shipmentStatus == "PUC" ||
+                          res.data.data[i].shipmentStatus == "DLR" ||
+                          res.data.data[i].shipmentStatus == "RDS"
+                            ? "accepted"
+                            : res.data.data[i].shipmentStatus == "PUR" ||
+                              res.data.data[i].shipmentStatus == "RDR" ||
+                              res.data.data[i].shipmentStatus == "UDU" ||
+                              res.data.data[i].shipmentStatus == "PUF"
+                            ? "rejected"
                             : null,
                           // null,
                           res.data.data[i].handoverStatus == 1
-                            ? 'accepted'
+                            ? "accepted"
                             : res.data.data[i].handoverStatus == 2
-                            ? 'rejected'
+                            ? "rejected"
                             : null,
                           null,
                           null,
-                          '',
+                          "",
                           res.data.data[i].packagingAction,
                         ],
                         (sqlTxn, _res) => {
                           // console.log(`\n Data Added to local db successfully`);
                           // console.log(res);
                         },
-                        error => {
-                          console.log('error on adding data ' + error.message);
-                        },
+                        (error) => {
+                          console.log("error on adding data " + error.message);
+                        }
                       );
                     });
                   }
-                },
+                }
               );
             });
           }
@@ -728,26 +749,26 @@ function StackNavigators({navigation}) {
           // console.log('value of m2 '+m);
           // setIsLoading(false);
         },
-        error => {
+        (error) => {
           console.log(error);
-        },
+        }
       );
     })();
   };
 
   const createTablesSF = () => {
-    db.transaction(txn => {
+    db.transaction((txn) => {
       // txn.executeSql('DROP TABLE IF EXISTS ShipmentFailure', []);
       txn.executeSql(
-        'CREATE TABLE IF NOT EXISTS ShipmentFailure(_id VARCHAR(24) PRIMARY KEY,description VARCHAR(255),parentCode VARCHAR(20), short_code VARCHAR(20), consignor_failure BOOLEAN, fe_failure BOOLEAN, operational_failure BOOLEAN, system_failure BOOLEAN, enable_geo_fence BOOLEAN, enable_future_scheduling BOOLEAN, enable_otp BOOLEAN, enable_call_validation BOOLEAN, created_by VARCHAR(10), last_updated_by VARCHAR(10), applies_to VARCHAR(255),life_cycle_code INT(20), __v INT(10))',
+        "CREATE TABLE IF NOT EXISTS ShipmentFailure(_id VARCHAR(24) PRIMARY KEY,description VARCHAR(255),parentCode VARCHAR(20), short_code VARCHAR(20), consignor_failure BOOLEAN, fe_failure BOOLEAN, operational_failure BOOLEAN, system_failure BOOLEAN, enable_geo_fence BOOLEAN, enable_future_scheduling BOOLEAN, enable_otp BOOLEAN, enable_call_validation BOOLEAN, created_by VARCHAR(10), last_updated_by VARCHAR(10), applies_to VARCHAR(255),life_cycle_code INT(20), __v INT(10))",
         [],
         (sqlTxn, res) => {
-          console.log('table ShipmentFailure created successfully');
+          console.log("table ShipmentFailure created successfully");
           // loadAPI_Data();
         },
-        error => {
-          console.log('error on creating table ' + error.message);
-        },
+        (error) => {
+          console.log("error on creating table " + error.message);
+        }
       );
     });
   };
@@ -755,14 +776,14 @@ function StackNavigators({navigation}) {
     // setIsLoading(!isLoading);
     createTablesSF();
     (async () => {
-      await axios.get(backendUrl + 'ADshipmentFailure/getList').then(
-        res => {
+      await axios.get(backendUrl + "ADshipmentFailure/getList").then(
+        (res) => {
           // console.log('Table6 API OK: ' + res.data.data.length);
           // console.log(res.data);
           for (let i = 0; i < res.data.data.length; i++) {
             // const appliesto=JSON.parse(JSON.stringify(res.data.data[i].appliesTo))
             const appliesto = String(res.data.data[i].appliesTo.slice());
-            db.transaction(txn => {
+            db.transaction((txn) => {
               txn.executeSql(
                 `INSERT OR REPLACE INTO ShipmentFailure(_id ,description , parentCode, short_code , consignor_failure , fe_failure , operational_failure , system_failure , enable_geo_fence , enable_future_scheduling , enable_otp , enable_call_validation, created_by , last_updated_by, applies_to ,life_cycle_code , __v
                           ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
@@ -789,9 +810,9 @@ function StackNavigators({navigation}) {
                   // console.log('\n Data Added to local db 6 ');
                   // console.log(res);
                 },
-                error => {
-                  console.log('error on adding data ' + error.message);
-                },
+                (error) => {
+                  console.log("error on adding data " + error.message);
+                }
               );
             });
           }
@@ -801,39 +822,39 @@ function StackNavigators({navigation}) {
           // viewDetailsSF();
           // setIsLoading(false);
         },
-        error => {
+        (error) => {
           console.log(error);
-        },
+        }
       );
     })();
   };
 
   const createTableBag1 = () => {
-    AsyncStorage.setItem('acceptedItemData11', '');
-    db.transaction(tx => {
+    AsyncStorage.setItem("acceptedItemData11", "");
+    db.transaction((tx) => {
       // tx.executeSql('DROP TABLE IF EXISTS closeHandoverBag1', []);
       tx.executeSql(
-        'CREATE TABLE IF NOT EXISTS closeHandoverBag1 (bagSeal TEXT , bagId TEXT PRIMARY KEY, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode Text,consignorName Text)',
+        "CREATE TABLE IF NOT EXISTS closeHandoverBag1 (bagSeal TEXT , bagId TEXT PRIMARY KEY, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode Text,consignorName Text)",
         [],
         (tx, results) => {
-          console.log('Table created successfully');
+          console.log("Table created successfully");
         },
-        error => {
-          console.log('Error occurred while creating the table:', error);
-        },
+        (error) => {
+          console.log("Error occurred while creating the table:", error);
+        }
       );
     });
   };
 
   const viewDetailsSF = () => {
-    db.transaction(tx => {
-      tx.executeSql('SELECT * FROM ShipmentFailure', [], (tx1, results) => {
+    db.transaction((tx) => {
+      tx.executeSql("SELECT * FROM ShipmentFailure", [], (tx1, results) => {
         let temp = [];
         // console.log(results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
         }
-        console.log('1173', temp);
+        console.log("1173", temp);
         // if (m <= 6){
         //   // ToastAndroid.show('Sync Successful',ToastAndroid.SHORT);
         //   console.log('Waiting for ' + ( 7 - m ) + ' API to load. Plz wait...');
@@ -851,11 +872,11 @@ function StackNavigators({navigation}) {
   const DisplayData = () => {
     axios
       .get(backendUrl + `SellerMainScreen/getadditionalwork/${userId}`)
-      .then(res => {
+      .then((res) => {
         setData(res.data);
         // console.log('dataDisplay', res.data);
       })
-      .catch(error => {
+      .catch((error) => {
         // console.log('Error Msg:', error);
       });
   };
@@ -867,19 +888,20 @@ function StackNavigators({navigation}) {
   return (
     <NativeBaseProvider>
       <Stack.Navigator
-        initialRouteName={'Main'}
-        key={'Main'}
+        initialRouteName={"Main"}
+        key={"Main"}
         screenOptions={{
           headerStyle: {
-            backgroundColor: '#004aad',
+            backgroundColor: "#004aad",
             // elevation: 0,
           },
-          headerTintColor: 'white',
+          headerTintColor: "white",
           headerTitleStyle: {
-            fontWeight: 'bold',
+            fontWeight: "bold",
             // alignSelf: 'center',
           },
-        }}>
+        }}
+      >
         <Stack.Screen
           name="Login"
           component={Login}
@@ -891,20 +913,21 @@ function StackNavigators({navigation}) {
           name="SellerSelection"
           component={SellerSelection}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Notification
                   </Heading>
                 </View>
@@ -918,20 +941,21 @@ function StackNavigators({navigation}) {
           name="CloseReasonCode"
           component={CloseReasonCode}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Notification
                   </Heading>
                 </View>
@@ -945,20 +969,21 @@ function StackNavigators({navigation}) {
           name="UpdateSellerCloseReasonCode"
           component={UpdateSellerCloseReasonCode}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Notification
                   </Heading>
                 </View>
@@ -972,20 +997,21 @@ function StackNavigators({navigation}) {
           name="ReturnHandoverRejectionTag"
           component={ReturnHandoverRejectionTag}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Notification
                   </Heading>
                 </View>
@@ -999,20 +1025,21 @@ function StackNavigators({navigation}) {
           name="Main"
           component={Main}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Dashboard
                   </Heading>
                 </View>
@@ -1020,30 +1047,32 @@ function StackNavigators({navigation}) {
             ),
             headerLeft: () => null,
             headerRight: () => (
-              <View style={{flexDirection: 'row', marginRight: 10}}>
-                <Text style={{fontSize: 12, color: 'white'}}>
+              <View style={{ flexDirection: "row", marginRight: 10 }}>
+                <Text style={{ fontSize: 12, color: "white" }}>
                   {lastSyncTime11}
                 </Text>
                 <TouchableOpacity
-                  style={{marginRight: 15}}
+                  style={{ marginRight: 15 }}
                   onPress={() => {
                     sync11();
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="sync"
-                    style={{fontSize: 30, color: 'white', marginTop: 5}}
+                    style={{ fontSize: 30, color: "white", marginTop: 5 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('NewSellerAdditionNotification');
+                    navigation.navigate("NewSellerAdditionNotification");
                     // navigation.dispatch(DrawerActions.openDrawer());
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="bell-outline"
                     style={{
                       fontSize: 30,
-                      color: 'white',
+                      color: "white",
                       marginRight: 5,
                       marginTop: 5,
                     }}
@@ -1051,11 +1080,12 @@ function StackNavigators({navigation}) {
                   {data.length ? (
                     <Badge
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         fontSize: 15,
-                        borderColor: 'white',
+                        borderColor: "white",
                         borderWidth: 1,
-                      }}>
+                      }}
+                    >
                       {data.length}
                     </Badge>
                   ) : null}
@@ -1069,20 +1099,21 @@ function StackNavigators({navigation}) {
           name="NewSellerPickup"
           component={NewSellerPickup}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Seller Pickups
                   </Heading>
                 </View>
@@ -1090,30 +1121,32 @@ function StackNavigators({navigation}) {
             ),
             headerLeft: () => null,
             headerRight: () => (
-              <View style={{flexDirection: 'row', marginRight: 10}}>
-                <Text style={{fontSize: 12, color: 'white'}}>
+              <View style={{ flexDirection: "row", marginRight: 10 }}>
+                <Text style={{ fontSize: 12, color: "white" }}>
                   {lastSyncTime11}
                 </Text>
                 <TouchableOpacity
-                  style={{marginRight: 15}}
+                  style={{ marginRight: 15 }}
                   onPress={() => {
                     sync11();
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="sync"
-                    style={{fontSize: 30, color: 'white', marginTop: 5}}
+                    style={{ fontSize: 30, color: "white", marginTop: 5 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('NewSellerAdditionNotification');
+                    navigation.navigate("NewSellerAdditionNotification");
                     // navigation.dispatch(DrawerActions.openDrawer());
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="bell-outline"
                     style={{
                       fontSize: 30,
-                      color: 'white',
+                      color: "white",
                       marginRight: 5,
                       marginTop: 5,
                     }}
@@ -1121,11 +1154,12 @@ function StackNavigators({navigation}) {
                   {data.length ? (
                     <Badge
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         fontSize: 15,
-                        borderColor: 'white',
+                        borderColor: "white",
                         borderWidth: 1,
-                      }}>
+                      }}
+                    >
                       {data.length}
                     </Badge>
                   ) : null}
@@ -1150,20 +1184,21 @@ function StackNavigators({navigation}) {
           name="SellerHandover"
           component={SellerHandover}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Seller Handover
                   </Heading>
                 </View>
@@ -1171,29 +1206,31 @@ function StackNavigators({navigation}) {
             ),
             headerLeft: () => null,
             headerRight: () => (
-              <View style={{flexDirection: 'row', marginRight: 10}}>
-                <Text style={{fontSize: 12, color: 'white'}}>
+              <View style={{ flexDirection: "row", marginRight: 10 }}>
+                <Text style={{ fontSize: 12, color: "white" }}>
                   {lastSyncTime11}
                 </Text>
                 <TouchableOpacity
-                  style={{marginRight: 15}}
+                  style={{ marginRight: 15 }}
                   onPress={() => {
                     sync11();
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="sync"
-                    style={{fontSize: 30, color: 'white', marginTop: 5}}
+                    style={{ fontSize: 30, color: "white", marginTop: 5 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('NewSellerAdditionNotification');
-                  }}>
+                    navigation.navigate("NewSellerAdditionNotification");
+                  }}
+                >
                   <MaterialIcons
                     name="bell-outline"
                     style={{
                       fontSize: 30,
-                      color: 'white',
+                      color: "white",
                       marginRight: 5,
                       marginTop: 5,
                     }}
@@ -1201,11 +1238,12 @@ function StackNavigators({navigation}) {
                   {data.length ? (
                     <Badge
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         fontSize: 15,
-                        borderColor: 'white',
+                        borderColor: "white",
                         borderWidth: 1,
-                      }}>
+                      }}
+                    >
                       {data.length}
                     </Badge>
                   ) : null}
@@ -1218,20 +1256,21 @@ function StackNavigators({navigation}) {
           name="HandoverShipment"
           component={HandoverShipment}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Shipment
                   </Heading>
                 </View>
@@ -1239,29 +1278,31 @@ function StackNavigators({navigation}) {
             ),
             headerLeft: () => null,
             headerRight: () => (
-              <View style={{flexDirection: 'row', marginRight: 10}}>
-                <Text style={{fontSize: 12, color: 'white'}}>
+              <View style={{ flexDirection: "row", marginRight: 10 }}>
+                <Text style={{ fontSize: 12, color: "white" }}>
                   {lastSyncTime11}
                 </Text>
                 <TouchableOpacity
-                  style={{marginRight: 15}}
+                  style={{ marginRight: 15 }}
                   onPress={() => {
                     sync11();
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="sync"
-                    style={{fontSize: 30, color: 'white', marginTop: 5}}
+                    style={{ fontSize: 30, color: "white", marginTop: 5 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('NewSellerAdditionNotification');
-                  }}>
+                    navigation.navigate("NewSellerAdditionNotification");
+                  }}
+                >
                   <MaterialIcons
                     name="bell-outline"
                     style={{
                       fontSize: 30,
-                      color: 'white',
+                      color: "white",
                       marginRight: 5,
                       marginTop: 5,
                     }}
@@ -1269,11 +1310,12 @@ function StackNavigators({navigation}) {
                   {data.length ? (
                     <Badge
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         fontSize: 15,
-                        borderColor: 'white',
+                        borderColor: "white",
                         borderWidth: 1,
-                      }}>
+                      }}
+                    >
                       {data.length}
                     </Badge>
                   ) : null}
@@ -1286,20 +1328,21 @@ function StackNavigators({navigation}) {
           name="OpenBags"
           component={OpenBags}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Open Bags
                   </Heading>
                 </View>
@@ -1307,29 +1350,31 @@ function StackNavigators({navigation}) {
             ),
             headerLeft: () => null,
             headerRight: () => (
-              <View style={{flexDirection: 'row', marginRight: 10}}>
-                <Text style={{fontSize: 12, color: 'white'}}>
+              <View style={{ flexDirection: "row", marginRight: 10 }}>
+                <Text style={{ fontSize: 12, color: "white" }}>
                   {lastSyncTime11}
                 </Text>
                 <TouchableOpacity
-                  style={{marginRight: 15}}
+                  style={{ marginRight: 15 }}
                   onPress={() => {
                     sync11();
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="sync"
-                    style={{fontSize: 30, color: 'white', marginTop: 5}}
+                    style={{ fontSize: 30, color: "white", marginTop: 5 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('NewSellerAdditionNotification');
-                  }}>
+                    navigation.navigate("NewSellerAdditionNotification");
+                  }}
+                >
                   <MaterialIcons
                     name="bell-outline"
                     style={{
                       fontSize: 30,
-                      color: 'white',
+                      color: "white",
                       marginRight: 5,
                       marginTop: 5,
                     }}
@@ -1337,11 +1382,12 @@ function StackNavigators({navigation}) {
                   {data.length ? (
                     <Badge
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         fontSize: 15,
-                        borderColor: 'white',
+                        borderColor: "white",
                         borderWidth: 1,
-                      }}>
+                      }}
+                    >
                       {data.length}
                     </Badge>
                   ) : null}
@@ -1354,20 +1400,21 @@ function StackNavigators({navigation}) {
           name="PendingHandover"
           component={PendingHandover}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Pending Handover
                   </Heading>
                 </View>
@@ -1375,29 +1422,31 @@ function StackNavigators({navigation}) {
             ),
             headerLeft: () => null,
             headerRight: () => (
-              <View style={{flexDirection: 'row', marginRight: 10}}>
-                <Text style={{fontSize: 12, color: 'white'}}>
+              <View style={{ flexDirection: "row", marginRight: 10 }}>
+                <Text style={{ fontSize: 12, color: "white" }}>
                   {lastSyncTime11}
                 </Text>
                 <TouchableOpacity
-                  style={{marginRight: 15}}
+                  style={{ marginRight: 15 }}
                   onPress={() => {
                     sync11();
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="sync"
-                    style={{fontSize: 30, color: 'white', marginTop: 5}}
+                    style={{ fontSize: 30, color: "white", marginTop: 5 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('NewSellerAdditionNotification');
-                  }}>
+                    navigation.navigate("NewSellerAdditionNotification");
+                  }}
+                >
                   <MaterialIcons
                     name="bell-outline"
                     style={{
                       fontSize: 30,
-                      color: 'white',
+                      color: "white",
                       marginRight: 5,
                       marginTop: 5,
                     }}
@@ -1405,11 +1454,12 @@ function StackNavigators({navigation}) {
                   {data.length ? (
                     <Badge
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         fontSize: 15,
-                        borderColor: 'white',
+                        borderColor: "white",
                         borderWidth: 1,
-                      }}>
+                      }}
+                    >
                       {data.length}
                     </Badge>
                   ) : null}
@@ -1422,20 +1472,21 @@ function StackNavigators({navigation}) {
           name="PendingWork"
           component={PendingWork}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Pending Work
                   </Heading>
                 </View>
@@ -1443,29 +1494,31 @@ function StackNavigators({navigation}) {
             ),
             headerLeft: () => null,
             headerRight: () => (
-              <View style={{flexDirection: 'row', marginRight: 10}}>
-                <Text style={{fontSize: 12, color: 'white'}}>
+              <View style={{ flexDirection: "row", marginRight: 10 }}>
+                <Text style={{ fontSize: 12, color: "white" }}>
                   {lastSyncTime11}
                 </Text>
                 <TouchableOpacity
-                  style={{marginRight: 15}}
+                  style={{ marginRight: 15 }}
                   onPress={() => {
                     sync11();
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="sync"
-                    style={{fontSize: 30, color: 'white', marginTop: 5}}
+                    style={{ fontSize: 30, color: "white", marginTop: 5 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('NewSellerAdditionNotification');
-                  }}>
+                    navigation.navigate("NewSellerAdditionNotification");
+                  }}
+                >
                   <MaterialIcons
                     name="bell-outline"
                     style={{
                       fontSize: 30,
-                      color: 'white',
+                      color: "white",
                       marginRight: 5,
                       marginTop: 5,
                     }}
@@ -1473,11 +1526,12 @@ function StackNavigators({navigation}) {
                   {data.length ? (
                     <Badge
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         fontSize: 15,
-                        borderColor: 'white',
+                        borderColor: "white",
                         borderWidth: 1,
-                      }}>
+                      }}
+                    >
                       {data.length}
                     </Badge>
                   ) : null}
@@ -1490,20 +1544,21 @@ function StackNavigators({navigation}) {
           name="NotPicked"
           component={NotPicked}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Pending Work
                   </Heading>
                 </View>
@@ -1511,29 +1566,31 @@ function StackNavigators({navigation}) {
             ),
             headerLeft: () => null,
             headerRight: () => (
-              <View style={{flexDirection: 'row', marginRight: 10}}>
-                <Text style={{fontSize: 12, color: 'white'}}>
+              <View style={{ flexDirection: "row", marginRight: 10 }}>
+                <Text style={{ fontSize: 12, color: "white" }}>
                   {lastSyncTime11}
                 </Text>
                 <TouchableOpacity
-                  style={{marginRight: 15}}
+                  style={{ marginRight: 15 }}
                   onPress={() => {
                     sync11();
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="sync"
-                    style={{fontSize: 30, color: 'white', marginTop: 5}}
+                    style={{ fontSize: 30, color: "white", marginTop: 5 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('NewSellerAdditionNotification');
-                  }}>
+                    navigation.navigate("NewSellerAdditionNotification");
+                  }}
+                >
                   <MaterialIcons
                     name="bell-outline"
                     style={{
                       fontSize: 30,
-                      color: 'white',
+                      color: "white",
                       marginRight: 5,
                       marginTop: 5,
                     }}
@@ -1541,11 +1598,12 @@ function StackNavigators({navigation}) {
                   {data.length ? (
                     <Badge
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         fontSize: 15,
-                        borderColor: 'white',
+                        borderColor: "white",
                         borderWidth: 1,
-                      }}>
+                      }}
+                    >
                       {data.length}
                     </Badge>
                   ) : null}
@@ -1558,20 +1616,21 @@ function StackNavigators({navigation}) {
           name="NotDelivered"
           component={NotDelivered}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Pending Work
                   </Heading>
                 </View>
@@ -1579,29 +1638,31 @@ function StackNavigators({navigation}) {
             ),
             headerLeft: () => null,
             headerRight: () => (
-              <View style={{flexDirection: 'row', marginRight: 10}}>
-                <Text style={{fontSize: 12, color: 'white'}}>
+              <View style={{ flexDirection: "row", marginRight: 10 }}>
+                <Text style={{ fontSize: 12, color: "white" }}>
                   {lastSyncTime11}
                 </Text>
                 <TouchableOpacity
-                  style={{marginRight: 15}}
+                  style={{ marginRight: 15 }}
                   onPress={() => {
                     sync11();
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="sync"
-                    style={{fontSize: 30, color: 'white', marginTop: 5}}
+                    style={{ fontSize: 30, color: "white", marginTop: 5 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('NewSellerAdditionNotification');
-                  }}>
+                    navigation.navigate("NewSellerAdditionNotification");
+                  }}
+                >
                   <MaterialIcons
                     name="bell-outline"
                     style={{
                       fontSize: 30,
-                      color: 'white',
+                      color: "white",
                       marginRight: 5,
                       marginTop: 5,
                     }}
@@ -1609,11 +1670,12 @@ function StackNavigators({navigation}) {
                   {data.length ? (
                     <Badge
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         fontSize: 15,
-                        borderColor: 'white',
+                        borderColor: "white",
                         borderWidth: 1,
-                      }}>
+                      }}
+                    >
                       {data.length}
                     </Badge>
                   ) : null}
@@ -1626,20 +1688,21 @@ function StackNavigators({navigation}) {
           name="HandOverSummary"
           component={HandOverSummary}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Handover Summary
                   </Heading>
                 </View>
@@ -1647,29 +1710,31 @@ function StackNavigators({navigation}) {
             ),
             headerLeft: () => null,
             headerRight: () => (
-              <View style={{flexDirection: 'row', marginRight: 10}}>
-                <Text style={{fontSize: 12, color: 'white'}}>
+              <View style={{ flexDirection: "row", marginRight: 10 }}>
+                <Text style={{ fontSize: 12, color: "white" }}>
                   {lastSyncTime11}
                 </Text>
                 <TouchableOpacity
-                  style={{marginRight: 15}}
+                  style={{ marginRight: 15 }}
                   onPress={() => {
                     sync11();
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="sync"
-                    style={{fontSize: 30, color: 'white', marginTop: 5}}
+                    style={{ fontSize: 30, color: "white", marginTop: 5 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('NewSellerAdditionNotification');
-                  }}>
+                    navigation.navigate("NewSellerAdditionNotification");
+                  }}
+                >
                   <MaterialIcons
                     name="bell-outline"
                     style={{
                       fontSize: 30,
-                      color: 'white',
+                      color: "white",
                       marginRight: 5,
                       marginTop: 5,
                     }}
@@ -1677,11 +1742,12 @@ function StackNavigators({navigation}) {
                   {data.length ? (
                     <Badge
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         fontSize: 15,
-                        borderColor: 'white',
+                        borderColor: "white",
                         borderWidth: 1,
-                      }}>
+                      }}
+                    >
                       {data.length}
                     </Badge>
                   ) : null}
@@ -1695,20 +1761,21 @@ function StackNavigators({navigation}) {
           name="HandoverShipmentRTO"
           component={HandoverShipmentRTO}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Handover Scan
                   </Heading>
                 </View>
@@ -1716,29 +1783,31 @@ function StackNavigators({navigation}) {
             ),
             headerLeft: () => null,
             headerRight: () => (
-              <View style={{flexDirection: 'row', marginRight: 10}}>
-                <Text style={{fontSize: 12, color: 'white'}}>
+              <View style={{ flexDirection: "row", marginRight: 10 }}>
+                <Text style={{ fontSize: 12, color: "white" }}>
                   {lastSyncTime11}
                 </Text>
                 <TouchableOpacity
-                  style={{marginRight: 15}}
+                  style={{ marginRight: 15 }}
                   onPress={() => {
                     sync11();
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="sync"
-                    style={{fontSize: 30, color: 'white', marginTop: 5}}
+                    style={{ fontSize: 30, color: "white", marginTop: 5 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('NewSellerAdditionNotification');
-                  }}>
+                    navigation.navigate("NewSellerAdditionNotification");
+                  }}
+                >
                   <MaterialIcons
                     name="bell-outline"
                     style={{
                       fontSize: 30,
-                      color: 'white',
+                      color: "white",
                       marginRight: 5,
                       marginTop: 5,
                     }}
@@ -1746,11 +1815,12 @@ function StackNavigators({navigation}) {
                   {data.length ? (
                     <Badge
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         fontSize: 15,
-                        borderColor: 'white',
+                        borderColor: "white",
                         borderWidth: 1,
-                      }}>
+                      }}
+                    >
                       {data.length}
                     </Badge>
                   ) : null}
@@ -1764,20 +1834,21 @@ function StackNavigators({navigation}) {
           name="NewSellerSelection"
           component={NewSellerSelection}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Seller Summary
                   </Heading>
                 </View>
@@ -1785,29 +1856,31 @@ function StackNavigators({navigation}) {
             ),
             headerLeft: () => null,
             headerRight: () => (
-              <View style={{flexDirection: 'row', marginRight: 10}}>
-                <Text style={{fontSize: 12, color: 'white'}}>
+              <View style={{ flexDirection: "row", marginRight: 10 }}>
+                <Text style={{ fontSize: 12, color: "white" }}>
                   {lastSyncTime11}
                 </Text>
                 <TouchableOpacity
-                  style={{marginRight: 15}}
+                  style={{ marginRight: 15 }}
                   onPress={() => {
                     sync11();
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="sync"
-                    style={{fontSize: 30, color: 'white', marginTop: 5}}
+                    style={{ fontSize: 30, color: "white", marginTop: 5 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('NewSellerAdditionNotification');
-                  }}>
+                    navigation.navigate("NewSellerAdditionNotification");
+                  }}
+                >
                   <MaterialIcons
                     name="bell-outline"
                     style={{
                       fontSize: 30,
-                      color: 'white',
+                      color: "white",
                       marginRight: 5,
                       marginTop: 5,
                     }}
@@ -1815,11 +1888,12 @@ function StackNavigators({navigation}) {
                   {data.length ? (
                     <Badge
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         fontSize: 15,
-                        borderColor: 'white',
+                        borderColor: "white",
                         borderWidth: 1,
-                      }}>
+                      }}
+                    >
                       {data.length}
                     </Badge>
                   ) : null}
@@ -1833,20 +1907,21 @@ function StackNavigators({navigation}) {
           name="ShipmentBarcode"
           component={ShipmentBarcode}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Scan Products
                   </Heading>
                 </View>
@@ -1854,29 +1929,31 @@ function StackNavigators({navigation}) {
             ),
             headerLeft: () => null,
             headerRight: () => (
-              <View style={{flexDirection: 'row', marginRight: 10}}>
-                <Text style={{fontSize: 12, color: 'white'}}>
+              <View style={{ flexDirection: "row", marginRight: 10 }}>
+                <Text style={{ fontSize: 12, color: "white" }}>
                   {lastSyncTime11}
                 </Text>
                 <TouchableOpacity
-                  style={{marginRight: 15}}
+                  style={{ marginRight: 15 }}
                   onPress={() => {
                     sync11();
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="sync"
-                    style={{fontSize: 30, color: 'white', marginTop: 5}}
+                    style={{ fontSize: 30, color: "white", marginTop: 5 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('NewSellerAdditionNotification');
-                  }}>
+                    navigation.navigate("NewSellerAdditionNotification");
+                  }}
+                >
                   <MaterialIcons
                     name="bell-outline"
                     style={{
                       fontSize: 30,
-                      color: 'white',
+                      color: "white",
                       marginRight: 5,
                       marginTop: 5,
                     }}
@@ -1884,11 +1961,12 @@ function StackNavigators({navigation}) {
                   {data.length ? (
                     <Badge
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         fontSize: 15,
-                        borderColor: 'white',
+                        borderColor: "white",
                         borderWidth: 1,
-                      }}>
+                      }}
+                    >
                       {data.length}
                     </Badge>
                   ) : null}
@@ -1901,20 +1979,21 @@ function StackNavigators({navigation}) {
           name="SellerDeliveries"
           component={SellerDeliveries}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Seller Deliveries
                   </Heading>
                 </View>
@@ -1922,29 +2001,31 @@ function StackNavigators({navigation}) {
             ),
             headerLeft: () => null,
             headerRight: () => (
-              <View style={{flexDirection: 'row', marginRight: 10}}>
-                <Text style={{fontSize: 12, color: 'white'}}>
+              <View style={{ flexDirection: "row", marginRight: 10 }}>
+                <Text style={{ fontSize: 12, color: "white" }}>
                   {lastSyncTime11}
                 </Text>
                 <TouchableOpacity
-                  style={{marginRight: 15}}
+                  style={{ marginRight: 15 }}
                   onPress={() => {
                     sync11();
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="sync"
-                    style={{fontSize: 30, color: 'white', marginTop: 5}}
+                    style={{ fontSize: 30, color: "white", marginTop: 5 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('NewSellerAdditionNotification');
-                  }}>
+                    navigation.navigate("NewSellerAdditionNotification");
+                  }}
+                >
                   <MaterialIcons
                     name="bell-outline"
                     style={{
                       fontSize: 30,
-                      color: 'white',
+                      color: "white",
                       marginRight: 5,
                       marginTop: 5,
                     }}
@@ -1952,11 +2033,12 @@ function StackNavigators({navigation}) {
                   {data.length ? (
                     <Badge
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         fontSize: 15,
-                        borderColor: 'white',
+                        borderColor: "white",
                         borderWidth: 1,
-                      }}>
+                      }}
+                    >
                       {data.length}
                     </Badge>
                   ) : null}
@@ -1969,20 +2051,21 @@ function StackNavigators({navigation}) {
           name="SellerHandoverSelection"
           component={SellerHandoverSelection}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Seller Handover
                   </Heading>
                 </View>
@@ -1990,29 +2073,31 @@ function StackNavigators({navigation}) {
             ),
             headerLeft: () => null,
             headerRight: () => (
-              <View style={{flexDirection: 'row', marginRight: 10}}>
-                <Text style={{fontSize: 12, color: 'white'}}>
+              <View style={{ flexDirection: "row", marginRight: 10 }}>
+                <Text style={{ fontSize: 12, color: "white" }}>
                   {lastSyncTime11}
                 </Text>
                 <TouchableOpacity
-                  style={{marginRight: 15}}
+                  style={{ marginRight: 15 }}
                   onPress={() => {
                     sync11();
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="sync"
-                    style={{fontSize: 30, color: 'white', marginTop: 5}}
+                    style={{ fontSize: 30, color: "white", marginTop: 5 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('NewSellerAdditionNotification');
-                  }}>
+                    navigation.navigate("NewSellerAdditionNotification");
+                  }}
+                >
                   <MaterialIcons
                     name="bell-outline"
                     style={{
                       fontSize: 30,
-                      color: 'white',
+                      color: "white",
                       marginRight: 5,
                       marginTop: 5,
                     }}
@@ -2020,11 +2105,12 @@ function StackNavigators({navigation}) {
                   {data.length ? (
                     <Badge
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         fontSize: 15,
-                        borderColor: 'white',
+                        borderColor: "white",
                         borderWidth: 1,
-                      }}>
+                      }}
+                    >
                       {data.length}
                     </Badge>
                   ) : null}
@@ -2037,20 +2123,21 @@ function StackNavigators({navigation}) {
           name="ScanShipment"
           component={ScanShipment}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Scan Shipment
                   </Heading>
                 </View>
@@ -2058,29 +2145,31 @@ function StackNavigators({navigation}) {
             ),
             headerLeft: () => null,
             headerRight: () => (
-              <View style={{flexDirection: 'row', marginRight: 10}}>
-                <Text style={{fontSize: 12, color: 'white'}}>
+              <View style={{ flexDirection: "row", marginRight: 10 }}>
+                <Text style={{ fontSize: 12, color: "white" }}>
                   {lastSyncTime11}
                 </Text>
                 <TouchableOpacity
-                  style={{marginRight: 15}}
+                  style={{ marginRight: 15 }}
                   onPress={() => {
                     sync11();
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="sync"
-                    style={{fontSize: 30, color: 'white', marginTop: 5}}
+                    style={{ fontSize: 30, color: "white", marginTop: 5 }}
                   />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('NewSellerAdditionNotification');
-                  }}>
+                    navigation.navigate("NewSellerAdditionNotification");
+                  }}
+                >
                   <MaterialIcons
                     name="bell-outline"
                     style={{
                       fontSize: 30,
-                      color: 'white',
+                      color: "white",
                       marginRight: 5,
                       marginTop: 5,
                     }}
@@ -2088,11 +2177,12 @@ function StackNavigators({navigation}) {
                   {data.length ? (
                     <Badge
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         fontSize: 15,
-                        borderColor: 'white',
+                        borderColor: "white",
                         borderWidth: 1,
-                      }}>
+                      }}
+                    >
                       {data.length}
                     </Badge>
                   ) : null}
@@ -2105,20 +2195,21 @@ function StackNavigators({navigation}) {
           name="CollectPOD"
           component={CollectPOD}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Seller Deliveries
                   </Heading>
                 </View>
@@ -2126,7 +2217,7 @@ function StackNavigators({navigation}) {
             ),
             headerLeft: () => null,
             headerRight: () => (
-              <View style={{flexDirection: 'row', marginRight: 10}}>
+              <View style={{ flexDirection: "row", marginRight: 10 }}>
                 {/* <Text style={{fontSize: 12, color: 'white'}}>{lastSyncTime11}</Text>
                 <TouchableOpacity
                   style={{marginRight: 15}}
@@ -2140,13 +2231,14 @@ function StackNavigators({navigation}) {
                 </TouchableOpacity> */}
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('NewSellerAdditionNotification');
-                  }}>
+                    navigation.navigate("NewSellerAdditionNotification");
+                  }}
+                >
                   <MaterialIcons
                     name="bell-outline"
                     style={{
                       fontSize: 30,
-                      color: 'white',
+                      color: "white",
                       marginRight: 5,
                       marginTop: 5,
                     }}
@@ -2154,11 +2246,12 @@ function StackNavigators({navigation}) {
                   {data.length ? (
                     <Badge
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         fontSize: 15,
-                        borderColor: 'white',
+                        borderColor: "white",
                         borderWidth: 1,
-                      }}>
+                      }}
+                    >
                       {data.length}
                     </Badge>
                   ) : null}
@@ -2171,20 +2264,21 @@ function StackNavigators({navigation}) {
           name="Dispatch"
           component={Dispatch}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Bag to Dispatch
                   </Heading>
                 </View>
@@ -2198,20 +2292,21 @@ function StackNavigators({navigation}) {
           name="MapScreen"
           component={MapScreen}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Map Navigation
                   </Heading>
                 </View>
@@ -2219,7 +2314,7 @@ function StackNavigators({navigation}) {
             ),
             headerLeft: () => null,
             headerRight: () => (
-              <View style={{flexDirection: 'row', marginRight: 10}}>
+              <View style={{ flexDirection: "row", marginRight: 10 }}>
                 {/* <TouchableOpacity
                   style={{marginRight: 15}}
                   onPress={() => {
@@ -2232,26 +2327,56 @@ function StackNavigators({navigation}) {
                 {/* </TouchableOpacity> */}
                 <TouchableOpacity
                   onPress={() => {
-                    navigation.navigate('NewSellerAdditionNotification');
-                  }}>
+                    navigation.navigate("NewSellerAdditionNotification");
+                  }}
+                >
                   <MaterialIcons
                     name="bell-outline"
-                    style={{fontSize: 30, color: 'white', marginRight: 5}}
+                    style={{ fontSize: 30, color: "white", marginRight: 5 }}
                   />
                   {data.length ? (
                     <Badge
                       style={{
-                        position: 'absolute',
+                        position: "absolute",
                         fontSize: 15,
-                        borderColor: 'white',
+                        borderColor: "white",
                         borderWidth: 1,
-                      }}>
+                      }}
+                    >
                       {data.length}
                     </Badge>
                   ) : null}
                 </TouchableOpacity>
               </View>
             ),
+          }}
+        />
+
+        <Stack.Screen
+          name="TripHistory"
+          component={TripHistory}
+          options={{
+            headerTitle: (props) => (
+              <NativeBaseProvider>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginLeft: -15,
+                  }}
+                >
+                  <MaterialIcons
+                    name="menu"
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
+                    TripHistory
+                  </Heading>
+                </View>
+              </NativeBaseProvider>
+            ),
+            headerLeft: () => null,
           }}
         />
 
@@ -2267,20 +2392,21 @@ function StackNavigators({navigation}) {
           name="POD"
           component={POD}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Pickup Summary
                   </Heading>
                 </View>
@@ -2294,47 +2420,22 @@ function StackNavigators({navigation}) {
           name="MyTrip"
           component={MyTrip}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     My Trip
-                  </Heading>
-                </View>
-              </NativeBaseProvider>
-            ),
-            headerLeft: () => null,
-          }}
-        />
-        <Stack.Screen
-          name="TripHistory"
-          component={TripHistory}
-          options={{
-            headerTitle: props => (
-              <NativeBaseProvider>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginLeft: -15,
-                  }}>
-                  <MaterialIcons
-                    name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
-                    onPress={() => navigation.toggleDrawer()}
-                  />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
-                    TripHistory
                   </Heading>
                 </View>
               </NativeBaseProvider>
@@ -2347,20 +2448,21 @@ function StackNavigators({navigation}) {
           name="StartEndDetails"
           component={StartEndDetails}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Trip Details
                   </Heading>
                 </View>
@@ -2374,20 +2476,21 @@ function StackNavigators({navigation}) {
           name="NewSellerAdditionNotification"
           component={NewSellerAdditionNotification}
           options={{
-            headerTitle: props => (
+            headerTitle: (props) => (
               <NativeBaseProvider>
                 <View
                   style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
+                    flexDirection: "row",
+                    alignItems: "center",
                     marginLeft: -15,
-                  }}>
+                  }}
+                >
                   <MaterialIcons
                     name="menu"
-                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
                     onPress={() => navigation.toggleDrawer()}
                   />
-                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
                     Notification
                   </Heading>
                 </View>
@@ -2404,15 +2507,16 @@ function StackNavigators({navigation}) {
             StyleSheet.absoluteFillObject,
             {
               flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
+              justifyContent: "center",
+              alignItems: "center",
               zIndex: 1,
-              backgroundColor: 'rgba(0,0,0,0.65)',
+              backgroundColor: "rgba(0,0,0,0.65)",
             },
-          ]}>
-          <Text style={{color: 'white'}}>Syncing Data. Please Wait...</Text>
+          ]}
+        >
+          <Text style={{ color: "white" }}>Syncing Data. Please Wait...</Text>
           <Lottie
-            source={require('./src/assets/loading11.json')}
+            source={require("./src/assets/loading11.json")}
             autoPlay
             loop
             speed={1}
@@ -2424,35 +2528,39 @@ function StackNavigators({navigation}) {
   );
 }
 
-function CustomDrawerContent({navigation}) {
+function CustomDrawerContent({ navigation }) {
   const dispatch = useDispatch();
 
-  const [language, setLanguage] = useState('');
+  const [language, setLanguage] = useState("");
 
-  const email = useSelector(state => state.user.user_email);
-  const id = useSelector(state => state.user.user_id);
-  const name = useSelector(state => state.user.user_name);
+  const email = useSelector((state) => state.user.user_email);
+  const id = useSelector((state) => state.user.user_id);
+  const name = useSelector((state) => state.user.user_name);
+  const idToken = useSelector((state) => state.user.idToken);
+  const token = useSelector((state) => state.user.token);
 
   const LogoutHandle = async () => {
     try {
-      await AsyncStorage.removeItem('userId');
-      await AsyncStorage.removeItem('name');
-      await AsyncStorage.removeItem('email');
+      await AsyncStorage.removeItem("userId");
+      await AsyncStorage.removeItem("name");
+      await AsyncStorage.removeItem("email");
+      await AsyncStorage.removeItem("token");
 
-      dispatch(setUserId(''));
-      dispatch(setUserEmail(''));
-      dispatch(setUserName(''));
+      dispatch(setUserId(""));
+      dispatch(setUserEmail(""));
+      dispatch(setUserName(""));
+      dispatch(setToken(""));
     } catch (e) {
       console.log(e);
     }
     try {
       await AsyncStorage.multiRemove(await AsyncStorage.getAllKeys());
-      console.log('AsyncStorage cleared successfully!');
+      console.log("AsyncStorage cleared successfully!");
     } catch (error) {
-      console.error('Error clearing AsyncStorage:', error);
+      console.error("Error clearing AsyncStorage:", error);
     }
 
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
         "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
         [],
@@ -2465,21 +2573,47 @@ function CustomDrawerContent({navigation}) {
             tx.executeSql(`DROP TABLE IF EXISTS ${tableName}`);
           }
           if (i === result.rows.length) {
-            console.log('SQlite DB cleared successfully!');
+            console.log("SQlite DB cleared successfully!");
           }
-        },
+        }
       );
     });
+
+    // await logout(
+    //   { issuer: "https://uacc.logistiex.com/realms/Logistiex-Demo" },
+    //   {
+    //     idToken: idToken,
+    //     postLogoutRedirectUrl: "com.demoproject.app://Login",
+    //   }
+    // )
+    //   .then((result) => {
+    //     console.log(result);
+    //   })
+    //   .catch((err) => {
+    //     console.log("Logout Error", err);
+    //   });
+
+    // await revoke(config, {
+    //   tokenToRevoke: token,
+    //   includeBasicAuth: true,
+    //   sendClientId: true,
+    // })
+    //   .then((result) => {
+    //     console.log(result);
+    //   })
+    //   .catch((err) => {
+    //     console.log("Logout Error", err);
+    //   });
   };
 
   return (
     <NativeBaseProvider>
       {email ? (
-        <Box pt={4} px={4} key={'extra' + email}>
+        <Box pt={4} px={4} key={"extra" + email}>
           <Avatar bg="#004aad" alignSelf="center" size="xl">
             <MaterialIcons
               name="account"
-              style={{fontSize: 60, color: 'white'}}
+              style={{ fontSize: 60, color: "white" }}
             />
           </Avatar>
           <Heading alignSelf="center" mt={2}>
@@ -2494,20 +2628,21 @@ function CustomDrawerContent({navigation}) {
                 CommonActions.reset({
                   index: 1,
                   routes: [
-                    {name: 'Login'},
+                    { name: "Login" },
                     // {
                     //   name: 'Profile',
                     //   params: { user: 'jane' },
                     // },
                   ],
-                }),
+                })
               );
 
               // navigation.navigate('Login');
               navigation.closeDrawer();
             }}
             mt={2}
-            style={{backgroundColor: '#004aad'}}>
+            style={{ backgroundColor: "#004aad" }}
+          >
             Logout
           </Button>
         </Box>
@@ -2519,19 +2654,20 @@ function CustomDrawerContent({navigation}) {
                 CommonActions.reset({
                   index: 1,
                   routes: [
-                    {name: 'Login'},
+                    { name: "Login" },
                     // {
                     //   name: 'Profile',
                     //   params: { user: 'jane' },
                     // },
                   ],
-                }),
+                })
               );
               // navigation.navigate('Login');
               navigation.closeDrawer();
             }}
             mt={2}
-            style={{backgroundColor: '#004aad'}}>
+            style={{ backgroundColor: "#004aad" }}
+          >
             Login
           </Button>
         </Box>
@@ -2543,33 +2679,36 @@ function CustomDrawerContent({navigation}) {
             <Button
               variant="outline"
               onPress={() => {
-                navigation.navigate('Main');
+                navigation.navigate("Main");
                 navigation.closeDrawer();
               }}
-              style={{color: '#004aad', borderColor: '#004aad'}}>
-              <Text style={{color: '#004aad'}}>Home</Text>
+              style={{ color: "#004aad", borderColor: "#004aad" }}
+            >
+              <Text style={{ color: "#004aad" }}>Home</Text>
             </Button>
             <Button
               variant="outline"
               onPress={() => {
-                navigation.navigate('MyTrip', {userId: id});
+                navigation.navigate("MyTrip", { userId: id });
                 navigation.closeDrawer();
               }}
               mt={4}
-              style={{color: '#004aad', borderColor: '#004aad'}}>
-              <Text style={{color: '#004aad'}}>My Trip</Text>
+              style={{ color: "#004aad", borderColor: "#004aad" }}
+            >
+              <Text style={{ color: "#004aad" }}>My Trip</Text>
             </Button>
             <Button
               variant="outline"
               onPress={() => {
-                navigation.navigate('NewSellerAdditionNotification', {
+                navigation.navigate("NewSellerAdditionNotification", {
                   userId: id,
                 });
                 navigation.closeDrawer();
               }}
               mt={4}
-              style={{color: '#004aad', borderColor: '#004aad'}}>
-              <Text style={{color: '#004aad'}}> Additional Workload</Text>
+              style={{ color: "#004aad", borderColor: "#004aad" }}
+            >
+              <Text style={{ color: "#004aad" }}> Additional Workload</Text>
             </Button>
           </Box>
         </View>
@@ -2581,9 +2720,10 @@ function CustomDrawerContent({navigation}) {
           minWidth="200"
           accessibilityLabel="Choose Language"
           placeholder="Choose Language"
-          _selectedItem={{bg: '#004aad', color: 'white'}}
+          _selectedItem={{ bg: "#004aad", color: "white" }}
           mt={0}
-          onValueChange={itemValue => setLanguage(itemValue)}>
+          onValueChange={(itemValue) => setLanguage(itemValue)}
+        >
           <Select.Item label="English (EN)" value="English" />
           <Select.Item label="Hindi (HI)" value="Hindi" />
           <Select.Item label="Marathi (MT)" value="Marathi" />
@@ -2592,25 +2732,26 @@ function CustomDrawerContent({navigation}) {
           <Select.Item label="Tamil (TL)" value="Tamil" />
         </Select>
       </Box>
-      <Center style={{bottom: 0, position: 'absolute', left: '15%'}}>
+      <Center style={{ bottom: 0, position: "absolute", left: "15%" }}>
         <Image
-          style={{width: 200, height: 150}}
-          source={require('./src/assets/image.png')}
-          alt={'Logo Image'}
+          style={{ width: 200, height: 150 }}
+          source={require("./src/assets/image.png")}
+          alt={"Logo Image"}
         />
       </Center>
     </NativeBaseProvider>
   );
 }
 
-export default function App({navigation}) {
+export default function App({ navigation }) {
   return (
     <Provider store={store}>
       <NavigationContainer>
         <Drawer.Navigator
           initialRouteName="home"
-          key={'home'}
-          drawerContent={props => <CustomDrawerContent {...props} />}>
+          key={"home"}
+          drawerContent={(props) => <CustomDrawerContent {...props} />}
+        >
           <Drawer.Screen
             name="home"
             component={StackNavigators}
