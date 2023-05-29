@@ -135,6 +135,7 @@ export default function Login() {
           setLoginClicked(false);
           setMessage(1);
           setShowModal(true);
+         await AsyncStorage.setItem('acceptedItemData11',JSON.stringify({}));
           await AsyncStorage.setItem(
             'userId',
             response.data.userDetails.userId,
