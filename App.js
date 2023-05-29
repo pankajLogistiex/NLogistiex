@@ -72,6 +72,7 @@ import ReturnHandoverRejectionTag from './src/components/newSeller/ReturnHandove
 import HandoverShipmentRTO from './src/components/newSeller/HandoverShipmentRTO';
 import {LogBox} from 'react-native';
 import MyTrip from './src/components/MyTrip';
+import TripHistory from './src/components/TripHistory';
 import {backendUrl} from './src/utils/backendUrl';
 import messaging from '@react-native-firebase/messaging';
 import {setIsNewSync} from './src/redux/slice/isNewSync';
@@ -2308,6 +2309,32 @@ function StackNavigators({navigation}) {
                   />
                   <Heading style={{color: 'white', marginLeft: 10}} size="md">
                     My Trip
+                  </Heading>
+                </View>
+              </NativeBaseProvider>
+            ),
+            headerLeft: () => null,
+          }}
+        />
+        <Stack.Screen
+          name="TripHistory"
+          component={TripHistory}
+          options={{
+            headerTitle: props => (
+              <NativeBaseProvider>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginLeft: -15,
+                  }}>
+                  <MaterialIcons
+                    name="menu"
+                    style={{fontSize: 30, marginLeft: 10, color: 'white'}}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{color: 'white', marginLeft: 10}} size="md">
+                    TripHistory
                   </Heading>
                 </View>
               </NativeBaseProvider>
