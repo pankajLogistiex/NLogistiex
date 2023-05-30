@@ -2540,6 +2540,20 @@ function CustomDrawerContent({ navigation }) {
   const token = useSelector((state) => state.user.token);
 
   const LogoutHandle = async () => {
+    await logout(
+      { issuer: "https://uacc.logistiex.com/realms/Logistiex-Demo" },
+      {
+        idToken: idToken,
+        postLogoutRedirectUrl: "com.demoproject.app://Login",
+      }
+    )
+      .then((result) => {
+        console.log(result);
+      })
+      .catch((err) => {
+        console.log("Logout Error", err);
+      });
+
     try {
       await AsyncStorage.removeItem("userId");
       await AsyncStorage.removeItem("name");
@@ -2578,32 +2592,6 @@ function CustomDrawerContent({ navigation }) {
         }
       );
     });
-
-    // await logout(
-    //   { issuer: "https://uacc.logistiex.com/realms/Logistiex-Demo" },
-    //   {
-    //     idToken: idToken,
-    //     postLogoutRedirectUrl: "com.demoproject.app://Login",
-    //   }
-    // )
-    //   .then((result) => {
-    //     console.log(result);
-    //   })
-    //   .catch((err) => {
-    //     console.log("Logout Error", err);
-    //   });
-
-    // await revoke(config, {
-    //   tokenToRevoke: token,
-    //   includeBasicAuth: true,
-    //   sendClientId: true,
-    // })
-    //   .then((result) => {
-    //     console.log(result);
-    //   })
-    //   .catch((err) => {
-    //     console.log("Logout Error", err);
-    //   });
   };
 
   return (
