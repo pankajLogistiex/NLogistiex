@@ -7,29 +7,29 @@ import {
   Button,
   Modal,
   Input,
-} from 'native-base';
+} from "native-base";
 import {
   StyleSheet,
   ScrollView,
   View,
   ToastAndroid,
   ActivityIndicator,
-} from 'react-native';
-import {DataTable, Searchbar, Text, Card} from 'react-native-paper';
-import {openDatabase} from 'react-native-sqlite-storage';
-import React, {useEffect, useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
-import {Picker} from '@react-native-picker/picker';
-const db = openDatabase({name: 'rn_sqlite'});
-import GetLocation from 'react-native-get-location';
-import axios from 'axios';
-import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
-import {backendUrl} from '../../utils/backendUrl';
-import {useSelector} from 'react-redux';
+} from "react-native";
+import { DataTable, Searchbar, Text, Card } from "react-native-paper";
+import { openDatabase } from "react-native-sqlite-storage";
+import React, { useEffect, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import { Picker } from "@react-native-picker/picker";
+const db = openDatabase({ name: "rn_sqlite" });
+import GetLocation from "react-native-get-location";
+import axios from "axios";
+import RNAndroidLocationEnabler from "react-native-android-location-enabler";
+import { backendUrl } from "../../utils/backendUrl";
+import { useSelector } from "react-redux";
 
-const PendingHandover = ({route}) => {
+const PendingHandover = ({ route }) => {
   // const [data, setData] = useState([]);
-  const [selected, setSelected] = useState('Select Exception Reason');
+  const [selected, setSelected] = useState("Select Exception Reason");
   const navigation = useNavigation();
 
   const [data, setData] = useState([]);
@@ -37,14 +37,14 @@ const PendingHandover = ({route}) => {
   const [displayData, setDisplayData] = useState({});
   // const navigation = useNavigation();
 
-  const [keyword, setKeyword] = useState('');
+  const [keyword, setKeyword] = useState("");
   const [expected11, setExpected11] = useState(0);
   const [rejected11, setRejected11] = useState(0);
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [DropDownValue, setDropDownValue] = useState('');
+  const [DropDownValue, setDropDownValue] = useState("");
   const [totalPending, setTotalPending] = useState(0);
-  const [consignorCode, setConsignorCode] = useState('');
+  const [consignorCode, setConsignorCode] = useState("");
   const [showCloseBagModal, setShowCloseBagModal] = useState(false);
   const [latitude, setLatitude] = useState(0);
   const [data11, setData11] = useState([]);
@@ -54,7 +54,7 @@ const PendingHandover = ({route}) => {
   const [runSheetNumbers, setRunSheetNumbers] = useState([]);
   const [totalDone, setTotalDone] = useState(0);
 
-  const userId = useSelector(state => state.user.user_id);
+  const userId = useSelector((state) => state.user.user_id);
 
   useEffect(() => {
     current_location();
@@ -65,29 +65,29 @@ const PendingHandover = ({route}) => {
       enableHighAccuracy: true,
       timeout: 10000,
     })
-      .then(location => {
+      .then((location) => {
         setLatitude(location.latitude);
         setLongitude(location.longitude);
       })
-      .catch(error => {
+      .catch((error) => {
         RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
           interval: 10000,
           fastInterval: 5000,
         })
-          .then(status => {
+          .then((status) => {
             if (status) {
-              console.log('Location enabled');
+              console.log("Location enabled");
             }
           })
-          .catch(err => {
+          .catch((err) => {
             console.log(err);
           });
-        console.log('Location Lat long error', error);
+        console.log("Location Lat long error", error);
       });
   };
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
+    const unsubscribe = navigation.addListener("focus", () => {
       loadDetails();
       loadDetails112();
     });
@@ -95,8 +95,8 @@ const PendingHandover = ({route}) => {
   }, [navigation]);
 
   const loadDetails = () => {
-    db.transaction(tx => {
-      tx.executeSql('SELECT * FROM SyncSellerPickUp', [], (tx1, results) => {
+    db.transaction((tx) => {
+      tx.executeSql("SELECT * FROM SyncSellerPickUp", [], (tx1, results) => {
         let temp = [];
         var m = 0;
         for (let i = 0; i < results.rows.length; ++i) {
@@ -105,8 +105,8 @@ const PendingHandover = ({route}) => {
           // var consignorcode=results.rows.item(i).consignorCode;
           // var consignorName=results.rows.item(i).consignorName;
 
-          db.transaction(tx => {
-            db.transaction(tx => {
+          db.transaction((tx) => {
+            db.transaction((tx) => {
               tx.executeSql(
                 'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? ',
                 [results.rows.item(i).consignorCode],
@@ -126,14 +126,14 @@ const PendingHandover = ({route}) => {
                       };
                       // console.log(newData);
                       if (newData != null) {
-                        setDisplayData(prevData => ({
+                        setDisplayData((prevData) => ({
                           ...prevData,
                           ...newData,
                         }));
                       }
-                    },
+                    }
                   );
-                },
+                }
               );
             });
           });
@@ -141,8 +141,8 @@ const PendingHandover = ({route}) => {
         setData(temp);
       });
     });
-    db.transaction(tx => {
-      tx.executeSql('SELECT * FROM ShipmentFailure', [], (tx1, results) => {
+    db.transaction((tx) => {
+      tx.executeSql("SELECT * FROM ShipmentFailure", [], (tx1, results) => {
         let temp = [];
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
@@ -157,7 +157,7 @@ const PendingHandover = ({route}) => {
   //   }, [])
 
   const displayData11 = Object.keys(displayData)
-    .filter(sealID => sealID.toLowerCase().includes(keyword.toLowerCase()))
+    .filter((sealID) => sealID.toLowerCase().includes(keyword.toLowerCase()))
     .reduce((obj, key) => {
       obj[key] = displayData[key];
       return obj;
@@ -169,14 +169,14 @@ const PendingHandover = ({route}) => {
   //     { value: 'Shipment Not Traceable', label: 'Shipment Not Traceable' },
   //   ];
   function handleButtonPress(item) {
-    if (item == 'CNA') {
+    if (item == "CNA") {
       setModalVisible(false);
     }
     setDropDownValue(item);
   }
   const pendingHandover11 = () => {
     const DropDownValue112 = DropDownValue;
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? ',
         [consignorCode],
@@ -190,7 +190,7 @@ const PendingHandover = ({route}) => {
           };
           const tempHandoverStatus = [...handoverStatus];
           const conIndex = tempHandoverStatus.findIndex(
-            obj => obj.consignorCode === consignorCode,
+            (obj) => obj.consignorCode === consignorCode
           );
           if (conIndex != -1) {
             tempHandoverStatus[conIndex] = consignorData;
@@ -203,39 +203,39 @@ const PendingHandover = ({route}) => {
           for (var i = 0; i < results111.rows.length; i++) {
             if (
               !tempRunsheetArray.includes(
-                results111.rows.item(i).runSheetNumber,
+                results111.rows.item(i).runSheetNumber
               )
             ) {
               tempRunsheetArray.push(results111.rows.item(i).runSheetNumber);
             }
           }
           setRunSheetNumbers(tempRunsheetArray);
-        },
+        }
       );
     });
-    setDropDownValue('');
+    setDropDownValue("");
   };
   useEffect(() => {
     loadDetails112();
   }, []);
   const loadDetails112 = () => {
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery"  AND handoverStatus IS NULL',
         [],
         (tx1, results) => {
           setTotalPending(results.rows.length);
-        },
+        }
       );
     });
   };
 
   function updateQueryLocal(eventTime, rejectReason, consignorCode) {
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
         'UPDATE SellerMainScreenDetails SET handoverStatus=?, rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Delivery" AND handoverStatus IS Null And consignorCode=?',
         [
-          'pendingHandover',
+          "pendingHandover",
           rejectReason,
           eventTime,
           latitude,
@@ -245,9 +245,9 @@ const PendingHandover = ({route}) => {
         (tx1, results) => {
           console.log(results);
         },
-        error => {
-          console.log('Status Update Local DB bug', error);
-        },
+        (error) => {
+          console.log("Status Update Local DB bug", error);
+        }
       );
     });
   }
@@ -258,19 +258,21 @@ const PendingHandover = ({route}) => {
         updateQueryLocal(
           time11,
           handoverStatus[i]?.rejectReason,
-          handoverStatus[i]?.consignorCode,
+          handoverStatus[i]?.consignorCode
         );
       }
     } catch (error) {
-      console.log('==err====', error);
+      console.log("==err====", error);
     }
-    navigation.navigate('HandOverSummary');
+    navigation.navigate("HandOverSummary");
   }
 
   function closeHandover() {
     let time11 = new Date().valueOf();
-    console.log('===handover close data===', {
-      handoverStatus: handoverStatus,
+    console.log("===handover close data===", {
+      handoverStatus: handoverStatus.concat(
+        route.params.acceptedHandoverStatus
+      ),
       runsheets: runSheetNumbers,
       feUserID: userId,
       receivingTime: parseInt(time11),
@@ -278,7 +280,7 @@ const PendingHandover = ({route}) => {
       longitude: parseFloat(longitude),
     });
     axios
-      .post(backendUrl + 'SellerMainScreen/closeHandover', {
+      .post(backendUrl + "SellerMainScreen/closeHandover", {
         handoverStatus: handoverStatus,
         runsheets: runSheetNumbers,
         feUserID: userId,
@@ -286,13 +288,13 @@ const PendingHandover = ({route}) => {
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
       })
-      .then(response => {
+      .then((response) => {
         changeLocalStatus(time11);
-        ToastAndroid.show('Successfully Handover Closed', ToastAndroid.SHORT);
+        ToastAndroid.show("Successfully Handover Closed", ToastAndroid.SHORT);
       })
-      .catch(error => {
-        ToastAndroid.show('Somthing Went Wrong', ToastAndroid.SHORT);
-        console.error('Error:', error);
+      .catch((error) => {
+        ToastAndroid.show("Somthing Went Wrong", ToastAndroid.SHORT);
+        console.error("Error:", error);
       });
   }
 
@@ -302,28 +304,30 @@ const PendingHandover = ({route}) => {
         <ScrollView
           style={styles.homepage}
           showsVerticalScrollIndicator={true}
-          showsHorizontalScrollIndicator={false}>
+          showsHorizontalScrollIndicator={false}
+        >
           <Card>
             <DataTable>
               <DataTable.Header
                 style={{
-                  height: 'auto',
-                  backgroundColor: '#004aad',
+                  height: "auto",
+                  backgroundColor: "#004aad",
                   borderTopLeftRadius: 5,
                   borderTopRightRadius: 5,
-                }}>
-                <DataTable.Title style={{flex: 1.2}}>
-                  <Text style={{textAlign: 'center', color: 'white'}}>
+                }}
+              >
+                <DataTable.Title style={{ flex: 1.2 }}>
+                  <Text style={{ textAlign: "center", color: "white" }}>
                     Seller Name
                   </Text>
                 </DataTable.Title>
-                <DataTable.Title style={{flex: 1.2}}>
-                  <Text style={{textAlign: 'center', color: 'white'}}>
+                <DataTable.Title style={{ flex: 1.2 }}>
+                  <Text style={{ textAlign: "center", color: "white" }}>
                     Expected Deliveries
                   </Text>
                 </DataTable.Title>
-                <DataTable.Title style={{flex: 1.2}}>
-                  <Text style={{textAlign: 'center', color: 'white'}}>
+                <DataTable.Title style={{ flex: 1.2 }}>
+                  <Text style={{ textAlign: "center", color: "white" }}>
                     Pending Shipments
                   </Text>
                 </DataTable.Title>
@@ -340,23 +344,24 @@ const PendingHandover = ({route}) => {
                     <>
                       <DataTable.Row
                         style={{
-                          height: 'auto',
-                          backgroundColor: '#eeeeee',
+                          height: "auto",
+                          backgroundColor: "#eeeeee",
                           borderBottomWidth: 1,
                         }}
-                        key={consignorCode}>
-                        <DataTable.Cell style={{flex: 1.7}}>
+                        key={consignorCode}
+                      >
+                        <DataTable.Cell style={{ flex: 1.7 }}>
                           <Text style={styles.fontvalue}>
                             {displayData11[consignorCode].consignorName}
                           </Text>
                         </DataTable.Cell>
 
-                        <DataTable.Cell style={{flex: 1, marginRight: 5}}>
+                        <DataTable.Cell style={{ flex: 1, marginRight: 5 }}>
                           <Text style={styles.fontvalue}>
                             {displayData11[consignorCode].expected}
                           </Text>
                         </DataTable.Cell>
-                        <DataTable.Cell style={{flex: 1, marginRight: -45}}>
+                        <DataTable.Cell style={{ flex: 1, marginRight: -45 }}>
                           <Text style={styles.fontvalue}>
                             {displayData11[consignorCode].pending}
                           </Text>
@@ -375,30 +380,31 @@ const PendingHandover = ({route}) => {
                         size="lg"
                         bg="#004aad"
                         mb={4}
-                        mt={4}>
+                        mt={4}
+                      >
                         {handoverStatus.length > 0 &&
                         handoverStatus.filter(
-                          obj => obj.consignorCode === consignorCode,
+                          (obj) => obj.consignorCode === consignorCode
                         )[0]?.rejectReason
                           ? (data11
-                              ?.filter(d => d.applies_to.includes('PRHC'))
+                              ?.filter((d) => d.applies_to.includes("PRHC"))
                               .filter(
-                                obj =>
+                                (obj) =>
                                   obj.short_code ==
                                   handoverStatus.filter(
-                                    obj => obj.consignorCode === consignorCode,
-                                  )[0].rejectReason,
+                                    (obj) => obj.consignorCode === consignorCode
+                                  )[0].rejectReason
                               ))[0]?.description
-                          : 'Select Exception Reason'}
+                          : "Select Exception Reason"}
                       </Button>
                     </>
-                  ) : null,
+                  ) : null
                 )
               ) : (
                 <ActivityIndicator
                   size="large"
                   color="#004aad"
-                  style={{marginVertical: 15}}
+                  style={{ marginVertical: 15 }}
                 />
               )}
             </DataTable>
@@ -408,17 +414,18 @@ const PendingHandover = ({route}) => {
           isOpen={modalVisible}
           onClose={() => {
             setModalVisible(false);
-            setDropDownValue('');
+            setDropDownValue("");
           }}
-          size="lg">
+          size="lg"
+        >
           <Modal.Content maxWidth="350">
             <Modal.CloseButton />
             <Modal.Header>Pending Handover Reason</Modal.Header>
             <Modal.Body>
               {data11 &&
                 data11
-                  .filter(d => d.applies_to.includes('PRHC'))
-                  .map(d => (
+                  .filter((d) => d.applies_to.includes("PRHC"))
+                  .map((d) => (
                     <Button
                       key={d.short_code}
                       flex="1"
@@ -429,15 +436,17 @@ const PendingHandover = ({route}) => {
                       style={{
                         backgroundColor:
                           d.short_code === DropDownValue
-                            ? '#6666FF'
-                            : '#C8C8C8',
+                            ? "#6666FF"
+                            : "#C8C8C8",
                       }}
-                      onPress={() => handleButtonPress(d.short_code)}>
+                      onPress={() => handleButtonPress(d.short_code)}
+                    >
                       <Text
                         style={{
                           color:
-                            DropDownValue == d.short_code ? 'white' : 'black',
-                        }}>
+                            DropDownValue == d.short_code ? "white" : "black",
+                        }}
+                      >
                         {d.description}
                       </Text>
                     </Button>
@@ -451,7 +460,8 @@ const PendingHandover = ({route}) => {
                 onPress={() => {
                   pendingHandover11();
                   setModalVisible(false);
-                }}>
+                }}
+              >
                 Submit
               </Button>
             </Modal.Body>
@@ -460,17 +470,19 @@ const PendingHandover = ({route}) => {
         {displayData && data.length > 0 ? (
           <View
             style={{
-              width: '90%',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignSelf: 'center',
+              width: "90%",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignSelf: "center",
               marginTop: 10,
-            }}>
+            }}
+          >
             <Button
               w="48%"
               size="lg"
               bg="#004aad"
-              onPress={() => navigation.navigate('HandoverShipmentRTO')}>
+              onPress={() => navigation.navigate("HandoverShipmentRTO")}
+            >
               Resume Scanning
             </Button>
             {totalPending == totalDone ? (
@@ -478,7 +490,8 @@ const PendingHandover = ({route}) => {
                 w="48%"
                 size="lg"
                 bg="#004aad"
-                onPress={() => closeHandover()}>
+                onPress={() => closeHandover()}
+              >
                 Close Handover
               </Button>
             ) : (
@@ -488,10 +501,11 @@ const PendingHandover = ({route}) => {
                 bg="gray.300"
                 onPress={() =>
                   ToastAndroid.show(
-                    'All shipments not scanned',
-                    ToastAndroid.SHORT,
+                    "All shipments not scanned",
+                    ToastAndroid.SHORT
                   )
-                }>
+                }
+              >
                 Close Handover
               </Button>
             )}
@@ -499,9 +513,9 @@ const PendingHandover = ({route}) => {
         ) : null}
         <Center>
           <Image
-            style={{width: 150, height: 150}}
-            source={require('../../assets/image.png')}
-            alt={'Logo Image'}
+            style={{ width: 150, height: 150 }}
+            source={require("../../assets/image.png")}
+            alt={"Logo Image"}
           />
         </Center>
       </Box>
@@ -511,66 +525,66 @@ const PendingHandover = ({route}) => {
 export default PendingHandover;
 export const styles = StyleSheet.create({
   container112: {
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   tableHeader: {
-    backgroundColor: '#004aad',
-    alignItems: 'flex-start',
-    fontFamily: 'open sans',
+    backgroundColor: "#004aad",
+    alignItems: "flex-start",
+    fontFamily: "open sans",
     fontSize: 15,
-    color: 'white',
+    color: "white",
     margin: 1,
   },
   container222: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     zIndex: 1,
-    backgroundColor: 'rgba(0,0,0,0.2 )',
+    backgroundColor: "rgba(0,0,0,0.2 )",
   },
   normal: {
-    fontFamily: 'open sans',
-    fontWeight: 'normal',
-    color: '#eee',
+    fontFamily: "open sans",
+    fontWeight: "normal",
+    color: "#eee",
     marginTop: 27,
     paddingTop: 15,
     paddingBottom: 15,
-    backgroundColor: '#eee',
-    width: 'auto',
+    backgroundColor: "#eee",
+    width: "auto",
     borderRadius: 0,
-    alignContent: 'space-between',
+    alignContent: "space-between",
   },
   text: {
-    color: '#000',
-    fontWeight: 'bold',
+    color: "#000",
+    fontWeight: "bold",
     fontSize: 18,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
     paddingLeft: 20,
   },
   main: {
-    backgroundColor: '#004aad',
-    width: 'auto',
-    height: 'auto',
+    backgroundColor: "#004aad",
+    width: "auto",
+    height: "auto",
     margin: 1,
   },
   textbox: {
-    alignItems: 'flex-start',
-    fontFamily: 'open sans',
+    alignItems: "flex-start",
+    fontFamily: "open sans",
     fontSize: 13,
-    color: '#fff',
+    color: "#fff",
   },
   homepage: {
     margin: 10,
     // backgroundColor:"blue",
   },
   mainbox: {
-    width: '98%',
+    width: "98%",
     height: 40,
-    backgroundColor: 'lightblue',
-    alignSelf: 'center',
+    backgroundColor: "lightblue",
+    alignSelf: "center",
     marginVertical: 15,
     borderRadius: 5,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 8,
@@ -580,43 +594,43 @@ export const styles = StyleSheet.create({
     elevation: 1,
   },
   innerup: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: 10,
-    backgroundColor: 'blue',
+    backgroundColor: "blue",
   },
   innerdown: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   fontvalue: {
-    fontWeight: '300',
+    fontWeight: "300",
     flex: 1,
-    fontFamily: 'open sans',
-    justifyContent: 'center',
+    fontFamily: "open sans",
+    justifyContent: "center",
   },
   fontvalue1: {
-    fontWeight: '700',
+    fontWeight: "700",
     marginTop: 10,
     marginLeft: 100,
     marginRight: -10,
   },
   searchbar: {
-    width: '95%',
+    width: "95%",
     borderWidth: 2,
-    borderColor: 'white',
+    borderColor: "white",
     borderRadius: 1,
     marginLeft: 10,
     marginRight: 10,
   },
   bt1: {
-    fontFamily: 'open sans',
+    fontFamily: "open sans",
     fontSize: 15,
     lineHeight: 0,
     marginTop: 0,
     paddingTop: 10,
     paddingBottom: 10,
-    backgroundColor: '#004aad',
+    backgroundColor: "#004aad",
     width: 110,
     borderRadius: 10,
     paddingLeft: 0,
@@ -624,13 +638,13 @@ export const styles = StyleSheet.create({
     marginVertical: 0,
   },
   bt2: {
-    fontFamily: 'open sans',
+    fontFamily: "open sans",
     fontSize: 15,
     lineHeight: 0,
     marginTop: -45,
     paddingTop: 10,
     paddingBottom: 8,
-    backgroundColor: '#004aad',
+    backgroundColor: "#004aad",
     width: 110,
     borderRadius: 10,
     paddingLeft: 0,
@@ -638,17 +652,17 @@ export const styles = StyleSheet.create({
     marginVertical: 0,
   },
   btnText: {
-    alignSelf: 'center',
-    color: '#fff',
+    alignSelf: "center",
+    color: "#fff",
     fontSize: 15,
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   horizontal: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     padding: 0,
   },
 });

@@ -120,7 +120,7 @@ AsyncStorage.getItem('acceptedItemData11')
       if (Object.keys(acceptedItemData).length > 0) {
         try {
           AsyncStorage.setItem('acceptedItemData11',JSON.stringify(acceptedItemData));
-          console.log('aaaa!1', acceptedItemData);
+          // console.log('aaaa!1', acceptedItemData);
         } catch (error) {
           console.error('Failed to update AsyncStorage:', error);
         }

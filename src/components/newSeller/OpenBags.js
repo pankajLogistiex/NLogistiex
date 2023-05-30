@@ -8,50 +8,61 @@ import {
   Button,
   Modal,
   Input,
-} from 'native-base';
+} from "native-base";
 import {
   StyleSheet,
   ScrollView,
   View,
   ToastAndroid,
   Vibration,
-} from 'react-native';
-import {DataTable, Searchbar, Text, Card} from 'react-native-paper';
-import {openDatabase} from 'react-native-sqlite-storage';
-import React, {useEffect, useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
-import QRCodeScanner from 'react-native-qrcode-scanner';
-import {RNCamera} from 'react-native-camera';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import RNBeep from 'react-native-a-beep';
-const db = openDatabase({name: 'rn_sqlite'});
- 
-const OpenBags = ({route}) => {
+} from "react-native";
+import { DataTable, Searchbar, Text, Card } from "react-native-paper";
+import { openDatabase } from "react-native-sqlite-storage";
+import React, { useEffect, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import QRCodeScanner from "react-native-qrcode-scanner";
+import { RNCamera } from "react-native-camera";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import RNBeep from "react-native-a-beep";
+import { useSelector } from "react-redux";
+import GetLocation from "react-native-get-location";
+import RNAndroidLocationEnabler from "react-native-android-location-enabler";
+import axios from "axios";
+const db = openDatabase({ name: "rn_sqlite" });
+import { backendUrl } from "../../utils/backendUrl";
+
+const OpenBags = ({ route }) => {
+  const userId = useSelector((state) => state.user.user_id);
+
   const [data, setData] = useState([]);
   const navigation = useNavigation();
   const [showCloseBagModal, setShowCloseBagModal] = useState(false);
-  const [keyword, setKeyword] = useState('');
-  const [consignorNames, setconsignorNames] = useState('');
-  const [consignorCode, setconsignorCode] = useState('');
+  const [keyword, setKeyword] = useState("");
+  const [consignorNames, setconsignorNames] = useState("");
+  const [consignorCode, setconsignorCode] = useState("");
   const [NoShipment, setNoShipment] = useState(45);
-  const [bagSeal, setBagSeal] = useState('');
+  const [bagSeal, setBagSeal] = useState("");
   const [totalAccepted, setTotalAccepted] = useState(0);
   const [totalShipment, setTotalShipment] = useState(0);
   const [acceptedItemData, setAcceptedItemData] = useState(
-    route.params.allCloseBAgData || {},
+    route.params.allCloseBAgData || {}
   );
+  const [latitude, setLatitude] = useState(0);
+  const [longitude, setLongitude] = useState(0);
+  const [acceptedHandoverStatus, setAcceptedHandoverStatus] = useState([]);
+  const [runSheetNumbers, setRunSheetNumbers] = useState([]);
   var check = acceptedItemData;
   const currentDate = new Date().toISOString().slice(0, 10);
   const loadDetails = () => {
-    db.transaction(tx => {
-      tx.executeSql('SELECT * FROM SyncSellerPickUp', [], (tx1, results) => {
+    db.transaction((tx) => {
+      tx.executeSql("SELECT * FROM SyncSellerPickUp", [], (tx1, results) => {
         let temp = [];
         console.log(results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
         }
         setData(temp);
-        console.log(data[0].ShipmentListArray.split().length, 'data');
+        console.log(data[0].ShipmentListArray.split().length, "data");
       });
     });
   };
@@ -62,29 +73,22 @@ const OpenBags = ({route}) => {
     })();
   }, []);
 
-  const searched = keyword1 => c => {
+  const searched = (keyword1) => (c) => {
     let f = c.consignorName;
     return f.includes(keyword1);
-  };
-
-  const CloseBagFunction = (consignorCode, consignorName) => {
-    setShowCloseBagModal(true),
-      setNoShipment(45),
-      setconsignorCode(consignorCode),
-      setconsignorNames(consignorName);
   };
 
   function CloseBag() {
     console.log(bagId);
     console.log(bagSeal);
-    setBagId('');
+    setBagId("");
     setBagIdNo(bagIdNo + 1);
   }
 
-  const onSuccess11 = e => {
+  const onSuccess11 = (e) => {
     Vibration.vibrate(100);
     RNBeep.beep();
-    console.log(e.data, 'sealID');
+    console.log(e.data, "sealID");
     // getCategories(e.data);
     setBagSeal(e.data);
   };
@@ -98,19 +102,20 @@ const OpenBags = ({route}) => {
     // const saveAcceptedItemData = async () => {
     // try {
     AsyncStorage.setItem(
-      'acceptedItemData11',
+      "acceptedItemData11",
       JSON.stringify(acceptedItemData)
     );
     // } catch (error) {
-    console.log('aaaa', acceptedItemData);
+    // console.log("aaaa", acceptedItemData);
     // }
     // };
 
     // saveAcceptedItemData();
   }, [acceptedItemData]);
+
   const fetchTableData = () => {
-    db.transaction(tx => {
-      tx.executeSql('SELECT * FROM closeHandoverBag1', [], (tx, results) => {
+    db.transaction((tx) => {
+      tx.executeSql("SELECT * FROM closeHandoverBag1", [], (tx, results) => {
         const len = results.rows.length;
         const rows11 = [];
 
@@ -131,10 +136,10 @@ const OpenBags = ({route}) => {
   };
   useEffect(() => {
     fetchTableData();
-    console.log('fdfdd11 ', acceptedItemData);
+    console.log("fdfdd11 ", acceptedItemData);
   }, []);
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
+    const unsubscribe = navigation.addListener("focus", () => {
       loadDetails112();
       // loadAcceptedItemData12();
     });
@@ -146,23 +151,23 @@ const OpenBags = ({route}) => {
   }, []);
 
   const loadDetails112 = () => {
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery"  AND handoverStatus IS NOT NULL',
         [],
         (tx1, results) => {
           setTotalAccepted(results.rows.length);
-        },
+        }
       );
     });
 
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" ',
         [],
         (tx1, results) => {
           setTotalShipment(results.rows.length);
-        },
+        }
       );
     });
   };
@@ -171,80 +176,198 @@ const OpenBags = ({route}) => {
     var consName = acceptedItemData[consignorCode].consignorName;
     console.log(bagSeal);
     // console.log(acceptedArray);
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM closeHandoverBag1 Where consignorCode=? AND bagDate=? ',
+        "SELECT * FROM closeHandoverBag1 Where consignorCode=? AND bagDate=? ",
         [consCode, currentDate],
         (tx, results) => {
           console.log(results.rows.length);
           console.log(results);
           tx.executeSql(
-            'INSERT INTO closeHandoverBag1 (bagSeal, bagId, bagDate, AcceptedList,status,consignorCode,consignorName) VALUES (?, ?, ?, ?,?,?,?)',
+            "INSERT INTO closeHandoverBag1 (bagSeal, bagId, bagDate, AcceptedList,status,consignorCode,consignorName) VALUES (?, ?, ?, ?,?,?,?)",
             [
               bagSeal,
-              consCode + '-' + currentDate + '-' + (results.rows.length + 1),
+              consCode + "-" + currentDate + "-" + (results.rows.length + 1),
               currentDate,
               JSON.stringify(acceptedItemData[consCode].acceptedItems11),
-              'pending',
+              "pending",
               consCode,
               consName,
             ],
             (tx, results11) => {
-              console.log('Row inserted successfully');
+              console.log("Row inserted successfully");
               // setAcceptedArray([]);
               // acceptedItemData[consCode] = null;
               setAcceptedItemData(
                 Object.fromEntries(
                   Object.entries(acceptedItemData).filter(
-                    ([k, v]) => k !== consCode,
-                  ),
-                ),
+                    ([k, v]) => k !== consCode
+                  )
+                )
               );
-              setBagSeal('');
+              setBagSeal("");
               console.log(
-                ' Data Added to local db successfully Handover closeBag',
+                " Data Added to local db successfully Handover closeBag"
               );
-              ToastAndroid.show('Bag closed successfully', ToastAndroid.SHORT);
+              ToastAndroid.show("Bag closed successfully", ToastAndroid.SHORT);
               console.log(results11);
               viewDetailBag();
             },
-            error => {
-              console.log('Error occurred while inserting a row:', error);
-            },
+            (error) => {
+              console.log("Error occurred while inserting a row:", error);
+            }
           );
         },
-        error => {
+        (error) => {
           console.log(
-            'Error occurred while generating a unique bag ID:',
-            error,
+            "Error occurred while generating a unique bag ID:",
+            error
           );
-        },
+        }
       );
     });
   }
 
   const viewDetailBag = () => {
-    db.transaction(tx => {
-      tx.executeSql('SELECT * FROM closeHandoverBag1', [], (tx1, results) => {
+    db.transaction((tx) => {
+      tx.executeSql("SELECT * FROM closeHandoverBag1", [], (tx1, results) => {
         let temp = [];
         console.log(results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
         }
         console.log(
-          'Data from Local Database Handover Bag: \n ',
-          JSON.stringify(temp, null, 4),
+          "Data from Local Database Handover Bag: \n ",
+          JSON.stringify(temp, null, 4)
         );
       });
     });
   };
+
+  useEffect(() => {
+    current_location();
+  }, []);
+
+  const current_location = () => {
+    GetLocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 10000,
+    })
+      .then((location) => {
+        setLatitude(location.latitude);
+        setLongitude(location.longitude);
+      })
+      .catch((error) => {
+        RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+          interval: 10000,
+          fastInterval: 5000,
+        })
+          .then((status) => {
+            if (status) {
+              console.log("Location enabled");
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+        console.log("Location Lat long error", error);
+      });
+  };
+
+  useEffect(() => {
+    getAllConsignors();
+  }, []);
+
+  function getAllAcceptedHandovers(consignorCode) {
+    db.transaction((tx) => {
+      tx.executeSql(
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" And consignorCode=?',
+        [consignorCode],
+        (tx1, results) => {
+          let exp = results.rows.length;
+          let acc = 0;
+          const tempRunsheetArray = [...runSheetNumbers];
+          for (var i = 0; i < results.rows.length; i++) {
+            if (results.rows.item(i).handoverStatus == "accepted") {
+              acc++;
+              if (
+                !tempRunsheetArray.includes(results.rows.item(i).runSheetNumber)
+              ) {
+                tempRunsheetArray.push(results.rows.item(i).runSheetNumber);
+              }
+            }
+          }
+          if (exp == acc) {
+            const consignorData = {
+              expected: exp,
+              accepted: acc,
+              rejected: 0,
+              consignorCode: consignorCode,
+              rejectReason: "",
+            };
+            const tempHandoverStatus = [...acceptedHandoverStatus];
+            const conIndex = tempHandoverStatus.findIndex(
+              (obj) => obj.consignorCode === consignorCode
+            );
+            if (conIndex != -1) {
+              tempHandoverStatus[conIndex] = consignorData;
+            } else {
+              tempHandoverStatus.push(consignorData);
+            }
+            setAcceptedHandoverStatus(tempHandoverStatus);
+            setRunSheetNumbers(tempRunsheetArray);
+          }
+        }
+      );
+    });
+  }
+
+  function getAllConsignors() {
+    db.transaction((tx) => {
+      tx.executeSql("SELECT * FROM SyncSellerPickUp", [], (tx1, results) => {
+        for (var i = 0; i < results.rows.length; i++) {
+          getAllAcceptedHandovers(results.rows.item(i).consignorCode);
+        }
+      });
+    });
+  }
+
+  function closeHandover() {
+    let time11 = new Date().valueOf();
+    console.log("===handover close data===", {
+      handoverStatus: acceptedHandoverStatus,
+      runsheets: runSheetNumbers,
+      feUserID: userId,
+      receivingTime: parseInt(time11),
+      latitude: parseFloat(latitude),
+      longitude: parseFloat(longitude),
+    });
+    axios
+      .post(backendUrl + "SellerMainScreen/closeHandover", {
+        handoverStatus: acceptedHandoverStatus,
+        runsheets: runSheetNumbers,
+        feUserID: userId,
+        receivingTime: parseInt(time11),
+        latitude: parseFloat(latitude),
+        longitude: parseFloat(longitude),
+      })
+      .then((response) => {
+        navigation.navigate("HandOverSummary");
+        ToastAndroid.show("Successfully Handover Closed", ToastAndroid.SHORT);
+      })
+      .catch((error) => {
+        ToastAndroid.show("Somthing Went Wrong", ToastAndroid.SHORT);
+        console.error("Error:", error);
+      });
+  }
 
   return (
     <NativeBaseProvider>
       <Modal
         isOpen={showCloseBagModal}
         onClose={() => setShowCloseBagModal(false)}
-        size="lg">
+        size="lg"
+      >
         <Modal.Content maxWidth="350">
           <Modal.CloseButton />
           <Modal.Header>Close Bag</Modal.Header>
@@ -255,28 +378,28 @@ const OpenBags = ({route}) => {
               // showMarker={true}
               reactivateTimeout={2000}
               flashMode={RNCamera.Constants.FlashMode.off}
-              ref={node => {
+              ref={(node) => {
                 this.scanner = node;
               }}
-              containerStyle={{height: 116, marginBottom: '55%'}}
+              containerStyle={{ height: 116, marginBottom: "55%" }}
               cameraStyle={{
                 height: 90,
                 marginTop: 95,
-                marginBottom: '15%',
+                marginBottom: "15%",
                 width: 289,
-                alignSelf: 'center',
-                justifyContent: 'center',
+                alignSelf: "center",
+                justifyContent: "center",
               }}
-            />{' '}
-            {'\n'}
+            />{" "}
+            {"\n"}
             <Input
               placeholder="Enter Bag Seal"
               size="md"
               value={bagSeal}
-              onChangeText={text => setBagSeal(text)}
+              onChangeText={(text) => setBagSeal(text)}
               style={{
                 width: 290,
-                backgroundColor: 'white',
+                backgroundColor: "white",
               }}
             />
             {/* {'\n'}
@@ -288,28 +411,33 @@ const OpenBags = ({route}) => {
               onPress={() => {
                 CloseBag(consignorCode);
                 setShowCloseBagModal(false);
-              }}>
+              }}
+            >
               Submit
             </Button>
-            <View style={{alignItems: 'center', marginTop: 15}}>
+            <View style={{ alignItems: "center", marginTop: 15 }}>
               <View
                 style={{
-                  width: '98%',
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
+                  width: "98%",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
                   borderWidth: 1,
                   borderBottomWidth: 0,
-                  borderColor: 'lightgray',
+                  borderColor: "lightgray",
                   borderTopLeftRadius: 5,
                   borderTopRightRadius: 5,
                   padding: 10,
-                }}>
-                <Text style={{fontSize: 16, fontWeight: '500', color: 'black'}}>
+                }}
+              >
+                <Text
+                  style={{ fontSize: 16, fontWeight: "500", color: "black" }}
+                >
                   Seller Code
                 </Text>
                 {data && data.length ? (
                   <Text
-                    style={{fontSize: 16, fontWeight: '500', color: 'black'}}>
+                    style={{ fontSize: 16, fontWeight: "500", color: "black" }}
+                  >
                     {consignorCode}
                   </Text>
                 ) : null}
@@ -317,20 +445,24 @@ const OpenBags = ({route}) => {
               </View>
               <View
                 style={{
-                  width: '98%',
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
+                  width: "98%",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
                   borderWidth: 1,
                   borderBottomWidth: 0,
-                  borderColor: 'lightgray',
+                  borderColor: "lightgray",
                   padding: 10,
-                }}>
-                <Text style={{fontSize: 16, fontWeight: '500', color: 'black'}}>
+                }}
+              >
+                <Text
+                  style={{ fontSize: 16, fontWeight: "500", color: "black" }}
+                >
                   Seller Name
                 </Text>
                 {data && data.length ? (
                   <Text
-                    style={{fontSize: 16, fontWeight: '500', color: 'black'}}>
+                    style={{ fontSize: 16, fontWeight: "500", color: "black" }}
+                  >
                     {data && consignorCode && acceptedItemData[consignorCode]
                       ? acceptedItemData[consignorCode].consignorName
                       : null}
@@ -339,22 +471,26 @@ const OpenBags = ({route}) => {
               </View>
               <View
                 style={{
-                  width: '98%',
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
+                  width: "98%",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
                   borderWidth: 1,
                   borderBottomWidth: 1,
-                  borderColor: 'lightgray',
+                  borderColor: "lightgray",
                   borderTopLeftRadius: 5,
                   borderTopRightRadius: 5,
                   padding: 10,
-                }}>
-                <Text style={{fontSize: 16, fontWeight: '500', color: 'black'}}>
+                }}
+              >
+                <Text
+                  style={{ fontSize: 16, fontWeight: "500", color: "black" }}
+                >
                   Number of Shipments
                 </Text>
                 {data && data.length ? (
                   <Text
-                    style={{fontSize: 16, fontWeight: '500', color: 'black'}}>
+                    style={{ fontSize: 16, fontWeight: "500", color: "black" }}
+                  >
                     {data &&
                     consignorCode &&
                     acceptedItemData[consignorCode] &&
@@ -373,28 +509,30 @@ const OpenBags = ({route}) => {
         <ScrollView
           style={styles.homepage}
           showsVerticalScrollIndicator={true}
-          showsHorizontalScrollIndicator={false}>
+          showsHorizontalScrollIndicator={false}
+        >
           <Card>
             <DataTable>
               <DataTable.Header
                 style={{
-                  height: 'auto',
-                  backgroundColor: '#004aad',
+                  height: "auto",
+                  backgroundColor: "#004aad",
                   borderTopLeftRadius: 5,
                   borderTopRightRadius: 5,
-                }}>
-                <DataTable.Title style={{flex: 1.2}}>
-                  <Text style={{textAlign: 'center', color: 'white'}}>
+                }}
+              >
+                <DataTable.Title style={{ flex: 1.2 }}>
+                  <Text style={{ textAlign: "center", color: "white" }}>
                     Seller Name
                   </Text>
                 </DataTable.Title>
-                <DataTable.Title style={{flex: 1.2}}>
-                  <Text style={{textAlign: 'center', color: 'white'}}>
+                <DataTable.Title style={{ flex: 1.2 }}>
+                  <Text style={{ textAlign: "center", color: "white" }}>
                     No. of Shipment
                   </Text>
                 </DataTable.Title>
-                <DataTable.Title style={{flex: 0.8, paddingLeft: 10}}>
-                  <Text style={{textAlign: 'center', color: 'white'}}>
+                <DataTable.Title style={{ flex: 0.8, paddingLeft: 10 }}>
+                  <Text style={{ textAlign: "center", color: "white" }}>
                     Bag Status
                   </Text>
                 </DataTable.Title>
@@ -402,26 +540,27 @@ const OpenBags = ({route}) => {
               {acceptedItemData &&
                 Object.entries(acceptedItemData).map(([key, value]) => (
                   <DataTable.Row key={key}>
-                    <DataTable.Cell style={{flex: 1.7}}>
+                    <DataTable.Cell style={{ flex: 1.7 }}>
                       <Text style={styles.fontvalue}>
                         {value.consignorName}
                       </Text>
                     </DataTable.Cell>
-                    <DataTable.Cell style={{flex: 1}}>
+                    <DataTable.Cell style={{ flex: 1 }}>
                       {/* <Text style={styles.fontvalue}>{data[0].ShipmentListArray.split().length}</Text> */}
                       <Text style={styles.fontvalue}>
                         {value.acceptedItems11.length}
                       </Text>
                     </DataTable.Cell>
-                    <DataTable.Cell style={{flex: 1}}>
+                    <DataTable.Cell style={{ flex: 1 }}>
                       <Button
                         // disabled={single.BagOpenClose === 'close' ? true : false}
                         // style={{backgroundColor: single.BagOpenClose === 'close' ? 'grey' : '#004aad', color: '#fff'}}
-                        style={{backgroundColor: '#004aad', color: '#fff'}}
+                        style={{ backgroundColor: "#004aad", color: "#fff" }}
                         onPress={() => {
                           setShowCloseBagModal(true);
                           setconsignorCode(key);
-                        }}>
+                        }}
+                      >
                         Close Bag
                       </Button>
                     </DataTable.Cell>
@@ -434,29 +573,30 @@ const OpenBags = ({route}) => {
               {tableData && tableData.length > 0
                 ? tableData.filter(searched(keyword)).map((single, i) => (
                     <DataTable.Row key={single.bagId11}>
-                      <DataTable.Cell style={{flex: 1.7}}>
+                      <DataTable.Cell style={{ flex: 1.7 }}>
                         <Text style={styles.fontvalue}>
                           {single.consignorName}
                         </Text>
                       </DataTable.Cell>
-                      <DataTable.Cell style={{flex: 1}}>
+                      <DataTable.Cell style={{ flex: 1 }}>
                         {/* <Text style={styles.fontvalue}>{data[0].ShipmentListArray.split().length}</Text> */}
                         <Text style={styles.fontvalue}>
                           {single.shipmentsCount}
                         </Text>
                       </DataTable.Cell>
-                      <DataTable.Cell style={{flex: 1}}>
+                      <DataTable.Cell style={{ flex: 1 }}>
                         <Button
                           // disabled={single.BagOpenClose === 'close' ? true : false}
                           // style={{backgroundColor: single.BagOpenClose === 'close' ? 'grey' : '#004aad', color: '#fff'}}
-                          style={{backgroundColor: 'gray', color: '#fff'}}
+                          style={{ backgroundColor: "gray", color: "#fff" }}
                           onPress={() => {
                             // navigation.navigate('PendingHandover',{consignorName:single.consignorName,expected:single.ReverseDeliveries});
                             ToastAndroid.show(
-                              'Bag already closed',
-                              ToastAndroid.SHORT,
+                              "Bag already closed",
+                              ToastAndroid.SHORT
                             );
-                          }}>
+                          }}
+                        >
                           Closed Bag
                         </Button>
                       </DataTable.Cell>
@@ -471,12 +611,13 @@ const OpenBags = ({route}) => {
             Object.keys(acceptedItemData).length > 0 ? null : (
               <View
                 style={{
-                  flexDirection: 'row',
-                  justifyContent: 'center',
-                  alignText: 'center',
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignText: "center",
                   padding: 10,
-                }}>
-                <Text style={{fontSize: 16}}>No Bags Created By you</Text>
+                }}
+              >
+                <Text style={{ fontSize: 16 }}>No Bags Created By you</Text>
               </View>
             )}
           </Card>
@@ -486,61 +627,67 @@ const OpenBags = ({route}) => {
         Object.keys(acceptedItemData).length === 0 ? (
           <View
             style={{
-              width: '90%',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignSelf: 'center',
+              width: "90%",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignSelf: "center",
               marginTop: 10,
-            }}>
+            }}
+          >
             <Button
               w="48%"
               size="lg"
               bg="gray.300"
               onPress={() => {
                 // navigation.navigate('PendingHandover',{consignorName:"single.consignorName",expected:"0"})
-                ToastAndroid.show('No Pending Shipments', ToastAndroid.SHORT);
-              }}>
+                ToastAndroid.show("No Pending Shipments", ToastAndroid.SHORT);
+              }}
+            >
               Pending Handover
             </Button>
             <Button
               w="48%"
               size="lg"
               bg="#004aad"
-              onPress={() => navigation.navigate('HandOverSummary')}>
-              Finish Handover
+              onPress={() => closeHandover()}
+            >
+              Close Handover
             </Button>
           </View>
         ) : (
           <View
             style={{
-              width: '90%',
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignSelf: 'center',
+              width: "90%",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignSelf: "center",
               marginTop: 10,
-            }}>
+            }}
+          >
             <Button
               w="48%"
               size="lg"
               bg={
                 Object.keys(acceptedItemData).length === 0
-                  ? '#004aad'
-                  : 'gray.300'
+                  ? "#004aad"
+                  : "gray.300"
               }
               onPress={
                 Object.keys(acceptedItemData).length === 0
                   ? () => {
-                      navigation.navigate('PendingHandover', {
-                        consignorName: 'consignorName',
-                        expected: '0',
+                      navigation.navigate("PendingHandover", {
+                        consignorName: "consignorName",
+                        expected: "0",
+                        acceptedHandoverStatus: acceptedHandoverStatus,
                       });
                     }
                   : () =>
                       ToastAndroid.show(
-                        'All Bags are not Closed',
-                        ToastAndroid.SHORT,
+                        "All Bags are not Closed",
+                        ToastAndroid.SHORT
                       )
-              }>
+              }
+            >
               Pending Handover
             </Button>
             <Button
@@ -550,19 +697,20 @@ const OpenBags = ({route}) => {
               onPress={() => {
                 // navigation.navigate('HandOverSummary')
                 ToastAndroid.show(
-                  'All Shipments Not Scanned',
-                  ToastAndroid.SHORT,
+                  "All Shipments Not Scanned",
+                  ToastAndroid.SHORT
                 );
-              }}>
-              Finish Handover
+              }}
+            >
+              Close Handover
             </Button>
           </View>
         )}
         <Center>
           <Image
-            style={{width: 150, height: 150}}
-            source={require('../../assets/image.png')}
-            alt={'Logo Image'}
+            style={{ width: 150, height: 150 }}
+            source={require("../../assets/image.png")}
+            alt={"Logo Image"}
           />
         </Center>
       </Box>
@@ -572,66 +720,66 @@ const OpenBags = ({route}) => {
 export default OpenBags;
 export const styles = StyleSheet.create({
   container112: {
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   tableHeader: {
-    backgroundColor: '#004aad',
-    alignItems: 'flex-start',
-    fontFamily: 'open sans',
+    backgroundColor: "#004aad",
+    alignItems: "flex-start",
+    fontFamily: "open sans",
     fontSize: 15,
-    color: 'white',
+    color: "white",
     margin: 1,
   },
   container222: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     zIndex: 1,
-    backgroundColor: 'rgba(0,0,0,0.2 )',
+    backgroundColor: "rgba(0,0,0,0.2 )",
   },
   normal: {
-    fontFamily: 'open sans',
-    fontWeight: 'normal',
-    color: '#eee',
+    fontFamily: "open sans",
+    fontWeight: "normal",
+    color: "#eee",
     marginTop: 27,
     paddingTop: 15,
     paddingBottom: 15,
-    backgroundColor: '#eee',
-    width: 'auto',
+    backgroundColor: "#eee",
+    width: "auto",
     borderRadius: 0,
-    alignContent: 'space-between',
+    alignContent: "space-between",
   },
   text: {
-    color: '#000',
-    fontWeight: 'bold',
+    color: "#000",
+    fontWeight: "bold",
     fontSize: 18,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
     paddingLeft: 20,
   },
   main: {
-    backgroundColor: '#004aad',
-    width: 'auto',
-    height: 'auto',
+    backgroundColor: "#004aad",
+    width: "auto",
+    height: "auto",
     margin: 1,
   },
   textbox: {
-    alignItems: 'flex-start',
-    fontFamily: 'open sans',
+    alignItems: "flex-start",
+    fontFamily: "open sans",
     fontSize: 13,
-    color: '#fff',
+    color: "#fff",
   },
   homepage: {
     margin: 10,
     // backgroundColor:"blue",
   },
   mainbox: {
-    width: '98%',
+    width: "98%",
     height: 40,
-    backgroundColor: 'lightblue',
-    alignSelf: 'center',
+    backgroundColor: "lightblue",
+    alignSelf: "center",
     marginVertical: 15,
     borderRadius: 5,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 8,
@@ -641,43 +789,43 @@ export const styles = StyleSheet.create({
     elevation: 1,
   },
   innerup: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: 10,
-    backgroundColor: 'blue',
+    backgroundColor: "blue",
   },
   innerdown: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   fontvalue: {
-    fontWeight: '300',
+    fontWeight: "300",
     flex: 1,
-    fontFamily: 'open sans',
-    justifyContent: 'center',
+    fontFamily: "open sans",
+    justifyContent: "center",
   },
   fontvalue1: {
-    fontWeight: '700',
+    fontWeight: "700",
     marginTop: 10,
     marginLeft: 100,
     marginRight: -10,
   },
   searchbar: {
-    width: '95%',
+    width: "95%",
     borderWidth: 2,
-    borderColor: 'white',
+    borderColor: "white",
     borderRadius: 1,
     marginLeft: 10,
     marginRight: 10,
   },
   bt1: {
-    fontFamily: 'open sans',
+    fontFamily: "open sans",
     fontSize: 15,
     lineHeight: 0,
     marginTop: 0,
     paddingTop: 10,
     paddingBottom: 10,
-    backgroundColor: '#004aad',
+    backgroundColor: "#004aad",
     width: 110,
     borderRadius: 10,
     paddingLeft: 0,
@@ -685,13 +833,13 @@ export const styles = StyleSheet.create({
     marginVertical: 0,
   },
   bt2: {
-    fontFamily: 'open sans',
+    fontFamily: "open sans",
     fontSize: 15,
     lineHeight: 0,
     marginTop: -45,
     paddingTop: 10,
     paddingBottom: 8,
-    backgroundColor: '#004aad',
+    backgroundColor: "#004aad",
     width: 110,
     borderRadius: 10,
     paddingLeft: 0,
@@ -699,17 +847,17 @@ export const styles = StyleSheet.create({
     marginVertical: 0,
   },
   btnText: {
-    alignSelf: 'center',
-    color: '#fff',
+    alignSelf: "center",
+    color: "#fff",
     fontSize: 15,
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   horizontal: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     padding: 0,
   },
 });
