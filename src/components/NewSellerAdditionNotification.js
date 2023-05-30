@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
   NativeBaseProvider,
   Box,
@@ -10,14 +10,17 @@ import {
   Stack,
   HStack,
   Divider,
-} from 'native-base';
-import {Image} from 'react-native';
-import {TouchableOpacity} from 'react-native-gesture-handler';
-import {backendUrl} from '../utils/backendUrl';
-import {useSelector} from 'react-redux';
+} from "native-base";
+import { Image } from "react-native";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { backendUrl } from "../utils/backendUrl";
+import { useSelector, useDispatch } from "react-redux";
+import { setNotificationCount } from "../redux/slice/notificationSlice";
 
 export default function NewSellerAdditionNotification() {
-  const userId = useSelector(state => state.user.user_id);
+  const dispatch = useDispatch();
+  const userId = useSelector((state) => state.user.user_id);
+  const notificationCount = useSelector((state) => state.notification.count);
 
   const [data, setData] = useState([]);
 
@@ -25,12 +28,12 @@ export default function NewSellerAdditionNotification() {
     if (userId) {
       axios
         .get(backendUrl + `SellerMainScreen/getadditionalwork/${userId}`)
-        .then(res => {
+        .then((res) => {
           console.log(res.data.data);
           setData(res.data.data);
         })
-        .catch(error => {
-          console.log('Error Msg1:', error);
+        .catch((error) => {
+          console.log("Error Msg1:", error);
         });
     }
   };
@@ -41,14 +44,15 @@ export default function NewSellerAdditionNotification() {
   const AcceptHandler = async () => {
     // console.log('df')
     axios
-      .post(backendUrl + 'SellerMainScreen/acceptWorkLoad', {
+      .post(backendUrl + "SellerMainScreen/acceptWorkLoad", {
         consignorCode: data.consignorCode,
         feUserId: userId,
       })
-      .then(response => {
-        console.log('Msg Accepted ', response.data);
+      .then((response) => {
+        console.log("Msg Accepted ", response.data);
+        dispatch(setNotificationCount(notificationCount - 1));
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(error);
       });
   };
@@ -56,14 +60,15 @@ export default function NewSellerAdditionNotification() {
   const RejectHandler = async () => {
     // console.log('df')
     axios
-      .post(backendUrl + 'SellerMainScreen/rejectWorkLoad', {
+      .post(backendUrl + "SellerMainScreen/rejectWorkLoad", {
         consignorCode: data.consignorCode,
         feUserId: userId,
       })
-      .then(response => {
-        console.log('Msg Rejected ', response.data);
+      .then((response) => {
+        console.log("Msg Rejected ", response.data);
+        dispatch(setNotificationCount(notificationCount - 1));
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(error);
       });
   };
@@ -79,7 +84,8 @@ export default function NewSellerAdditionNotification() {
                     key={i}
                     width="100%"
                     marginBottom="5"
-                    alignItems="center">
+                    alignItems="center"
+                  >
                     <Box
                       width="100%"
                       rounded="lg"
@@ -87,28 +93,31 @@ export default function NewSellerAdditionNotification() {
                       borderColor="coolGray.100"
                       borderWidth="1"
                       _dark={{
-                        borderColor: 'coolGray.600',
-                        backgroundColor: 'white',
+                        borderColor: "coolGray.600",
+                        backgroundColor: "white",
                       }}
                       _web={{
                         shadow: 2,
                         borderWidth: 0,
                       }}
                       _light={{
-                        backgroundColor: 'white',
-                      }}>
+                        backgroundColor: "white",
+                      }}
+                    >
                       <Stack p="4" space={3}>
                         <HStack
                           alignItems="center"
                           space={4}
-                          justifyContent="space-between">
+                          justifyContent="space-between"
+                        >
                           <HStack alignItems="center">
                             <Text
                               color="black"
                               _dark={{
-                                color: 'gray.400',
+                                color: "gray.400",
                               }}
-                              fontWeight="400">
+                              fontWeight="400"
+                            >
                               {d.consignorName} {d.consignorCode}
                             </Text>
                           </HStack>
@@ -116,9 +125,10 @@ export default function NewSellerAdditionNotification() {
                             <Text
                               color="black"
                               _dark={{
-                                color: 'gray.400',
+                                color: "gray.400",
                               }}
-                              fontWeight="400">
+                              fontWeight="400"
+                            >
                               {d.ForwardPickups}/{d.ReverseDeliveries}
                             </Text>
                           </HStack>
@@ -126,51 +136,54 @@ export default function NewSellerAdditionNotification() {
                         <Divider
                           my="1"
                           _light={{
-                            bg: 'muted.200',
+                            bg: "muted.200",
                           }}
                           _dark={{
-                            bg: 'muted.50',
+                            bg: "muted.50",
                           }}
                         />
                         <Stack space={2}>
                           <Text
                             fontSize="sm"
                             _light={{
-                              color: 'black',
+                              color: "black",
                             }}
                             _dark={{
-                              color: 'black',
+                              color: "black",
                             }}
                             fontWeight="500"
                             ml="-0.5"
-                            mt="-1">
-                            Address of seller {'\n'}
+                            mt="-1"
+                          >
+                            Address of seller {"\n"}
                             {d.consignorAddress1} {d.consignorAddress2}
-                            {'\n'}
+                            {"\n"}
                             {d.consignorCity} - {d.consignorPincode}
                           </Text>
                         </Stack>
                         <Divider
                           my="1"
                           _light={{
-                            bg: 'muted.200',
+                            bg: "muted.200",
                           }}
                           _dark={{
-                            bg: 'muted.50',
+                            bg: "muted.50",
                           }}
                         />
                         <HStack
                           alignItems="center"
                           space={4}
-                          justifyContent="space-between">
+                          justifyContent="space-between"
+                        >
                           <HStack alignItems="center">
                             <TouchableOpacity onPress={() => RejectHandler()}>
                               <Button
-                                style={{backgroundColor: '#FF2E2E'}}
+                                style={{ backgroundColor: "#FF2E2E" }}
                                 _dark={{
-                                  color: 'red.200',
+                                  color: "red.200",
                                 }}
-                                fontWeight="400">
+                                fontWeight="400"
+                              >
                                 Reject
                               </Button>
                             </TouchableOpacity>
@@ -178,11 +191,12 @@ export default function NewSellerAdditionNotification() {
                           <HStack alignItems="center">
                             <TouchableOpacity onPress={() => AcceptHandler()}>
                               <Button
-                                style={{backgroundColor: '#004aad'}}
+                                style={{ backgroundColor: "#004aad" }}
                                 _dark={{
-                                  color: 'blue.200',
+                                  color: "blue.200",
                                 }}
-                                fontWeight="400">
+                                fontWeight="400"
+                              >
                                 Accept
                               </Button>
                             </TouchableOpacity>
@@ -197,9 +211,9 @@ export default function NewSellerAdditionNotification() {
 
           <Center>
             <Image
-              style={{width: 150, height: 100}}
-              source={require('../assets/image.png')}
-              alt={'Logo Image'}
+              style={{ width: 150, height: 100 }}
+              source={require("../assets/image.png")}
+              alt={"Logo Image"}
             />
           </Center>
         </Box>

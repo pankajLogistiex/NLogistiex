@@ -82,25 +82,9 @@ import {
   setUserId,
   setUserName,
 } from "./src/redux/slice/userSlice";
-import { logout, revoke } from "react-native-app-auth";
-
-const config = {
-  issuer: "https://uacc.logistiex.com/realms/Logistiex-Demo",
-  clientId: "logistiex-demo",
-  redirectUrl: "com.demoproject.app://Login",
-  scopes: [
-    "openid",
-    "web-origins",
-    "acr",
-    "offline_access",
-    "email",
-    "microprofile-jwt",
-    "profile",
-    "address",
-    "phone",
-    "roles",
-  ],
-};
+import { logout } from "react-native-app-auth";
+import PushNotification from "react-native-push-notification";
+import { setNotificationCount } from "./src/redux/slice/notificationSlice";
 
 const db = openDatabase({ name: "rn_sqlite" });
 
@@ -111,6 +95,7 @@ function StackNavigators({ navigation }) {
   const dispatch = useDispatch();
 
   const userId = useSelector((state) => state.user.user_id);
+  const notificationCount = useSelector((state) => state.notification.count);
 
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState([]);
@@ -182,65 +167,87 @@ function StackNavigators({ navigation }) {
     }
   };
 
+  function NotificationCountIncrease() {
+    dispatch(setNotificationCount(notificationCount + 1));
+  }
+
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-      Alert.alert(
-        remoteMessage.notification.title,
-        remoteMessage.notification.body
-      );
-      // messaging().getInitialNotification().then((notificationOpen) => {
-      //   if (notificationOpen) {
-      //     console.log('Opened via notification:');
-      //   }
-      // });
-      // messaging().onNotificationOpenedApp((notificationOpen) => {
-      //   console.log('Opened via notification:');
-      // });
+      // console.log(remoteMessage.notification);
+      NotificationCountIncrease();
+      PushNotification.localNotification({
+        title: remoteMessage.notification.title,
+        message: remoteMessage.notification.body,
+        channelId: "AdditionalWork_1",
+      });
     });
 
     return unsubscribe;
-    // return () => {
-    // unsubscribeNotification();
-    // unsubscribe();
-    // };
   }, []);
 
   useEffect(() => {
-    const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-      // Handle FCM message here
+    PushNotification.createChannel({
+      channelId: "AdditionalWork_1",
+      channelName: "AdditionalWork_Channel",
     });
+    PushNotification.configure({
+      onRegister: function (token) {
+        console.log("TOKEN:", token);
+      },
 
-    const unsubscribeNotification = messaging().onNotificationOpenedApp(
-      (notificationOpen) => {
-        console.log(
-          "Opened via notification11:",
-          notificationOpen.notification
-        );
+      onNotification: function (notification) {
+        console.log("NOTIFICATION:", notification);
 
-        // navigation.navigate('NewSellerAdditionNotification');
-      }
-    );
+        navigation.navigate("NewSellerAdditionNotification");
+      },
 
-    messaging()
-      .getInitialNotification()
-      .then((notificationOpen) => {
-        if (notificationOpen) {
-          console.log(
-            "Opened via notification:",
-            notificationOpen.notification
-          );
-          note11();
-          // navigation.navigate('NewSellerAdditionNotification');
-        } else {
-          console.log("Opened normally");
-        }
-      });
+      permissions: {
+        alert: true,
+        badge: true,
+        sound: true,
+      },
 
-    return () => {
-      unsubscribe();
-      unsubscribeNotification();
-    };
+      popInitialNotification: true,
+      requestPermissions: Platform.OS === "ios",
+    });
   }, []);
+
+  // useEffect(() => {
+  //   const unsubscribe = messaging().onMessage(async (remoteMessage) => {
+  //     // Handle FCM message here
+  //   });
+
+  //   const unsubscribeNotification = messaging().onNotificationOpenedApp(
+  //     (notificationOpen) => {
+  //       console.log(
+  //         "Opened via notification11:",
+  //         notificationOpen.notification
+  //       );
+
+  //       // navigation.navigate('NewSellerAdditionNotification');
+  //     }
+  //   );
+
+  //   messaging()
+  //     .getInitialNotification()
+  //     .then((notificationOpen) => {
+  //       if (notificationOpen) {
+  //         console.log(
+  //           "Opened via notification:",
+  //           notificationOpen.notification
+  //         );
+  //         note11();
+  //         // navigation.navigate('NewSellerAdditionNotification');
+  //       } else {
+  //         console.log("Opened normally");
+  //       }
+  //     });
+
+  //   return () => {
+  //     unsubscribe();
+  //     unsubscribeNotification();
+  //   };
+  // }, []);
 
   const pull_API_Data = () => {
     var date = new Date();
@@ -869,22 +876,6 @@ function StackNavigators({ navigation }) {
     });
   };
 
-  const DisplayData = () => {
-    axios
-      .get(backendUrl + `SellerMainScreen/getadditionalwork/${userId}`)
-      .then((res) => {
-        setData(res.data);
-        // console.log('dataDisplay', res.data);
-      })
-      .catch((error) => {
-        // console.log('Error Msg:', error);
-      });
-  };
-
-  useEffect(() => {
-    DisplayData();
-  }, [userId]);
-
   return (
     <NativeBaseProvider>
       <Stack.Navigator
@@ -1077,7 +1068,7 @@ function StackNavigators({ navigation }) {
                       marginTop: 5,
                     }}
                   />
-                  {data.length ? (
+                  {notificationCount ? (
                     <Badge
                       style={{
                         position: "absolute",
@@ -1086,7 +1077,7 @@ function StackNavigators({ navigation }) {
                         borderWidth: 1,
                       }}
                     >
-                      {data.length}
+                      {notificationCount}
                     </Badge>
                   ) : null}
                 </TouchableOpacity>
@@ -1151,7 +1142,7 @@ function StackNavigators({ navigation }) {
                       marginTop: 5,
                     }}
                   />
-                  {data.length ? (
+                  {notificationCount ? (
                     <Badge
                       style={{
                         position: "absolute",
@@ -1160,7 +1151,7 @@ function StackNavigators({ navigation }) {
                         borderWidth: 1,
                       }}
                     >
-                      {data.length}
+                      {notificationCount}
                     </Badge>
                   ) : null}
                 </TouchableOpacity>
@@ -1235,7 +1226,7 @@ function StackNavigators({ navigation }) {
                       marginTop: 5,
                     }}
                   />
-                  {data.length ? (
+                  {notificationCount ? (
                     <Badge
                       style={{
                         position: "absolute",
@@ -1244,7 +1235,7 @@ function StackNavigators({ navigation }) {
                         borderWidth: 1,
                       }}
                     >
-                      {data.length}
+                      {notificationCount}
                     </Badge>
                   ) : null}
                 </TouchableOpacity>
@@ -1307,7 +1298,7 @@ function StackNavigators({ navigation }) {
                       marginTop: 5,
                     }}
                   />
-                  {data.length ? (
+                  {notificationCount ? (
                     <Badge
                       style={{
                         position: "absolute",
@@ -1316,7 +1307,7 @@ function StackNavigators({ navigation }) {
                         borderWidth: 1,
                       }}
                     >
-                      {data.length}
+                      {notificationCount}
                     </Badge>
                   ) : null}
                 </TouchableOpacity>
@@ -1379,7 +1370,7 @@ function StackNavigators({ navigation }) {
                       marginTop: 5,
                     }}
                   />
-                  {data.length ? (
+                  {notificationCount ? (
                     <Badge
                       style={{
                         position: "absolute",
@@ -1388,7 +1379,7 @@ function StackNavigators({ navigation }) {
                         borderWidth: 1,
                       }}
                     >
-                      {data.length}
+                      {notificationCount}
                     </Badge>
                   ) : null}
                 </TouchableOpacity>
@@ -1451,7 +1442,7 @@ function StackNavigators({ navigation }) {
                       marginTop: 5,
                     }}
                   />
-                  {data.length ? (
+                  {notificationCount ? (
                     <Badge
                       style={{
                         position: "absolute",
@@ -1460,7 +1451,7 @@ function StackNavigators({ navigation }) {
                         borderWidth: 1,
                       }}
                     >
-                      {data.length}
+                      {notificationCount}
                     </Badge>
                   ) : null}
                 </TouchableOpacity>
@@ -1523,7 +1514,7 @@ function StackNavigators({ navigation }) {
                       marginTop: 5,
                     }}
                   />
-                  {data.length ? (
+                  {notificationCount ? (
                     <Badge
                       style={{
                         position: "absolute",
@@ -1532,7 +1523,7 @@ function StackNavigators({ navigation }) {
                         borderWidth: 1,
                       }}
                     >
-                      {data.length}
+                      {notificationCount}
                     </Badge>
                   ) : null}
                 </TouchableOpacity>
@@ -1595,7 +1586,7 @@ function StackNavigators({ navigation }) {
                       marginTop: 5,
                     }}
                   />
-                  {data.length ? (
+                  {notificationCount ? (
                     <Badge
                       style={{
                         position: "absolute",
@@ -1604,7 +1595,7 @@ function StackNavigators({ navigation }) {
                         borderWidth: 1,
                       }}
                     >
-                      {data.length}
+                      {notificationCount}
                     </Badge>
                   ) : null}
                 </TouchableOpacity>
@@ -1667,7 +1658,7 @@ function StackNavigators({ navigation }) {
                       marginTop: 5,
                     }}
                   />
-                  {data.length ? (
+                  {notificationCount ? (
                     <Badge
                       style={{
                         position: "absolute",
@@ -1676,7 +1667,7 @@ function StackNavigators({ navigation }) {
                         borderWidth: 1,
                       }}
                     >
-                      {data.length}
+                      {notificationCount}
                     </Badge>
                   ) : null}
                 </TouchableOpacity>
@@ -1739,7 +1730,7 @@ function StackNavigators({ navigation }) {
                       marginTop: 5,
                     }}
                   />
-                  {data.length ? (
+                  {notificationCount ? (
                     <Badge
                       style={{
                         position: "absolute",
@@ -1748,7 +1739,7 @@ function StackNavigators({ navigation }) {
                         borderWidth: 1,
                       }}
                     >
-                      {data.length}
+                      {notificationCount}
                     </Badge>
                   ) : null}
                 </TouchableOpacity>
@@ -1812,7 +1803,7 @@ function StackNavigators({ navigation }) {
                       marginTop: 5,
                     }}
                   />
-                  {data.length ? (
+                  {notificationCount ? (
                     <Badge
                       style={{
                         position: "absolute",
@@ -1821,7 +1812,7 @@ function StackNavigators({ navigation }) {
                         borderWidth: 1,
                       }}
                     >
-                      {data.length}
+                      {notificationCount}
                     </Badge>
                   ) : null}
                 </TouchableOpacity>
@@ -1885,7 +1876,7 @@ function StackNavigators({ navigation }) {
                       marginTop: 5,
                     }}
                   />
-                  {data.length ? (
+                  {notificationCount ? (
                     <Badge
                       style={{
                         position: "absolute",
@@ -1894,7 +1885,7 @@ function StackNavigators({ navigation }) {
                         borderWidth: 1,
                       }}
                     >
-                      {data.length}
+                      {notificationCount}
                     </Badge>
                   ) : null}
                 </TouchableOpacity>
@@ -1958,7 +1949,7 @@ function StackNavigators({ navigation }) {
                       marginTop: 5,
                     }}
                   />
-                  {data.length ? (
+                  {notificationCount ? (
                     <Badge
                       style={{
                         position: "absolute",
@@ -1967,7 +1958,7 @@ function StackNavigators({ navigation }) {
                         borderWidth: 1,
                       }}
                     >
-                      {data.length}
+                      {notificationCount}
                     </Badge>
                   ) : null}
                 </TouchableOpacity>
@@ -2030,7 +2021,7 @@ function StackNavigators({ navigation }) {
                       marginTop: 5,
                     }}
                   />
-                  {data.length ? (
+                  {notificationCount ? (
                     <Badge
                       style={{
                         position: "absolute",
@@ -2039,7 +2030,7 @@ function StackNavigators({ navigation }) {
                         borderWidth: 1,
                       }}
                     >
-                      {data.length}
+                      {notificationCount}
                     </Badge>
                   ) : null}
                 </TouchableOpacity>
@@ -2102,7 +2093,7 @@ function StackNavigators({ navigation }) {
                       marginTop: 5,
                     }}
                   />
-                  {data.length ? (
+                  {notificationCount ? (
                     <Badge
                       style={{
                         position: "absolute",
@@ -2111,7 +2102,7 @@ function StackNavigators({ navigation }) {
                         borderWidth: 1,
                       }}
                     >
-                      {data.length}
+                      {notificationCount}
                     </Badge>
                   ) : null}
                 </TouchableOpacity>
@@ -2174,7 +2165,7 @@ function StackNavigators({ navigation }) {
                       marginTop: 5,
                     }}
                   />
-                  {data.length ? (
+                  {notificationCount ? (
                     <Badge
                       style={{
                         position: "absolute",
@@ -2183,7 +2174,7 @@ function StackNavigators({ navigation }) {
                         borderWidth: 1,
                       }}
                     >
-                      {data.length}
+                      {notificationCount}
                     </Badge>
                   ) : null}
                 </TouchableOpacity>
@@ -2243,7 +2234,7 @@ function StackNavigators({ navigation }) {
                       marginTop: 5,
                     }}
                   />
-                  {data.length ? (
+                  {notificationCount ? (
                     <Badge
                       style={{
                         position: "absolute",
@@ -2252,7 +2243,7 @@ function StackNavigators({ navigation }) {
                         borderWidth: 1,
                       }}
                     >
-                      {data.length}
+                      {notificationCount}
                     </Badge>
                   ) : null}
                 </TouchableOpacity>
@@ -2334,7 +2325,7 @@ function StackNavigators({ navigation }) {
                     name="bell-outline"
                     style={{ fontSize: 30, color: "white", marginRight: 5 }}
                   />
-                  {data.length ? (
+                  {notificationCount ? (
                     <Badge
                       style={{
                         position: "absolute",
@@ -2343,7 +2334,7 @@ function StackNavigators({ navigation }) {
                         borderWidth: 1,
                       }}
                     >
-                      {data.length}
+                      {notificationCount}
                     </Badge>
                   ) : null}
                 </TouchableOpacity>

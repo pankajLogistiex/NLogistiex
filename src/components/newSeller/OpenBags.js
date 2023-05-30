@@ -480,11 +480,6 @@ const OpenBags = ({route}) => {
               </View>
             )}
           </Card>
-
-          {/* {acceptedItemData &&  <View style={{width: '90%', flexDirection: 'row', justifyContent: 'space-between', alignSelf: 'center', marginTop: 10 }}>
-            <Button w="48%" size="lg" bg="#004aad" >Start Scanning</Button>
-            <Button w="48%" size="lg" bg="#004aad" onPress={()=>navigation.navigate('HandOverSummary')} >Close Handover</Button>
-          </View>} */}
         </ScrollView>
         {totalAccepted === totalShipment &&
         totalAccepted + totalShipment > 0 &&

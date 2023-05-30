@@ -289,7 +289,6 @@ const PendingHandover = ({route}) => {
       .then(response => {
         changeLocalStatus(time11);
         ToastAndroid.show('Successfully Handover Closed', ToastAndroid.SHORT);
-        console.log('Response close handover:', response.data);
       })
       .catch(error => {
         ToastAndroid.show('Somthing Went Wrong', ToastAndroid.SHORT);

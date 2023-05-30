@@ -1,36 +1,26 @@
 {
   "project_info": {
-    "project_number": "414720557386",
-    "project_id": "logistiex11",
-    "storage_bucket": "logistiex11.appspot.com"
+    "project_number": "684173868448",
+    "project_id": "logistiex-8dbc9",
+    "storage_bucket": "logistiex-8dbc9.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:414720557386:android:4a839380fa31df69e741b3",
+        "mobilesdk_app_id": "1:684173868448:android:7d664a721ddcb297bab8c5",
         "android_client_info": {
           "package_name": "com.demoproject"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "414720557386-hm8301a9hkbo947bd9bvqeuklnfc9f5h.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyD7uiXEvS17tdbgvgMB7GTmx64XawoHqH4"
+          "current_key": "AIzaSyD3kOn21QmlFt-YGkObqwQhkvLKEYpIWPs"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "414720557386-hm8301a9hkbo947bd9bvqeuklnfc9f5h.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
