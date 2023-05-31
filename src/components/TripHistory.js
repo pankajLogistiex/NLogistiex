@@ -47,46 +47,29 @@ export default function TripHistory({navigation, route}) {
   
   const focus = useIsFocused();
 
-  let current = new Date();
-  let tripid = current.toString();
-  let time = tripid.match(/\d{2}:\d{2}:\d{2}/)[0];
-  let dateStart = 0;
-  let dateEnd = tripid.indexOf(
-    ' ',
-    tripid.indexOf(' ', tripid.indexOf(' ') + 1) + 1,
-  );
-  let date = dateEnd
-    ? tripid.substring(dateStart, dateEnd + 5)
-    : 'No match found';
-
-    useEffect(() => {
-      if (userId) {
-            getTripData(userId);
-      }
-    }, [userId,tripID]);
- 
-
-  
-  function getTripData(userId) {
-    axios
-      .get(backendUrl + 'UserTripInfo/getUserTripInfo', {
-        params: {
-          feUserID:userId,
-        },
-      })
-      .then(response => {
-        setTripDetails(response.data.res_data)
+console.log(userId)
+useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(backendUrl + 'UserTripInfo/getUserTripInfo', {
+          params: {
+            feUserID: userId,
+          },
+        });
+        setTripDetails(response.data.res_data);
         setLoading(false);
-      })
-      .catch(error => {
+      } catch (error) {
         console.log(error, 'error');
-      });
-  }
-  useEffect(() => {
-    if (focus == true) {
-      getTripData();
+        setLoading(false);
+      }
+    };
+  
+    if (userId) {
+      fetchData();
     }
-  }, [focus]);
+  }, [userId]);
+  
   const loadDetails = async () => {
     db.transaction(tx => {
       tx.executeSql(
@@ -116,7 +99,6 @@ export default function TripHistory({navigation, route}) {
         },
       );
     });
-    setLoading(false);
   };
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -125,7 +107,6 @@ export default function TripHistory({navigation, route}) {
     return unsubscribe;
   }, [navigation]);
 
-  
   return (
     <NativeBaseProvider>
       <ScrollView>
@@ -137,7 +118,7 @@ export default function TripHistory({navigation, route}) {
           />
         ) : (
           <Box flex={1}>
-  {tripDetails.length === 0 || tripDetails.filter(data => data.startTime && data.endTime).length === 0 ? (
+  {!tripDetails || !tripDetails[0]?.endTime ? (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
     <Text
       style={{
