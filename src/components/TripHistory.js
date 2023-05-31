@@ -47,7 +47,6 @@ export default function TripHistory({navigation, route}) {
   
   const focus = useIsFocused();
 
-console.log(userId)
 useEffect(() => {
     const fetchData = async () => {
       try {
