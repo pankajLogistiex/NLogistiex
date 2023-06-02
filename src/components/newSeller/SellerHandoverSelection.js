@@ -289,20 +289,20 @@ const SellerHandoverSelection = ({route}) => {
   };
 
   let r = [];
-  useEffect(() => {
-    (async () => {
-      db.transaction(tx => {
-        tx.executeSql(
-          'SELECT * FROM categories where ScanStatus = ?',
-          [1],
-          (tx, results) => {
-            var len = results.rows.length;
-            setPending(Forward - len);
-          },
-        );
-      });
-    })();
-  }, []);
+  // useEffect(() => {
+  //   (async () => {
+  //     db.transaction(tx => {
+  //       tx.executeSql(
+  //         'SELECT * FROM categories where ScanStatus = ?',
+  //         [1],
+  //         (tx, results) => {
+  //           var len = results.rows.length;
+  //           setPending(Forward - len);
+  //         },
+  //       );
+  //     });
+  //   })();
+  // }, []);
 
   const loadDetails = () => {
     // setIsLoading(!isLoading);
