@@ -167,19 +167,38 @@ useEffect(() => {
                   backgroundColor: '#004aad',
                   borderTopLeftRadius: 5,
                   borderTopRightRadius: 5,
-                }}>
-                <DataTable.Title style={{flex: 1.2}}>
-                  <Text style={{textAlign: 'center', color: 'white'}}>
+                  alignItems: 'center',
+                  }}>
+                <DataTable.Title style={{ flex: 1.6 }}>
+                  <Text style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    color: 'white',
+                    textAlign: 'center',
+                    flexWrap: 'wrap',
+                    }}>
                     Seller Name
                   </Text>
                 </DataTable.Title>
-                <DataTable.Title style={{flex: 1.2}}>
-                  <Text style={{textAlign: 'center', color: 'white'}}>
+                <DataTable.Title style={{ flex: 0.8}} numberOfLines={2}>
+                  <Text style={{
+                  flex: 1,
+                  justifyContent: 'center',
+                  color: 'white',
+                  textAlign: 'center',
+                  flexWrap: 'wrap',
+                  }}>
                     Expected Deliveries
                   </Text>
                 </DataTable.Title>
-                <DataTable.Title style={{flex: 1.2}}>
-                  <Text style={{textAlign: 'center', color: 'white'}}>
+                <DataTable.Title style={{ flex: 0.8 ,marginRight:-20}} numberOfLines={2}>
+                  <Text style={{
+                    flex: 1,
+                    justifyContent: 'center',
+                    color: 'white',
+                    textAlign: 'center',
+                    flexWrap: 'wrap',
+                    }}>
                     Scanned Shipments
                   </Text>
                 </DataTable.Title>
@@ -195,18 +214,18 @@ useEffect(() => {
                           borderBottomWidth: 1,
                         }}
                         key={consignorCode}>
-                        <DataTable.Cell style={{flex: 1.7}}>
+                        <DataTable.Cell style={{ flex: 1.7, flexWrap: 'wrap' }}>
                           <Text style={styles.fontvalue}>
                             {displayData11[consignorCode].consignorName}
                           </Text>
                         </DataTable.Cell>
 
-                        <DataTable.Cell style={{flex: 1, marginRight: 20 }}>
+                        <DataTable.Cell style={{ flex: 0.8, marginRight: 5, flexWrap: 'wrap' }}>
                           <Text style={styles.fontvalue}>
                             {displayData11[consignorCode].expected}
                           </Text>
                         </DataTable.Cell>
-                        <DataTable.Cell style={{flex: 1, marginRight: -30}}>
+                        <DataTable.Cell style={{ flex: 0.8, marginRight: -45, flexWrap: 'wrap' }}>
                           <Text style={styles.fontvalue}>
                             {displayData11[consignorCode].scanned}
                           </Text>
@@ -222,23 +241,23 @@ useEffect(() => {
                           borderBottomWidth: 1,
                         }}
                         key={consignorCode}>
-                        <DataTable.Cell style={{flex: 1.7}}>
+                        <DataTable.Cell style={{ flex: 1.7, flexWrap: 'wrap' }}>
                           <Text style={styles.fontvalue}>
                             {displayData11[consignorCode].consignorName}
                           </Text>
                         </DataTable.Cell>
 
-                        <DataTable.Cell style={{flex: 1, marginRight: 5 }}>
+                        <DataTable.Cell style={{ flex: 0.8, marginRight: 5, flexWrap: 'wrap' }}>
                           <Text style={styles.fontvalue}>
                             {displayData11[consignorCode].expected}
                           </Text>
                         </DataTable.Cell>
-                        <DataTable.Cell style={{flex: 1, marginRight: -45}}>
+                        <DataTable.Cell style={{ flex: 0.8, marginRight: -45, flexWrap: 'wrap' }}>
                           <Text style={styles.fontvalue}>
                             {displayData11[consignorCode].scanned}
                           </Text>
                         </DataTable.Cell>
-                        <MaterialIcons name="check" style={{ fontSize: 30, color: 'green', marginTop: 8 }} />
+                        {/* <MaterialIcons name="check" style={{ fontSize: 30, color: 'green', marginTop: 8 }} /> */}
                       </DataTable.Row>
                       : <DataTable.Row
                       style={{
@@ -247,18 +266,18 @@ useEffect(() => {
                         borderBottomWidth: 1,
                       }}
                       key={consignorCode}>
-                      <DataTable.Cell style={{flex: 1.7}}>
+                      <DataTable.Cell style={{ flex: 1.7, flexWrap: 'wrap' }}>
                         <Text style={styles.fontvalue}>
                           {displayData11[consignorCode].consignorName}
                         </Text>
                       </DataTable.Cell>
 
-                      <DataTable.Cell style={{flex: 1, marginRight: 20 }}>
+                      <DataTable.Cell style={{ flex: 0.8, marginRight: 5, flexWrap: 'wrap' }}>
                         <Text style={styles.fontvalue}>
                           {displayData11[consignorCode].expected}
                         </Text>
                       </DataTable.Cell>
-                      <DataTable.Cell style={{flex: 1, marginRight: -30}}>
+                      <DataTable.Cell style={{ flex: 0.8, marginRight: -45, flexWrap: 'wrap' }}>
                         <Text style={styles.fontvalue}>
                           {displayData11[consignorCode].scanned}
                         </Text>
