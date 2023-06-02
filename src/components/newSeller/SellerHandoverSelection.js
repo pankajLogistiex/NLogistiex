@@ -48,7 +48,7 @@ const SellerHandoverSelection = ({route}) => {
   const shipmentData =
     backendUrl + `SellerMainScreen/getSellerDetails/${route.params.paramKey}`;
   const [acc, setAcc] = useState(0);
-  const [pending, setPending] = useState(route.params.Forward);
+  const [pending, setPending] = useState(route.params.Reverse);
   const [Forward, setForward] = useState('');
   const [reject, setReject] = useState(0);
   const [data, setData] = useState([]);
