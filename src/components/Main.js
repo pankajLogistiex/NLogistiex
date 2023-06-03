@@ -57,7 +57,7 @@ export default function Main({navigation, route}) {
   const [spp, setSpp] = useState(0);
   const [spnp, setSpnp] = useState(0);
   const [spr, setSpr] = useState(0);
-
+const [bagShipmentCount,setBagShipmentCount] = useState(0);
   const [shts, setShts] = useState(0);
   const [shc1, setShc1] = useState(0);
   const [shp1, setShp1] = useState(0);
@@ -333,6 +333,36 @@ export default function Main({navigation, route}) {
         },
       );
     });
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        `SELECT consignorCode, AcceptedList
+        FROM closeHandoverBag1`,
+        [],
+        (tx, resultSet) => {
+          // console.log("resultSet", resultSet.rows.raw());
+          const rows = resultSet.rows.raw();
+          const updatedResults = {};
+    const bagShipmentCount11=0;
+          rows.forEach((item) => {
+            const consignorCode = item.consignorCode;
+            const acceptedList = JSON.parse(item.AcceptedList);
+    
+            if (!updatedResults[consignorCode]) {
+              updatedResults[consignorCode] = 0;
+            }
+    
+            updatedResults[consignorCode] += acceptedList.length;
+    bagShipmentCount11=bagShipmentCount11+acceptedList.length;
+            // console.log("item", item);
+          });
+               setBagShipmentCount(bagShipmentCount11);
+          // setResults(updatedResults);
+          console.log("Seller Closed Bags Shipment Count : ",bagShipmentCount11);
+        }
+      );
+    });
+
     setLoading(false);
   };
 
@@ -637,7 +667,7 @@ export default function Main({navigation, route}) {
                   it.notPicked !== 0 ||
                   it.rejectedOrder !== 0
                 ) {
-                  if (shp1 === 0 && shc1 !== 0) {
+                  if (shp1 === 0  && (shc1+shr1+shnp1) === bagShipmentCount) {
                     return it.title === 'Seller Pickups' ||
                       it.title === 'Seller Deliveries' ? (
                       <Box pt={4} mb="6" rounded="md" bg="white" key={index}>
