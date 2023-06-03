@@ -152,11 +152,12 @@ useEffect(() => {
         <Box
         key={i}
         flex={1}
-        bg="#fff"
+        bg="#F5F4F4"
         alignItems="center"
         pt={'2%'}
         pb={'2%'}
       >
+        
         {i === 0 && (
           <View
             style={{
@@ -183,18 +184,18 @@ useEffect(() => {
           py={4}
           px={6}
           bg="#fff"
-          rounded="xl"
+          rounded="sm"
           width={'90%'}
           maxWidth="100%"
           _text={{ fontWeight: 'medium' }}
           style={{
             elevation: 10,
-            shadowColor: 'rgba(154, 160, 166, 0.3)',
-            shadowOpacity: 0.3,
-            shadowRadius: 2,
+            shadowColor: 'rgba(154, 160, 166, 0.6)',
+            shadowOpacity: 0.8, 
+            shadowRadius: 4, 
             shadowOffset: {
               width: 0,
-              height: 2,
+              height: 6, 
             },
             borderWidth: 0.1,
             borderColor: 'gray.100',
@@ -291,6 +292,13 @@ useEffect(() => {
       </Box>
     ))
 )}
+<Center>
+<Image
+  style={{width: 150, height: 100}}
+  source={require('../assets/image.png')}
+  alt={'Logo Image'}
+/>
+</Center>
 
           </Box>
         )}

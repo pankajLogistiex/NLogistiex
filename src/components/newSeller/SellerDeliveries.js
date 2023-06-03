@@ -160,10 +160,16 @@ import {
       <ScrollView style={styles.homepage} showsVerticalScrollIndicator={true} showsHorizontalScrollIndicator={false}>
         <Card>
           <DataTable>
-            <DataTable.Header style={{height:'auto', backgroundColor: '#004aad', borderTopLeftRadius: 5, borderTopRightRadius: 5, borderWidth:2, borderColor:'white'}}  >
-              <DataTable.Title style={{flex: 1.2}}><Text style={{ textAlign: 'center', color:'white'}}>Seller Name</Text></DataTable.Title>
-              <DataTable.Title style={{flex: 1.2}}><Text style={{ textAlign: 'center', color:'white'}}>Forward Pickups</Text></DataTable.Title>
-              <DataTable.Title style={{flex: 1.3,marginRight:-35}}><Text style={{ textAlign: 'center', color:'white'}}>Reverse Deliveries</Text></DataTable.Title>
+            <DataTable.Header style={{alignItems: 'center', height:'auto', backgroundColor: '#004aad', borderTopLeftRadius: 5, borderTopRightRadius: 5, borderWidth:2, borderColor:'white'}}  >
+              <DataTable.Title style={{ flex: 6 }}>
+                <Text style={{ flex: 1, justifyContent: 'center', color: 'white', textAlign: 'center', flexWrap: 'wrap',}}>Seller Name</Text>
+                </DataTable.Title>
+              <DataTable.Title style={{ flex: 2 }} numberOfLines={2}>
+                <Text style={{ flex: 1, justifyContent: 'center', color: 'white', textAlign: 'center', flexWrap: 'wrap',}}>Forward Pickups</Text>
+                </DataTable.Title>
+              <DataTable.Title style={{flex: 2 ,marginRight:-20}} numberOfLines={2} >
+                <Text style={{ flex: 1, justifyContent: 'center', color: 'white', textAlign: 'center', flexWrap: 'wrap',}}>Reverse Deliveries</Text>
+                </DataTable.Title>
             </DataTable.Header>
            {route.params.Trip !== 'Start Trip' && data && data.length > 0
                 ? data.filter(searched(keyword)).map((single, i) =>
@@ -188,9 +194,9 @@ import {
                        otpSubmittedDelivery: single.otpSubmittedDelivery,
                        });
                }}>
-                 <DataTable.Cell style={{ flex: 1.2 }}><Text style={styles.fontvalue} numberOfLines={2}>{single.consignorName}</Text></DataTable.Cell>
-                 <DataTable.Cell style={{ flex: 0.4, marginRight: 50 }}><Text style={styles.fontvalue} numberOfLines={2}>{value[i]}</Text></DataTable.Cell>
-                 <DataTable.Cell style={{ flex: 0.4, marginRight: 5 }}><Text style={styles.fontvalue} numberOfLines={2}>{pending11[i]}/{reverse[i]}</Text></DataTable.Cell>
+                 <DataTable.Cell style={{ flex: 6, flexWrap: 'wrap' }}><Text style={styles.fontvalue} >{single.consignorName}</Text></DataTable.Cell>
+                 <DataTable.Cell style={{ flex: 2, marginRight: 5, flexWrap: 'wrap' }}><Text style={styles.fontvalue} >{value[i]}</Text></DataTable.Cell>
+                 <DataTable.Cell style={{ flex: 2, marginRight: -45, flexWrap: 'wrap' }}><Text style={styles.fontvalue}>{pending11[i]}/{reverse[i]}</Text></DataTable.Cell>
                </DataTable.Row> ): (
                         <DataTable.Row style={{ height: 'auto', backgroundColor: '#eeeeee', borderBottomWidth: 1, borderWidth: 2, borderColor: 'white' }} key={single.consignorName} onPress={() => {
                           navigation.navigate('SellerHandoverSelection', {
@@ -212,9 +218,9 @@ import {
                          otpSubmittedDelivery: single.otpSubmittedDelivery,
                          });
                  }}>
-                        <DataTable.Cell style={{ flex: 1.2 }}><Text style={styles.fontvalue} numberOfLines={2}>{single.consignorName}</Text></DataTable.Cell>
-                        <DataTable.Cell style={{ flex: 0.4, marginRight: 50 }}><Text style={styles.fontvalue} numberOfLines={2}>{value[i]}</Text></DataTable.Cell>
-                        <DataTable.Cell style={{ flex: 0.4, marginRight: 5 }}><Text style={styles.fontvalue} numberOfLines={2}>{pending11[i]}/{reverse[i]}</Text></DataTable.Cell>
+                        <DataTable.Cell style={{ flex: 6, flexWrap: 'wrap' }}><Text style={styles.fontvalue} >{single.consignorName}</Text></DataTable.Cell>
+                        <DataTable.Cell style={{ flex: 2, marginRight: 5, flexWrap: 'wrap' }}><Text style={styles.fontvalue} >{value[i]}</Text></DataTable.Cell>
+                        <DataTable.Cell style={{ flex: 2, marginRight: -45, flexWrap: 'wrap' }}><Text style={styles.fontvalue} >{pending11[i]}/{reverse[i]}</Text></DataTable.Cell>
                       </DataTable.Row>
                         )
                      : null,
@@ -227,14 +233,14 @@ import {
                       <DataTable.Row style={{ height: 'auto', backgroundColor: '#eeeeee', borderBottomWidth: 1, borderWidth: 2, borderColor: 'white',elevation: 8, }} key={single.consignorName} onPress={() => {
                         handleTrip()
                }}>
-                 <DataTable.Cell style={{ flex: 1.2 }}><Text style={styles.fontvalue} numberOfLines={2}>{single.consignorName}</Text></DataTable.Cell>
-                 <DataTable.Cell style={{ flex: 0.4, marginRight: 50 }}><Text style={styles.fontvalue} numberOfLines={2}>{value[i]}</Text></DataTable.Cell>
-                 <DataTable.Cell style={{ flex: 0.4, marginRight: 5}}><Text style={styles.fontvalue} numberOfLines={2}>{pending11[i]}/{reverse[i]}</Text></DataTable.Cell>
+                 <DataTable.Cell style={{ flex: 6, flexWrap: 'wrap' }}><Text style={styles.fontvalue} >{single.consignorName}</Text></DataTable.Cell>
+                 <DataTable.Cell style={{ flex: 2, marginRight: 5, flexWrap: 'wrap' }}><Text style={styles.fontvalue} >{value[i]}</Text></DataTable.Cell>
+                 <DataTable.Cell style={{ flex: 2, marginRight: -45, flexWrap: 'wrap' }}><Text style={styles.fontvalue} >{pending11[i]}/{reverse[i]}</Text></DataTable.Cell>
                </DataTable.Row> ): (
                 <DataTable.Row style={{ height: 'auto', backgroundColor: '#90ee90', borderBottomWidth: 1, borderWidth: 2, borderColor: 'white' }} key={single.consignorName} >
-                <DataTable.Cell style={{ flex: 1.2 }}><Text style={styles.fontvalue} numberOfLines={2}>{single.consignorName}</Text></DataTable.Cell>
-                <DataTable.Cell style={{ flex: 0.4, marginRight: 50 }}><Text style={styles.fontvalue} numberOfLines={2}>{value[i]}</Text></DataTable.Cell>
-                <DataTable.Cell style={{ flex: 0.4, marginRight: 5 }}><Text style={styles.fontvalue} numberOfLines={2}>{pending11[i]}/{reverse[i]}</Text></DataTable.Cell>
+                <DataTable.Cell style={{ flex: 6, flexWrap: 'wrap' }}><Text style={styles.fontvalue} >{single.consignorName}</Text></DataTable.Cell>
+                <DataTable.Cell style={{ flex: 2, marginRight: 5, flexWrap: 'wrap' }}><Text style={styles.fontvalue} >{value[i]}</Text></DataTable.Cell>
+                <DataTable.Cell style={{ flex: 2, marginRight: -45, flexWrap: 'wrap' }}><Text style={styles.fontvalue} >{pending11[i]}/{reverse[i]}</Text></DataTable.Cell>
                 </DataTable.Row>
                 )
                 : null,
