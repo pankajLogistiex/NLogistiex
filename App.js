@@ -597,7 +597,7 @@ function StackNavigators({ navigation }) {
           // console.log("Address from local db : " + address_json.consignorAddress1 + " " + address_json.consignorAddress2);
           // ToastAndroid.show('consignorName:' + results.rows.item(i).consignorName + "\n" + 'PRSNumber : ' + results.rows.item(i).PRSNumber, ToastAndroid.SHORT);
         }
-        if (m === 4) {
+        if (m === 3) {
           ToastAndroid.show("Sync Successful", ToastAndroid.SHORT);
           setIsLoading(false);
           setIsLogin(true);
@@ -607,7 +607,7 @@ function StackNavigators({ navigation }) {
 
           AsyncStorage.setItem("refresh11", "refresh");
         } else {
-          console.log("Only " + m + " APIs loaded out of 4 ");
+          console.log("Only " + m + " APIs loaded out of 3 ");
         }
         // m++;
         // ToastAndroid.show("Sync Successful",ToastAndroid.SHORT);
