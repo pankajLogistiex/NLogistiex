@@ -121,7 +121,7 @@ const PendingWork = ({route}) => {
                 [results.rows.item(i).consignorCode],
                 (tx1, results11) => {
                   tx.executeSql(
-                    'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND status IS NULL',
+                    'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND ( handoverStatus="accepted" AND status IS NULL)',
                     [results.rows.item(i).consignorCode],
                     (tx1, results22) => {
                       setMM(MM + results22.rows.length);

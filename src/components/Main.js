@@ -77,6 +77,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   const [Forward, setForward] = useState(0);
   const [Reverse, setReverse] = useState(0);
   const [tripData, setTripData] = useState([]);
+  const [tripID, setTripID] = useState('');
   const [loading, setLoading] = useState(true);
   const [showModal1, setShowModal1] = useState(false);
   const [message1, setMessage1] = useState(0);
@@ -106,8 +107,14 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
       .catch(err => {
         console.log(err);
       });
+      await AsyncStorage.getItem('tripID')
+      .then(value => {
+        setTripID(value);
+      })
+      .catch(err => {
+        console.log(err);
+      });
   }
-
   function getTripDetails(tripId) {
     axios
       .get(backendUrl + 'UserTripInfo/getUserTripInfo', {
@@ -136,19 +143,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   }, []);
 
   useEffect(() => {
-    let current = new Date();
-    let tripid = current.toString();
-    let time = tripid.match(/\d{2}:\d{2}:\d{2}/)[0];
-    let dateStart = 0;
-    let dateEnd = tripid.indexOf(
-      ' ',
-      tripid.indexOf(' ', tripid.indexOf(' ') + 1) + 1,
-    );
-    let date = dateEnd
-      ? tripid.substring(dateStart, dateEnd + 5)
-      : 'No match found';
-    getTripDetails(id + '_' + date);
-  }, [id]);
+    getTripDetails(tripID);
+  }, [tripID]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
