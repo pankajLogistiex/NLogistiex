@@ -19,6 +19,7 @@ import {
   Modal,
 } from "native-base";
 import MaterialIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import Icon from 'react-native-vector-icons/FontAwesome';
 import {
   NavigationContainer,
   DrawerActions,
@@ -1031,7 +1032,7 @@ function StackNavigators({ navigation }) {
                     onPress={() => navigation.toggleDrawer()}
                   />
                   <Heading style={{ color: "white", marginLeft: 10 }} size="md">
-                    Dashboard
+                    Welcome,
                   </Heading>
                 </View>
               </NativeBaseProvider>
@@ -2585,48 +2586,66 @@ function CustomDrawerContent({ navigation }) {
       });
   };
 
+ 
   return (
     <NativeBaseProvider>
+      <TouchableOpacity
+        onPress={()=>{navigation.closeDrawer();}}
+        style={{
+          position: 'absolute',
+          top: 20,
+          right: 20,
+          zIndex: 1, 
+        }}
+      >
+        <MaterialIcons name="close" size={26} color="black" /> 
+      </TouchableOpacity>
       {email ? (
-        <Box pt={4} px={4} key={"extra" + email}>
-          <Avatar bg="#004aad" alignSelf="center" size="xl">
-            <MaterialIcons
-              name="account"
-              style={{ fontSize: 60, color: "white" }}
-            />
-          </Avatar>
-          <Heading alignSelf="center" mt={2}>
-            {name}
-          </Heading>
-          <Text alignSelf="center">{email}</Text>
+        <Box pt={5} px={5} key={"extra" + email}>
+          <Center>
+            <Avatar bg="white" size="xl" 
+      >
+              <MaterialIcons
+                name="account"
+                style={{ fontSize: 95, color: "#004aad" }}
+              />
+            </Avatar>
+            <Heading mt={4} size="md" color="gray.800">
+              {name}
+            </Heading>
+            <Text mt={1} color="gray.600">
+              {email}
+            </Text>
+          </Center>
           <Button
+            mt={4}
             onPress={() => {
               LogoutHandle();
-
+  
               navigation.dispatch(
                 CommonActions.reset({
                   index: 1,
                   routes: [
                     { name: "Login" },
-                    // {
-                    //   name: 'Profile',
-                    //   params: { user: 'jane' },
-                    // },
                   ],
                 })
               );
-
-              // navigation.navigate('Login');
+  
               navigation.closeDrawer();
             }}
-            mt={2}
-            style={{ backgroundColor: "#004aad" }}
+            style={{ backgroundColor: "#004aad" ,justifyContent: 'flex-start', alignItems: 'flex-start',paddingLeft:20}}
+            startIcon={
+              <MaterialIcons
+                name="logout"
+                style={{ fontSize: 20, color: "white" }}
+              />
+            }
           >
             Logout
           </Button>
         </Box>
       ) : (
-        <Box pt={4} px={4}>
+        <Box pt={5} px={5}>
           <Button
             onPress={() => {
               navigation.dispatch(
@@ -2634,34 +2653,41 @@ function CustomDrawerContent({ navigation }) {
                   index: 1,
                   routes: [
                     { name: "Login" },
-                    // {
-                    //   name: 'Profile',
-                    //   params: { user: 'jane' },
-                    // },
                   ],
                 })
               );
-              // navigation.navigate('Login');
+  
               navigation.closeDrawer();
             }}
-            mt={2}
-            style={{ backgroundColor: "#004aad" }}
+            style={{ backgroundColor: "#004aad" ,justifyContent: 'flex-start', alignItems: 'flex-start',paddingLeft:20 }}
+            startIcon={
+              <MaterialIcons
+                name="login"
+                style={{ fontSize: 20, color: "white" }}
+              />
+            }
           >
             Login
           </Button>
         </Box>
       )}
       {email ? (
-        <View>
-          <Divider my="4" />
-          <Box px={4}>
+        <View >
+          <Divider my={5} height={1.5}/>
+          <Box px={5}>
             <Button
               variant="outline"
               onPress={() => {
                 navigation.navigate("Main");
                 navigation.closeDrawer();
               }}
-              style={{ color: "#004aad", borderColor: "#004aad" }}
+              style={{ color: "#004aad", borderColor: "#004aad" ,justifyContent: 'flex-start', alignItems: 'flex-start',paddingLeft:20 }}
+              startIcon={
+                <MaterialIcons
+                  name="home"
+                  style={{ fontSize: 20, color: "#004aad" }}
+                />
+              }
             >
               <Text style={{ color: "#004aad" }}>Home</Text>
             </Button>
@@ -2672,7 +2698,14 @@ function CustomDrawerContent({ navigation }) {
                 navigation.closeDrawer();
               }}
               mt={4}
-              style={{ color: "#004aad", borderColor: "#004aad" }}
+              style={{ color: "#004aad", borderColor: "#004aad",justifyContent: 'flex-start', alignItems: 'flex-start',paddingLeft:20 }}
+              startIcon={
+                // <MaterialIcons
+                //   name="motorbike"
+                //   style={{ fontSize: 20, color: "#004aad" }}
+                // />
+                <Icon name="motorcycle" size={18} color="#004aad" />
+              }
             >
               <Text style={{ color: "#004aad" }}>My Trip</Text>
             </Button>
@@ -2685,41 +2718,64 @@ function CustomDrawerContent({ navigation }) {
                 navigation.closeDrawer();
               }}
               mt={4}
-              style={{ color: "#004aad", borderColor: "#004aad" }}
+              style={{ color: "#004aad", borderColor: "#004aad" ,justifyContent: 'flex-start', alignItems: 'flex-start',paddingLeft:20}}
+              startIcon={
+                // <>
+                //  <MaterialIcons
+                //    name="briefcase"
+                //    style={{ fontSize: 20, color: "#004aad" }}
+                // />
+                <Icon name="briefcase" size={18} color="#004aad" />
+            //  </> 
+             }
             >
-              <Text style={{ color: "#004aad" }}> Additional Workload</Text>
+              <Text style={{ color: "#004aad" }}>Additional Workload</Text>
             </Button>
           </Box>
         </View>
       ) : null}
-      <Divider my="4" />
-      <Box px={4}>
+      <Divider my={5} height={1.5}/>
+      <Box px={5}>
         <Select
           selectedValue={language}
-          minWidth="200"
+          minWidth={200}
           accessibilityLabel="Choose Language"
           placeholder="Choose Language"
           _selectedItem={{ bg: "#004aad", color: "white" }}
           mt={0}
           onValueChange={(itemValue) => setLanguage(itemValue)}
+          InputLeftElement={
+            <Icon name="language" style={{ fontSize: 20, color: "#004aad" ,justifyContent: 'flex-start', alignItems: 'flex-start',paddingLeft:20 }} />
+            // <MaterialIcons
+            //   name="translate"
+            //   style={{ fontSize: 20, color: "#004aad", marginRight: 5 }}
+            // />
+          } 
         >
-          <Select.Item label="English (EN)" value="English" />
-          <Select.Item label="Hindi (HI)" value="Hindi" />
-          <Select.Item label="Marathi (MT)" value="Marathi" />
-          <Select.Item label="Urdu (UD)" value="Urdu" />
-          <Select.Item label="Telgu (TG)" value="Telgu" />
-          <Select.Item label="Tamil (TL)" value="Tamil" />
+          <Select.Item label="English (US)" value="English" />
+          <Select.Item label="Hindi (हिन्दी)" value="Hindi" />
+          <Select.Item label="Marathi (मराठी)" value="Marathi" />
+          <Select.Item label="Urdu (اردو )" value="Urdu" />
+          <Select.Item label="Telugu (తెలుగు )" value="Telugu" />
+          <Select.Item label="Tamil (தமிழ் )" value="Tamil" />
         </Select>
       </Box>
-      <Center style={{ bottom: 0, position: "absolute", left: "15%" }}>
+      <Center
+        bottom={0}
+        position="absolute"
+        left="17%"
+        _text={{ color: 'gray.400', fontSize: 'xs' }}
+      >
         <Image
-          style={{ width: 200, height: 150 }}
-          source={require("./src/assets/image.png")}
-          alt={"Logo Image"}
+          style={{ width: 190, height: 150 }}
+          source={require('./src/assets/image.png')}
+          alt="Logo Image"
         />
       </Center>
     </NativeBaseProvider>
   );
+  
+  
 }
 
 export default function App({ navigation }) {
