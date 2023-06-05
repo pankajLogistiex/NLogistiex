@@ -12,6 +12,7 @@ import {
 import axios from 'axios';
 import {Fab} from 'native-base';
 import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon1 from 'react-native-vector-icons/FontAwesome';
 import {Icon} from 'native-base';
 import Lottie from 'lottie-react-native';
 import {ProgressBar} from '@react-native-community/progress-bar-android';
@@ -25,8 +26,9 @@ import {
   VStack,
   Alert,
   Modal,
-  TouchableOpacity
 } from 'native-base';
+import { TouchableOpacity } from 'react-native';
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {openDatabase} from 'react-native-sqlite-storage';
 const db = openDatabase({name: 'rn_sqlite'});
@@ -81,6 +83,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showModal1, setShowModal1] = useState(false);
   const [message1, setMessage1] = useState(0);
+  const [myArray, setMyArray] = useState([]);
   const focus = useIsFocused();
 
   async function getUserDetails() {
@@ -338,23 +341,20 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
         (tx, resultSet) => {
           // console.log("resultSet", resultSet.rows.raw());
           const rows = resultSet.rows.raw();
-          const updatedResults = {};
-    const bagShipmentCount11=0;
-          rows.forEach((item) => {
+    for (let i = 0; i < rows.length; i++) {
+            const item=rows[i];
             const consignorCode = item.consignorCode;
             const acceptedList = JSON.parse(item.AcceptedList);
-    
-            if (!updatedResults[consignorCode]) {
-              updatedResults[consignorCode] = 0;
+    // console.log(consignorCode,"  ",acceptedList);
+            JSON.parse(rows[i].AcceptedList).forEach((item) => {
+              // console.log(item);
+              if (!myArray.includes(item)) {
+                setMyArray([...myArray, item]);
             }
-    
-            updatedResults[consignorCode] += acceptedList.length;
-    bagShipmentCount11=bagShipmentCount11+acceptedList.length;
-            // console.log("item", item);
-          });
-               setBagShipmentCount(bagShipmentCount11);
-          // setResults(updatedResults);
-          console.log("Seller Closed Bags Shipment Count : ",bagShipmentCount11);
+
+            });
+        }
+          // console.log("Seller Handover Closed Bags Shipment Count:",myArray.length);
         }
       );
     });
@@ -663,7 +663,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                   it.notPicked !== 0 ||
                   it.rejectedOrder !== 0
                 ) {
-                  if (shp1 === 0  && (shc1+shr1+shnp1) === bagShipmentCount) {
+                  if (shp1 === 0  && shc1 === myArray.length ) {
                     return it.title === 'Seller Pickups' ||
                       it.title === 'Seller Deliveries' ? (
                       <Box pt={4} mb="6" rounded="md" bg="white" key={index}>
@@ -878,6 +878,55 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                           </View>
                         </Box>
                         {it.title === 'Seller Handover' ? (
+
+
+<TouchableOpacity
+w="100%"
+      style={{
+        // size:'90%',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#004aad',
+        elevation: 10,
+        borderTopLeftRadius: 0,
+        borderTopRightRadius: 0,
+        // margin: 20,
+        padding:8,
+        borderRadius:6,
+
+        paddingHorizontal: 10,
+      }}
+      onPress={()=>{navigation.navigate('SellerHandover');}}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Image alt={'Icon Image'}
+          source={require('../assets/icons11/Sellerhandover.png')}
+          style={{
+            width: 45,
+            height: 30,
+            tintColor: 'white',
+            marginRight: 5,
+          }}
+        />
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: '500',
+            color: 'white',
+          }}
+        >
+          {tripValue === 'Start Trip'
+            ? 'Start Handover'
+            : spp1 === 0
+            ? 'Handover completed'
+            : 'Handover in progress'}
+        </Text>
+      </View>
+      <Icon1 name="chevron-right" size={16} color="white" />
+    </TouchableOpacity>
+
+/*
                           <Button
                             w="100%"
                             // size="lg"
@@ -897,7 +946,64 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                               ? 'Handover completed'
                               : 'Handover in progress'}
                           </Button>
+*/
+
                         ) : it.title === 'Seller Deliveries' ? (
+
+
+                          <TouchableOpacity
+                          w="100%"
+                                style={{
+                                  // size:'90%',
+                                  flexDirection: 'row',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  backgroundColor: '#004aad',
+                                  elevation: 10,
+                                  borderTopLeftRadius: 0,
+                                  borderTopRightRadius: 0,
+                                  // margin: 20,
+                                  padding:8,
+                                  borderRadius:6,
+                          
+                                  paddingHorizontal: 10,
+                                }}
+                                onPress={()=>{navigation.navigate('SellerDeliveries', {
+                                  Forward: Forward,
+                                  Reverse: Reverse,
+                                  Trip: tripValue,
+                                  PendingHandover: shp1,
+                                })}}
+                              >
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                  <Image alt={'Icon Image'}
+                                    source={require('../assets/icons11/1685906413809.png')}
+                                    style={{
+                                      width: 30,
+                                      height: 30,
+                                      tintColor: 'white',
+                                      marginRight: 12,
+                                      marginLeft:8,
+                                    }}
+                                  />
+                                  <Text
+                                    style={{
+                                      fontSize: 16,
+                                      fontWeight: '500',
+                                      color: 'white',
+                                    }}
+                                  >
+                                     {tripValue === 'Start Trip'
+                              ? 'New Delivery'
+                              : spp1 === 0
+                              ? 'Delivery completed'
+                              : 'Delivery in progress'}
+                                  </Text>
+                                </View>
+                                <Icon1 name="chevron-right" size={16} color="white" />
+                              </TouchableOpacity>
+
+/*
                           <Button
                             w="100%"
                             // size="lg"
@@ -922,7 +1028,65 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                               ? 'Delivery completed'
                               : 'Delivery in progress'}
                           </Button>
+*/
+
+
                         ) : (
+
+
+
+                          <TouchableOpacity
+w="100%"
+      style={{
+        // size:'90%',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#004aad',
+        elevation: 10,
+        borderTopLeftRadius: 0,
+        borderTopRightRadius: 0,
+        // margin: 20,
+        padding:8,
+        borderRadius:6,
+
+        paddingHorizontal: 10,
+      }}
+      onPress={()=>{navigation.navigate('NewSellerPickup', {
+        Forward: Forward,
+        Reverse: Reverse,
+        Trip: tripValue,
+        userId: id,
+        PendingHandover: shp1,
+      })}}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Image alt={'Icon Image'}
+          source={require('../assets/icons11/new_pickup11.png')}
+          style={{
+            width: 45,
+            height: 30,
+            tintColor: 'white',
+            marginRight: 5,
+          }}
+        />
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: '500',
+            color: 'white',
+          }}
+        >
+           {tripValue === 'Start Trip'
+                              ? 'New Pickup'
+                              : spp === 0
+                              ? 'Pickup completed'
+                              : 'Pickup in progress'}
+        </Text>
+      </View>
+      <Icon1 name="chevron-right" size={16} color="white" />
+    </TouchableOpacity>
+                          /*
                           <Button
                             w="100%"
                             // size="lg"
@@ -933,6 +1097,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                               backgroundColor: '#004aad',
                               elevation: 10,
                             }}
+                            
                             onPress={() =>
                               navigation.navigate('NewSellerPickup', {
                                 Forward: Forward,
@@ -942,12 +1107,24 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                                 PendingHandover: shp1,
                               })
                             }>
+                              <Image alt={'Icon Image'}
+        source={require('../assets/icons11/new_pickup11.png')}
+        style={{
+          width: 5,
+          height: 5,
+          tintColor: 'blue',
+        }}
+      />
                             {tripValue === 'Start Trip'
                               ? 'New Pickup'
                               : spp === 0
                               ? 'Pickup completed'
                               : 'Pickup in progress'}
                           </Button>
+                          */
+
+
+
                         )}
                       </Box>
                     ) : null;
@@ -1165,26 +1342,186 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                           </View>
                         </Box>
                         {it.title === 'Seller Handover' ? (
-                          <Button
-                            w="100%"
-                            // size="lg"
-                            // bg="#004aad"
-                            rounded="md"
-                            style={{
-                              height: 'auto',
-                              backgroundColor: '#004aad',
-                              elevation: 10,
-                            }}
-                            onPress={() =>
-                              navigation.navigate('SellerHandover')
-                            }>
-                            {tripValue === 'Start Trip'
-                              ? 'Start Handover'
-                              : spp1 === 0
-                              ? 'Handover completed'
-                              : 'Handover in progress'}
-                          </Button>
+
+
+               
+
+<TouchableOpacity
+w="100%"
+      style={{
+        // size:'90%',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#004aad',
+        elevation: 10,
+        borderTopLeftRadius: 0,
+        borderTopRightRadius: 0,
+        // margin: 20,
+        padding:8,
+        borderRadius:6,
+
+        paddingHorizontal: 10,
+      }}
+      onPress={()=>{navigation.navigate('SellerHandover');}}
+    >
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <Image alt={'Icon Image'}
+          source={require('../assets/icons11/Sellerhandover.png')}
+          style={{
+            width: 45,
+            height: 30,
+            tintColor: 'white',
+            marginRight: 5,
+          }}
+        />
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: '500',
+            color: 'white',
+          }}
+        >
+          {tripValue === 'Start Trip'
+            ? 'Start Handover'
+            : spp1 === 0
+            ? 'Handover completed'
+            : 'Handover in progress'}
+        </Text>
+      </View>
+      <Icon1 name="chevron-right" size={16} color="white" />
+    </TouchableOpacity>
+
+
+ 
+/*
+ <Button
+w="100%"
+style={{
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  backgroundColor: '#004aad',
+  elevation: 10,
+  borderTopLeftRadius: 0,
+  borderTopRightRadius: 0,
+  marginTop: -10,
+  paddingHorizontal: 10,
+}}
+onPress={() =>
+  navigation.navigate('SellerHandover')
+}
+>
+<View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
+  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+    <Image alt={'Icon Image'}
+      source={require('../assets/icons11/Sellerhandover.png')}
+      style={{
+        width: 45,
+        height: 30,
+        tintColor: 'white',
+        marginRight: 5,
+      }}
+    />
+    <Text
+      style={{
+        fontSize: 16,
+        fontWeight: '500',
+        color: 'white',
+      }}
+    >
+        {tripValue === 'Start Trip'
+                               ? 'Start Handover'
+                               : spp1 === 0
+                               ? 'Handover completed'
+                               : 'Handover in progress'}
+    </Text>
+  </View>
+  <Icon1 name="chevron-right" size={16} color="white" />
+</View>
+</Button> 
+*/
+
+
+                          // <Button
+                          //   w="100%"
+                          //   // size="lg"
+                          //   // bg="#004aad"
+                          //   rounded="md"
+                          //   style={{
+                          //     height: 'auto',
+                          //     backgroundColor: '#004aad',
+                          //     elevation: 10,
+                          //   }}
+                          //   onPress={() =>
+                          //     navigation.navigate('SellerHandover')
+                          //   }>
+                          //   {tripValue === 'Start Trip'
+                          //     ? 'Start Handover'
+                          //     : spp1 === 0
+                          //     ? 'Handover completed'
+                          //     : 'Handover in progress'}
+                          // </Button>
+
+
+
                         ) : it.title === 'Seller Deliveries' ? (
+
+
+<TouchableOpacity
+                          w="100%"
+                                style={{
+                                  // size:'90%',
+                                  flexDirection: 'row',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  backgroundColor: '#004aad',
+                                  elevation: 10,
+                                  borderTopLeftRadius: 0,
+                                  borderTopRightRadius: 0,
+                                  // margin: 20,
+                                  padding:8,
+                                  borderRadius:6,
+                          
+                                  paddingHorizontal: 10,
+                                }}
+                                onPress={()=>{navigation.navigate('SellerDeliveries', {
+                                  Forward: Forward,
+                                  Reverse: Reverse,
+                                  Trip: tripValue,
+                                  PendingHandover: shp1,
+                                })}}
+                              >
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                  <Image alt={'Icon Image'}
+                                    source={require('../assets/icons11/1685906413809.png')}
+                                    style={{
+                                      width: 30,
+                                      height: 30,
+                                      tintColor: 'white',
+                                      // marginRight: 5,
+                                      marginRight: 12,
+                                      marginLeft:8,
+                                    }}
+                                  />
+                                  <Text
+                                    style={{
+                                      fontSize: 16,
+                                      fontWeight: '500',
+                                      color: 'white',
+                                    }}
+                                  >
+                                     {tripValue === 'Start Trip'
+                              ? 'New Delivery'
+                              : spp1 === 0
+                              ? 'Delivery completed'
+                              : 'Delivery in progress'}
+                                  </Text>
+                                </View>
+                                <Icon1 name="chevron-right" size={16} color="white" />
+                              </TouchableOpacity>
+
+                          /*
                           <Button
                             w="100%"
                             // size="lg"
@@ -1209,32 +1546,118 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                               ? 'Delivery completed'
                               : 'Delivery in progress'}
                           </Button>
+                          */
+
+
+
                         ) : (
-                          <Button
-                            w="100%"
-                            // size="lg"
-                            // bg="#004aad"
-                            rounded="md"
-                            style={{
-                              height: 'auto',
-                              backgroundColor: '#004aad',
-                              elevation: 10,
-                            }}
-                            onPress={() =>
-                              navigation.navigate('NewSellerPickup', {
-                                Forward: Forward,
-                                Reverse: Reverse,
-                                Trip: tripValue,
-                                userId: id,
-                                PendingHandover: shp1,
-                              })
-                            }>
-                            {tripValue === 'Start Trip'
-                              ? 'New Pickup'
-                              : spp === 0
-                              ? 'Pickup completed'
-                              : 'Pickup in progress'}
-                          </Button>
+
+                          <TouchableOpacity
+                          w="100%"
+                                style={{
+                                  // size:'90%',
+                                  flexDirection: 'row',
+                                  justifyContent: 'space-between',
+                                  alignItems: 'center',
+                                  backgroundColor: '#004aad',
+                                  elevation: 10,
+                                  borderTopLeftRadius: 0,
+                                  borderTopRightRadius: 0,
+                                  // margin: 20,
+                                  padding:8,
+                                  borderRadius:6,
+                          
+                                  paddingHorizontal: 10,
+                                }}
+                                onPress={()=>{navigation.navigate('NewSellerPickup', {
+                                  Forward: Forward,
+                                  Reverse: Reverse,
+                                  Trip: tripValue,
+                                  userId: id,
+                                  PendingHandover: shp1,
+                                })}}
+                              >
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                  <Image alt={'Icon Image'}
+                                    source={require('../assets/icons11/new_pickup11.png')}
+                                    style={{
+                                      width: 40,
+                                      height: 30,
+                                      tintColor: 'white',
+                                      marginRight: 5,
+                                    }}
+                                  />
+                                  <Text
+                                    style={{
+                                      fontSize: 16,
+                                      fontWeight: '500',
+                                      color: 'white',
+                                    }}
+                                  >
+                                     {tripValue === 'Start Trip'
+                                                        ? 'New Pickup'
+                                                        : spp === 0
+                                                        ? 'Pickup completed'
+                                                        : 'Pickup in progress'}
+                                  </Text>
+                                </View>
+                                <Icon1 name="chevron-right" size={16} color="white" />
+                              </TouchableOpacity>
+                         /* 
+                         <Button
+  w="100%"
+  style={{
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#004aad',
+    elevation: 10,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    marginTop: -10,
+    paddingHorizontal: 10,
+  }}
+  onPress={() =>
+    navigation.navigate('NewSellerPickup', {
+      Forward: Forward,
+      Reverse: Reverse,
+      Trip: tripValue,
+      userId: id,
+      PendingHandover: shp1,
+    })
+  }
+>
+  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <Image alt={'Icon Image'}
+        source={require('../assets/icons11/new_pickup11.png')}
+        style={{
+          width: 35,
+          height: 32,
+          tintColor: 'white',
+          marginRight: 5,
+        }}
+      />
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: '500',
+          color: 'white',
+        }}
+      >
+        {tripValue === 'Start Trip'
+          ? 'New Pickup                                                   '
+          : spp === 0
+          ? 'Pickup completed'
+          : 'Pickup in progress'}
+      </Text>
+    </View>
+    <Icon1 name="chevron-right" size={16} color="white" />
+  </View>
+</Button>
+*/
+
+                        
                         )}
                       </Box>
                     ) : null;
@@ -1254,7 +1677,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                     //               </Heading>
                     //               <Center>
                     //                 {/* <Text style={{color:'black'}}>No assignment for {it.title} </Text> */}
-                    //                 <Image
+                    //                 <Image alt={'Icon Image'}
                     //                   style={{width: 80, height: 80}}
                     //                   source={require('../assets/noDataAvailable.jpg')}
                     //                   alt={'No data Image'}
@@ -1449,9 +1872,11 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                   }}
                   mt={4}
                   style={{
-                    height: 'auto',
+                    // height: 'auto',
                     width:'48%',
-                    backgroundColor: '#fff',
+                    // backgroundColor: '#fff',
+                    backgroundColor: '#004aad',
+
                     borderWidth: 2,
                     borderColor: '#004aad',
                     elevation: 15,
@@ -1464,7 +1889,18 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                     },
                   }}
                 >
-                  <Text style={{ color: '#004aad' }}>{tripValue}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+    <Image alt={'Icon Image'}
+      source={require('../assets/icons11/1685612829193.png')}
+      style={{
+        width: 30,
+        height: 26,
+        tintColor: 'white',
+        marginRight: 5,
+      }}
+    />
+                  <Text style={{ color: 'white',fontWeight:'bold'}}>{tripValue}</Text>
+                  </View>
                 </Button>
                 <Button
                   variant="outline"
@@ -1473,9 +1909,14 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                   }}
                   mt={4}
                   style={{
+
+                    backgroundColor: '#004aad',
+
+
+
                     height: 'auto',
                     width:'48%',
-                    backgroundColor: '#fff',
+                    // backgroundColor: '#fff',
                     borderWidth: 2,
                     borderColor: '#004aad',
                     elevation: 15,
@@ -1488,7 +1929,18 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                     },
                   }}
                 >
-                  <Text style={{ color: '#004aad' }}>Trip History</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+    <Image alt={'Icon Image'}
+      source={require('../assets/icons11/1685611800053.png')}
+      style={{
+        width: 25,
+        height: 25,
+        tintColor: 'white',
+        marginRight: 5,
+      }}
+    />
+                  <Text style={{ color: 'white',fontWeight:'bold' }}>Trip History</Text>
+                  </View>
                 </Button>
               </View>              
               
