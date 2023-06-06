@@ -1,1 +1,1 @@
-export const backendUrl = 'https://bkedtest.logistiex.com/';
+export const backendUrl = "https://bkdev.logistiex.com/";
