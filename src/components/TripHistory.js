@@ -23,6 +23,7 @@ import {
   View,
   ScrollView,
   TextInput,
+  StyleSheet,
 } from 'react-native';
 import {launchCamera} from 'react-native-image-picker';
 import {openDatabase} from 'react-native-sqlite-storage';
@@ -32,6 +33,8 @@ import {backendUrl} from '../utils/backendUrl';
 import {useDispatch, useSelector} from 'react-redux';
 import { setTripStatus } from '../redux/slice/tripSlice';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Lottie from "lottie-react-native";
+import { ProgressBar } from "@react-native-community/progress-bar-android";
 
 export default function TripHistory({navigation, route}) {
   const dispatch = useDispatch();
@@ -105,20 +108,35 @@ useEffect(() => {
     });
     return unsubscribe;
   }, [navigation]);
-
   return (
     <NativeBaseProvider>
       <ScrollView>
         {loading ? (
-          <ActivityIndicator
-            size="large"
-            color="blue"
-            style={{marginTop: 44}}
-          />
+          <View
+          style={[
+            StyleSheet.absoluteFillObject,
+            {
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 1,
+              backgroundColor: "rgba(0,0,0,0.65)",
+            },
+          ]}
+        >
+          {/* <Text style={{ color: "white" }}>Syncing Data. Please Wait...</Text>
+          <Lottie
+            source={require("../assets/loading11.json")}
+            autoPlay
+            loop
+            speed={1}
+          /> */}
+          <ProgressBar width={70} />
+        </View>
         ) : (
           <Box flex={1}>
-  {!tripDetails || !tripDetails[0]?.endTime ? (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  {tripDetails.length==0 ? (
+  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' , marginTop:'70%'}}>
     <Text
       style={{
         fontSize: 16,
@@ -143,9 +161,133 @@ useEffect(() => {
     >
       <Text style={{ color: '#fff' }}>{route.params.tripValue}</Text>
     </Button>
-  </View>
+    </View>
 ) : (
-  tripDetails
+  <>
+  {tripDetails
+    .filter(data => !data.endTime)
+    .map((data, i) => (
+        <Box
+        key={i}
+        flex={1}
+        bg="#F5F4F4"
+        alignItems="center"
+        pt={'2%'}
+        pb={'2%'}
+      >
+        
+        {i === 0 && (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginBottom: 8,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: '500',
+                color: 'gray',
+              }}
+              mb={2}
+            >
+              Current Trip
+            </Text>
+          </View>
+        )}
+        <Box
+          justifyContent="space-between"
+          py={4}
+          px={6}
+          bg="#fff"
+          rounded="sm"
+          width={'90%'}
+          maxWidth="100%"
+          _text={{ fontWeight: 'medium' }}
+          style={{
+            elevation: 10,
+            shadowColor: 'rgba(154, 160, 166, 0.6)',
+            shadowOpacity: 0.8, 
+            shadowRadius: 4, 
+            shadowOffset: {
+              width: 0,
+              height: 6, 
+            },
+            borderWidth: 0.1,
+            borderColor: 'gray.100',
+          }}
+        >
+          <ScrollView>
+            <VStack space={4}>
+              <View flexDirection="row">
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: '500',
+                    color: 'gray',
+                    marginRight: 8,
+                  }}
+                  mb={1}
+                >
+                  Vehicle Number:
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: '500',
+                    color: 'gray',
+                  }}
+                  mb={1}
+                >
+                  {data.vehicleNumber}
+                </Text>
+              </View>
+              <View flexDirection="row">
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: '500',
+                    color: 'gray',
+                    marginRight: 8,
+                  }}
+                  mb={1}
+                >
+                  Start KMs:
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: '500',
+                    color: 'gray',
+                  }}
+                  mb={1}
+                >
+                  {data.startKilometer}
+                </Text>
+              </View>
+              <Button
+                w="100%"
+                rounded="md"
+                style={{
+                  height: 'auto',
+                  backgroundColor: '#004aad',
+                  elevation: 10,
+                }}
+                onPress={() => {
+                  navigation.navigate('MyTrip', { userId: data.userID });
+                }}
+              >
+                End Trip
+              </Button>
+            </VStack>
+          </ScrollView>
+        </Box>
+      </Box>
+    ))
+    }
+  {tripDetails
     .filter(data => data.startTime && data.endTime)
     .sort((a, b) => new Date(b.endTime) - new Date(a.endTime))
     .map((data, i) => (
@@ -291,6 +433,8 @@ useEffect(() => {
         </Box>
       </Box>
     ))
+    }
+  </>
 )}
 <Center>
 <Image

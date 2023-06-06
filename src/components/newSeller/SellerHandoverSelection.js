@@ -111,7 +111,7 @@ const SellerHandoverSelection = ({route}) => {
     AsyncStorage.setItem('refresh11', 'refresh');
     db.transaction(tx => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND status IS NULL AND consignorCode=?',
+        'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND consignorCode=?',
         [new Date().valueOf(), latitude, longitude, rejectionCode, route.params.consignorCode],
         (tx1, results) => {
           let temp = [];
@@ -161,7 +161,7 @@ const SellerHandoverSelection = ({route}) => {
         setStatus('error');
       });
     setShowModal(true);
-    navigation.navigate('Main')
+    navigation.navigate('SellerDeliveries')
   };
   const closePickup11 = () => {
     db.transaction(tx => {

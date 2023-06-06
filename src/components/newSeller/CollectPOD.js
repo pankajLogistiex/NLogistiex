@@ -123,7 +123,7 @@ const CollectPOD = ({route}) => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND status is NULL',
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND (handoverStatus="accepted" AND status IS NULL)',
         [route.params.consignorCode],
         (tx1, results) => {
           setNewNotDelivered(results.rows.length);
@@ -192,7 +192,7 @@ const CollectPOD = ({route}) => {
       })
       .then(function (response) {
         console.log('POST RD Data Submitted', response.data);
-        alert('Your Data has submitted');
+        alert('Delivery Successfully completed');
         navigation.navigate('Main');
       })
       .catch(function (error) {
@@ -251,7 +251,7 @@ const CollectPOD = ({route}) => {
 
           db.transaction(tx => {
             tx.executeSql(
-              'UPDATE SellerMainScreenDetails SET status="notDelivered" , rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND status IS Null And consignorCode=?',
+              'UPDATE SellerMainScreenDetails SET status="notDelivered" , rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) And consignorCode=?',
               [
                 route.params.DropDownValue,
                 new Date().valueOf(),

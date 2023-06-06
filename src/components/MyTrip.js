@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useRef, useEffect, useState} from 'react';
 import axios from 'axios';
 import {
   NativeBaseProvider,
@@ -58,7 +58,20 @@ export default function MyTrip({navigation, route}) {
   const [isFocused, setIsFocused] = useState(false);
   // const [label, setLabel] = useState('Input vehicle KMs');
   const focus = useIsFocused();
+  const startKmInputRef = useRef(null);
+  const EndKmInputRef = useRef(null);
 
+  useEffect(() => {
+    setTimeout(() => {
+      if (startKmInputRef.current) {
+        startKmInputRef.current.focus();
+      }
+      if (EndKmInputRef.current) {
+        EndKmInputRef.current.focus();
+      }
+    }, 200);
+  }, []);
+  
   let current = new Date();
   let tripid = current.toString();
   let time = tripid.match(/\d{2}:\d{2}:\d{2}/)[0];
@@ -162,7 +175,7 @@ export default function MyTrip({navigation, route}) {
 
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status IS NULL',
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL)',
         [],
         (tx1, results) => {
           setPendingDelivery(results.rows.length);
@@ -531,6 +544,7 @@ console.log("Trip Id",tripID)
                           Start KMs:
                         </Text>
                         <Input
+                          ref={startKmInputRef}
                           keyboardType="numeric"
                           value={startkm}
                           onChangeText={setStartKm}
@@ -704,6 +718,7 @@ console.log("Trip Id",tripID)
                         End KMs:
                       </Text>
                       <Input
+                      ref={EndKmInputRef}
                         value={endkm}
                         keyboardType="numeric"
                         onChangeText={setEndkm}
