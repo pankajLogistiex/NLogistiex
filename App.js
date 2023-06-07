@@ -97,6 +97,7 @@ function StackNavigators({ navigation }) {
 
   const userId = useSelector((state) => state.user.user_id);
   const notificationCount = useSelector((state) => state.notification.count);
+  // const [notificationCount,setNotificationCount1]=useState(0);
 
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState([]);
@@ -169,13 +170,21 @@ function StackNavigators({ navigation }) {
   };
 
   function NotificationCountIncrease() {
-    dispatch(setNotificationCount(notificationCount + 1));
+    // dispatch(setNotificationCount(5));
+    // dispatch(setNotificationCount(useSelector((state) => state.notification.count) + 1));
   }
+  
+console.log('Notification Count',notificationCount,' ',useSelector((state) => state.notification.count));
+    // dispatch(setNotificationCount(useSelector((state) => state.notification.count) + 1));
 
+// dispatch(setNotificationCount(41));
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-      // console.log(remoteMessage.notification);
-      NotificationCountIncrease();
+      console.log(remoteMessage.notification);
+      // setNotificationCount1((prevCount)=>prevCount+1);
+      const newvalue=notificationCount+1;
+      dispatch(setNotificationCount(newvalue));
+      // NotificationCountIncrease();
       PushNotification.localNotification({
         title: remoteMessage.notification.title,
         message: remoteMessage.notification.body,
@@ -184,7 +193,7 @@ function StackNavigators({ navigation }) {
     });
 
     return unsubscribe;
-  }, []);
+  }, [dispatch, notificationCount]);
 
   useEffect(() => {
     PushNotification.createChannel({

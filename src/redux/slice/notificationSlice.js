@@ -7,7 +7,10 @@ export const newNotificationSlice = createSlice({
   },
   reducers: {
     setNotificationCount: (state, action) => {
-      state.count = action.payload;
+      const newCount = action.payload >= 0 ? action.payload : 0;
+      state.count = newCount;
+    // setNotificationCount: (state, action) => {
+      // state.count = action.payload;
     },
   },
 });
