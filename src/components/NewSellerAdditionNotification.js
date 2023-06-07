@@ -11,7 +11,7 @@ import {
   HStack,
   Divider,
 } from "native-base";
-import { Image } from "react-native";
+import { Image, View } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { backendUrl } from "../utils/backendUrl";
 import { useSelector, useDispatch } from "react-redux";
@@ -134,7 +134,7 @@ console.log("Data ",data.length +" ",consignorCodeAccept," ", updatedData.length
                               }}
                               fontWeight="400"
                             >
-                              {d.ForwardPickups}/{d.ReverseDeliveries}
+                              {d.ForwardPickups}
                             </Text>
                           </HStack>
                         </HStack>
@@ -212,7 +212,17 @@ console.log("Data ",data.length +" ",consignorCodeAccept," ", updatedData.length
                   </Box>
                 );
               })
-            : null}
+            : <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' , marginTop:'70%'}}>
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: '500',
+                color: 'gray',
+              }}
+            >
+              No Additional Workload Notified
+            </Text>
+            </View>}
 
           <Center>
             <Image

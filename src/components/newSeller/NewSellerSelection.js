@@ -164,7 +164,7 @@ const NewSellerSelection = ({route}) => {
         setStatus('error');
       });
     setShowModal(true);
-    navigation.navigate('Main');
+    navigation.navigate('NewSellerPickup');
   };
   const closePickup11 = () => {
     db.transaction(tx => {

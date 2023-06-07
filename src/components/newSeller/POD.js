@@ -204,7 +204,7 @@ const POD = ({route}) => {
         })
         .then(function (response) {
           console.log('POST RD Data Submitted', response.data);
-          alert('Your Data has submitted');
+          alert('Pickup Successfully completed');
           navigation.navigate('Main');
         })
         .catch(function (error) {
@@ -332,79 +332,6 @@ const POD = ({route}) => {
 
   return (
     <NativeBaseProvider>
-      {/*
-      <Modal
-        w="100%"
-        isOpen={showModal11}
-        onClose={() => {
-          setShowModal11(false), setInputOtp('');setTimer(60);
-        }}>
-        <Modal.Content w="100%" bg={'#eee'}>
-          <Modal.CloseButton />
-          <Modal.Body w="100%">
-            <Modal.Header>Enter the OTP</Modal.Header>
-             <OTPTextInput
-              ref={e => (otpInput = e)}
-              inputCount={6}
-              handleTextChange={e => setInputOtp(e)}
-            /> 
-      <View style={{
-    flexDirection: 'row',
-    justifyContent: 'center',margin:20,
-  }}>
-              <OTPTextInput
-        handleTextChange={e => setInputOtp(e)}
-        inputCount={6} // specify the number of digits in OTP
-        tintColor="#004aad" // color of the underline when active
-        offTintColor="#BDBDBD" // color of the underline when inactive
-        containerStyle={{
-          marginTop: 20,
-        }}
-        textInputStyle={{
-          backgroundColor: '#F5F5F5',
-          borderRadius: 10,
-          borderWidth: 1,
-          borderColor: '#BDBDBD',
-          padding: 10,
-        }}
-        secureTextEntry={true}
-        keyboardType="number-pad"
-        onBackspace={() => console.log('back')}
-      />  
-      <MaterialIcons
-                name={showPassword ? "eye-off" : "eye"}
-                style={{fontSize: 22, marginLeft: 4, color: 'gray.950'}}
-                onPress={toggleShowPassword}
-              />
-              </View>
-            <Box flexDir="row" justifyContent="space-between" mt={3}>
-              {timer ? (
-                <Button w="40%" bg="gray.500">
-                  <Text style={{color: 'white'}}>{timer}s</Text>
-                </Button>
-              ) : (
-                <Button
-                  w="40%"
-                  bg="gray.500"
-                  onPress={() => {
-                    sendSmsOtp();
-                    setTimer(60);
-                  }}>
-                  Resend
-                </Button>
-              )}
-              <Button
-                w="40%"
-                bg="#004aad"
-                onPress={() => {
-                  validateOTP();
-                }}>
-                Submit
-              </Button>
-            </Box>
-          </Modal.Body>
-        </Modal.Content>
-      </Modal>*/}
       <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
         <Modal.Content backgroundColor={message === 1 ? '#dcfce7' : '#fee2e2'}>
           <Modal.CloseButton />
