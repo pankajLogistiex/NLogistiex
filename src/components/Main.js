@@ -110,14 +110,34 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
       .catch(err => {
         console.log(err);
       });
-      await AsyncStorage.getItem('tripID')
-      .then(value => {
-        setTripID(value);
-      })
-      .catch(err => {
-        console.log(err);
-      });
+    
   }
+  useEffect(() => {
+    const fetchTripInfo = async () => {
+      if (id) {
+        const storedTripID = await AsyncStorage.getItem('tripID');
+        if (storedTripID) {
+          setTripID(storedTripID);
+        } else {
+          axios
+            .get(backendUrl + 'UserTripInfo/getUserTripInfo', {
+              params: {
+                feUserID: id,
+              },
+            })
+            .then((response) => {
+              const filteredData = response.data.res_data.filter((trip) => trip.startTime && !trip.endTime);
+              if (filteredData.length > 0) {
+                const tripID = filteredData[0].tripID;
+                AsyncStorage.setItem('tripID', tripID); 
+                setTripID(tripID);
+              }
+            });
+        }
+      }
+    };
+    fetchTripInfo(); 
+  }, [id, tripID]);
   function getTripDetails(tripId) {
     axios
       .get(backendUrl + 'UserTripInfo/getUserTripInfo', {
@@ -143,7 +163,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
 
   useEffect(() => {
     getUserDetails();
-  }, []);
+  }, [id,tripID]);
 
   useEffect(() => {
     getTripDetails(tripID);
@@ -183,7 +203,6 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   const loadtripdetails = async () => {
     setIsLoading(!isLoading);
   };
-
   useEffect(() => {
     if (tripStatus == 1) {
       setTripValue('End Trip');
@@ -205,7 +224,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
         [],
         (tx1, results) => {
           setSpts(results.rows.item(0).count);
-          if (results.rows.length > 0) {
+          if (results.rows.item(0).count != 0) {
             setIsData(true);
           }
         },
@@ -288,7 +307,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
         [],
         (tx1, results) => {
           setShts(results.rows.item(0).count);
-          if (results.rows.length > 0) {
+          if (results.rows.item(0).count != 0) {
             setIsData(true);
           }
         },
@@ -1863,7 +1882,48 @@ onPress={() =>
         <Button w="100%" size="lg" bg="#004aad" onPress={()=>navigation.navigate('SellerHandover')}>Start Handover</Button>
         :
         null} */}
-              {isData ? (
+        {isData ? (
+          <>
+                  {(spp == 0 && spp1 == 0 && shp1 == 0 && tripValue == 'Start Trip')?
+                  (
+                  <Button
+                  variant="outline"
+                  onPress={() => {
+                    navigation.navigate('TripHistory', { userId: id , tripValue:tripValue});
+                  }}
+                  mt={4}
+                  style={{
+                    backgroundColor: '#004aad',
+                    height: 'auto',
+                    width:'100%',
+                    borderWidth: 2,
+                    borderColor: '#004aad',
+                    elevation: 15,
+                    shadowColor: 'rgba(154, 160, 166, 0.5)',
+                    shadowOpacity: 0.5,
+                    shadowRadius: 4,
+                    shadowOffset: {
+                      width: 0,
+                      height: 4,
+                    },
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Image alt={'Icon Image'}
+                    source={require('../assets/icons11/1685611800053.png')}
+                    style={{
+                      width: 25,
+                      height: 25,
+                      tintColor: 'white',
+                      marginRight: 5,
+                    }}
+                  />
+                  <Text style={{ color: 'white',fontWeight:'bold' }}>Trip History</Text>
+                  </View>
+                </Button>
+                  )
+                :
+                  (
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
                 <Button
                   variant="outline"
@@ -1872,9 +1932,7 @@ onPress={() =>
                   }}
                   mt={4}
                   style={{
-                    // height: 'auto',
                     width:'48%',
-                    // backgroundColor: '#fff',
                     backgroundColor: '#004aad',
 
                     borderWidth: 2,
@@ -1890,15 +1948,15 @@ onPress={() =>
                   }}
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-    <Image alt={'Icon Image'}
-      source={require('../assets/icons11/1685612829193.png')}
-      style={{
-        width: 30,
-        height: 26,
-        tintColor: 'white',
-        marginRight: 5,
-      }}
-    />
+                  <Image alt={'Icon Image'}
+                    source={require('../assets/icons11/1685612829193.png')}
+                    style={{
+                      width: 30,
+                      height: 26,
+                      tintColor: 'white',
+                      marginRight: 5,
+                    }}
+                  />
                   <Text style={{ color: 'white',fontWeight:'bold'}}>{tripValue}</Text>
                   </View>
                 </Button>
@@ -1909,14 +1967,9 @@ onPress={() =>
                   }}
                   mt={4}
                   style={{
-
                     backgroundColor: '#004aad',
-
-
-
                     height: 'auto',
                     width:'48%',
-                    // backgroundColor: '#fff',
                     borderWidth: 2,
                     borderColor: '#004aad',
                     elevation: 15,
@@ -1930,19 +1983,22 @@ onPress={() =>
                   }}
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-    <Image alt={'Icon Image'}
-      source={require('../assets/icons11/1685611800053.png')}
-      style={{
-        width: 25,
-        height: 25,
-        tintColor: 'white',
-        marginRight: 5,
-      }}
-    />
+                  <Image alt={'Icon Image'}
+                    source={require('../assets/icons11/1685611800053.png')}
+                    style={{
+                      width: 25,
+                      height: 25,
+                      tintColor: 'white',
+                      marginRight: 5,
+                    }}
+                  />
                   <Text style={{ color: 'white',fontWeight:'bold' }}>Trip History</Text>
                   </View>
                 </Button>
-              </View>              
+                </View>    
+                  )  
+                }
+                </>           
               
               ) : (
                 <Center style={{marginVertical: 50}}>

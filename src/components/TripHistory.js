@@ -117,20 +117,19 @@ useEffect(() => {
             StyleSheet.absoluteFillObject,
             {
               flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
+              justifyContent: 'center',
+              alignItems: 'center',
               zIndex: 1,
-              backgroundColor: "rgba(0,0,0,0.65)",
+              backgroundColor: 'rgba(0,0,0,0.65)',
             },
-          ]}
-        >
-          {/* <Text style={{ color: "white" }}>Syncing Data. Please Wait...</Text>
+          ]}>
+          <Text style={{color: 'white'}}>Loading...</Text>
           <Lottie
-            source={require("../assets/loading11.json")}
+            source={require('../assets/loading11.json')}
             autoPlay
             loop
             speed={1}
-          /> */}
+          />
           <ProgressBar width={70} />
         </View>
         ) : (
