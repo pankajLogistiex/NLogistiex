@@ -174,6 +174,30 @@ function StackNavigators({ navigation }) {
     // dispatch(setNotificationCount(useSelector((state) => state.notification.count) + 1));
   }
   
+
+  const handleIncomingMessage = async (message) => {
+    try {
+      console.log(message);
+      const { messageId, notification, sentTime } = message;
+      const sendDate = new Date().toISOString().slice(0, 10);
+
+      db.transaction((tx) => {
+        tx.executeSql(
+          'INSERT INTO noticeMessages (messageId, notificationTitle, notificationBody, sendDate, sentTime) VALUES (?, ?, ?, ?, ?)',
+          [messageId, notification.title, notification.body, sendDate, sentTime.toString()],
+          (tx, results) => {
+            if (results.rowsAffected > 0) {
+              console.log('Message stored in the local database ',notification.body);
+            }
+          }
+        );
+      });
+    } catch (error) {
+      console.log('Error handling incoming message: ', error);
+    }
+  };
+
+
 console.log('Notification Count',notificationCount,' ',useSelector((state) => state.notification.count));
     // dispatch(setNotificationCount(useSelector((state) => state.notification.count) + 1));
 
@@ -184,6 +208,8 @@ console.log('Notification Count',notificationCount,' ',useSelector((state) => st
       // setNotificationCount1((prevCount)=>prevCount+1);
       const newvalue=notificationCount+1;
       dispatch(setNotificationCount(newvalue));
+
+      handleIncomingMessage(remoteMessage);
       // NotificationCountIncrease();
       PushNotification.localNotification({
         title: remoteMessage.notification.title,
@@ -847,6 +873,21 @@ console.log('Notification Count',notificationCount,' ',useSelector((state) => st
   };
 
   const createTableBag1 = () => {
+
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        `CREATE TABLE IF NOT EXISTS noticeMessages (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          messageId TEXT,
+          notificationTitle TEXT,
+          notificationBody TEXT,
+          sendDate TEXT,
+          sentTime TEXT
+        )`
+      );
+    });
+
     AsyncStorage.setItem("acceptedItemData11", "");
     db.transaction((tx) => {
       // tx.executeSql('DROP TABLE IF EXISTS closeHandoverBag1', []);
