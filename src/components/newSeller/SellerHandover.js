@@ -36,20 +36,17 @@ const SellerHandover = ({route}) => {
   }, [navigation]);
 
 useEffect(() => {
-  AsyncStorage.getItem('acceptedItemData11')
+  AsyncStorage.getItem('acceptedItemData')
   .then((data) => {
     if (data !== null) {
-      // Data retrieved successfully
       const acceptedItemData123 = JSON.parse(data);
       console.log(acceptedItemData123);
       setAcceptedItemData(acceptedItemData123);
-      // Use the retrieved data as needed
     } else {
       console.log("Data with the specified key doesn't exist",data);
     }
   })
   .catch((error) => {
-    // Error retrieving data
     console.log(error);
   });
 }, []);

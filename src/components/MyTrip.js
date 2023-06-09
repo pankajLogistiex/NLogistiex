@@ -116,7 +116,6 @@ export default function MyTrip({navigation, route}) {
         console.log(error, 'error');
       });
   }
-
   function getTripDetails(tripID) {
     axios
       .get(backendUrl + 'UserTripInfo/getUserTripInfo', {

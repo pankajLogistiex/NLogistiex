@@ -101,7 +101,7 @@ export default function Login() {
         );
         AsyncStorage.setItem("token", token);
         AsyncStorage.setItem("idToken", idToken);
-        AsyncStorage.setItem("acceptedItemData11", JSON.stringify({}));
+        // AsyncStorage.setItem("acceptedItemData", JSON.stringify({}));
 
         dispatch(setUserId(response?.data?.userDetails?.userId));
         dispatch(

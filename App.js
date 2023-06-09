@@ -847,7 +847,7 @@ console.log('Notification Count',notificationCount,' ',useSelector((state) => st
   };
 
   const createTableBag1 = () => {
-    AsyncStorage.setItem("acceptedItemData11", "");
+    // AsyncStorage.setItem("acceptedItemData", "");
     db.transaction((tx) => {
       // tx.executeSql('DROP TABLE IF EXISTS closeHandoverBag1', []);
       tx.executeSql(
