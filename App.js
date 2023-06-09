@@ -174,17 +174,41 @@ function StackNavigators({ navigation }) {
     // dispatch(setNotificationCount(useSelector((state) => state.notification.count) + 1));
   }
   
-console.log('Notification Count',notificationCount,' ',useSelector((state) => state.notification.count));
-    // dispatch(setNotificationCount(useSelector((state) => state.notification.count) + 1));
 
-// dispatch(setNotificationCount(41));
+  const handleIncomingMessage = async (message) => {
+      console.log(message);
+      const { messageId, notification, sentTime } = message;
+      const sendDate = new Date().toISOString().slice(0, 10);
+      const date = new Date(sentTime);
+
+      const options = { hour: 'numeric', minute: 'numeric', hour12: true };
+      const formattedTime = date.toLocaleTimeString('en-US', options);
+      
+      console.log(formattedTime); 
+
+      db.transaction((tx) => {
+        tx.executeSql(
+          'INSERT INTO noticeMessages (messageId, notificationTitle, notificationBody, sendDate, sentTime) VALUES (?, ?, ?, ?, ?)',
+          [messageId, notification.title, notification.body, sendDate, formattedTime.toString()],
+          (tx, results) => {
+            console.log(results);
+            if (results.rowsAffected > 0) {
+              console.log('Message stored in the local database ',notification.body);
+            }
+          }
+        );
+      });
+  };
+
+
+  console.log('Notification Count',notificationCount,' ',useSelector((state) => state.notification.count));
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       console.log(remoteMessage.notification);
-      // setNotificationCount1((prevCount)=>prevCount+1);
       const newvalue=notificationCount+1;
       dispatch(setNotificationCount(newvalue));
-      // NotificationCountIncrease();
+
+      handleIncomingMessage(remoteMessage);
       PushNotification.localNotification({
         title: remoteMessage.notification.title,
         message: remoteMessage.notification.body,
@@ -847,7 +871,7 @@ console.log('Notification Count',notificationCount,' ',useSelector((state) => st
   };
 
   const createTableBag1 = () => {
-    // AsyncStorage.setItem("acceptedItemData", "");
+    AsyncStorage.setItem("acceptedItemData11", "");
     db.transaction((tx) => {
       // tx.executeSql('DROP TABLE IF EXISTS closeHandoverBag1', []);
       tx.executeSql(
