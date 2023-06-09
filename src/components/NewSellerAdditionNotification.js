@@ -29,7 +29,7 @@ export default function NewSellerAdditionNotification() {
       axios
         .get(backendUrl + `SellerMainScreen/getadditionalwork/${userId}`)
         .then((res) => {
-          console.log(res.data.data);
+          // console.log(res.data.data);
           setData(res.data.data);
         })
         .catch((error) => {
@@ -41,7 +41,7 @@ export default function NewSellerAdditionNotification() {
     DisplayData();
   }, [userId]);
 
-  const AcceptHandler = async () => {
+  const AcceptHandler = async (consignorCodeAccept) => {
     // console.log('df')
     axios
       .post(backendUrl + "SellerMainScreen/acceptWorkLoad", {
@@ -51,13 +51,16 @@ export default function NewSellerAdditionNotification() {
       .then((response) => {
         console.log("Msg Accepted ", response.data);
         dispatch(setNotificationCount(notificationCount - 1));
+        const updatedData = data.filter(item => item.consignorCode !== consignorCodeAccept);
+        setData(updatedData);
+console.log("Data ",data.length +" ",consignorCodeAccept," ", updatedData.length);
       })
       .catch((error) => {
         console.log(error);
       });
-  };
+  }; 
 
-  const RejectHandler = async () => {
+  const RejectHandler = async (consignorCodeReject) => {
     // console.log('df')
     axios
       .post(backendUrl + "SellerMainScreen/rejectWorkLoad", {
@@ -67,6 +70,8 @@ export default function NewSellerAdditionNotification() {
       .then((response) => {
         console.log("Msg Rejected ", response.data);
         dispatch(setNotificationCount(notificationCount - 1));
+        const updatedData = data.filter(item => item.consignorCode !== consignorCodeReject);
+        setData(updatedData);
       })
       .catch((error) => {
         console.log(error);
@@ -176,7 +181,7 @@ export default function NewSellerAdditionNotification() {
                           justifyContent="space-between"
                         >
                           <HStack alignItems="center">
-                            <TouchableOpacity onPress={() => RejectHandler()}>
+                            <TouchableOpacity onPress={() => RejectHandler(d.consignorCode)}>
                               <Button
                                 style={{ backgroundColor: "#FF2E2E" }}
                                 _dark={{
@@ -189,7 +194,7 @@ export default function NewSellerAdditionNotification() {
                             </TouchableOpacity>
                           </HStack>
                           <HStack alignItems="center">
-                            <TouchableOpacity onPress={() => AcceptHandler()}>
+                            <TouchableOpacity onPress={() => AcceptHandler(d.consignorCode)}>
                               <Button
                                 style={{ backgroundColor: "#004aad" }}
                                 _dark={{
