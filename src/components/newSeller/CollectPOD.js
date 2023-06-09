@@ -251,7 +251,7 @@ const CollectPOD = ({route}) => {
 
           db.transaction(tx => {
             tx.executeSql(
-              'UPDATE SellerMainScreenDetails SET status="notDelivered" , rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) And consignorCode=?',
+              'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND consignorCode=?',
               [
                 route.params.DropDownValue,
                 new Date().valueOf(),

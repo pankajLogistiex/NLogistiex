@@ -871,22 +871,7 @@ function StackNavigators({ navigation }) {
   };
 
   const createTableBag1 = () => {
-
-
-    db.transaction((tx) => {
-      tx.executeSql(
-        `CREATE TABLE IF NOT EXISTS noticeMessages (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          messageId TEXT,
-          notificationTitle TEXT,
-          notificationBody TEXT,
-          sendDate TEXT,
-          sentTime TEXT
-        )`
-      );
-    });
-
-    // AsyncStorage.setItem("acceptedItemData11", "");
+    AsyncStorage.setItem("acceptedItemData11", "");
     db.transaction((tx) => {
       // tx.executeSql('DROP TABLE IF EXISTS closeHandoverBag1', []);
       tx.executeSql(

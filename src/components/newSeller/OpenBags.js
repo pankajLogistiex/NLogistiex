@@ -102,7 +102,7 @@ const OpenBags = ({ route }) => {
     // const saveAcceptedItemData = async () => {
     // try {
     AsyncStorage.setItem(
-      "acceptedItemData11",
+      "acceptedItemData",
       JSON.stringify(acceptedItemData)
     );
     // } catch (error) {

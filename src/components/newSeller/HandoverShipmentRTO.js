@@ -99,34 +99,34 @@ const HandoverShipmentRTO = ({route}) => {
 
 // console.log(userId);
 
-AsyncStorage.getItem('acceptedItemData11')
-  .then((data) => {
-    if (data !== null) {
-      // Data retrieved successfully
-      const acceptedItemData = JSON.parse(data);
-      console.log(acceptedItemData);
-      // Use the retrieved data as needed
-    } else {
-      console.log("Data with the specified key doesn't exist");
-    }
-  })
-  .catch((error) => {
-    // Error retrieving data
-    console.log(error);
-  });
+// AsyncStorage.getItem('acceptedItemData')
+//   .then((data) => {
+//     if (data !== null) {
+//       // Data retrieved successfully
+//       const acceptedItemData = JSON.parse(data);
+//       console.log(acceptedItemData);
+//       // Use the retrieved data as needed
+//     } else {
+//       console.log("Data with the specified key doesn't exist");
+//     }
+//   })
+//   .catch((error) => {
+//     // Error retrieving data
+//     console.log(error);
+//   });
 
   useEffect(() => {
     console.log(acceptedItemData);
       if (Object.keys(acceptedItemData).length > 0) {
         try {
-          AsyncStorage.setItem('acceptedItemData11',JSON.stringify(acceptedItemData));
+          AsyncStorage.setItem('acceptedItemData',JSON.stringify(acceptedItemData));
           // console.log('aaaa!1', acceptedItemData);
         } catch (error) {
           console.error('Failed to update AsyncStorage:', error);
         }
       }else{
         if(barcode.length>0){
-          AsyncStorage.setItem('acceptedItemData11',JSON.stringify(acceptedItemData));
+          AsyncStorage.setItem('acceptedItemData',JSON.stringify(acceptedItemData));
         }
       }
     },[acceptedItemData]);
@@ -230,17 +230,15 @@ AsyncStorage.getItem('acceptedItemData11')
   }, [data && data.length > 0]);
 
   const loadAcceptedItemData12 = async () => {
-    AsyncStorage.getItem('acceptedItemData11')
-      .then(data99 => {
-        if (data99 != null) {
-          setAcceptedItemData(JSON.parse(data99));
-          console.log('ghghg', data99);
-          console.log('ghghg', acceptedItemData);
-        }
-      })
-      .catch(e => {
-        console.log(e);
-      });
+    try {
+      const data99 = await AsyncStorage.getItem('acceptedItemData');
+      if (data99 !== null) {
+        const parsedData = JSON.parse(data99);
+        setAcceptedItemData(parsedData);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {

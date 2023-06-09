@@ -3,6 +3,7 @@ import axios from 'axios';
 import {NativeBaseProvider, Box, Center, VStack, Button, Icon, Input, Heading, Alert, Text, Modal, ScrollView, Stack} from 'native-base';
 import { Image, StyleSheet, View } from 'react-native';
 import { backendUrl } from '../utils/backendUrl';
+import moment from 'moment';
 
 export default function StartEndDetails({navigation,route}) {
   const [data, setData] = useState();
@@ -32,7 +33,11 @@ export default function StartEndDetails({navigation,route}) {
         <ScrollView>
           <Box marginTop={1}>
             <Stack space="2" p="4">
-              <Text style={{backgroundColor:'#CCCCCC', fontSize: 16, borderWidth: 1, borderColor: '#004aad', borderRadius: 5, paddingVertical: 15, textAlign:'center', display:'flex', justifyContent:'center', alignItems:'center', color:'black'}}>Start Time - {printData.startTime}</Text>
+              <Text style={{backgroundColor:'#CCCCCC', fontSize: 16, borderWidth: 1, borderColor: '#004aad', borderRadius: 5, paddingVertical: 15, textAlign:'center', display:'flex', justifyContent:'center', alignItems:'center', color:'black'}}>Start Time - {printData.startTime &&
+                    moment
+                      .unix(printData.startTime/ 1000)
+                      .utcOffset("+05:30")
+                      .format("YYYY-MM-DD HH:MM")}</Text>
               <Text style={{backgroundColor:'#CCCCCC', fontSize: 16, borderWidth: 1, borderColor: '#004aad', borderRadius: 5, paddingVertical: 15, textAlign:'center', display:'flex', justifyContent:'center', alignItems:'center', color:'black'}}>Vehicle Number - {printData.vehicleNumber}</Text>
               <Text style={{backgroundColor:'#CCCCCC', fontSize: 16, borderWidth: 1, borderColor: '#004aad', borderRadius: 5, paddingVertical: 15, textAlign:'center', display:'flex', justifyContent:'center', alignItems:'center', color:'black'}}>Start Kilometer - {printData.startKilometer}</Text>
               <Text style={{backgroundColor:'#CCCCCC', fontSize: 16, borderWidth: 1, borderColor: '#004aad', borderRadius: 5, paddingVertical: 15, textAlign:'center', display:'flex', justifyContent:'center', alignItems:'center', color:'black'}}>End Kilometer - {printData.endkilometer}</Text>
