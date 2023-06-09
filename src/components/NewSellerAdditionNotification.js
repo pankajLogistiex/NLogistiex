@@ -13,23 +13,23 @@ const Tab = createMaterialTopTabNavigator();
 const NewSellerAdditionNotification = () => {
   return (
     
-    <Tab.Navigator  
+    <Tab.Navigator
     initialRouteName="Additional Workload"
-    tabBarOptions={{
-      activeTintColor: '#004aad',
-      inactiveTintColor: '#AFAFAF',
-      style: {
+    screenOptions={{
+      tabBarActiveTintColor: '#004aad',
+      tabBarInactiveTintColor: '#AFAFAF',
+      tabBarStyle: {
         backgroundColor: 'white',
       },
-      labelStyle: {
-        fontSize: 15,
+      tabBarLabelStyle: {
+        fontSize: 14,
         fontWeight: 'bold',
       },
-      indicatorStyle: {
+      tabBarIndicatorStyle: {
         backgroundColor: '#004aad',
       },
-    }}>
-
+    }}
+  >
       <Tab.Screen 
       name="Additional Workload" 
        component={Additional_workload} 

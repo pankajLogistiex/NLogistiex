@@ -16,12 +16,13 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import { backendUrl } from "../../utils/backendUrl";
 import { useSelector, useDispatch } from "react-redux";
 import { setNotificationCount } from "../../redux/slice/notificationSlice";
-
+import {useNavigation} from '@react-navigation/native';
 export default function Additional_workload() {
   const dispatch = useDispatch();
   const userId = useSelector((state) => state.user.user_id);
   const notificationCount = useSelector((state) => state.notification.count);
 
+  const navigation = useNavigation();
   const [data, setData] = useState([]);
 
   const DisplayData = () => {
@@ -49,7 +50,7 @@ export default function Additional_workload() {
         feUserId: userId,
       })
       .then((response) => {
-        console.log("Msg Accepted ", response.data);
+        console.log("Msg Accepted ", response.data,'',userId);
         dispatch(setNotificationCount(notificationCount - 1));
         const updatedData = data.filter(item => item.consignorCode !== consignorCodeAccept);
         setData(updatedData);
@@ -77,7 +78,7 @@ console.log("Data ",data.length +" ",consignorCodeAccept," ", updatedData.length
         console.log(error);
       });
   };
-
+ 
   return (
     <NativeBaseProvider>
       <ScrollView>
@@ -212,7 +213,83 @@ console.log("Data ",data.length +" ",consignorCodeAccept," ", updatedData.length
                   </Box>
                 );
               })
-            : null}
+            : 
+            <Box
+            width="100%"
+            rounded="lg"
+            overflow="hidden"
+            borderColor="coolGray.100"
+            borderWidth="1"
+            _dark={{
+              borderColor: "coolGray.600",
+              backgroundColor: "white",
+            }}
+            _web={{
+              shadow: 2,
+              borderWidth: 0,
+            }}
+            _light={{
+              backgroundColor: "white",
+            }}
+          >
+            <Stack p="4" space={3}>
+              <HStack
+                alignItems="center"
+                space={4}
+                justifyContent="space-between"
+              >
+                <HStack alignItems="center">
+                  <Text
+                    color="black"
+                    _dark={{
+                      color: "gray.400",
+                    }}
+                    fontWeight="500"
+                  >
+                    No new notification
+                  </Text>
+                </HStack>
+              
+              </HStack>
+             
+              <Stack space={2}>
+                <Text
+                  fontSize="sm"
+                  _light={{
+                    color: "black",
+                  }}
+                  _dark={{
+                    color: "black",
+                  }}
+                  fontWeight="400"
+                  ml="-0.5"
+                  mt="-1"
+                >
+                  We will notify you when something arrives
+                </Text>
+              </Stack>
+             
+              <HStack
+                alignItems="center"
+                space={4}
+                // justifyContent="space-between"
+              >
+                <HStack alignItems="center">
+                  <TouchableOpacity onPress={() => navigation.popToTop()}>
+                    <Button
+                      style={{ backgroundColor: "#004aad" }}
+                      _dark={{
+                        color: "blue.200",
+                      }}
+                      fontWeight="400"
+                    >
+                      Go to HomeScreen
+                    </Button>
+                  </TouchableOpacity>
+                </HStack>
+              </HStack>
+            </Stack>
+          </Box>}
 
           <Center>
             <Image
