@@ -1065,7 +1065,7 @@ function StackNavigators({ navigation }) {
                     onPress={() => navigation.toggleDrawer()}
                   />
                   <Heading style={{ color: "white", marginLeft: 10 }} size="md">
-                    Welcome,
+                    Welcome
                   </Heading>
                 </View>
               </NativeBaseProvider>
