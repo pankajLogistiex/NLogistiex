@@ -69,19 +69,7 @@ const NotDelivered = ({route}) => {
     };
     const NotDelivered = () => {
       AsyncStorage.setItem('refresh11', 'refresh');
-      db.transaction(tx => {
-        tx.executeSql(
-          'UPDATE SyncSellerPickUp  SET otpSubmitted="true" WHERE consignorCode=? ',
-          [route.params.consignorCode],
-          (tx1, results) => {
-            if (results.rowsAffected > 0) {
-              console.log('otp status updated  in seller table ');
-            } else {
-              console.log('opt status not updated in local table');
-            }
-          },
-        );
-      });
+      
       db.transaction(tx => {
         tx.executeSql(
           'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND consignorCode=?',
@@ -95,6 +83,24 @@ const NotDelivered = ({route}) => {
           },
         );
       });
+
+      db.transaction(tx => {
+        tx.executeSql(
+          'UPDATE SyncSellerPickUp  SET otpSubmittedDelivery="true" WHERE consignorCode=? ',
+          [route.params.consignorCode],
+          (tx1, results) => {
+            // console.log('Results', results.rowsAffected);
+            // console.log(results);
+            if (results.rowsAffected > 0) {
+              console.log('otp status updated seller delivery in seller table ');
+            } else {
+              console.log('opt status not updated in seller delivery in local table');
+            }
+            // console.log(results.rows.length);
+          },
+        );
+      });
+  
       axios
         .post(backendUrl + 'SellerMainScreen/attemptFailed', {
           consignorCode: route.params.consignorCode,

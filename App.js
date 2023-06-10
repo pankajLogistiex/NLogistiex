@@ -871,7 +871,7 @@ function StackNavigators({ navigation }) {
   };
 
   const createTableBag1 = () => {
-    AsyncStorage.setItem("acceptedItemData11", "");
+    // AsyncStorage.setItem("acceptedItemData11", "");
     db.transaction((tx) => {
       // tx.executeSql('DROP TABLE IF EXISTS closeHandoverBag1', []);
       tx.executeSql(

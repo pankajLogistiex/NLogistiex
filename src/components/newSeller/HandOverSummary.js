@@ -191,7 +191,7 @@ const HandOverSummary = ({route}) => {
             w="48%"
             size="lg"
             bg="#004aad"
-            onPress={() => navigation.popToTop()}>
+            onPress={() => navigation.navigate('Main')}>
             HomeScreen
           </Button>
         </Center>

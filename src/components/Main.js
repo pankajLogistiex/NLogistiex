@@ -84,6 +84,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   const [showModal1, setShowModal1] = useState(false);
   const [message1, setMessage1] = useState(0);
   const [myArray, setMyArray] = useState([]);
+  const [acceptedItemData, setAcceptedItemData] = useState(0);
+
   const focus = useIsFocused();
 
   async function getUserDetails() {
@@ -461,7 +463,37 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     Accepted: 0,
     Rejected: 0,
   };
+  const loadAcceptedItemData12 = async () => {
+    try {
+      const data = await AsyncStorage.getItem('acceptedItemData');
+      if (data !== null) {
+        const parsedData = JSON.parse(data);
+  
+        let totalLength = 0;
+        for (const consignorCode in parsedData) {
+          if (parsedData.hasOwnProperty(consignorCode) && parsedData[consignorCode].acceptedItems11) {
+            const acceptedItemsLength = parsedData[consignorCode].acceptedItems11.length;
+            totalLength += acceptedItemsLength;
+          }
+        }
+        setAcceptedItemData(totalLength)
+        console.log('Total length of acceptedItems11:', totalLength);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadAcceptedItemData12();
+    });
+    return unsubscribe;
+  }, [navigation]);
 
+  useEffect(() => {
+    loadAcceptedItemData12();
+  }, []);
   // const createTables = () => {
   //     db.transaction(txn => {
   //         txn.executeSql('DROP TABLE IF EXISTS categories', []);
@@ -644,7 +676,6 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     //     notPicked: 70,
     // },
   ];
-
   return (
     <NativeBaseProvider>
       <Modal isOpen={showModal1} onClose={() => setShowModal1(false)}>
@@ -677,7 +708,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                   it.notPicked !== 0 ||
                   it.rejectedOrder !== 0
                 ) {
-                  if (shp1 === 0 ) {
+                  if (shp1 === 0 && acceptedItemData==0) {
                     return it.title === 'Seller Pickups' ||
                       it.title === 'Seller Deliveries' ? (
                       <Box pt={4} mb="6" rounded="md" bg="white" key={index}>
