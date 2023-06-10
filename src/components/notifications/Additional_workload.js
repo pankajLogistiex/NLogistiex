@@ -30,7 +30,7 @@ export default function Additional_workload() {
       axios
         .get(backendUrl + `SellerMainScreen/getadditionalwork/${userId}`)
         .then((res) => {
-          // console.log(res.data.data);
+          console.log(res.data.data);
           setData(res.data.data);
         })
         .catch((error) => {
@@ -40,21 +40,21 @@ export default function Additional_workload() {
   };
   useEffect(() => {
     DisplayData();
-  }, [userId]);
+  }, []);
 
   const AcceptHandler = async (consignorCodeAccept) => {
     // console.log('df')
     axios
       .post(backendUrl + "SellerMainScreen/acceptWorkLoad", {
-        consignorCode: data.consignorCode,
+        consignorCode: consignorCodeAccept,
         feUserId: userId,
       })
       .then((response) => {
         console.log("Msg Accepted ", response.data,'',userId);
         dispatch(setNotificationCount(notificationCount - 1));
-        const updatedData = data.filter(item => item.consignorCode !== consignorCodeAccept);
-        setData(updatedData);
-console.log("Data ",data.length +" ",consignorCodeAccept," ", updatedData.length);
+        // const updatedData = data.filter(item => item.consignorCode !== consignorCodeAccept);
+        // setData(updatedData);
+console.log("Data ",data.length +" ",consignorCodeAccept);
       })
       .catch((error) => {
         console.log(error);
@@ -65,14 +65,14 @@ console.log("Data ",data.length +" ",consignorCodeAccept," ", updatedData.length
     // console.log('df')
     axios
       .post(backendUrl + "SellerMainScreen/rejectWorkLoad", {
-        consignorCode: data.consignorCode,
+        consignorCode: consignorCodeReject,
         feUserId: userId,
       })
       .then((response) => {
         console.log("Msg Rejected ", response.data);
         dispatch(setNotificationCount(notificationCount - 1));
-        const updatedData = data.filter(item => item.consignorCode !== consignorCodeReject);
-        setData(updatedData);
+        // const updatedData = data.filter(item => item.consignorCode !== consignorCodeReject);
+        // setData(updatedData);
       })
       .catch((error) => {
         console.log(error);
