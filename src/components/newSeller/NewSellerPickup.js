@@ -8,7 +8,7 @@ import {
   Alert,
   VStack
 } from 'native-base';
-import {StyleSheet, ScrollView, View, KeyboardAvoidingView,ActivityIndicator} from 'react-native';
+import {StyleSheet, ScrollView, View, KeyboardAvoidingView,ActivityIndicator,TouchableOpacity, Linking, ToastAndroid } from 'react-native';
 import {DataTable, Searchbar, Text, Card} from 'react-native-paper';
 import {openDatabase} from 'react-native-sqlite-storage';
 import React, {useEffect, useState} from 'react';
@@ -28,7 +28,7 @@ const NewSellerPickup = ({route}) => {
   const [loading, setLoading] = useState(true);
   const [showModal1, setShowModal1] = useState(false);
   const [message1, setMessage1] = useState(0);
-
+  
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -40,13 +40,14 @@ const NewSellerPickup = ({route}) => {
 
   const loadDetails = () => { // setIsLoading(!isLoading);
       db.transaction((tx) => {
-          tx.executeSql('SELECT * FROM SyncSellerPickUp', [], (tx1, results) => { // ToastAndroid.show("Loading...", ToastAndroid.SHORT);
+          tx.executeSql('SELECT * FROM SyncSellerPickUp' , [], (tx1, results) => {
               let temp = [];
               console.log(results.rows.length);
               for (let i = 0; i < results.rows.length; ++i) {
                   temp.push(results.rows.item(i));
               }
               setData(temp);
+              // console.log(temp[0]);
               setLoading(false);
           });
       });
@@ -132,6 +133,27 @@ const NewSellerPickup = ({route}) => {
       return (f.includes(keyword1));
   };
 
+
+  const handlePhoneIconPress = (phone) => {
+    console.log(`Calling ${phone}`);
+    Linking.openURL('tel:' + phone);
+  };
+
+  const handleMapIconPress = (seller) => {
+    // console.log(`Navigating to ${seller}`);
+    const type = `${seller.consignorAddress1 ? seller.consignorAddress1 + ' ' : ''}${seller.consignorAddress2 ? seller.consignorAddress2 + ', ' : ''}${seller.consignorCity ? seller.consignorCity + ' ' : ''}${seller.consignorPincode || ''}`;
+// console.log(type);
+    const scheme = Platform.select({ios: 'maps:0,0?q=', android: 'geo:0,0?q='});
+    const latLng = `${seller.consignorLatitude},${seller.consignorLongitude}`;
+    const label = type;
+    const url = Platform.select({
+      ios: `${scheme}${label}@${latLng}`,
+      android: `${scheme}${latLng}(${label})`,
+    });
+
+    Linking.openURL(url);
+  };
+ 
 return (
 <NativeBaseProvider>
           <Modal isOpen={showModal1} onClose={() => {setShowModal1(false); navigation.navigate('Main')}}>
@@ -158,100 +180,220 @@ return (
       style={{marginHorizontal: 15, marginTop: 10}}
     />
     <ScrollView style={styles.homepage} showsVerticalScrollIndicator={true} showsHorizontalScrollIndicator={false}>
-      <Card>
-        <DataTable>
-        <DataTable.Header style={{height:'auto', backgroundColor: '#004aad',
-         borderTopLeftRadius: 5, borderTopRightRadius: 5,
-         borderWidth:2, borderColor:'white', alignItems: 'center',}}  >
-              <DataTable.Title style={{ flex: 6 }}>
-                <Text style={{ flex: 1, justifyContent: 'center', color: 'white', textAlign: 'center', flexWrap: 'wrap',}}>Seller Name</Text>
-                </DataTable.Title>
-              <DataTable.Title  style={{ flex: 2 }} numberOfLines={2} >
-                <Text style={{ flex: 1, justifyContent: 'center', color: 'white', textAlign: 'center', flexWrap: 'wrap',}}>Forward Pickups</Text>
-                </DataTable.Title>
-              <DataTable.Title style={{flex: 2 ,marginRight:-20}} numberOfLines={2} >
-                <Text style={{ flex: 1, justifyContent: 'center', color: 'white', textAlign: 'center', flexWrap: 'wrap',}}>Reverse Deliveries</Text>
-                </DataTable.Title>
-            </DataTable.Header>
+      {/* <Card> */}
+      <View>
+       
           {route.params.Trip !== 'Start Trip' && data && data.length > 0
-                ? data.filter(searched(keyword)).map((single, i) =>
-                    value[i] > 0 ? (value[i] == pending11[i]) && single.otpSubmitted === "true" ? (
-                      <DataTable.Row style={{ height: 'auto', backgroundColor: '#90ee90', borderBottomWidth: 1, borderWidth: 2, borderColor: 'white',elevation: 8, }} key={single.consignorName} onPress={() => {
-                        navigation.navigate('NewSellerSelection', {
-                       paramKey: single.consignorCode,
-                       Forward: value[i],
-                       consignorAddress1: single.consignorAddress1,
-                       consignorAddress2: single.consignorAddress2,
-                       consignorCity: single.consignorCity,
-                       consignorPincode: single.consignorPincode,
-                       consignorLatitude: single.consignorLatitude,
-                       consignorLongitude: single.consignorLongitude,
-                       contactPersonName: single.contactPersonName,
-                       consignorName: single.consignorName,
-                       PRSNumber: single.PRSNumber,
-                       consignorCode: single.consignorCode,
-                       userId: single.userId,
-                       phone: single.consignorContact,
-                       otpSubmitted: single.otpSubmitted,
-                       });
-               }}>
-                 <DataTable.Cell style={{ flex: 6, flexWrap: 'wrap' }}><Text style={styles.fontvalue}  >{single.consignorName}</Text></DataTable.Cell>
-                 <DataTable.Cell style={{ flex: 2, marginRight: 5, flexWrap: 'wrap' }}><Text style={styles.fontvalue}  >{pending11[i]}/{value[i]}</Text></DataTable.Cell>
-                 <DataTable.Cell style={{ flex: 2, marginRight: -45, flexWrap: 'wrap' }}><Text style={styles.fontvalue}  >{reverse[i]}</Text></DataTable.Cell>
-                 {/* <MaterialIcons name="arrow-right-bold" style={{ fontSize: 30, color: '#004aad', marginTop: 8 }} /> */}
-               </DataTable.Row> ): (
-                       <DataTable.Row style={{ height: 'auto', backgroundColor: '#eeeeee', borderBottomWidth: 1, borderWidth: 2, borderColor: 'white' }} key={single.consignorName} onPress={() => {
-                        navigation.navigate('NewSellerSelection', {
-                       paramKey: single.consignorCode,
-                       Forward: value[i],
-                       consignorAddress1: single.consignorAddress1,
-                       consignorAddress2: single.consignorAddress2,
-                       consignorCity: single.consignorCity,
-                       consignorPincode: single.consignorPincode,
-                       consignorLatitude: single.consignorLatitude,
-                       consignorLongitude: single.consignorLongitude,
-                       contactPersonName: single.contactPersonName,
-                       consignorName: single.consignorName,
-                       PRSNumber: single.PRSNumber,
-                       consignorCode: single.consignorCode,
-                       userId: single.userId,
-                       phone: single.consignorContact,
-                       otpSubmitted: single.otpSubmitted,
-                       });
-               }} >
-                       <DataTable.Cell style={{ flex: 6, flexWrap: 'wrap' }}><Text style={styles.fontvalue} >{single.consignorName}</Text></DataTable.Cell>
-                       <DataTable.Cell style={{ flex: 2, marginRight: 5, flexWrap: 'wrap' }}><Text style={styles.fontvalue} >{pending11[i]}/{value[i]}</Text></DataTable.Cell>
-                       <DataTable.Cell style={{ flex: 2, marginRight: -45, flexWrap: 'wrap' }}><Text style={styles.fontvalue} >{reverse[i]}</Text></DataTable.Cell>
-                       {/* <MaterialIcons name="check" style={{ fontSize: 30, color: 'green', marginTop: 8 }} /> */}
-                     </DataTable.Row>
-                        )
-                     : null,
+                ? data.filter(searched(keyword)).map((seller, i) =>
+                    value[i] > 0 ? (value[i] == pending11[i]) && seller.otpSubmitted === "true" ? 
+                    (
+        <TouchableOpacity key={seller.consignorCode} onPress={() => {navigation.navigate('NewSellerSelection', {
+          paramKey: seller.consignorCode,
+          Forward: value[i],
+          consignorAddress1: seller.consignorAddress1,
+          consignorAddress2: seller.consignorAddress2,
+          consignorCity: seller.consignorCity,
+          consignorPincode: seller.consignorPincode,
+          consignorLatitude: seller.consignorLatitude,
+          consignorLongitude: seller.consignorLongitude,
+          contactPersonName: seller.contactPersonName,
+          consignorName: seller.consignorName,
+          PRSNumber: seller.PRSNumber,
+          consignorCode: seller.consignorCode,
+          userId: seller.userId,
+          phone: seller.consignorContact,
+          otpSubmitted: seller.otpSubmitted,
+        });
+        }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: 16,
+              borderRadius: 18,
+              marginVertical: 8,
+              backgroundColor:'#90ee90', 
+              shadowColor:'black' ,
+              shadowOffset: { width: 5, height: 5 },
+              shadowOpacity: 0.8,
+              shadowRadius: 20,
+              elevation: 5,
+            }}
+          >
+            <View style={{ flex: 1 }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
+  {i+1}.{" "}{seller.consignorName}
+</Text>
+
+              <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorAddress1}</Text>
+              <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorCity}, {seller.consignorAddress2}, {seller.consignorPincode}</Text>
+              <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Pickup({pending11[i]}/{value[i]}) </Text>
+            </View>
+            <View style={{ alignItems: 'flex-end' }}>
+              <TouchableOpacity onPress={() => handlePhoneIconPress(seller.consignorContact)}>
+                <MaterialIcons name="phone" size={24} style={{ marginBottom: 12 , }} color="green" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleMapIconPress(seller)}>
+                <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
+              </TouchableOpacity>
+              <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Delivery({reverse[i]}) </Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+                    )
+               : 
+               (
+                  <TouchableOpacity key={seller.consignorCode} onPress={() => {navigation.navigate('NewSellerSelection', {
+                    paramKey: seller.consignorCode,
+                    Forward: value[i],
+                    consignorAddress1: seller.consignorAddress1,
+                    consignorAddress2: seller.consignorAddress2,
+                    consignorCity: seller.consignorCity,
+                    consignorPincode: seller.consignorPincode,
+                    consignorLatitude: seller.consignorLatitude,
+                    consignorLongitude: seller.consignorLongitude,
+                    contactPersonName: seller.contactPersonName,
+                    consignorName: seller.consignorName,
+                    PRSNumber: seller.PRSNumber,
+                    consignorCode: seller.consignorCode,
+                    userId: seller.userId,
+                    phone: seller.consignorContact,
+                    otpSubmitted: seller.otpSubmitted,
+                  });
+                  }}>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: 16,
+                        borderRadius: 18,
+                        marginVertical: 8,
+                        backgroundColor: i  % 2 === 0 ? '#E6F2FF' : '#FFFFFF',
+                        shadowColor:'black' ,
+                        shadowOffset: { width: 5, height: 5 },
+                        shadowOpacity: 0.8,
+                        shadowRadius: 18,
+                        elevation: 5,
+                        
+                      }}
+                    >
+                      <View style={{ flex: 1 }}>
+                      <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
+            {i+1}.{" "}{seller.consignorName}
+          </Text>
+          
+                        <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorAddress1}</Text>
+                        <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorCity}, {seller.consignorAddress2}, {seller.consignorPincode}</Text>
+                        <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Pickup({pending11[i]}/{value[i]}) </Text>
+                      </View>
+                      <View style={{ alignItems: 'flex-end' }}>
+                        <TouchableOpacity onPress={() => handlePhoneIconPress(seller.consignorContact)}>
+                          <MaterialIcons name="phone" size={24} style={{ marginBottom: 12 , }} color="green" />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => handleMapIconPress(seller)}>
+                          <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="orange"  />
+                        </TouchableOpacity>
+                        <Text style={{fontWeight: 'bold',marginTop: 8, color: '#004aad' }}>Delivery({reverse[i]}) </Text>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+               )
+                     : null
                   )
                 : null}
 
             {route.params.Trip === 'Start Trip' && data && data.length > 0
-                ? data.filter(searched(keyword)).map((single, i) =>
-                    value[i] > 0 ? (value[i] != pending11[i])? (
-                      <DataTable.Row style={{ height: 'auto', backgroundColor: '#eeeeee', borderBottomWidth: 1, borderWidth: 2, borderColor: 'white' ,elevation: 8,}} key={single.consignorName} onPress={() => {
-                      handleTrip()
-               }}>
-                 <DataTable.Cell style={{ flex: 6, flexWrap: 'wrap' }}><Text style={styles.fontvalue} >{single.consignorName}</Text></DataTable.Cell>
-                 <DataTable.Cell style={{ flex: 2, marginRight: 5, flexWrap: 'wrap' }}><Text style={styles.fontvalue}  >{pending11[i]}/{value[i]}</Text></DataTable.Cell>
-                 <DataTable.Cell style={{ flex: 2, marginRight: -45, flexWrap: 'wrap' }}><Text style={styles.fontvalue}  >{reverse[i]}</Text></DataTable.Cell>
-                 {/* <MaterialIcons name="arrow-right-bold" style={{ fontSize: 30, color: '#004aad', marginTop: 8 }} /> */}
-               </DataTable.Row>): (
-                <DataTable.Row style={{ height: 'auto', backgroundColor: '#90ee90', borderBottomWidth: 1, borderWidth: 2, borderColor: 'white' }} key={single.consignorName} >
-                <DataTable.Cell style={{ flex: 6, flexWrap: 'wrap' }}><Text style={styles.fontvalue}  >{single.consignorName}</Text></DataTable.Cell>
-                <DataTable.Cell style={{ flex: 2, marginRight: 5, flexWrap: 'wrap' }}><Text style={styles.fontvalue}  >{pending11[i]}/{value[i]}</Text></DataTable.Cell>
-                <DataTable.Cell style={{ flex: 2, marginRight: -45, flexWrap: 'wrap' }}><Text style={styles.fontvalue}  >{reverse[i]}</Text></DataTable.Cell>
-                {/* <MaterialIcons name="check" style={{ fontSize: 30, color: 'green', marginTop: 8 }} /> */}
-              </DataTable.Row>
+                ? data.filter(searched(keyword)).map((seller, i) =>
+                    value[i] > 0 ? (value[i] != pending11[i])? 
+                    (
+        <TouchableOpacity key={seller.consignorCode} onPress={() => {handleTrip()}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: 16,
+              borderRadius: 18,
+              marginVertical: 8,
+              backgroundColor: i  % 2 === 0 ? '#E6F2FF' : '#FFFFFF',
+              shadowColor:'black' ,
+              shadowOffset: { width: 5, height: 5 },
+              shadowOpacity: 0.8,
+              shadowRadius: 20,
+              elevation: 5,
+              
+            }}
+          >
+            <View style={{ flex: 1 }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
+  {i+1}.{" "}{seller.consignorName}
+</Text>
+
+              <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorAddress1}</Text>
+              <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorCity}, {seller.consignorAddress2}, {seller.consignorPincode}</Text>
+              <Text style={{fontWeight: 'bold', marginTop: 8,  color: '#004aad'}}>Pickup({pending11[i]}/{value[i]}) </Text>
+            </View>
+            <View style={{ alignItems: 'flex-end' }}>
+              <TouchableOpacity onPress={() => handlePhoneIconPress(seller.consignorContact)}>
+                <MaterialIcons name="phone" size={24} style={{ marginBottom: 12 , }} color="green" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleMapIconPress(seller)}>
+                <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
+              </TouchableOpacity>
+              <Text style={{fontWeight: 'bold',marginTop: 8, color: '#004aad' }}>Delivery({reverse[i]}) </Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+              ):
+              (
+                <TouchableOpacity key={seller.consignorCode} >
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: 16,
+                    borderRadius: 18,
+                    marginVertical: 8,
+                    backgroundColor: '#90ee90',
+                    shadowColor:'black' ,
+                    shadowOffset: { width: 5, height: 5 },
+                    shadowOpacity: 0.8,
+                    shadowRadius: 20,
+                    elevation: 5,
+                    
+                  }}
+                >
+                  <View style={{ flex: 1 }}>
+                  <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
+        {i+1}.{" "}{seller.consignorName}
+      </Text>
+      
+                    <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorAddress1}</Text>
+                    <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorCity}, {seller.consignorAddress2}, {seller.consignorPincode}</Text>
+                    <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Pickup({pending11[i]}/{value[i]}) </Text>
+                  </View>
+                  <View style={{ alignItems: 'flex-end' }}>
+                    <TouchableOpacity onPress={() => handlePhoneIconPress(seller.consignorContact)}>
+                      <MaterialIcons name="phone" size={24} style={{ marginBottom: 12 , }} color="green" />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => handleMapIconPress(seller)}>
+                      <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
+                    </TouchableOpacity>
+                    <Text style={{fontWeight: 'bold',marginTop: 8, color: '#004aad' }}>Delivery({reverse[i]}) </Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
                 )
                 : null,
                 )
                 : null}
-        </DataTable>
-      </Card>
+        </View>
+
+
+
       {/* <View style={{ position: 'absolute', bottom: 0 , left:0 ,right:0, alignItems:'center'}}> */}
       <Center>
         <Image style={{ width:150, height:150}} source={require('../../assets/image.png')} alt={'Logo Image'} />
