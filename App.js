@@ -525,7 +525,7 @@ function StackNavigators({ navigation }) {
 
   /*              Press (Ctrl + k + 2) keys together for better API tables view in App.js (VSCode) */
 
-  // Table 1
+  // Table 1 
   const createTables1 = () => {
     db.transaction((txn) => {
       // txn.executeSql('DROP TABLE IF EXISTS SyncSellerPickUp', []);
@@ -542,7 +542,7 @@ function StackNavigators({ navigation }) {
         }
       );
     });
-  };
+  }; 
   const loadAPI_Data1 = () => {
     setIsLoading(!isLoading);
     createTables1();
@@ -571,7 +571,7 @@ function StackNavigators({ navigation }) {
                             userId,
                             res.data.data[i].consignorName,
                             res.data.data[i].consignorAddress1,
-                            res.data.data[i].consignorAddress2,
+                            res.data.data[i].consignorState,
                             res.data.data[i].consignorCity,
                             res.data.data[i].consignorPincode,
                             res.data.data[i].consignorLatitude,
