@@ -185,7 +185,7 @@ function StackNavigators({ navigation }) {
       const options = { hour: 'numeric', minute: 'numeric', hour12: true };
       const formattedTime = date.toLocaleTimeString('en-US', options);
       
-      console.log(formattedTime); 
+      console.log(formattedTime,notification); 
 
       db.transaction((tx) => {
         tx.executeSql(
@@ -802,6 +802,25 @@ function StackNavigators({ navigation }) {
   };
 
   const createTablesSF = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        `CREATE TABLE IF NOT EXISTS noticeMessages (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          messageId TEXT,
+          notificationTitle TEXT,
+          notificationBody TEXT,
+          sendDate TEXT,
+          sentTime TEXT
+        )`,
+        [],
+        (tx, results) => {
+          console.log('Table created successfully');
+        },
+        (error) => {
+          console.log('Error creating table: ', error);
+        }
+      );
+    });
     db.transaction((txn) => {
       // txn.executeSql('DROP TABLE IF EXISTS ShipmentFailure', []);
       txn.executeSql(
@@ -2614,6 +2633,8 @@ function CustomDrawerContent({ navigation }) {
       dispatch(setUserEmail(""));
       dispatch(setUserName(""));
       dispatch(setToken(""));
+      dispatch(setNotificationCount(0));
+
     } catch (e) {
       console.log(e);
     }
