@@ -83,6 +83,7 @@ import {
   setUserId,
   setUserName,
 } from "./src/redux/slice/userSlice";
+import { setTripStatus } from './src/redux/slice/tripSlice';
 import { logout } from "react-native-app-auth";
 import PushNotification from "react-native-push-notification";
 import { setNotificationCount } from "./src/redux/slice/notificationSlice";
@@ -681,7 +682,8 @@ function StackNavigators({ navigation }) {
           latitude VARCHAR(200),
           longitude VARCHAR(200),
           bagId VARCHAR(200),
-          packagingAction VARCHAR(200)
+          packagingAction VARCHAR(200),
+          postRDStatus VARCHAR(200)
           )`,
         [],
         (sqlTxn, res) => {
@@ -732,8 +734,9 @@ function StackNavigators({ navigation }) {
                           syncStatus,
                           syncHandoverStatus,
                           bagId,
-                          packagingAction
-                        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                          packagingAction,
+                          postRDStatus
+                        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
                         [
                           res.data.data[i].clientShipmentReferenceNumber,
                           res.data.data[i].clientRefId,
@@ -771,6 +774,7 @@ function StackNavigators({ navigation }) {
                           null,
                           "",
                           res.data.data[i].packagingAction,
+                          null
                         ],
                         (sqlTxn, _res) => {
                           // console.log(`\n Data Added to local db successfully`);
@@ -2557,13 +2561,48 @@ function CustomDrawerContent({ navigation }) {
   const dispatch = useDispatch();
 
   const [language, setLanguage] = useState("");
+  const [pendingPickup, setPendingPickup] = useState(0);
+  const [pendingDelivery, setPendingDelivery] = useState(0);
 
   const email = useSelector((state) => state.user.user_email);
   const id = useSelector((state) => state.user.user_id);
   const name = useSelector((state) => state.user.user_name);
   const idToken = useSelector((state) => state.user.idToken);
   const token = useSelector((state) => state.user.token);
+  const tripStatus = useSelector(state => state.trip.tripStatus);
 
+  useEffect(() => {
+    const loadDetails = async () => {
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND status IS NULL',
+          [],
+          (tx1, results) => {
+            setPendingPickup(results.rows.length);
+          },
+        );
+      });
+  
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL)',
+          [],
+          (tx1, results) => {
+            setPendingDelivery(results.rows.length);
+          },
+        );
+      });
+    };
+    loadDetails();
+  }, []);
+  const handleStartTrip = () => {
+    if ((pendingPickup != 0 || pendingDelivery != 0) && tripStatus==1) {
+      navigation.navigate('PendingWork')
+    } else {
+      navigation.navigate('MyTrip', {userId: id});
+    }
+    navigation.closeDrawer();
+  };
   const LogoutHandle = async () => {
     try {
       await AsyncStorage.removeItem("userId");
@@ -2727,8 +2766,7 @@ function CustomDrawerContent({ navigation }) {
             <Button
               variant="outline"
               onPress={() => {
-                navigation.navigate("MyTrip", { userId: id });
-                navigation.closeDrawer();
+                handleStartTrip();
               }}
               mt={4}
               style={{ color: "#004aad", borderColor: "#004aad",justifyContent: 'flex-start', alignItems: 'flex-start',paddingLeft:20 }}

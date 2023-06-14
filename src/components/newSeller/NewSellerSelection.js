@@ -126,7 +126,7 @@ const NewSellerSelection = ({route}) => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Pickup" AND status IS Null And consignorCode=?',
+        'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=?, postRDStatus="true" WHERE shipmentAction="Seller Pickup" AND status IS Null And consignorCode=?',
         [
           rejectionCode,
           new Date().valueOf(),

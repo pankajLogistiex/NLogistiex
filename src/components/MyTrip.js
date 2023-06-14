@@ -327,7 +327,7 @@ export default function MyTrip({navigation, route}) {
           endVehicleImageUrl: endImageUrl,
         })
         .then(function (res) {
-          dispatch(setTripStatus(2));
+          dispatch(setTripStatus(0));
           getTripDetails(tripID);
           setMessage(1);
           navigation.navigate('StartEndDetails', { tripID: tripID });
@@ -344,6 +344,10 @@ export default function MyTrip({navigation, route}) {
       setMessage1(2);
       setShowModal1(true);
     }
+    // else if(pendingPickup==0 && pendingDelivery==0 && tripStatus==0){
+    //   setMessage1(1);
+    //   setShowModal1(true);
+    // }
   }, [pendingPickup, pendingDelivery, pendingHandover, tripStatus]);
 console.log("Trip Id",tripID)
   let currentDate = new Date();
@@ -388,7 +392,7 @@ console.log("Trip Id",tripID)
     //   setLabel('Input vehicle KMs');
     // }
   };
-
+console.log(tripStatus)
   return (
     <NativeBaseProvider>
       <ScrollView>
@@ -775,7 +779,7 @@ console.log("Trip Id",tripID)
                         </TouchableOpacity>
                       ) : null}
                     </View>
-                    {pendingPickup > 0 || pendingDelivery > 0 ? (
+                    {pendingPickup!=0 || pendingDelivery!=0  ? (
                       <Button
                         backgroundColor="#004aad"
                         _text={{color: 'white', fontSize: 20}}
@@ -809,13 +813,6 @@ console.log("Trip Id",tripID)
                     />
                   </Center>
                 </Box>
-                {/* <Center>
-                  <Image
-                    style={{width: 200, height: 200}}
-                    source={require('../assets/logo.png')}
-                    alt={'Logo Image'}
-                  />
-                </Center> */}
               </Box>
             )}
           </Box>

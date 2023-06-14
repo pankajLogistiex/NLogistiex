@@ -530,12 +530,11 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   //     });
   // };
   const handleStartTrip = () => {
-    if (spp == 0 && spp1 == 0 && shp1 == 0 && tripValue == 'Start Trip') {
-      setMessage1(1);
-      setShowModal1(true);
-    } else if (shp1 != 0) {
+    if (shp1!=0) {
       setMessage1(2);
       setShowModal1(true);
+    } else if ((spp != 0 || spp1 != 0) &&  tripValue == 'End Trip' ) {
+      navigation.navigate('PendingWork')
     } else {
       navigation.navigate('MyTrip', {userId: id});
     }
@@ -1038,7 +1037,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                                       color: 'white',
                                     }}
                                   >
-                                     {tripValue === 'Start Trip'
+                                     {tripValue === 'Start Trip' && (spc1 ==0 && spnp1==0 && spr1==0)
                               ? 'New Delivery'
                               : spp1 === 0
                               ? 'Delivery completed'
@@ -1122,7 +1121,7 @@ w="100%"
             color: 'white',
           }}
         >
-           {tripValue === 'Start Trip'
+           {tripValue === 'Start Trip' && (spc ==0 && spnp==0 && spr==0)
                               ? 'New Pickup'
                               : spp === 0
                               ? 'Pickup completed'
@@ -1556,7 +1555,7 @@ onPress={() =>
                                       color: 'white',
                                     }}
                                   >
-                                     {tripValue === 'Start Trip'
+                                     {tripValue === 'Start Trip' && (spc1 ==0 && spnp1==0 && spr1==0)
                               ? 'New Delivery'
                               : spp1 === 0
                               ? 'Delivery completed'
@@ -1639,7 +1638,7 @@ onPress={() =>
                                       color: 'white',
                                     }}
                                   >
-                                     {tripValue === 'Start Trip'
+                                     {tripValue === 'Start Trip' && (spc ==0 && spnp==0 && spr==0)
                                                         ? 'New Pickup'
                                                         : spp === 0
                                                         ? 'Pickup completed'
