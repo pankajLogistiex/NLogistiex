@@ -270,7 +270,12 @@ return (
                         padding: 16,
                         borderRadius: 18,
                         marginVertical: 8,
-                        backgroundColor: i  % 2 === 0 ? '#E6F2FF' : '#FFFFFF',
+                        backgroundColor:
+                        seller.otpSubmitted== 'true'
+                          ? '#FFBF00'
+                          : i % 2 === 0
+                          ? '#E6F2FF'
+                          : '#FFFFFF',
                         shadowColor:'black' ,
                         shadowOffset: { width: 5, height: 5 },
                         shadowOpacity: 0.8,

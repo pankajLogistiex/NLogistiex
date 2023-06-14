@@ -8,7 +8,7 @@ import {
   Input,
   Icon,
 } from 'native-base';
-import {StyleSheet, ScrollView, View} from 'react-native';
+import {StyleSheet, ScrollView, View, ToastAndroid} from 'react-native';
 import {DataTable, Searchbar, Text, Card} from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {openDatabase} from 'react-native-sqlite-storage';
@@ -150,6 +150,25 @@ const PendingWork = ({route}) => {
         }
         setData(temp);
       });
+    });
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND status IS NULL',
+        [],
+        (tx1, results) => {
+          setPendingPickup(results.rows.length);
+        },
+      );
+    });
+
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL)',
+        [],
+        (tx1, results) => {
+          setPendingDelivery(results.rows.length);
+        },
+      );
     });
   };
 
@@ -355,13 +374,24 @@ const PendingWork = ({route}) => {
             onPress={() => navigation.navigate('Main')}>
             Dashboard
           </Button>
+          {pendingPickup==0 && pendingDelivery==0 ?
           <Button
+          w="48%"
+          size="lg"
+          bg="#004aad"
+          onPress={() => navigation.navigate('MyTrip',{userId: userId})}>
+          Close Trip
+        </Button>
+        :
+        <Button
             w="48%"
             size="lg"
-            bg="#004aad"
-            onPress={() => navigation.navigate('MyTrip')}>
+            bg="gray.300"
+            onPress={() => ToastAndroid.show("Complete Pending Work Before Closing Trip", ToastAndroid.SHORT)}>
             Close Trip
           </Button>
+          }
+          
         </View>
         <Center>
           <Image

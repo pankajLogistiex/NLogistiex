@@ -119,7 +119,7 @@ const POD = ({route}) => {
   const displayDataSPScan = async () => {
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=?  AND status="accepted"',
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=?  AND status="accepted" AND postRDStatus IS NULL',
         [route.params.consignorCode],
         (tx1, results) => {
           setnewAccepted(results.rows.length);
@@ -133,7 +133,7 @@ const POD = ({route}) => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=? AND status is NULL',
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=? AND status is NULL AND postRDStatus IS NULL',
         [route.params.consignorCode],
         (tx1, results) => {
           setNewNotPicked(results.rows.length);
@@ -148,7 +148,7 @@ const POD = ({route}) => {
 
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=? AND status="rejected"',
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=? AND status="rejected" AND postRDStatus IS NULL',
         [route.params.consignorCode],
         (tx1, results) => {
           setnewRejected(results.rows.length);
@@ -204,6 +204,7 @@ const POD = ({route}) => {
         })
         .then(function (response) {
           console.log('POST RD Data Submitted', response.data);
+          postRDStatus();
           alert('Pickup Successfully completed');
           navigation.navigate('Main');
         })
@@ -231,6 +232,22 @@ const POD = ({route}) => {
     // }
     setDropDownValue11(item);
     // setModalVisible11(false);
+  }
+
+  function postRDStatus(){
+    db.transaction(tx => {
+      tx.executeSql(
+        'UPDATE SellerMainScreenDetails  SET postRDStatus="true" WHERE shipmentAction="Seller Pickup" AND consignorCode=? AND status IS NOT NULL',
+        [route.params.consignorCode],
+        (tx1, results) => {
+          if (results.rowsAffected > 0) {
+            console.log('postRd STATUS UPDATED');
+          } else {
+            console.log('postRD not updated in local table');
+          }
+        },
+      );
+    });
   }
 
   function validateOTP() {
@@ -306,7 +323,7 @@ const POD = ({route}) => {
   const displayData = async () => {
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=? ',
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=? AND postRDStatus IS NULL ',
         [route.params.consignorCode],
         (tx1, results) => {
           // ToastAndroid.show("Loading...", ToastAndroid.SHORT);
@@ -320,7 +337,6 @@ const POD = ({route}) => {
       );
     });
   };
-
 
   
   useEffect(() => {

@@ -44,12 +44,26 @@ export default function TripHistory({navigation, route}) {
   const [startkm, setStartKm] = useState(0);
   const [tripID, setTripID] = useState('');
   const [userId, setUserId] = useState(route.params.userId);
+  const [pendingPickup, setPendingPickup] = useState(0);
+  const [pendingDelivery, setPendingDelivery] = useState(0);
+  const [pendingHandover, setPendingHandover] = useState(0);
+  const [showModal1, setShowModal1] = useState(false);
+  const [message1, setMessage1] = useState(0);
   
   const [tripDetails, setTripDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   
   const focus = useIsFocused();
-
+  const handleTrip = (id) => {
+    if (pendingHandover != 0 ) {
+      setMessage1(2);
+      setShowModal1(true);
+    } else if (pendingPickup !== 0 || pendingDelivery !== 0  ) {
+      navigation.navigate('PendingWork')
+    } else {
+      navigation.navigate('MyTrip', {userId: id});
+    }
+  };
 useEffect(() => {
     const fetchData = async () => {
       try {
@@ -110,6 +124,35 @@ useEffect(() => {
   }, [navigation]);
   return (
     <NativeBaseProvider>
+      <Modal
+                  isOpen={showModal1}
+                  onClose={() => {
+                    setShowModal1(false);
+                    navigation.navigate('Main');
+                  }}>
+                  <Modal.Content
+                    backgroundColor={message1 === 1 ? '#fee2e2' : '#fee2e2'}>
+                    <Modal.CloseButton />
+                    <Modal.Body>
+                      <Alert
+                        w="100%"
+                        status={message1 === 1 ? 'error' : 'error'}>
+                        <VStack
+                          space={1}
+                          flexShrink={1}
+                          w="100%"
+                          alignItems="center">
+                          <Alert.Icon size="4xl" />
+                          <Text my={3} fontSize="md" fontWeight="medium">
+                            {message1 === 1
+                              ? 'No Pickup/Delivery Assigned'
+                              : 'Please complete handover before Start a trip'}
+                          </Text>
+                        </VStack>
+                      </Alert>
+                    </Modal.Body>
+                  </Modal.Content>
+                </Modal>
       <ScrollView>
         {loading ? (
           <View
@@ -148,7 +191,7 @@ useEffect(() => {
     <Button
       variant="outline"
       onPress={() => {
-        navigation.navigate('MyTrip', { userId: route.params.userId });
+        handleTrip(route.params.userId)
       }}
       mt={4}
       style={{
@@ -275,7 +318,7 @@ useEffect(() => {
                   elevation: 10,
                 }}
                 onPress={() => {
-                  navigation.navigate('MyTrip', { userId: data.userID });
+                  handleTrip(data.userID)
                 }}
               >
                 End Trip

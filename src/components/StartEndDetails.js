@@ -25,7 +25,7 @@ export default function StartEndDetails({navigation,route}) {
             console.log(error, 'error');
           });
     }, []);
-    
+    console.log(printData);
     return (
       printData ?
       (
@@ -33,14 +33,13 @@ export default function StartEndDetails({navigation,route}) {
         <ScrollView>
           <Box marginTop={1}>
             <Stack space="2" p="4">
-              <Text style={{backgroundColor:'#CCCCCC', fontSize: 16, borderWidth: 1, borderColor: '#004aad', borderRadius: 5, paddingVertical: 15, textAlign:'center', display:'flex', justifyContent:'center', alignItems:'center', color:'black'}}>Start Time - {printData.startTime &&
-                    moment
-                      .unix(printData.startTime/ 1000)
-                      .utcOffset("+05:30")
-                      .format("YYYY-MM-DD HH:MM")}</Text>
+              <Text style={{backgroundColor:'#CCCCCC', fontSize: 16, borderWidth: 1, borderColor: '#004aad', borderRadius: 5, paddingVertical: 15, textAlign:'center', display:'flex', justifyContent:'center', alignItems:'center', color:'black'}}>Start Time - {moment(printData.startTime).utcOffset('+05:30').format('YYYY-MM-DD HH:mm:ss')}</Text>
               <Text style={{backgroundColor:'#CCCCCC', fontSize: 16, borderWidth: 1, borderColor: '#004aad', borderRadius: 5, paddingVertical: 15, textAlign:'center', display:'flex', justifyContent:'center', alignItems:'center', color:'black'}}>Vehicle Number - {printData.vehicleNumber}</Text>
               <Text style={{backgroundColor:'#CCCCCC', fontSize: 16, borderWidth: 1, borderColor: '#004aad', borderRadius: 5, paddingVertical: 15, textAlign:'center', display:'flex', justifyContent:'center', alignItems:'center', color:'black'}}>Start Kilometer - {printData.startKilometer}</Text>
               <Text style={{backgroundColor:'#CCCCCC', fontSize: 16, borderWidth: 1, borderColor: '#004aad', borderRadius: 5, paddingVertical: 15, textAlign:'center', display:'flex', justifyContent:'center', alignItems:'center', color:'black'}}>End Kilometer - {printData.endkilometer}</Text>
+              <Text style={{backgroundColor:'#CCCCCC', fontSize: 16, borderWidth: 1, borderColor: '#004aad', borderRadius: 5, paddingVertical: 15, textAlign:'center', display:'flex', justifyContent:'center', alignItems:'center', color:'black'}}>
+              Total Trip Time - { Math.floor(((printData.endTime-printData.startTime) / 1000 / 60 / 60) % 24)} hours {Math.floor(((printData.endTime-printData.startTime) / 1000 / 60) % 60)} min {Math.floor(((printData.endTime-printData.startTime) / 1000 / 60 / 60) % 24)} sec</Text>
+              <Text style={{backgroundColor:'#CCCCCC', fontSize: 16, borderWidth: 1, borderColor: '#004aad', borderRadius: 5, paddingVertical: 15, textAlign:'center', display:'flex', justifyContent:'center', alignItems:'center', color:'black'}}>Total KMs Travelled - {printData.endkilometer-printData.startKilometer}</Text>
             </Stack>
             <View style={{display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center'}} >
               <Image style={{height:200, width:"90%", borderRadius: 5}} source={{uri : printData.startVehicleImageUrl}} alt="image base" />
