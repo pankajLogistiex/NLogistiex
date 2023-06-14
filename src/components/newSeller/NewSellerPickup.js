@@ -26,8 +26,13 @@ const NewSellerPickup = ({route}) => {
   const [value,setValue] =useState([]);
   const [reverse,setReverse] =useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingR, setLoadingR] = useState(true);
   const [showModal1, setShowModal1] = useState(false);
   const [message1, setMessage1] = useState(0);
+  
+  const [totalPending,setTotalPending] =useState(0);
+  const [totalValue,setTotalValue] =useState(1);
+  const progress = (pending11.reduce((accumulator, currentValue) => accumulator + currentValue, 0)/value.reduce((accumulator, currentValue) => accumulator + currentValue, 0)) * 100
   
   const navigation = useNavigation();
 
@@ -48,7 +53,7 @@ const NewSellerPickup = ({route}) => {
               }
               setData(temp);
               // console.log(temp[0]);
-              setLoading(false);
+              // setLoading(false);
           });
       });
       
@@ -68,6 +73,7 @@ const NewSellerPickup = ({route}) => {
   
   useEffect(() => {
       if (data.length > 0) {
+        // const tc=0;
         const counts = [];
         data.forEach((single) => {
           db.transaction((tx) => {
@@ -78,6 +84,7 @@ const NewSellerPickup = ({route}) => {
                 counts.push(results.rows.length);
                 if (counts.length === data.length) {
                   setPending(counts);
+                  // setTotalPending(tc);
                 }
               },
             );
@@ -87,6 +94,7 @@ const NewSellerPickup = ({route}) => {
     }, [data, db]);
     useEffect(() => {
       if (data.length > 0) {
+        // const tc=0;
         const counts = [];
         data.forEach((single) => {
           db.transaction((tx) => {
@@ -97,6 +105,8 @@ const NewSellerPickup = ({route}) => {
                 counts.push(results.rows.length);
                 if (counts.length === data.length) {
                   setValue(counts);
+                  setLoading(false);
+                  // setTotalValue(tc);
                 }
               },
             );
@@ -116,6 +126,7 @@ const NewSellerPickup = ({route}) => {
                 counts.push(results.rows.length);
                 if (counts.length === data.length) {
                   setReverse(counts);
+                  setLoadingR(false);
                 }
               },
             );
@@ -169,15 +180,54 @@ return (
                   </Modal.Body>
                 </Modal.Content>
       </Modal>
-{loading ? 
+{loading &&loadingR ? 
         <ActivityIndicator size="large" color="blue" style={{marginTop: 44}} />
       :
       <Box flex={1} bg="#fff"  width="auto" maxWidth="100%">
+    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 0, padding: 14, justifyContent: 'center', alignItems: 'center' }}> 
+<View
+      style={{
+        width: '100%',
+        height: 50,
+        backgroundColor: '#f2f2f2',
+        borderRadius: 5,
+        overflow: 'hidden',
+        
+      }}
+    >
+      <View
+        style={{
+          width: `${progress}%`,
+          height: '100%',
+          backgroundColor: '#90ee90',
+          borderRadius: 5,
+        }}
+      />
+      <Text
+        style={{
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          fontSize: 18,
+          color: 'black',
+          fontWeight: 'bold',
+        }}
+      >
+       Sellers Attempted ({pending11.reduce((accumulator, currentValue) => accumulator + currentValue, 0)}/{value.reduce((accumulator, currentValue) => accumulator + currentValue, 0)})
+      </Text>
+    </View>
+    </View>
+
+
     <Searchbar
       placeholder="Search Seller Name"
       onChangeText={(e) => setKeyword(e)}
       value={keyword}
-      style={{marginHorizontal: 15, marginTop: 10}}
+      style={{marginHorizontal: 15, marginTop: 0}}
     />
     <ScrollView style={styles.homepage} showsVerticalScrollIndicator={true} showsHorizontalScrollIndicator={false}>
       {/* <Card> */}
