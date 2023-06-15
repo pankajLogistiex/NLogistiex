@@ -45,10 +45,10 @@ const NewSellerPickup = ({route}) => {
 
   const loadDetails = () => { // setIsLoading(!isLoading);
       db.transaction((tx) => {
-          tx.executeSql('SELECT * FROM SyncSellerPickUp' , [], (tx1, results) => {
+          tx.executeSql('SELECT * FROM SyncSellerPickUp ORDER BY  CAST(sellerIndex AS INTEGER) ASC' , [], (tx1, results) => {
               let temp = [];
-              console.log(results.rows.length);
               for (let i = 0; i < results.rows.length; ++i) {
+                // console.log(results.rows.item(i).sellerIndex);
                   temp.push(results.rows.item(i));
               }
               setData(temp);
@@ -273,7 +273,7 @@ return (
           >
             <View style={{ flex: 1 }}>
             <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
-  {i+1}.{" "}{seller.consignorName}
+  {parseInt(seller.sellerIndex)+1}.{" "}{seller.consignorName}
 </Text>
 
               <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorAddress1}</Text>
@@ -336,7 +336,7 @@ return (
                     >
                       <View style={{ flex: 1 }}>
                       <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
-            {i+1}.{" "}{seller.consignorName}
+            {parseInt(seller.sellerIndex)+1}.{" "}{seller.consignorName}
           </Text>
           
                         <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorAddress1}</Text>
@@ -383,7 +383,7 @@ return (
           >
             <View style={{ flex: 1 }}>
             <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
-  {i+1}.{" "}{seller.consignorName}
+  {parseInt(seller.sellerIndex)+1}.{" "}{seller.consignorName}
 </Text>
 
               <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorAddress1}</Text>
@@ -423,7 +423,7 @@ return (
                 >
                   <View style={{ flex: 1 }}>
                   <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
-        {i+1}.{" "}{seller.consignorName}
+        {parseInt(seller.sellerIndex)+1}.{" "}{seller.consignorName}
       </Text>
       
                     <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorAddress1}</Text>

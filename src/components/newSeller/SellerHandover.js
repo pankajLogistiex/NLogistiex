@@ -9,7 +9,7 @@ import {
   Button,
   ArrowForwardIcon,
 } from 'native-base';
-import {StyleSheet, ScrollView} from 'react-native';
+import {StyleSheet,View, ScrollView, Linking,ActivityIndicator,TouchableOpacity} from 'react-native';
 import {DataTable, Searchbar, Text, Card} from 'react-native-paper';
 import {openDatabase} from 'react-native-sqlite-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -25,8 +25,14 @@ const SellerHandover = ({route}) => {
   const [numScanned, setNumScanned] = useState(0);
   const [displayData, setDisplayData] = useState({});
   const [results, setResults] = useState({});
+  
+  const [loading, setLoading] = useState(true);
   const [MM,setMM] = useState(0);
   const [acceptedItemData, setAcceptedItemData] = useState({});
+  const expectedSum = Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ? item.expected : 0), 0);
+const scannedSum = Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ? item.scanned : 0), 0);
+
+  // const progress = Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ? item.scanned : 0), 0) / Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ? item.expected : 0), 0);
   const navigation = useNavigation();
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -50,13 +56,14 @@ useEffect(() => {
     console.log(error);
   });
 }, []);
-
+// console.log(loading);
   const loadDetails = () => {
     db.transaction(tx => {
-      tx.executeSql('SELECT * FROM SyncSellerPickUp', [], (tx1, results) => {
+      tx.executeSql('SELECT * FROM SyncSellerPickUp ORDER BY  CAST(sellerIndex AS INTEGER) ASC', [], (tx1, results) => {
         let temp = [];
         var m = 0;
         for (let i = 0; i < results.rows.length; ++i) {
+          
           const newData = {};
           temp.push(results.rows.item(i));
           // var consignorcode=results.rows.item(i).consignorCode;
@@ -79,15 +86,27 @@ useEffect(() => {
                       // var scanned=results.rows.length;
                       newData[results.rows.item(i).consignorCode] = {
                         consignorName: results.rows.item(i).consignorName,
+                        consignorContact:results.rows.item(i).consignorContact,
+                        consignorAddress1 :results.rows.item(i).consignorAddress1,
+                        consignorCity:results.rows.item(i).consignorCity,
+                        consignorAddress2:results.rows.item(i).consignorAddress2,
+                        consignorPincode:results.rows.item(i).consignorPincode,
+                        consignorLatitude:results.rows.item(i).consignorLatitude,
+                        consignorLongitude:results.rows.item(i).consignorLongitude,
+                        sequenceNumber:results.rows.item(i).sellerIndex,
                         expected: results11.rows.length,
                         scanned: results22.rows.length,
                       };
                       // console.log(newData);
-                      if (newData != null) {
+                      if (newData != null && results11.rows.length>0) {
                         setDisplayData(prevData => ({
                           ...prevData,
                           ...newData,
                         }));
+                        console.log(results11.rows.length);
+                      }
+                      if(i===results.rows.length-1){
+                        setLoading(false);
                       }
                     },
                   );
@@ -98,9 +117,9 @@ useEffect(() => {
 
         }
         setData(temp);
+        // setLoading(false);
       });
     });
-
 
     db.transaction((tx) => {
       tx.executeSql(
@@ -135,7 +154,25 @@ useEffect(() => {
 //   useEffect(() => {
 //     loadDetails()
 //   }, [])
+const handlePhoneIconPress = (phone) => {
+  console.log(`Calling ${phone}`);
+  Linking.openURL('tel:' + phone);
+};
 
+const handleMapIconPress = (seller) => {
+  // console.log(`Navigating to ${seller}`);
+  const type = `${seller.consignorAddress1 ? seller.consignorAddress1 + ' ' : ''}${seller.consignorAddress2 ? seller.consignorAddress2 + ', ' : ''}${seller.consignorCity ? seller.consignorCity + ' ' : ''}${seller.consignorPincode || ''}`;
+// console.log(type);
+  const scheme = Platform.select({ios: 'maps:0,0?q=', android: 'geo:0,0?q='});
+  const latLng = `${seller.consignorLatitude},${seller.consignorLongitude}`;
+  const label = type;
+  const url = Platform.select({
+    ios: `${scheme}${label}@${latLng}`,
+    android: `${scheme}${latLng}(${label})`,
+  });
+
+  Linking.openURL(url);
+};
 
   const displayData11 = Object.keys(displayData)
     .filter(sealID => sealID.toLowerCase().includes(keyword.toLowerCase()))
@@ -151,166 +188,214 @@ useEffect(() => {
   
   return (
     <NativeBaseProvider>
+      {loading ? 
+        <ActivityIndicator size="large" color="blue" style={{marginTop: 44}} />
+      :
       <Box flex={1} bg="#fff" width="auto" maxWidth="100%">
+
+
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 0, padding: 14, justifyContent: 'center', alignItems: 'center' }}> 
+<View
+      style={{
+        width: '100%',
+        height: 50,
+        backgroundColor: '#f2f2f2',
+        borderRadius: 5,
+        overflow: 'hidden',
+        
+      }}
+    >
+      <View
+        style={{
+          width: `${scannedSum/expectedSum}%`,
+          height: '100%',
+          backgroundColor: '#90ee90',
+          borderRadius: 5,
+        }}
+      />
+      <Text
+        style={{
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          textAlign: 'center',
+          textAlignVertical: 'center',
+          fontSize: 18,
+          color: 'black',
+          fontWeight: 'bold',
+        }}
+      >
+       Handover Attempted (
+        {/* {Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ? item.scanned : 0), 0)}/{ Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ? item.expected : 0), 0)} */}
+        {scannedSum}/{expectedSum})
+      </Text>
+    </View>
+    </View>
+
         <ScrollView
           style={styles.homepage}
           showsVerticalScrollIndicator={true}
           showsHorizontalScrollIndicator={false}>
-          <Card>
-            <DataTable>
-              <DataTable.Header
-                style={{
-                  height: 'auto',
-                  backgroundColor: '#004aad',
-                  borderTopLeftRadius: 5,
-                  borderTopRightRadius: 5,
-                  alignItems: 'center',
-                  }}>
-                <DataTable.Title style={{ flex: 1.6 }}>
-                  <Text style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    color: 'white',
-                    textAlign: 'center',
-                    flexWrap: 'wrap',
-                    }}>
-                    Seller Name
-                  </Text>
-                </DataTable.Title>
-                <DataTable.Title style={{ flex: 0.8}} numberOfLines={2}>
-                  <Text style={{
-                  flex: 1,
-                  justifyContent: 'center',
-                  color: 'white',
-                  textAlign: 'center',
-                  flexWrap: 'wrap',
-                  }}>
-                    Expected Deliveries
-                  </Text>
-                </DataTable.Title>
-                <DataTable.Title style={{ flex: 0.8 ,marginRight:-20}} numberOfLines={2}>
-                  <Text style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    color: 'white',
-                    textAlign: 'center',
-                    flexWrap: 'wrap',
-                    }}>
-                    Scanned Shipments
-                  </Text>
-                </DataTable.Title>
-              </DataTable.Header>
 
               {displayData && data.length > 0
-                ? Object.keys(displayData11).map((consignorCode, index) =>
+                ? Object.keys(displayData11).map((consignorCode, i) =>
                     displayData11[consignorCode].expected > 0 ? displayData11[consignorCode].expected !== displayData11[consignorCode].scanned ? (
-                      <DataTable.Row
-                        style={{
-                          height: 'auto',
-                          backgroundColor: '#eeeeee',
-                          borderBottomWidth: 1,
-                        }}
-                        key={consignorCode}>
-                        <DataTable.Cell style={{ flex: 1.7, flexWrap: 'wrap' }}>
-                          <Text style={styles.fontvalue}>
-                            {displayData11[consignorCode].consignorName}
-                          </Text>
-                        </DataTable.Cell>
 
-                        <DataTable.Cell style={{ flex: 0.8, marginRight: 5, flexWrap: 'wrap' }}>
-                          <Text style={styles.fontvalue}>
-                            {displayData11[consignorCode].expected}
-                          </Text>
-                        </DataTable.Cell>
-                        <DataTable.Cell style={{ flex: 0.8, marginRight: -45, flexWrap: 'wrap' }}>
-                          <Text style={styles.fontvalue}>
-                            {displayData11[consignorCode].scanned}
-                          </Text>
-                        </DataTable.Cell>
-                        {/* <MaterialIcons name="check" style={{ fontSize: 30, color: 'green', marginTop: 8 }} /> */}
+ <View > 
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: 16,
+              borderRadius: 18,
+              marginVertical: 8,
+              backgroundColor: i  % 2 === 0 ? '#E6F2FF' : '#FFFFFF', 
+              shadowColor:'black' ,
+              shadowOffset: { width: 5, height: 5 },
+              shadowOpacity: 0.8,
+              shadowRadius: 20,
+              elevation: 5,
+            }}
+          >
+            <View style={{ flex: 1 }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
+   {i+1}.{" "}{displayData11[consignorCode].consignorName}
+</Text>
 
-                      </DataTable.Row>) : (
+              <Text style={{ marginBottom: 4 , color: 'black'}}>{displayData11[consignorCode].consignorAddress1}</Text>
+              <Text style={{ marginBottom: 4 , color: 'black'}}>{displayData11[consignorCode].consignorCity}, {displayData11[consignorCode].consignorAddress2}, {displayData11[consignorCode].consignorPincode}</Text>
+              <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Handovers({displayData11[consignorCode].expected}) </Text>
+            </View>
+            <View style={{ alignItems: 'flex-end' }}>
+              <TouchableOpacity onPress={() => handlePhoneIconPress( displayData11[consignorCode].consignorContact)}>
+                <MaterialIcons name="phone" size={24} style={{ marginBottom: 12 , }} color="green" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleMapIconPress( displayData11[consignorCode])}>
+                <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
+              </TouchableOpacity>
+              <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Scanned({displayData11[consignorCode].scanned}) </Text>
+            </View>
+          </View>
+         </View>
+
+
+                      ) 
+                      : 
+                      (
                        results && results[consignorCode]  && results[consignorCode] === displayData11[consignorCode].expected ? 
-                        <DataTable.Row
-                        style={{
-                          height: 'auto',
-                          backgroundColor: '#90ee90',
-                          borderBottomWidth: 1,
-                        }}
-                        key={consignorCode}>
-                        <DataTable.Cell style={{ flex: 1.7, flexWrap: 'wrap' }}>
-                          <Text style={styles.fontvalue}>
-                            {displayData11[consignorCode].consignorName}
-                          </Text>
-                        </DataTable.Cell>
 
-                        <DataTable.Cell style={{ flex: 0.8, marginRight: 5, flexWrap: 'wrap' }}>
-                          <Text style={styles.fontvalue}>
-                            {displayData11[consignorCode].expected}
-                          </Text>
-                        </DataTable.Cell>
-                        <DataTable.Cell style={{ flex: 0.8, marginRight: -45, flexWrap: 'wrap' }}>
-                          <Text style={styles.fontvalue}>
-                            {displayData11[consignorCode].scanned}
-                          </Text>
-                        </DataTable.Cell>
-                        {/* <MaterialIcons name="check" style={{ fontSize: 30, color: 'green', marginTop: 8 }} /> */}
-                      </DataTable.Row>
-                      : <DataTable.Row
-                      style={{
-                        height: 'auto',
-                        backgroundColor: '#eeeeee',
-                        borderBottomWidth: 1,
-                      }}
-                      key={consignorCode}>
-                      <DataTable.Cell style={{ flex: 1.7, flexWrap: 'wrap' }}>
-                        <Text style={styles.fontvalue}>
-                          {displayData11[consignorCode].consignorName}
-                        </Text>
-                      </DataTable.Cell>
+<View  >
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: 16,
+              borderRadius: 18,
+              marginVertical: 8,
+              backgroundColor:'#90ee90', 
+              shadowColor:'black' ,
+              shadowOffset: { width: 5, height: 5 },
+              shadowOpacity: 0.8,
+              shadowRadius: 20,
+              elevation: 5,
+            }}
+          >
+            <View style={{ flex: 1 }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
+   {i+1}.{" "}{displayData11[consignorCode].consignorName}
+</Text>
 
-                      <DataTable.Cell style={{ flex: 0.8, marginRight: 5, flexWrap: 'wrap' }}>
-                        <Text style={styles.fontvalue}>
-                          {displayData11[consignorCode].expected}
-                        </Text>
-                      </DataTable.Cell>
-                      <DataTable.Cell style={{ flex: 0.8, marginRight: -45, flexWrap: 'wrap' }}>
-                        <Text style={styles.fontvalue}>
-                          {displayData11[consignorCode].scanned}
-                        </Text>
-                      </DataTable.Cell>
-                      {/* <MaterialIcons name="check" style={{ fontSize: 30, color: 'green', marginTop: 8 }} /> */}
+              <Text style={{ marginBottom: 4 , color: 'black'}}>{ displayData11[consignorCode].consignorAddress1}</Text>
+              <Text style={{ marginBottom: 4 , color: 'black'}}>{ displayData11[consignorCode].consignorCity}, { displayData11[consignorCode].consignorAddress2}, { displayData11[consignorCode].consignorPincode}</Text>
+              <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Handovers({displayData11[consignorCode].expected}) </Text>
+            </View>
+            <View style={{ alignItems: 'flex-end' }}>
+              <TouchableOpacity onPress={() => handlePhoneIconPress( displayData11[consignorCode].consignorContact)}>
+                <MaterialIcons name="phone" size={24} style={{ marginBottom: 12 , }} color="green" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleMapIconPress( displayData11[consignorCode])}>
+                <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
+              </TouchableOpacity>
+              <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Scanned({displayData11[consignorCode].scanned}) </Text>
+            </View>
+          </View>
+        </View>
+                      
+                      :
 
-                    </DataTable.Row>
+<View   >
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: 16,
+              borderRadius: 18,
+              marginVertical: 8,
+              backgroundColor:i  % 2 === 0 ? '#E6F2FF' : '#FFFFFF', 
+              shadowColor:'black' ,
+              shadowOffset: { width: 5, height: 5 },
+              shadowOpacity: 0.8,
+              shadowRadius: 20,
+              elevation: 5,
+            }}
+          >
+            <View style={{ flex: 1 }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
+   {i+1}.{" "}{displayData11[consignorCode].consignorName}
+</Text>
 
-                        // null
+              <Text style={{ marginBottom: 4 , color: 'black'}}>{ displayData11[consignorCode].consignorAddress1}</Text>
+              <Text style={{ marginBottom: 4 , color: 'black'}}>{ displayData11[consignorCode].consignorCity}, { displayData11[consignorCode].consignorAddress2}, { displayData11[consignorCode].consignorPincode}</Text>
+              <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Handovers({displayData11[consignorCode].expected}) </Text>
+            </View>
+            <View style={{ alignItems: 'flex-end' }}>
+              <TouchableOpacity onPress={() => handlePhoneIconPress( displayData11[consignorCode].consignorContact)}>
+                <MaterialIcons name="phone" size={24} style={{ marginBottom: 12 , }} color="green" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleMapIconPress( displayData11[consignorCode])}>
+                <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
+              </TouchableOpacity>
+              <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Scanned({displayData11[consignorCode].scanned}) </Text>
+            </View>
+          </View>
+        </View> 
 
                         )
                      : null,
                   )
                 : null}
-            </DataTable>
-          </Card>
-        </ScrollView>
-        <Center>
-          <Button
-            w="50%"
-            size="lg"
-            style={{backgroundColor: '#004aad', color: '#fff'}}
-            onPress={() => navigation.navigate('HandoverShipmentRTO', {
-              allCloseBAgData: acceptedItemData,
-            })}>
-            Start Scanning
-          </Button>
-        </Center>
-        <Center>
+          <Center>
           <Image
             style={{width: 150, height: 150}}
             source={require('../../assets/image.png')}
             alt={'Logo Image'}
           />
         </Center>
-      </Box>
+        </ScrollView>
+        <Center>
+          <Button
+            w="50%"
+            size="lg"
+            style={{backgroundColor: '#004aad', color: '#fff',marginBottom:30}}
+            onPress={() => navigation.navigate('HandoverShipmentRTO', {
+              allCloseBAgData: acceptedItemData,
+            })}>
+            Start Scanning
+          </Button>
+        </Center>
+        {/* <Center>
+          <Image
+            style={{width: 150, height: 150}}
+            source={require('../../assets/image.png')}
+            alt={'Logo Image'}
+          />
+        </Center> */}
+      </Box>}
     </NativeBaseProvider>
   );
 };
@@ -367,7 +452,8 @@ export const styles = StyleSheet.create({
   },
   homepage: {
     margin: 10,
-    // backgroundColor:"blue",
+    marginTop:-5,
+    // backgroundColor:"lightgrey",
   },
   mainbox: {
     width: '98%',
