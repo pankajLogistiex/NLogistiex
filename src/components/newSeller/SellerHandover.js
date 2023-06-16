@@ -29,8 +29,11 @@ const SellerHandover = ({route}) => {
   const [loading, setLoading] = useState(true);
   const [MM,setMM] = useState(0);
   const [acceptedItemData, setAcceptedItemData] = useState({});
-  const expectedSum = Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ? item.expected : 0), 0);
-const scannedSum = Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ? item.scanned : 0), 0);
+//   const expectedSum = Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ? item.expected : 0), 0);
+// const scannedSum = Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ? item.scanned : 0), 0);
+
+ const scannedSum = Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 && item.expected === item.scanned && !acceptedItemData[item.consignorCode] ? 1 : 0), 0);
+ const expectedSum = Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ?  1 : 0), 0);
 
   // const progress = Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ? item.scanned : 0), 0) / Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ? item.expected : 0), 0);
   const navigation = useNavigation();
@@ -42,6 +45,7 @@ const scannedSum = Object.values(displayData).reduce((sum, item) => sum + (item.
   }, [navigation]);
 
 useEffect(() => {
+  const unsubscribe = navigation.addListener('focus', () => {
   AsyncStorage.getItem('acceptedItemData')
   .then((data) => {
     if (data !== null) {
@@ -49,13 +53,15 @@ useEffect(() => {
       console.log(acceptedItemData123);
       setAcceptedItemData(acceptedItemData123);
     } else {
-      console.log("Data with the specified key doesn't exist",data);
+      console.log("Data is null ",data);
     }
   })
   .catch((error) => {
     console.log(error);
   });
-}, []);
+});
+return unsubscribe;
+}, [navigation]);
 // console.log(loading);
   const loadDetails = () => {
     db.transaction(tx => {
@@ -86,6 +92,7 @@ useEffect(() => {
                       // var scanned=results.rows.length;
                       newData[results.rows.item(i).consignorCode] = {
                         consignorName: results.rows.item(i).consignorName,
+                        consignorCode:results.rows.item(i).consignorCode,
                         consignorContact:results.rows.item(i).consignorContact,
                         consignorAddress1 :results.rows.item(i).consignorAddress1,
                         consignorCity:results.rows.item(i).consignorCity,
@@ -207,7 +214,7 @@ const handleMapIconPress = (seller) => {
     >
       <View
         style={{
-          width: `${scannedSum/expectedSum}%`,
+          width: `${(scannedSum/expectedSum)*100}%`,
           height: '100%',
           backgroundColor: '#90ee90',
           borderRadius: 5,
@@ -228,7 +235,6 @@ const handleMapIconPress = (seller) => {
         }}
       >
        Handover Attempted (
-        {/* {Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ? item.scanned : 0), 0)}/{ Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ? item.expected : 0), 0)} */}
         {scannedSum}/{expectedSum})
       </Text>
     </View>
@@ -243,7 +249,7 @@ const handleMapIconPress = (seller) => {
                 ? Object.keys(displayData11).map((consignorCode, i) =>
                     displayData11[consignorCode].expected > 0 ? displayData11[consignorCode].expected !== displayData11[consignorCode].scanned ? (
 
- <View > 
+         <View > 
           <View
             style={{
               flexDirection: 'row',
@@ -285,7 +291,10 @@ const handleMapIconPress = (seller) => {
                       ) 
                       : 
                       (
-                       results && results[consignorCode]  && results[consignorCode] === displayData11[consignorCode].expected ? 
+
+                      //  results && results[consignorCode]  && results[consignorCode] === displayData11[consignorCode].expected
+                      !acceptedItemData[consignorCode]
+                       ? 
 
 <View  >
           <View
@@ -343,7 +352,7 @@ const handleMapIconPress = (seller) => {
               shadowRadius: 20,
               elevation: 5,
             }}
-          >
+          > 
             <View style={{ flex: 1 }}>
             <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
    {i+1}.{" "}{displayData11[consignorCode].consignorName}
