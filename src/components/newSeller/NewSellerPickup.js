@@ -32,8 +32,10 @@ const NewSellerPickup = ({route}) => {
   
   const [totalPending,setTotalPending] =useState(0);
   const [totalValue,setTotalValue] =useState(1);
-  const progress = (pending11.reduce((accumulator, currentValue) => accumulator + currentValue, 0)/value.reduce((accumulator, currentValue) => accumulator + currentValue, 0)) * 100
-  
+  // const progress = (pending11.reduce((accumulator, currentValue) => accumulator + currentValue, 0)/value.reduce((accumulator, currentValue) => accumulator + currentValue, 0)) * 100
+  const progress = 
+  (data.reduce((sum, seller, i) => sum + (value[i] > 0 && value[i] === pending11[i] && seller.otpSubmitted === "true" ? 1 : 0), 0)/value.reduce((accumulator, currentValue) => accumulator + (currentValue > 0 ? 1 : 0), 0)) * 100;
+
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -217,7 +219,7 @@ return (
           fontWeight: 'bold',
         }}
       >
-       Sellers Attempted ({pending11.reduce((accumulator, currentValue) => accumulator + currentValue, 0)}/{value.reduce((accumulator, currentValue) => accumulator + currentValue, 0)})
+       Sellers Attempted ({data.reduce((sum, seller, i) => sum + (value[i] > 0 && value[i] === pending11[i] && seller.otpSubmitted === "true" ? 1 : 0), 0)}/{value.reduce((accumulator, currentValue) => accumulator + (currentValue > 0 ? 1 : 0), 0)})
       </Text>
     </View>
     </View>
