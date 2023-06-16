@@ -58,7 +58,7 @@ export default function TripHistory({navigation, route}) {
     if (pendingHandover != 0 ) {
       setMessage1(2);
       setShowModal1(true);
-    } else if (pendingPickup !== 0 || pendingDelivery !== 0  ) {
+    } else if ((pendingPickup !== 0 || pendingDelivery !== 0) && route.params.tripValue=='End Trip' ) {
       navigation.navigate('PendingWork')
     } else {
       navigation.navigate('MyTrip', {userId: id});
@@ -85,7 +85,6 @@ useEffect(() => {
       fetchData();
     }
   }, [userId]);
-  
   const loadDetails = async () => {
     db.transaction(tx => {
       tx.executeSql(
