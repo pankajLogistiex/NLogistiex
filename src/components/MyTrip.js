@@ -53,7 +53,13 @@ export default function MyTrip({navigation, route}) {
   const [tripDetails, setTripDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pendingPickup, setPendingPickup] = useState(0);
+  const [completePickup, setCompletePickup] = useState(0);
+  const [rejectedPickup, setRejectedPickup] = useState(0);
+  const [notPicked, setNotPicked] = useState(0);
   const [pendingDelivery, setPendingDelivery] = useState(0);
+  const [completeDelivery, setCompleteDelivery] = useState(0);
+  const [rejectedDelivery, setRejectedDelivery] = useState(0);
+  const [notDelivered, setNotDelivered] = useState(0);
   const [pendingHandover, setPendingHandover] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
   // const [label, setLabel] = useState('Input vehicle KMs');
@@ -164,6 +170,35 @@ export default function MyTrip({navigation, route}) {
   const loadDetails = async () => {
     db.transaction(tx => {
       tx.executeSql(
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="accepted"',
+        [],
+        (tx1, results) => {
+          setCompletePickup(results.rows.length);
+        },
+      );
+    });
+    b.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="notPicked"',
+        [],
+        (tx1, results) => {
+          let temp = [];
+          setNotPicked(results.rows.length);
+        },
+      );
+    });
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="rejected"',
+        [],
+        (tx1, results) => {
+          setSpr(results.rows.length);
+          setRejectedPickup(false);
+        },
+      );
+    });
+    db.transaction(tx => {
+      tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND status IS NULL',
         [],
         (tx1, results) => {
@@ -187,6 +222,38 @@ export default function MyTrip({navigation, route}) {
         [],
         (tx1, results) => {
           setPendingHandover(results.rows.length);
+        },
+      );
+    });
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="accepted" OR  status="tagged"',
+        [],
+        (tx1, results) => {
+          let temp = [];
+          setCompleteDelivery(results.rows.length);
+        },
+      );
+    });
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="notDelivered"',
+        [],
+        (tx1, results) => {
+          let temp = [];
+          setNotDelivered(results.rows.length);
+          for (let i = 0; i < results.rows.length; ++i) {
+            temp.push(results.rows.item(i));
+          }
+        },
+      );
+    });
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="rejected"',
+        [],
+        (tx1, results) => {
+          setRejectedDelivery(results.rows.length);
         },
       );
     });
@@ -325,6 +392,13 @@ export default function MyTrip({navigation, route}) {
           endTime: new Date().valueOf(),
           endkilometer: endkm,
           endVehicleImageUrl: endImageUrl,
+          tripsummary:{acceptedPickup: completePickup,
+          notPicked: notPicked,
+          rejectedPickup: rejectedPickup,
+          acceptedDelivery: completeDelivery,
+          notDelivered: notDelivered,
+          rejectedDelivery: rejectedDelivery
+        }
         })
         .then(function (res) {
           dispatch(setTripStatus(0));

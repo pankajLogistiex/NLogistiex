@@ -211,6 +211,7 @@ const POD = ({route}) => {
         .catch(function (error) {
           console.log(error.response.data);
           alert(error.response.data.msg);
+          navigation.navigate('Main');
         });
     } catch (error) {
       console.log('===try catch post rd error====', error);
