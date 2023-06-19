@@ -202,9 +202,14 @@ const CollectPOD = ({route}) => {
 
   const sendSmsOtp = async () => {
     const response = await axios
-      .post(backendUrl + 'SMS/msg', {
-        mobileNumber: mobileNumber,
-      })
+    .post(backendUrl + 'SMS_new/sendOTP', {
+      mobileNumber: mobileNumber,
+      useCase: "POSTRD DELIVERY OTP",
+      payLoad:{
+        deliveredCount: newaccepted,
+        failedCount: newrejected+newNotDelivered
+      }
+    })
       .then(setShowModal11(true))
       .catch(err => console.log('OTP not send'));
   };
