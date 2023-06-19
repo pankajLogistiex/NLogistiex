@@ -220,8 +220,13 @@ const POD = ({route}) => {
 
   const sendSmsOtp = async () => {
     await axios
-      .post(backendUrl + 'SMS/msg', {
+      .post(backendUrl + 'SMS_new/sendOTP', {
         mobileNumber: mobileNumber,
+        useCase: "POSTRD PICKUP OTP",
+        payLoad:{
+          acceptedCount: newaccepted,
+          failedCount: newrejected+newNotPicked
+        }
       })
       .then(setShowModal11(true))
       .catch(err => console.log('OTP not send'));
@@ -257,8 +262,9 @@ const POD = ({route}) => {
     // const otp11=mm.filter(Boolean).join('');
     // console.log(otp11);
     axios
-      .post(backendUrl + 'SMS/OTPValidate', {
+      .post(backendUrl + 'SMS_new/OTPValidate', {
         mobileNumber: mobileNumber,
+        useCase:"POSTRD PICKUP OTP",
         otp: otp11,
       })
       .then(response => {

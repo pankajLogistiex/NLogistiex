@@ -23,6 +23,7 @@ const NewSellerPickup = ({route}) => {
   const [data1, setData1] = useState([]);
   const [keyword, setKeyword] = useState('');
   const [pending11,setPending] =useState([]);
+  const [pendingR,setPendingR] =useState([]);
   const [value,setValue] =useState([]);
   const [reverse,setReverse] =useState([]);
   const [loading, setLoading] = useState(true);
@@ -75,7 +76,6 @@ const NewSellerPickup = ({route}) => {
   
   useEffect(() => {
       if (data.length > 0) {
-        // const tc=0;
         const counts = [];
         data.forEach((single) => {
           db.transaction((tx) => {
@@ -86,7 +86,6 @@ const NewSellerPickup = ({route}) => {
                 counts.push(results.rows.length);
                 if (counts.length === data.length) {
                   setPending(counts);
-                  // setTotalPending(tc);
                 }
               },
             );
@@ -122,13 +121,32 @@ const NewSellerPickup = ({route}) => {
         data.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
-              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=?',
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND handoverStatus="accepted"',
               [single.consignorCode],
               (tx1, results) => {
                 counts.push(results.rows.length);
                 if (counts.length === data.length) {
                   setReverse(counts);
                   setLoadingR(false);
+                }
+              },
+            );
+          });
+        });
+      }
+    }, [data, db]);
+    useEffect(() => {
+      if (data.length > 0) {
+        const counts = [];
+        data.forEach((single) => {
+          db.transaction((tx) => {
+            tx.executeSql(
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND status IS NOT NULL',
+              [single.consignorCode],
+              (tx1, results) => {
+                counts.push(results.rows.length);
+                if (counts.length === data.length) {
+                  setPendingR(counts);
                 }
               },
             );
@@ -289,7 +307,7 @@ return (
               <TouchableOpacity onPress={() => handleMapIconPress(seller)}>
                 <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
               </TouchableOpacity>
-              <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Delivery({reverse[i]}) </Text>
+              <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Delivery({pendingR[i]}/{reverse[i]}) </Text>
             </View>
           </View>
         </TouchableOpacity>
@@ -352,7 +370,7 @@ return (
                         <TouchableOpacity onPress={() => handleMapIconPress(seller)}>
                           <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="orange"  />
                         </TouchableOpacity>
-                        <Text style={{fontWeight: 'bold',marginTop: 8, color: '#004aad' }}>Delivery({reverse[i]}) </Text>
+                        <Text style={{fontWeight: 'bold',marginTop: 8, color: '#004aad' }}>Delivery({pendingR[i]}/{reverse[i]}) </Text>
                       </View>
                     </View>
                   </TouchableOpacity>
@@ -399,7 +417,7 @@ return (
               <TouchableOpacity onPress={() => handleMapIconPress(seller)}>
                 <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
               </TouchableOpacity>
-              <Text style={{fontWeight: 'bold',marginTop: 8, color: '#004aad' }}>Delivery({reverse[i]}) </Text>
+              <Text style={{fontWeight: 'bold',marginTop: 8, color: '#004aad' }}>Delivery({pendingR[i]}/{reverse[i]}) </Text>
             </View>
           </View>
         </TouchableOpacity>
@@ -439,7 +457,7 @@ return (
                     <TouchableOpacity onPress={() => handleMapIconPress(seller)}>
                       <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
                     </TouchableOpacity>
-                    <Text style={{fontWeight: 'bold',marginTop: 8, color: '#004aad' }}>Delivery({reverse[i]}) </Text>
+                    <Text style={{fontWeight: 'bold',marginTop: 8, color: '#004aad' }}>Delivery({pendingR[i]}/{reverse[i]}) </Text>
                   </View>
                 </View>
               </TouchableOpacity>

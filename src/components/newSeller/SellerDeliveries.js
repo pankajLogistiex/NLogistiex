@@ -22,6 +22,7 @@ import {
     const [data1, setData1] = useState([]);
     const [keyword, setKeyword] = useState('');
     const [pending11,setPending] =useState([]);
+    const [pendingP,setPendingP] =useState([]);
     const [value,setValue] =useState([]);
     const [reverse,setReverse] =useState([]);
     const [loading, setLoading] = useState(true);
@@ -55,6 +56,25 @@ import {
         });
         
     };
+    useEffect(() => {
+      if (data.length > 0) {
+        const counts = [];
+        data.forEach((single) => {
+          db.transaction((tx) => {
+            tx.executeSql(
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=? AND status IS NOT NULL',
+              [single.consignorCode],
+              (tx1, results) => {
+                counts.push(results.rows.length);
+                if (counts.length === data.length) {
+                  setPendingP(counts);
+                }
+              },
+            );
+          });
+        });
+      }
+    }, [data, db]);
     useEffect(() => {
         if (data.length > 0) {
           const counts = [];
@@ -283,7 +303,7 @@ import {
                             <TouchableOpacity onPress={() => handleMapIconPress(single)}>
                               <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
                             </TouchableOpacity>
-                            <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Pickups({value[i]}) </Text>
+                            <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Pickups({pendingP[i]}/{value[i]}) </Text>
                           </View>
                         </View>
                       </TouchableOpacity>
@@ -346,7 +366,7 @@ import {
                             <TouchableOpacity onPress={() => handleMapIconPress(single)}>
                               <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
                             </TouchableOpacity>
-                            <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad',}}>Pickups({value[i]}) </Text>
+                            <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad',}}>Pickups({pendingP[i]}/{value[i]}) </Text>
                           </View>
                         </View>
                       </TouchableOpacity>
@@ -396,7 +416,7 @@ import {
                             <TouchableOpacity onPress={() => handleMapIconPress(single)}>
                               <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
                             </TouchableOpacity>
-                            <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Pickups({value[i]}) </Text>
+                            <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Pickups({pendingP[i]}/{value[i]}) </Text>
                           </View>
                         </View>
                       </TouchableOpacity>
@@ -439,7 +459,7 @@ import {
                             <TouchableOpacity onPress={() => handleMapIconPress(single)}>
                               <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
                             </TouchableOpacity>
-                            <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Pickups({value[i]}) </Text>
+                            <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Pickups({pendingP[i]}/{value[i]}) </Text>
                           </View>
                         </View>
                       </TouchableOpacity>

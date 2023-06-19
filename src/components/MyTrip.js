@@ -177,7 +177,7 @@ export default function MyTrip({navigation, route}) {
         },
       );
     });
-    b.transaction(tx => {
+    db.transaction(tx => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="notPicked"',
         [],
@@ -423,7 +423,6 @@ export default function MyTrip({navigation, route}) {
     //   setShowModal1(true);
     // }
   }, [pendingPickup, pendingDelivery, pendingHandover, tripStatus]);
-console.log("Trip Id",tripID)
   let currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
   currentDate = currentDate.valueOf();
