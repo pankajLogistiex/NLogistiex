@@ -262,8 +262,9 @@ const POD = ({route}) => {
     // const otp11=mm.filter(Boolean).join('');
     // console.log(otp11);
     axios
-      .post(backendUrl + 'SMS/OTPValidate', {
+      .post(backendUrl + 'SMS_new/OTPValidate', {
         mobileNumber: mobileNumber,
+        useCase:"POSTRD PICKUP OTP",
         otp: otp11,
       })
       .then(response => {

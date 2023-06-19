@@ -224,8 +224,9 @@ const CollectPOD = ({route}) => {
 
   function validateOTP() {
     axios
-      .post(backendUrl + 'SMS/OTPValidate', {
+      .post(backendUrl + 'SMS_new/OTPValidate', {
         mobileNumber: mobileNumber,
+        useCase: "POSTRD DELIVERY OTP",
         otp: inputOtp,
       })
       .then(response => {
