@@ -18,30 +18,50 @@ import {
   
   const SellerDeliveries = ({route}) => {
   
-    const [data, setData] = useState([]);
-    const [data1, setData1] = useState([]);
+    const [dataSeller, setData] = useState([]);
+    const [data, setData11] = useState([]);
     const [keyword, setKeyword] = useState('');
-    const [pending11,setPending] =useState([]);
+    const [pending11Seller,setPending] =useState([]);
+    const [valueSeller,setValue] =useState([]);
+    const [reverseSeller,setReverse] =useState([]);
+    // const [pending11,setPending] =useState([]);
     const [pendingP,setPendingP] =useState([]);
-    const [value,setValue] =useState([]);
-    const [reverse,setReverse] =useState([]);
+    // const [value,setValue] =useState([]);
+    // const [reverse,setReverse] =useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal1, setShowModal1] = useState(false);
     const [message1, setMessage1] = useState(0);
 
 
-    const scannedSum  =  data.reduce((sum, seller, i) => sum + (reverse[i] > 0 && pending11[i]===reverse[i] && seller.otpSubmittedDelivery === "true" ? 1 : 0), 0);
-    const expectedSum = reverse.reduce((accumulator, currentValue) => accumulator + (currentValue > 0 ? 1 : 0), 0);
-
+    
     const navigation = useNavigation();
+    
+      // const data =dataSeller.filter((_, index) => valueSeller[index] !== 0);
+      const pending11 =pending11Seller.filter((_, index) => reverseSeller[index] !== 0);
+      const value = valueSeller.filter((_, index) => reverseSeller[index] !== 0);
+      const reverse = reverseSeller.filter((_, index) => reverseSeller[index] !== 0);
+    
+      useEffect(() => {
+      
+    if(reverse && reverse.length>0 && data && data.length===0){
+      setData11(dataSeller.filter((_, index) => reverseSeller[index] !== 0));
+    
+    }
+    
+      }, [reverseSeller])
+
+      console.log(dataSeller.length," ",pending11Seller+" ",reverseSeller+" ",valueSeller);
+      // console.log(data.length,"  ",pending11+" ",reverse+" ",value);
+      const scannedSum  =  data.reduce((sum, seller, i) => sum + (reverse[i] > 0 && pending11[i]===reverse[i] && seller.otpSubmittedDelivery === "true" ? 1 : 0), 0);
+      const expectedSum = reverse.reduce((accumulator, currentValue) => accumulator + (currentValue > 0 ? 1 : 0), 0);
   
-    useEffect(() => {
+      useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
           loadDetails();
         });
         return unsubscribe;
       }, [navigation]);
-  
+
     const loadDetails = () => { // setIsLoading(!isLoading);
         db.transaction((tx) => {
             tx.executeSql('SELECT * FROM SyncSellerPickUp ORDER BY  CAST(sellerIndex AS INTEGER) ASC', [], (tx1, results) => { // ToastAndroid.show("Loading...", ToastAndroid.SHORT);
@@ -57,16 +77,16 @@ import {
         
     };
     useEffect(() => {
-      if (data.length > 0) {
+      if (dataSeller.length > 0) {
         const counts = [];
-        data.forEach((single) => {
+        dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
               'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=? AND status IS NOT NULL',
               [single.consignorCode],
               (tx1, results) => {
                 counts.push(results.rows.length);
-                if (counts.length === data.length) {
+                if (counts.length === dataSeller.length) {
                   setPendingP(counts);
                 }
               },
@@ -74,18 +94,18 @@ import {
           });
         });
       }
-    }, [data, db]);
+    }, [dataSeller, db]);
     useEffect(() => {
-        if (data.length > 0) {
+        if (dataSeller.length > 0) {
           const counts = [];
-          data.forEach((single) => {
+          dataSeller.forEach((single) => {
             db.transaction((tx) => {
               tx.executeSql(
                 'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND status IS NOT NULL',
                 [single.consignorCode],
                 (tx1, results) => {
                   counts.push(results.rows.length);
-                  if (counts.length === data.length) {
+                  if (counts.length === dataSeller.length) {
                     setPending(counts);
                   }
                 },
@@ -93,18 +113,18 @@ import {
             });
           });
         }
-      }, [data, db]);
+      }, [dataSeller, db]);
       useEffect(() => {
-        if (data.length > 0) {
+        if (dataSeller.length > 0) {
           const counts = [];
-          data.forEach((single) => {
+          dataSeller.forEach((single) => {
             db.transaction((tx) => {
               tx.executeSql(
                 'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=?',
                 [single.consignorCode],
                 (tx1, results) => {
                   counts.push(results.rows.length);
-                  if (counts.length === data.length) {
+                  if (counts.length === dataSeller.length) {
                     setValue(counts);
                   }
                 },
@@ -112,18 +132,18 @@ import {
             });
           });
         }
-      }, [data, db]);
+      }, [dataSeller, db]);
       useEffect(() => {
-        if (data.length > 0) {
+        if (dataSeller.length > 0) {
           const counts = [];
-          data.forEach((single) => {
+          dataSeller.forEach((single) => {
             db.transaction((tx) => {
               tx.executeSql(
                 'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND handoverStatus="accepted"',
                 [single.consignorCode],
                 (tx1, results) => {
                   counts.push(results.rows.length);
-                  if (counts.length === data.length) {
+                  if (counts.length === dataSeller.length) {
                     setReverse(counts);
                     setLoading(false);
 
@@ -133,7 +153,7 @@ import {
             });
           });
         }
-      }, [data, db]);
+      }, [dataSeller, db]);
       
     useEffect(() => {
         (async () => {
@@ -277,7 +297,7 @@ import {
                             justifyContent: 'space-between',
                             alignItems: 'center',
                             padding: 16,
-                            borderRadius: 18,
+                            borderRadius: 10,
                             marginVertical: 8,
                             backgroundColor:'#90ee90', 
                             shadowColor:'black' ,
@@ -340,7 +360,7 @@ import {
                             justifyContent: 'space-between',
                             alignItems: 'center',
                             padding: 16,
-                            borderRadius: 18,
+                            borderRadius: 10,
                             marginVertical: 8,
                             backgroundColor: i  % 2 === 0 ? '#E6F2FF' : '#FFFFFF', 
                             shadowColor:'black' ,
@@ -390,7 +410,7 @@ import {
                             justifyContent: 'space-between',
                             alignItems: 'center',
                             padding: 16,
-                            borderRadius: 18,
+                            borderRadius: 10,
                             marginVertical: 8,
                             backgroundColor: i  % 2 === 0 ? '#E6F2FF' : '#FFFFFF', 
                             shadowColor:'black' ,
@@ -433,7 +453,7 @@ import {
                             justifyContent: 'space-between',
                             alignItems: 'center',
                             padding: 16,
-                            borderRadius: 18,
+                            borderRadius: 10,
                             marginVertical: 8,
                             backgroundColor: '#90ee90', 
                             shadowColor:'black' ,

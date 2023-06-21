@@ -19,13 +19,13 @@ const db = openDatabase({name: 'rn_sqlite'});
 
 const NewSellerPickup = ({route}) => {
 
-  const [data, setData] = useState([]);
-  const [data1, setData1] = useState([]);
+  const [dataSeller, setData] = useState([]);
+  const [data, setData11] = useState([]);
   const [keyword, setKeyword] = useState('');
-  const [pending11,setPending] =useState([]);
+  const [pending11Seller,setPending] =useState([]);
   const [pendingR,setPendingR] =useState([]);
-  const [value,setValue] =useState([]);
-  const [reverse,setReverse] =useState([]);
+  const [valueSeller,setValue] =useState([]);
+  const [reverseSeller,setReverse] =useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingR, setLoadingR] = useState(true);
   const [showModal1, setShowModal1] = useState(false);
@@ -34,10 +34,26 @@ const NewSellerPickup = ({route}) => {
   const [totalPending,setTotalPending] =useState(0);
   const [totalValue,setTotalValue] =useState(1);
   // const progress = (pending11.reduce((accumulator, currentValue) => accumulator + currentValue, 0)/value.reduce((accumulator, currentValue) => accumulator + currentValue, 0)) * 100
+
+
+  // const data =(valueSeller && valueSeller.length>0 )?dataSeller.filter((_, index) => valueSeller[index] !== 0):[];
+  const pending11 =pending11Seller.filter((_, index) => valueSeller[index] !== 0);
+  const value = valueSeller.filter((_, index) => valueSeller[index] !== 0);
+  const reverse = reverseSeller.filter((_, index) => valueSeller[index] !== 0);
+  const navigation = useNavigation();
+ 
+ 
   const progress = 
   (data.reduce((sum, seller, i) => sum + (value[i] > 0 && value[i] === pending11[i] && seller.otpSubmitted === "true" ? 1 : 0), 0)/value.reduce((accumulator, currentValue) => accumulator + (currentValue > 0 ? 1 : 0), 0)) * 100;
-
-  const navigation = useNavigation();
+  useEffect(() => {
+  
+    if(value && value.length>0 && data && data.length===0){
+      setData11(dataSeller.filter((_, index) => valueSeller[index] !== 0));
+    
+    }
+    
+      }, [valueSeller]);
+  
 
   useEffect(() => {
       const unsubscribe = navigation.addListener('focus', () => {
@@ -45,6 +61,9 @@ const NewSellerPickup = ({route}) => {
       });
       return unsubscribe;
     }, [navigation]);
+    // console.log(data.length," ",data.filter((_, index) => value[index] !== 0).length);
+    console.log(dataSeller.length," ",pending11Seller+" ",reverseSeller+" ",valueSeller);
+    // console.log(data.length,"  ",pending11+" ",reverse+" ",value);
 
   const loadDetails = () => { // setIsLoading(!isLoading);
       db.transaction((tx) => {
@@ -53,6 +72,7 @@ const NewSellerPickup = ({route}) => {
               for (let i = 0; i < results.rows.length; ++i) {
                 // console.log(results.rows.item(i).sellerIndex);
                   temp.push(results.rows.item(i));
+                  console.log(results.rows.item(i).sellerIndex," " ,results.rows.item(i).consignorName);
               }
               setData(temp);
               // console.log(temp[0]);
@@ -75,16 +95,17 @@ const NewSellerPickup = ({route}) => {
   }
   
   useEffect(() => {
-      if (data.length > 0) {
+      if (dataSeller.length > 0) {
+        // const tc=0;
         const counts = [];
-        data.forEach((single) => {
+        dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
               'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=? AND status IS NOT NULL',
               [single.consignorCode],
               (tx1, results) => {
                 counts.push(results.rows.length);
-                if (counts.length === data.length) {
+                if (counts.length === dataSeller.length) {
                   setPending(counts);
                 }
               },
@@ -92,19 +113,19 @@ const NewSellerPickup = ({route}) => {
           });
         });
       }
-    }, [data, db]);
+    }, [dataSeller, db]);
     useEffect(() => {
-      if (data.length > 0) {
+      if (dataSeller.length > 0) {
         // const tc=0;
         const counts = [];
-        data.forEach((single) => {
+        dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
               'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=?',
               [single.consignorCode],
               (tx1, results) => {
                 counts.push(results.rows.length);
-                if (counts.length === data.length) {
+                if (counts.length === dataSeller.length) {
                   setValue(counts);
                   setLoading(false);
                   // setTotalValue(tc);
@@ -114,18 +135,18 @@ const NewSellerPickup = ({route}) => {
           });
         });
       }
-    }, [data, db]);
+    }, [dataSeller, db]);
     useEffect(() => {
-      if (data.length > 0) {
+      if (dataSeller.length > 0) {
         const counts = [];
-        data.forEach((single) => {
+        dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
               'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND handoverStatus="accepted"',
               [single.consignorCode],
               (tx1, results) => {
                 counts.push(results.rows.length);
-                if (counts.length === data.length) {
+                if (counts.length === dataSeller.length) {
                   setReverse(counts);
                   setLoadingR(false);
                 }
@@ -134,18 +155,19 @@ const NewSellerPickup = ({route}) => {
           });
         });
       }
-    }, [data, db]);
+    }, [dataSeller, db]);
+    // }, [data, db]);
     useEffect(() => {
-      if (data.length > 0) {
+      if (dataSeller.length > 0) {
         const counts = [];
-        data.forEach((single) => {
+        dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
               'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND status IS NOT NULL',
               [single.consignorCode],
               (tx1, results) => {
                 counts.push(results.rows.length);
-                if (counts.length === data.length) {
+                if (counts.length === dataSeller.length) {
                   setPendingR(counts);
                 }
               },
@@ -153,7 +175,26 @@ const NewSellerPickup = ({route}) => {
           });
         });
       }
-    }, [data, db]);
+    }, [dataSeller, db]);
+    useEffect(() => {
+      if (dataSeller.length > 0) {
+        const counts = [];
+        dataSeller.forEach((single) => {
+          db.transaction((tx) => {
+            tx.executeSql(
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND status IS NOT NULL',
+              [single.consignorCode],
+              (tx1, results) => {
+                counts.push(results.rows.length);
+                if (counts.length === dataSeller.length) {
+                  setPendingR(counts);
+                }
+              },
+            );
+          });
+        });
+      }
+    }, [dataSeller, db]);
   useEffect(() => {
       (async () => {
           loadDetails();
@@ -281,7 +322,7 @@ return (
               justifyContent: 'space-between',
               alignItems: 'center',
               padding: 16,
-              borderRadius: 18,
+              borderRadius: 10,
               marginVertical: 8,
               backgroundColor:'#90ee90', 
               shadowColor:'black' ,
@@ -293,7 +334,7 @@ return (
           >
             <View style={{ flex: 1 }}>
             <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
-  {parseInt(seller.sellerIndex)+1}.{" "}{seller.consignorName}
+  {i+1}.{" "}{seller.consignorName}
 </Text>
 
               <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorAddress1}</Text>
@@ -338,7 +379,7 @@ return (
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         padding: 16,
-                        borderRadius: 18,
+                        borderRadius: 10,
                         marginVertical: 8,
                         backgroundColor:
                         seller.otpSubmitted== 'true'
@@ -356,7 +397,7 @@ return (
                     >
                       <View style={{ flex: 1 }}>
                       <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
-            {parseInt(seller.sellerIndex)+1}.{" "}{seller.consignorName}
+            {i+1}.{" "}{seller.consignorName}
           </Text>
           
                         <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorAddress1}</Text>
@@ -390,7 +431,7 @@ return (
               justifyContent: 'space-between',
               alignItems: 'center',
               padding: 16,
-              borderRadius: 18,
+              borderRadius: 10,
               marginVertical: 8,
               backgroundColor: i  % 2 === 0 ? '#E6F2FF' : '#FFFFFF',
               shadowColor:'black' ,
@@ -403,7 +444,7 @@ return (
           >
             <View style={{ flex: 1 }}>
             <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
-  {parseInt(seller.sellerIndex)+1}.{" "}{seller.consignorName}
+  {i+1}.{" "}{seller.consignorName}
 </Text>
 
               <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorAddress1}</Text>
@@ -430,7 +471,7 @@ return (
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     padding: 16,
-                    borderRadius: 18,
+                    borderRadius: 10,
                     marginVertical: 8,
                     backgroundColor: '#90ee90',
                     shadowColor:'black' ,
@@ -443,7 +484,7 @@ return (
                 >
                   <View style={{ flex: 1 }}>
                   <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
-        {parseInt(seller.sellerIndex)+1}.{" "}{seller.consignorName}
+        {i+1}.{" "}{seller.consignorName}
       </Text>
       
                     <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorAddress1}</Text>

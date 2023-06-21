@@ -72,9 +72,11 @@ return unsubscribe;
           
           const newData = {};
           temp.push(results.rows.item(i));
-          // var consignorcode=results.rows.item(i).consignorCode;
-          // var consignorName=results.rows.item(i).consignorName;
+          // console.log(results.rows.item(i).consignorName," " ,results.rows.item(i).sellerIndex);
 
+          // var consignorcode=results.rows.item(i).consignorCode;
+          var consignorName=results.rows.item(i).sellerIndex;
+// console.log(consignorName);
           db.transaction(tx => {
             db.transaction(tx => {
               tx.executeSql(
@@ -110,7 +112,7 @@ return unsubscribe;
                           ...prevData,
                           ...newData,
                         }));
-                        console.log(results11.rows.length);
+                        // console.log(results.rows.item(i).consignorName," " ,results.rows.item(i).sellerIndex);
                       }
                       if(i===results.rows.length-1){
                         setLoading(false);
@@ -256,7 +258,7 @@ const handleMapIconPress = (seller) => {
               justifyContent: 'space-between',
               alignItems: 'center',
               padding: 16,
-              borderRadius: 18,
+              borderRadius: 10,
               marginVertical: 8,
               backgroundColor: i  % 2 === 0 ? '#E6F2FF' : '#FFFFFF', 
               shadowColor:'black' ,
@@ -303,7 +305,7 @@ const handleMapIconPress = (seller) => {
               justifyContent: 'space-between',
               alignItems: 'center',
               padding: 16,
-              borderRadius: 18,
+              borderRadius: 10,
               marginVertical: 8,
               backgroundColor:'#90ee90', 
               shadowColor:'black' ,
@@ -343,7 +345,7 @@ const handleMapIconPress = (seller) => {
               justifyContent: 'space-between',
               alignItems: 'center',
               padding: 16,
-              borderRadius: 18,
+              borderRadius: 10,
               marginVertical: 8,
               backgroundColor:i  % 2 === 0 ? '#E6F2FF' : '#FFFFFF', 
               shadowColor:'black' ,
