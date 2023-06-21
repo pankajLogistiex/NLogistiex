@@ -43,12 +43,15 @@ import {
 import {Console} from 'console';
 import {truncate} from 'fs/promises';
 import { backendUrl } from '../../utils/backendUrl';
+import { setAutoSync } from '../../redux/slice/autoSyncSlice';
+import { useDispatch } from 'react-redux';
 
 const db = openDatabase({
   name: 'rn_sqlite',
 });
 
 const HandoverShipment = ({route}) => {
+  const dispatch = useDispatch();
   const [barcodeValue, setBarcodeValue] = useState('');
   const [packageValue, setpackageValue] = useState('');
   const [otp, setOtp] = useState('');
@@ -75,6 +78,13 @@ const HandoverShipment = ({route}) => {
   useEffect(() => {
     setBagId();
   }, [bagId]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      dispatch(setAutoSync(false));
+    });
+    return unsubscribe;
+  }, [navigation]);
 
   // useEffect(() => {
   //       updateDetails2();

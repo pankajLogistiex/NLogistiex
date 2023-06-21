@@ -37,6 +37,7 @@
     "react-native-a-beep": "^1.2.0",
     "react-native-android-location-enabler": "^1.2.2",
     "react-native-app-auth": "^6.4.3",
+    "react-native-background-timer": "^2.4.1",
     "react-native-camera": "^4.2.1",
     "react-native-dropdown-picker": "^5.4.3",
     "react-native-gesture-handler": "^2.8.0",

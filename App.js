@@ -19,7 +19,7 @@ import {
   Modal,
 } from "native-base";
 import MaterialIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from "react-native-vector-icons/FontAwesome";
 import {
   NavigationContainer,
   DrawerActions,
@@ -83,10 +83,16 @@ import {
   setUserId,
   setUserName,
 } from "./src/redux/slice/userSlice";
-import { setTripStatus } from './src/redux/slice/tripSlice';
+import { setTripStatus } from "./src/redux/slice/tripSlice";
 import { logout } from "react-native-app-auth";
 import PushNotification from "react-native-push-notification";
 import { setNotificationCount } from "./src/redux/slice/notificationSlice";
+import BackgroundTimer from "react-native-background-timer";
+import {
+  setForceSync,
+  setSyncTime,
+  setSyncTimeFull,
+} from "./src/redux/slice/autoSyncSlice";
 
 const db = openDatabase({ name: "rn_sqlite" });
 
@@ -99,13 +105,36 @@ function StackNavigators({ navigation }) {
   const userId = useSelector((state) => state.user.user_id);
   const notificationCount = useSelector((state) => state.notification.count);
   // const [notificationCount,setNotificationCount1]=useState(0);
+  const syncTime = useSelector((state) => state.autoSync.syncTime);
+  const forceSync = useSelector((state) => state.autoSync.forceSync);
+  const isAutoSyncEnable = useSelector(
+    (state) => state.autoSync.isAutoSyncEnable
+  );
 
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState([]);
   const [isLogin, setIsLogin] = useState(false);
-  const [lastSyncTime11, setLastSyncTime] = useState("");
   const [scannedStatus, SetScannedStatus] = useState(0);
   let m = 0;
+
+  useEffect(() => {
+    BackgroundTimer.runBackgroundTimer(() => {
+      if (isAutoSyncEnable) {
+        push_Data();
+        console.log("===Auto sync called===");
+      }
+    }, 180000);
+
+    BackgroundTimer.stopBackgroundTimer();
+  }, []);
+
+  useEffect(() => {
+    if (forceSync) {
+      push_Data();
+      console.log("===Force sync called===");
+    }
+  }, [forceSync]);
+
   useEffect(() => {
     requestPermissions();
   }, []);
@@ -174,39 +203,51 @@ function StackNavigators({ navigation }) {
     // dispatch(setNotificationCount(5));
     // dispatch(setNotificationCount(useSelector((state) => state.notification.count) + 1));
   }
-  
 
   const handleIncomingMessage = async (message) => {
-      console.log(message);
-      const { messageId, notification, sentTime } = message;
-      const sendDate = new Date().toISOString().slice(0, 10);
-      const date = new Date(sentTime);
+    console.log(message);
+    const { messageId, notification, sentTime } = message;
+    const sendDate = new Date().toISOString().slice(0, 10);
+    const date = new Date(sentTime);
 
-      const options = { hour: 'numeric', minute: 'numeric', hour12: true };
-      const formattedTime = date.toLocaleTimeString('en-US', options);
-      
-      console.log(formattedTime,notification); 
+    const options = { hour: "numeric", minute: "numeric", hour12: true };
+    const formattedTime = date.toLocaleTimeString("en-US", options);
 
-      db.transaction((tx) => {
-        tx.executeSql(
-          'INSERT INTO noticeMessages (messageId, notificationTitle, notificationBody, sendDate, sentTime) VALUES (?, ?, ?, ?, ?)',
-          [messageId, notification.title, notification.body, sendDate, formattedTime.toString()],
-          (tx, results) => {
-            console.log(results);
-            if (results.rowsAffected > 0) {
-              console.log('Message stored in the local database ',notification.body);
-            }
+    console.log(formattedTime, notification);
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        "INSERT INTO noticeMessages (messageId, notificationTitle, notificationBody, sendDate, sentTime) VALUES (?, ?, ?, ?, ?)",
+        [
+          messageId,
+          notification.title,
+          notification.body,
+          sendDate,
+          formattedTime.toString(),
+        ],
+        (tx, results) => {
+          console.log(results);
+          if (results.rowsAffected > 0) {
+            console.log(
+              "Message stored in the local database ",
+              notification.body
+            );
           }
-        );
-      });
+        }
+      );
+    });
   };
 
-
-  console.log('Notification Count',notificationCount,' ',useSelector((state) => state.notification.count));
+  console.log(
+    "Notification Count",
+    notificationCount,
+    " ",
+    useSelector((state) => state.notification.count)
+  );
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       console.log(remoteMessage.notification);
-      const newvalue=notificationCount+1;
+      const newvalue = notificationCount + 1;
       dispatch(setNotificationCount(newvalue));
 
       handleIncomingMessage(remoteMessage);
@@ -288,12 +329,15 @@ function StackNavigators({ navigation }) {
     var date = new Date();
     var hours = date.getHours();
     var minutes = date.getMinutes();
+    var seconds = date.getSeconds();
+    var miliseconds = date.getMilliseconds();
     var ampm = hours >= 12 ? "PM" : "AM";
     hours = hours % 12;
     hours = hours ? hours : 12;
     minutes = minutes < 10 ? "0" + minutes : minutes;
     var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
-    setLastSyncTime(datetime);
+    dispatch(setSyncTime(datetime));
+    dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
     AsyncStorage.setItem("lastSyncTime112", datetime);
 
     console.log("api pull");
@@ -346,7 +390,8 @@ function StackNavigators({ navigation }) {
     if (userId !== null) {
       AsyncStorage.getItem("lastSyncTime112")
         .then((data11) => {
-          setLastSyncTime(data11);
+          dispatch(setSyncTime(data11));
+          dispatch(setSyncTimeFull(data11));
         })
         .catch((e) => {
           console.log(e);
@@ -372,7 +417,8 @@ function StackNavigators({ navigation }) {
       });
     AsyncStorage.getItem("lastSyncTime112")
       .then((data11) => {
-        setLastSyncTime(data11);
+        dispatch(setSyncTime(data11));
+        dispatch(setSyncTimeFull(data11));
       })
       .catch((e) => {
         console.log(e);
@@ -465,6 +511,20 @@ function StackNavigators({ navigation }) {
     await data.map((row) => {
       postSPSCalling(row);
     });
+    var date = new Date();
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var seconds = date.getSeconds();
+    var miliseconds = date.getMilliseconds();
+    var ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    var time = hours + ":" + minutes + " " + ampm;
+    var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
+    dispatch(setSyncTime(datetime));
+    dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
+    AsyncStorage.setItem("lastSyncTime112", datetime);
     pull_API_Data();
   }
 
@@ -474,18 +534,23 @@ function StackNavigators({ navigation }) {
       new Date().toJSON().slice(0, 10).replace(/-/g, "/")
     );
 
+    dispatch(setForceSync(false));
+
     Login_Data_load();
 
     var date = new Date();
     var hours = date.getHours();
     var minutes = date.getMinutes();
+    var seconds = date.getSeconds();
+    var miliseconds = date.getMilliseconds();
     var ampm = hours >= 12 ? "PM" : "AM";
     hours = hours % 12;
     hours = hours ? hours : 12;
     minutes = minutes < 10 ? "0" + minutes : minutes;
     var time = hours + ":" + minutes + " " + ampm;
     var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
-    setLastSyncTime(datetime);
+    dispatch(setSyncTime(datetime));
+    dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
     AsyncStorage.setItem("lastSyncTime112", datetime);
 
     db.transaction((tx) => {
@@ -526,7 +591,7 @@ function StackNavigators({ navigation }) {
 
   /*              Press (Ctrl + k + 2) keys together for better API tables view in App.js (VSCode) */
 
-  // Table 1 
+  // Table 1
   const createTables1 = () => {
     db.transaction((txn) => {
       // txn.executeSql('DROP TABLE IF EXISTS SyncSellerPickUp', []);
@@ -543,7 +608,7 @@ function StackNavigators({ navigation }) {
         }
       );
     });
-  }; 
+  };
   const loadAPI_Data1 = () => {
     setIsLoading(!isLoading);
     createTables1();
@@ -609,6 +674,19 @@ function StackNavigators({ navigation }) {
             viewDetails1();
             m++;
             // console.log('value of m1 '+m);
+            var date = new Date();
+            var hours = date.getHours();
+            var minutes = date.getMinutes();
+            var seconds = date.getSeconds();
+            var miliseconds = date.getMilliseconds();
+            var ampm = hours >= 12 ? "PM" : "AM";
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
+            dispatch(setSyncTime(datetime));
+            dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
+            AsyncStorage.setItem("lastSyncTime112", datetime);
             AsyncStorage.setItem("load11", "notload");
             setIsLoading(false);
           },
@@ -775,7 +853,7 @@ function StackNavigators({ navigation }) {
                           null,
                           "",
                           res.data.data[i].packagingAction,
-                          null
+                          null,
                         ],
                         (sqlTxn, _res) => {
                           // console.log(`\n Data Added to local db successfully`);
@@ -792,8 +870,21 @@ function StackNavigators({ navigation }) {
             });
           }
           m++;
+          var date = new Date();
+          var hours = date.getHours();
+          var minutes = date.getMinutes();
+          var seconds = date.getSeconds();
+          var miliseconds = date.getMilliseconds();
+          var ampm = hours >= 12 ? "PM" : "AM";
+          hours = hours % 12;
+          hours = hours ? hours : 12;
+          minutes = minutes < 10 ? "0" + minutes : minutes;
+          var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
+          dispatch(setSyncTime(datetime));
+          dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
+          AsyncStorage.setItem("lastSyncTime112", datetime);
           // console.log('value of m2 '+m);
-          // setIsLoading(false);
+          setIsLoading(false);
         },
         (error) => {
           console.log(error);
@@ -815,10 +906,10 @@ function StackNavigators({ navigation }) {
         )`,
         [],
         (tx, results) => {
-          console.log('Table created successfully');
+          console.log("Table created successfully");
         },
         (error) => {
-          console.log('Error creating table: ', error);
+          console.log("Error creating table: ", error);
         }
       );
     });
@@ -1097,9 +1188,7 @@ function StackNavigators({ navigation }) {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{ flexDirection: "row", marginRight: 10 }}>
-                <Text style={{ fontSize: 12, color: "white" }}>
-                  {lastSyncTime11}
-                </Text>
+                <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}
                   onPress={() => {
@@ -1171,9 +1260,7 @@ function StackNavigators({ navigation }) {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{ flexDirection: "row", marginRight: 10 }}>
-                <Text style={{ fontSize: 12, color: "white" }}>
-                  {lastSyncTime11}
-                </Text>
+                <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}
                   onPress={() => {
@@ -1256,9 +1343,7 @@ function StackNavigators({ navigation }) {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{ flexDirection: "row", marginRight: 10 }}>
-                <Text style={{ fontSize: 12, color: "white" }}>
-                  {lastSyncTime11}
-                </Text>
+                <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}
                   onPress={() => {
@@ -1328,9 +1413,7 @@ function StackNavigators({ navigation }) {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{ flexDirection: "row", marginRight: 10 }}>
-                <Text style={{ fontSize: 12, color: "white" }}>
-                  {lastSyncTime11}
-                </Text>
+                <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}
                   onPress={() => {
@@ -1400,9 +1483,7 @@ function StackNavigators({ navigation }) {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{ flexDirection: "row", marginRight: 10 }}>
-                <Text style={{ fontSize: 12, color: "white" }}>
-                  {lastSyncTime11}
-                </Text>
+                <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}
                   onPress={() => {
@@ -1472,9 +1553,7 @@ function StackNavigators({ navigation }) {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{ flexDirection: "row", marginRight: 10 }}>
-                <Text style={{ fontSize: 12, color: "white" }}>
-                  {lastSyncTime11}
-                </Text>
+                <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}
                   onPress={() => {
@@ -1544,9 +1623,7 @@ function StackNavigators({ navigation }) {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{ flexDirection: "row", marginRight: 10 }}>
-                <Text style={{ fontSize: 12, color: "white" }}>
-                  {lastSyncTime11}
-                </Text>
+                <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}
                   onPress={() => {
@@ -1616,9 +1693,7 @@ function StackNavigators({ navigation }) {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{ flexDirection: "row", marginRight: 10 }}>
-                <Text style={{ fontSize: 12, color: "white" }}>
-                  {lastSyncTime11}
-                </Text>
+                <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}
                   onPress={() => {
@@ -1688,9 +1763,7 @@ function StackNavigators({ navigation }) {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{ flexDirection: "row", marginRight: 10 }}>
-                <Text style={{ fontSize: 12, color: "white" }}>
-                  {lastSyncTime11}
-                </Text>
+                <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}
                   onPress={() => {
@@ -1760,9 +1833,7 @@ function StackNavigators({ navigation }) {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{ flexDirection: "row", marginRight: 10 }}>
-                <Text style={{ fontSize: 12, color: "white" }}>
-                  {lastSyncTime11}
-                </Text>
+                <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}
                   onPress={() => {
@@ -1833,9 +1904,7 @@ function StackNavigators({ navigation }) {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{ flexDirection: "row", marginRight: 10 }}>
-                <Text style={{ fontSize: 12, color: "white" }}>
-                  {lastSyncTime11}
-                </Text>
+                <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}
                   onPress={() => {
@@ -1906,9 +1975,7 @@ function StackNavigators({ navigation }) {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{ flexDirection: "row", marginRight: 10 }}>
-                <Text style={{ fontSize: 12, color: "white" }}>
-                  {lastSyncTime11}
-                </Text>
+                <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}
                   onPress={() => {
@@ -1979,9 +2046,7 @@ function StackNavigators({ navigation }) {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{ flexDirection: "row", marginRight: 10 }}>
-                <Text style={{ fontSize: 12, color: "white" }}>
-                  {lastSyncTime11}
-                </Text>
+                <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}
                   onPress={() => {
@@ -2051,9 +2116,7 @@ function StackNavigators({ navigation }) {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{ flexDirection: "row", marginRight: 10 }}>
-                <Text style={{ fontSize: 12, color: "white" }}>
-                  {lastSyncTime11}
-                </Text>
+                <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}
                   onPress={() => {
@@ -2123,9 +2186,7 @@ function StackNavigators({ navigation }) {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{ flexDirection: "row", marginRight: 10 }}>
-                <Text style={{ fontSize: 12, color: "white" }}>
-                  {lastSyncTime11}
-                </Text>
+                <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}
                   onPress={() => {
@@ -2195,9 +2256,7 @@ function StackNavigators({ navigation }) {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{ flexDirection: "row", marginRight: 10 }}>
-                <Text style={{ fontSize: 12, color: "white" }}>
-                  {lastSyncTime11}
-                </Text>
+                <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}
                   onPress={() => {
@@ -2589,37 +2648,37 @@ function CustomDrawerContent({ navigation }) {
   const name = useSelector((state) => state.user.user_name);
   const idToken = useSelector((state) => state.user.idToken);
   const token = useSelector((state) => state.user.token);
-  const tripStatus = useSelector(state => state.trip.tripStatus);
+  const tripStatus = useSelector((state) => state.trip.tripStatus);
 
   useEffect(() => {
     const loadDetails = async () => {
-      db.transaction(tx => {
+      db.transaction((tx) => {
         tx.executeSql(
           'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND status IS NULL',
           [],
           (tx1, results) => {
             setPendingPickup(results.rows.length);
-          },
+          }
         );
       });
-  
-      db.transaction(tx => {
+
+      db.transaction((tx) => {
         tx.executeSql(
           'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL)',
           [],
           (tx1, results) => {
             setPendingDelivery(results.rows.length);
-          },
+          }
         );
       });
     };
     loadDetails();
   }, []);
   const handleStartTrip = () => {
-    if ((pendingPickup != 0 || pendingDelivery != 0) && tripStatus==1) {
-      navigation.navigate('PendingWork')
+    if ((pendingPickup != 0 || pendingDelivery != 0) && tripStatus == 1) {
+      navigation.navigate("PendingWork");
     } else {
-      navigation.navigate('MyTrip', {userId: id});
+      navigation.navigate("MyTrip", { userId: id });
     }
     navigation.closeDrawer();
   };
@@ -2635,7 +2694,6 @@ function CustomDrawerContent({ navigation }) {
       dispatch(setUserName(""));
       dispatch(setToken(""));
       dispatch(setNotificationCount(0));
-
     } catch (e) {
       console.log(e);
     }
@@ -2680,25 +2738,25 @@ function CustomDrawerContent({ navigation }) {
       });
   };
 
- 
   return (
     <NativeBaseProvider>
       <TouchableOpacity
-        onPress={()=>{navigation.closeDrawer();}}
+        onPress={() => {
+          navigation.closeDrawer();
+        }}
         style={{
-          position: 'absolute',
+          position: "absolute",
           top: 20,
           right: 20,
-          zIndex: 1, 
+          zIndex: 1,
         }}
       >
-        <MaterialIcons name="close" size={26} color="black" /> 
+        <MaterialIcons name="close" size={26} color="black" />
       </TouchableOpacity>
       {email ? (
         <Box pt={5} px={5} key={"extra" + email}>
           <Center>
-            <Avatar bg="white" size="xl" 
-      >
+            <Avatar bg="white" size="xl">
               <MaterialIcons
                 name="account"
                 style={{ fontSize: 95, color: "#004aad" }}
@@ -2715,19 +2773,22 @@ function CustomDrawerContent({ navigation }) {
             mt={4}
             onPress={() => {
               LogoutHandle();
-  
+
               navigation.dispatch(
                 CommonActions.reset({
                   index: 1,
-                  routes: [
-                    { name: "Login" },
-                  ],
+                  routes: [{ name: "Login" }],
                 })
               );
-  
+
               navigation.closeDrawer();
             }}
-            style={{ backgroundColor: "#004aad" ,justifyContent: 'flex-start', alignItems: 'flex-start',paddingLeft:20}}
+            style={{
+              backgroundColor: "#004aad",
+              justifyContent: "flex-start",
+              alignItems: "flex-start",
+              paddingLeft: 20,
+            }}
             startIcon={
               <MaterialIcons
                 name="logout"
@@ -2745,15 +2806,18 @@ function CustomDrawerContent({ navigation }) {
               navigation.dispatch(
                 CommonActions.reset({
                   index: 1,
-                  routes: [
-                    { name: "Login" },
-                  ],
+                  routes: [{ name: "Login" }],
                 })
               );
-  
+
               navigation.closeDrawer();
             }}
-            style={{ backgroundColor: "#004aad" ,justifyContent: 'flex-start', alignItems: 'flex-start',paddingLeft:20 }}
+            style={{
+              backgroundColor: "#004aad",
+              justifyContent: "flex-start",
+              alignItems: "flex-start",
+              paddingLeft: 20,
+            }}
             startIcon={
               <MaterialIcons
                 name="login"
@@ -2766,8 +2830,8 @@ function CustomDrawerContent({ navigation }) {
         </Box>
       )}
       {email ? (
-        <View >
-          <Divider my={5} height={1.5}/>
+        <View>
+          <Divider my={5} height={1.5} />
           <Box px={5}>
             <Button
               variant="outline"
@@ -2775,7 +2839,13 @@ function CustomDrawerContent({ navigation }) {
                 navigation.navigate("Main");
                 navigation.closeDrawer();
               }}
-              style={{ color: "#004aad", borderColor: "#004aad" ,justifyContent: 'flex-start', alignItems: 'flex-start',paddingLeft:20 }}
+              style={{
+                color: "#004aad",
+                borderColor: "#004aad",
+                justifyContent: "flex-start",
+                alignItems: "flex-start",
+                paddingLeft: 20,
+              }}
               startIcon={
                 <MaterialIcons
                   name="home"
@@ -2791,7 +2861,13 @@ function CustomDrawerContent({ navigation }) {
                 handleStartTrip();
               }}
               mt={4}
-              style={{ color: "#004aad", borderColor: "#004aad",justifyContent: 'flex-start', alignItems: 'flex-start',paddingLeft:20 }}
+              style={{
+                color: "#004aad",
+                borderColor: "#004aad",
+                justifyContent: "flex-start",
+                alignItems: "flex-start",
+                paddingLeft: 20,
+              }}
               startIcon={
                 // <MaterialIcons
                 //   name="motorbike"
@@ -2811,7 +2887,13 @@ function CustomDrawerContent({ navigation }) {
                 navigation.closeDrawer();
               }}
               mt={4}
-              style={{ color: "#004aad", borderColor: "#004aad" ,justifyContent: 'flex-start', alignItems: 'flex-start',paddingLeft:20}}
+              style={{
+                color: "#004aad",
+                borderColor: "#004aad",
+                justifyContent: "flex-start",
+                alignItems: "flex-start",
+                paddingLeft: 20,
+              }}
               startIcon={
                 // <>
                 //  <MaterialIcons
@@ -2819,15 +2901,15 @@ function CustomDrawerContent({ navigation }) {
                 //    style={{ fontSize: 20, color: "#004aad" }}
                 // />
                 <Icon name="briefcase" size={18} color="#004aad" />
-            //  </> 
-             }
+                //  </>
+              }
             >
               <Text style={{ color: "#004aad" }}>Additional Workload</Text>
             </Button>
           </Box>
         </View>
       ) : null}
-      <Divider my={5} height={1.5}/>
+      <Divider my={5} height={1.5} />
       <Box px={5}>
         <Select
           selectedValue={language}
@@ -2838,12 +2920,21 @@ function CustomDrawerContent({ navigation }) {
           mt={0}
           onValueChange={(itemValue) => setLanguage(itemValue)}
           InputLeftElement={
-            <Icon name="language" style={{ fontSize: 20, color: "#004aad" ,justifyContent: 'flex-start', alignItems: 'flex-start',paddingLeft:20 }} />
+            <Icon
+              name="language"
+              style={{
+                fontSize: 20,
+                color: "#004aad",
+                justifyContent: "flex-start",
+                alignItems: "flex-start",
+                paddingLeft: 20,
+              }}
+            />
             // <MaterialIcons
             //   name="translate"
             //   style={{ fontSize: 20, color: "#004aad", marginRight: 5 }}
             // />
-          } 
+          }
         >
           <Select.Item label="English (US)" value="English" />
           <Select.Item label="Hindi (हिन्दी)" value="Hindi" />
@@ -2857,18 +2948,16 @@ function CustomDrawerContent({ navigation }) {
         bottom={0}
         position="absolute"
         left="17%"
-        _text={{ color: 'gray.400', fontSize: 'xs' }}
+        _text={{ color: "gray.400", fontSize: "xs" }}
       >
         <Image
           style={{ width: 190, height: 150 }}
-          source={require('./src/assets/image.png')}
+          source={require("./src/assets/image.png")}
           alt="Logo Image"
         />
       </Center>
     </NativeBaseProvider>
   );
-  
-  
 }
 
 export default function App({ navigation }) {

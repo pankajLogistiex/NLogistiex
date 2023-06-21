@@ -24,14 +24,16 @@ import QRCodeScanner from "react-native-qrcode-scanner";
 import { RNCamera } from "react-native-camera";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import RNBeep from "react-native-a-beep";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import GetLocation from "react-native-get-location";
 import RNAndroidLocationEnabler from "react-native-android-location-enabler";
 import axios from "axios";
 const db = openDatabase({ name: "rn_sqlite" });
 import { backendUrl } from "../../utils/backendUrl";
+import { setAutoSync } from "../../redux/slice/autoSyncSlice";
 
 const OpenBags = ({ route }) => {
+  const dispatch = useDispatch();
   const userId = useSelector((state) => state.user.user_id);
 
   const [data, setData] = useState([]);
@@ -140,6 +142,7 @@ const OpenBags = ({ route }) => {
   }, []);
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
+      dispatch(setAutoSync(false));
       loadDetails112();
       // loadAcceptedItemData12();
     });

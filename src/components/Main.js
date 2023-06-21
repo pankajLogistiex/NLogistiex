@@ -40,6 +40,7 @@ import {convertAbsoluteToRem} from 'native-base/lib/typescript/theme/tools';
 import {useSelector, useDispatch} from 'react-redux';
 import {setUserEmail, setUserId, setUserName} from '../redux/slice/userSlice';
 import {setTripStatus} from '../redux/slice/tripSlice';
+import { setAutoSync } from '../redux/slice/autoSyncSlice';
 
 export default function Main({navigation, route}) {
   const dispatch = useDispatch();
@@ -47,6 +48,7 @@ export default function Main({navigation, route}) {
   const id = useSelector(state => state.user.user_id);
   const tripStatus = useSelector(state => state.trip.tripStatus);
   const isNewSync = useSelector(state => state.newSync.value);
+  const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
 
   const [data, setData] = useState(0);
   // const [data1, setData1] = useState(0);
@@ -173,13 +175,14 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
+      dispatch(setAutoSync(true));
       loadSellerPickupDetails();
       loadHanoverDetails();
       loadSellerDeliveryDetails();
       loadtripdetails();
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
 
   const getData = async () => {
     try {
@@ -200,7 +203,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     loadHanoverDetails();
     loadSellerDeliveryDetails();
     loadtripdetails();
-  }, [isNewSync]);
+  }, [isNewSync, syncTimeFull]);
 
   const loadtripdetails = async () => {
     setIsLoading(!isLoading);
@@ -486,6 +489,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
+      dispatch(setAutoSync(true));
       loadAcceptedItemData12();
     });
     return unsubscribe;

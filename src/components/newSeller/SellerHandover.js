@@ -14,12 +14,16 @@ import {DataTable, Searchbar, Text, Card} from 'react-native-paper';
 import {openDatabase} from 'react-native-sqlite-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import { useDispatch } from "react-redux";
+import { setAutoSync } from "../../redux/slice/autoSyncSlice";
 
 import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 const db = openDatabase({name: 'rn_sqlite'});
 
-const SellerHandover = ({route}) => {
+const SellerHandover = ({ route }) => {
+  const dispatch = useDispatch();
+
   const [data, setData] = useState([]);
   const [keyword, setKeyword] = useState('');
   const [numScanned, setNumScanned] = useState(0);
@@ -39,6 +43,7 @@ const SellerHandover = ({route}) => {
   const navigation = useNavigation();
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
+      dispatch(setAutoSync(true));
       loadDetails();
     });
     return unsubscribe;

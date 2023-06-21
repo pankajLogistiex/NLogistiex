@@ -14,12 +14,15 @@ import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import RNBeep from 'react-native-a-beep';
 import { backendUrl } from '../../utils/backendUrl';
+import { useDispatch } from 'react-redux';
+import { setAutoSync } from '../../redux/slice/autoSyncSlice';
 
 const db = openDatabase({
   name: 'rn_sqlite',
 });
 
-const Dispatch = ({route}) => {
+const Dispatch = ({ route }) => {
+  const dispatch = useDispatch();
     const [keyword, setKeyword] = useState('');
     const [eligibleBags, setEligibleBags] = useState(0);
     const [scanned, setScanned] = useState(0);
@@ -42,6 +45,13 @@ const Dispatch = ({route}) => {
     useEffect(() => {
       showList();
     }, [sealIDList]);
+  
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      dispatch(setAutoSync(false));
+    });
+    return unsubscribe;
+  }, [navigation]);
 
     const showList = ()=>{
       console.log('showlist called',sealIDList+""+sealIDList.length);

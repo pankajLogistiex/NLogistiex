@@ -52,11 +52,14 @@ import {RNCamera} from 'react-native-camera';
 import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {panGestureHandlerCustomNativeProps} from 'react-native-gesture-handler/lib/typescript/handlers/PanGestureHandler';
 import { backendUrl } from '../../utils/backendUrl';
+import { setAutoSync } from '../../redux/slice/autoSyncSlice';
+import { useDispatch } from 'react-redux';
 const db = openDatabase({
   name: 'rn_sqlite',
 });
 
-const ScanShipment = ({route}) => {
+const ScanShipment = ({ route }) => {
+  const dispatch = useDispatch();
   const [expected, setExpected] = useState(0);
   const [newaccepted, setnewAccepted] = useState(0);
   const [newrejected, setnewRejected] = useState(0);
@@ -237,6 +240,7 @@ const ScanShipment = ({route}) => {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
+      dispatch(setAutoSync(false));
       displayDataSPScan();
     });
     return unsubscribe;
@@ -318,6 +322,7 @@ const ScanShipment = ({route}) => {
 console.log("packagingId",packagingID)
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
+      dispatch(setAutoSync(false));
       displayData();
     });
     return unsubscribe;

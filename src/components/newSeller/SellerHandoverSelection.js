@@ -42,8 +42,11 @@ import PieChart from 'react-native-pie-chart';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import GetLocation from 'react-native-get-location';
 import { backendUrl } from '../../utils/backendUrl';
+import { setAutoSync } from '../../redux/slice/autoSyncSlice';
+import { useDispatch } from 'react-redux';
 
-const SellerHandoverSelection = ({route}) => {
+const SellerHandoverSelection = ({ route }) => {
+  const dispatch = useDispatch();
   const [barcodeValue, setBarcodeValue] = useState('');
   const shipmentData =
     backendUrl + `SellerMainScreen/getSellerDetails/${route.params.paramKey}`;
@@ -206,6 +209,7 @@ const SellerHandoverSelection = ({route}) => {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
+      dispatch(setAutoSync(true));
       loadSellerPickupDetails();
     });
     return unsubscribe;

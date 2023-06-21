@@ -29,11 +29,16 @@ import OTPTextInput from 'react-native-otp-textinput';
 
 import {openDatabase} from 'react-native-sqlite-storage';
 import { backendUrl } from '../../utils/backendUrl';
+import { setAutoSync } from '../../redux/slice/autoSyncSlice';
+import { useDispatch } from 'react-redux';
 
 const db = openDatabase({
   name: 'rn_sqlite',
 });
-const CollectPOD = ({route}) => {
+const CollectPOD = ({ route }) => {
+  
+  const dispatch = useDispatch();
+
   var otpInput = useRef(null);
   const navigation = useNavigation();
   const [name, setName] = useState(route.params.contactPersonName);
@@ -101,6 +106,7 @@ const CollectPOD = ({route}) => {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
+      dispatch(setAutoSync(true));
       displayDataSPScan();
     });
     return unsubscribe;
@@ -307,6 +313,7 @@ const CollectPOD = ({route}) => {
   };
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
+      dispatch(setAutoSync(true));
       displayData();
     });
     return unsubscribe;

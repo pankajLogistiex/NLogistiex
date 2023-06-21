@@ -25,9 +25,11 @@ import GetLocation from "react-native-get-location";
 import axios from "axios";
 import RNAndroidLocationEnabler from "react-native-android-location-enabler";
 import { backendUrl } from "../../utils/backendUrl";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { setAutoSync } from "../../redux/slice/autoSyncSlice";
 
 const PendingHandover = ({ route }) => {
+  const dispatch = useDispatch();
   // const [data, setData] = useState([]);
   const [selected, setSelected] = useState("Select Exception Reason");
   const navigation = useNavigation();
@@ -88,6 +90,7 @@ const PendingHandover = ({ route }) => {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
+      dispatch(setAutoSync(true));
       loadDetails();
       loadDetails112();
     });

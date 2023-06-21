@@ -31,11 +31,14 @@ import OTPTextInput from 'react-native-otp-textinput';
 import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import {openDatabase} from 'react-native-sqlite-storage';
 import { backendUrl } from '../../utils/backendUrl';
+import { setAutoSync } from '../../redux/slice/autoSyncSlice';
+import { useDispatch } from 'react-redux';
 
 const db = openDatabase({
   name: 'rn_sqlite',
 });
-const POD = ({route}) => {
+const POD = ({ route }) => {
+  const dispatch = useDispatch();
   // console.log("========post rd params=======", route.params);
   const navigation = useNavigation();
   const [name, setName] = useState(route.params.contactPersonName);
@@ -111,6 +114,7 @@ const POD = ({route}) => {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
+      dispatch(setAutoSync(true));
       displayDataSPScan();
     });
     return unsubscribe;
@@ -348,6 +352,7 @@ const POD = ({route}) => {
   
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
+      dispatch(setAutoSync(true));
       displayData();
     });
     return unsubscribe;

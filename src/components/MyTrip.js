@@ -1,5 +1,5 @@
-import React, {useRef, useEffect, useState} from 'react';
-import axios from 'axios';
+import React, { useRef, useEffect, useState } from "react";
+import axios from "axios";
 import {
   NativeBaseProvider,
   Box,
@@ -14,8 +14,8 @@ import {
   FloatingLabel,
   Label,
   Item,
-} from 'native-base';
-import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+} from "native-base";
+import MaterialIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import {
   ActivityIndicator,
   PermissionsAndroid,
@@ -23,28 +23,29 @@ import {
   View,
   ScrollView,
   TextInput,
-} from 'react-native';
-import {launchCamera} from 'react-native-image-picker';
-import {openDatabase} from 'react-native-sqlite-storage';
-const db = openDatabase({name: 'rn_sqlite'});
-import {useIsFocused} from '@react-navigation/native';
-import {backendUrl} from '../utils/backendUrl';
-import {useDispatch, useSelector} from 'react-redux';
-import { setTripStatus } from '../redux/slice/tripSlice';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+} from "react-native";
+import { launchCamera } from "react-native-image-picker";
+import { openDatabase } from "react-native-sqlite-storage";
+const db = openDatabase({ name: "rn_sqlite" });
+import { useIsFocused } from "@react-navigation/native";
+import { backendUrl } from "../utils/backendUrl";
+import { useDispatch, useSelector } from "react-redux";
+import { setTripStatus } from "../redux/slice/tripSlice";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { setAutoSync, setForceSync } from "../redux/slice/autoSyncSlice";
 
-export default function MyTrip({navigation, route}) {
+export default function MyTrip({ navigation, route }) {
   const dispatch = useDispatch();
-  const tripStatus = useSelector(state => state.trip.tripStatus);
+  const tripStatus = useSelector((state) => state.trip.tripStatus);
 
-  const [vehicle, setVehicle] = useState('');
+  const [vehicle, setVehicle] = useState("");
   const [startkm, setStartKm] = useState(0);
   const [endkm, setEndkm] = useState(0);
-  const [startImageUrl, setStartImageUrl] = useState('');
-  const [endImageUrl, setEndImageUrl] = useState('');
-  const [tripID, setTripID] = useState('');
+  const [startImageUrl, setStartImageUrl] = useState("");
+  const [endImageUrl, setEndImageUrl] = useState("");
+  const [tripID, setTripID] = useState("");
   const [userId, setUserId] = useState(route.params.userId);
-  const [uploadStatus, setUploadStatus] = useState('idle');
+  const [uploadStatus, setUploadStatus] = useState("idle");
   const [modalVisible, setModalVisible] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState(0);
@@ -77,87 +78,87 @@ export default function MyTrip({navigation, route}) {
       }
     }, 200);
   }, []);
-  
+
   let current = new Date();
   let tripid = current.toString();
   let time = tripid.match(/\d{2}:\d{2}:\d{2}/)[0];
   let dateStart = 0;
   let dateEnd = tripid.indexOf(
-    ' ',
-    tripid.indexOf(' ', tripid.indexOf(' ') + 1) + 1,
+    " ",
+    tripid.indexOf(" ", tripid.indexOf(" ") + 1) + 1
   );
   let date = dateEnd
     ? tripid.substring(dateStart, dateEnd + 5)
-    : 'No match found';
+    : "No match found";
 
-    useEffect(() => {
-      if (userId) {
-        AsyncStorage.getItem('tripID')
-          .then((storedTripID) => {
-            if (storedTripID) {
-              setTripID(storedTripID);
-            } else {
-              const tripID = userId + '_' + date + '_' + new Date().valueOf();
-              setTripID(tripID);
-              AsyncStorage.setItem('tripID', tripID);
-            }
-            getVehicleNumber(userId);
-            getTripDetails(tripID);
-            getTripData(userId);
-          })
-          .catch((error) => {
-            console.log(error);
-          });
-      }
-    }, [userId,tripID]);
+  useEffect(() => {
+    if (userId) {
+      AsyncStorage.getItem("tripID")
+        .then((storedTripID) => {
+          if (storedTripID) {
+            setTripID(storedTripID);
+          } else {
+            const tripID = userId + "_" + date + "_" + new Date().valueOf();
+            setTripID(tripID);
+            AsyncStorage.setItem("tripID", tripID);
+          }
+          getVehicleNumber(userId);
+          getTripDetails(tripID);
+          getTripData(userId);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  }, [userId, tripID]);
   function getVehicleNumber(userId) {
     axios
       .get(backendUrl + `SellerMainScreen/vehicleNumber/${userId}`)
-      .then(response => {
+      .then((response) => {
         if (response?.data?.data?.vehicleNumber) {
           setVehicle(response.data.data.vehicleNumber);
         }
       })
-      .catch(error => {
-        console.log(error, 'error');
+      .catch((error) => {
+        console.log(error, "error");
       });
   }
   function getTripDetails(tripID) {
     axios
-      .get(backendUrl + 'UserTripInfo/getUserTripInfo', {
+      .get(backendUrl + "UserTripInfo/getUserTripInfo", {
         params: {
           tripID: tripID,
         },
       })
-      .then(response => {
+      .then((response) => {
         if (response?.data?.res_data) {
           // setVehicle(response.data.res_data.vehicleNumber);
-          const startKm = response.data.res_data.startKilometer; 
-          setStartKm(startKm);         
+          const startKm = response.data.res_data.startKilometer;
+          setStartKm(startKm);
           if (response.data.res_data.endkilometer) {
-            navigation.navigate('StartEndDetails', {tripID: tripID});
+            navigation.navigate("StartEndDetails", { tripID: tripID });
           }
         }
         setLoading(false);
       })
-      .catch(error => {
-        console.log(error, 'error');
+      .catch((error) => {
+        console.log(error, "error");
         setLoading(false);
       });
   }
   function getTripData(userId) {
     axios
-      .get(backendUrl + 'UserTripInfo/getUserTripInfo', {
+      .get(backendUrl + "UserTripInfo/getUserTripInfo", {
         params: {
-          feUserID:userId,
+          feUserID: userId,
         },
       })
-      .then(response => {
-        setTripDetails(response.data.res_data)
+      .then((response) => {
+        setTripDetails(response.data.res_data);
         setLoading(false);
       })
-      .catch(error => {
-        console.log(error, 'error');
+      .catch((error) => {
+        console.log(error, "error");
         setLoading(false);
       });
   }
@@ -168,74 +169,74 @@ export default function MyTrip({navigation, route}) {
     }
   }, [focus]);
   const loadDetails = async () => {
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="accepted"',
         [],
         (tx1, results) => {
           setCompletePickup(results.rows.length);
-        },
+        }
       );
     });
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="notPicked"',
         [],
         (tx1, results) => {
           let temp = [];
           setNotPicked(results.rows.length);
-        },
+        }
       );
     });
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="rejected"',
         [],
         (tx1, results) => {
           setSpr(results.rows.length);
           setRejectedPickup(false);
-        },
+        }
       );
     });
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND status IS NULL',
         [],
         (tx1, results) => {
           setPendingPickup(results.rows.length);
-        },
+        }
       );
     });
 
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL)',
         [],
         (tx1, results) => {
           setPendingDelivery(results.rows.length);
-        },
+        }
       );
     });
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND handoverStatus IS NULL',
         [],
         (tx1, results) => {
           setPendingHandover(results.rows.length);
-        },
+        }
       );
     });
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="accepted" OR  status="tagged"',
         [],
         (tx1, results) => {
           let temp = [];
           setCompleteDelivery(results.rows.length);
-        },
+        }
       );
     });
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="notDelivered"',
         [],
@@ -245,22 +246,24 @@ export default function MyTrip({navigation, route}) {
           for (let i = 0; i < results.rows.length; ++i) {
             temp.push(results.rows.item(i));
           }
-        },
+        }
       );
     });
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="rejected"',
         [],
         (tx1, results) => {
           setRejectedDelivery(results.rows.length);
-        },
+        }
       );
     });
     setLoading(false);
   };
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      dispatch(setAutoSync(true));
+      dispatch(setForceSync(true));
       loadDetails();
     });
     return unsubscribe;
@@ -271,9 +274,9 @@ export default function MyTrip({navigation, route}) {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.CAMERA,
         {
-          title: 'Camera Permission',
-          message: 'App needs camera permission',
-        },
+          title: "Camera Permission",
+          message: "App needs camera permission",
+        }
       );
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     } catch (err) {
@@ -285,33 +288,33 @@ export default function MyTrip({navigation, route}) {
   const createFormData = (photo, body) => {
     const data = new FormData();
 
-    data.append('file', {
+    data.append("file", {
       name: photo.fileName,
       type: photo.type,
       uri:
-        Platform.OS === 'android'
+        Platform.OS === "android"
           ? photo.uri
-          : photo.uri.replace('file://', ''),
+          : photo.uri.replace("file://", ""),
     });
 
-    Object.keys(body).forEach(key => {
+    Object.keys(body).forEach((key) => {
       data.append(key, body[key]);
     });
     return data;
   };
 
   const takeStartPhoto = async () => {
-    setUploadStatus('uploading');
-    setStartImageUrl('');
+    setUploadStatus("uploading");
+    setStartImageUrl("");
     let options = {
-      mediaType: 'photo',
+      mediaType: "photo",
       quality: 1,
-      cameraType: 'back',
+      cameraType: "back",
       maxWidth: 480,
       maxHeight: 480,
       storageOptions: {
         skipBackup: true,
-        path: 'images',
+        path: "images",
       },
     };
     let isGranted = await requestCameraPermission();
@@ -320,40 +323,40 @@ export default function MyTrip({navigation, route}) {
       result = await launchCamera(options);
     }
     if (result.assets !== undefined) {
-      fetch(backendUrl + 'DSQCPicture/uploadPicture', {
-        method: 'POST',
+      fetch(backendUrl + "DSQCPicture/uploadPicture", {
+        method: "POST",
         body: createFormData(result.assets[0], {
-          useCase: 'DSQC',
-          type: 'front',
-          contextId: 'SI002',
-          contextType: 'shipment',
-          hubCode: 'HC001',
+          useCase: "DSQC",
+          type: "front",
+          contextId: "SI002",
+          contextType: "shipment",
+          hubCode: "HC001",
         }),
       })
-        .then(data => data.json())
-        .then(res => {
+        .then((data) => data.json())
+        .then((res) => {
           setStartImageUrl(res.publicURL);
-          setUploadStatus('done');
+          setUploadStatus("done");
         })
-        .catch(error => {
-          console.log('upload error', error);
-          setUploadStatus('error');
+        .catch((error) => {
+          console.log("upload error", error);
+          setUploadStatus("error");
         });
     }
   };
 
   const takeEndPhoto = async () => {
-    setUploadStatus('uploading');
-    setEndImageUrl('');
+    setUploadStatus("uploading");
+    setEndImageUrl("");
     let options = {
-      mediaType: 'photo',
+      mediaType: "photo",
       quality: 1,
-      cameraType: 'back',
+      cameraType: "back",
       maxWidth: 480,
       maxHeight: 480,
       storageOptions: {
         skipBackup: true,
-        path: 'images',
+        path: "images",
       },
     };
     let isGranted = await requestCameraPermission();
@@ -362,24 +365,24 @@ export default function MyTrip({navigation, route}) {
       result = await launchCamera(options);
     }
     if (result.assets !== undefined) {
-      fetch(backendUrl + 'DSQCPicture/uploadPicture', {
-        method: 'POST',
+      fetch(backendUrl + "DSQCPicture/uploadPicture", {
+        method: "POST",
         body: createFormData(result.assets[0], {
-          useCase: 'DSQC',
-          type: 'front',
-          contextId: 'SI002',
-          contextType: 'shipment',
-          hubCode: 'HC001',
+          useCase: "DSQC",
+          type: "front",
+          contextId: "SI002",
+          contextType: "shipment",
+          hubCode: "HC001",
         }),
       })
-        .then(data => data.json())
-        .then(res => {
+        .then((data) => data.json())
+        .then((res) => {
           setEndImageUrl(res.publicURL);
-          setUploadStatus('done');
+          setUploadStatus("done");
         })
-        .catch(error => {
-          console.log('upload error', error);
-          setUploadStatus('error');
+        .catch((error) => {
+          console.log("upload error", error);
+          setUploadStatus("error");
         });
     }
   };
@@ -387,32 +390,33 @@ export default function MyTrip({navigation, route}) {
   const submitEndTrip = () => {
     (async () => {
       await axios
-        .post(backendUrl + 'UserTripInfo/updateUserTripEndDetails', {
+        .post(backendUrl + "UserTripInfo/updateUserTripEndDetails", {
           tripID: tripID,
           endTime: new Date().valueOf(),
           endkilometer: endkm,
           endVehicleImageUrl: endImageUrl,
-          tripsummary:{acceptedPickup: completePickup,
-          notPicked: notPicked,
-          rejectedPickup: rejectedPickup,
-          acceptedDelivery: completeDelivery,
-          notDelivered: notDelivered,
-          rejectedDelivery: rejectedDelivery
-        }
+          tripsummary: {
+            acceptedPickup: completePickup,
+            notPicked: notPicked,
+            rejectedPickup: rejectedPickup,
+            acceptedDelivery: completeDelivery,
+            notDelivered: notDelivered,
+            rejectedDelivery: rejectedDelivery,
+          },
         })
         .then(function (res) {
           dispatch(setTripStatus(0));
           getTripDetails(tripID);
           setMessage(1);
-          navigation.navigate('StartEndDetails', { tripID: tripID });
-          AsyncStorage.removeItem('tripID');
+          navigation.navigate("StartEndDetails", { tripID: tripID });
+          AsyncStorage.removeItem("tripID");
         })
         .catch(function (error) {
           console.log(error);
         });
     })();
   };
-  
+
   useEffect(() => {
     if (pendingHandover !== 0) {
       setMessage1(2);
@@ -429,7 +433,7 @@ export default function MyTrip({navigation, route}) {
   const submitStartTrip = () => {
     (async () => {
       await axios
-        .post(backendUrl + 'UserTripInfo/userTripDetails', {
+        .post(backendUrl + "UserTripInfo/userTripDetails", {
           tripID: tripID,
           userID: userId,
           date: currentDate,
@@ -439,14 +443,14 @@ export default function MyTrip({navigation, route}) {
           startVehicleImageUrl: startImageUrl,
         })
         .then(function (res) {
-          if (res.data.msg === 'TripID already exists') {
+          if (res.data.msg === "TripID already exists") {
             getTripDetails(tripID);
             setMessage(2);
           } else {
             dispatch(setTripStatus(1));
             getTripDetails(tripID);
             setMessage(1);
-            navigation.navigate('Main', { tripID: tripID });
+            navigation.navigate("Main", { tripID: tripID });
           }
           setShowModal(true);
         })
@@ -455,9 +459,8 @@ export default function MyTrip({navigation, route}) {
         });
     })();
   };
-  
 
-  const handleInputChange = value => {
+  const handleInputChange = (value) => {
     setStartKm(value);
     // if (value) {
     //   setLabel('Vehicle KMs');
@@ -465,7 +468,7 @@ export default function MyTrip({navigation, route}) {
     //   setLabel('Input vehicle KMs');
     // }
   };
-console.log(tripStatus)
+  console.log(tripStatus);
   return (
     <NativeBaseProvider>
       <ScrollView>
@@ -473,7 +476,7 @@ console.log(tripStatus)
           <ActivityIndicator
             size="large"
             color="blue"
-            style={{marginTop: 44}}
+            style={{ marginTop: 44 }}
           />
         ) : (
           <Box flex={1}>
@@ -482,26 +485,30 @@ console.log(tripStatus)
                 flex={1}
                 bg="gray.300"
                 alignItems="center"
-                pt={'4%'}
-                pb={'50%'}>
+                pt={"4%"}
+                pb={"50%"}
+              >
                 <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
                   <Modal.Content
-                    backgroundColor={message === 1 ? '#dcfce7' : '#fee2e2'}>
+                    backgroundColor={message === 1 ? "#dcfce7" : "#fee2e2"}
+                  >
                     <Modal.CloseButton />
                     <Modal.Body>
                       <Alert
                         w="100%"
-                        status={message === 1 ? 'success' : 'error'}>
+                        status={message === 1 ? "success" : "error"}
+                      >
                         <VStack
                           space={1}
                           flexShrink={1}
                           w="100%"
-                          alignItems="center">
+                          alignItems="center"
+                        >
                           <Alert.Icon size="4xl" />
                           <Text my={3} fontSize="md" fontWeight="medium">
                             {message === 1
-                              ? 'Data Successfully Submitted'
-                              : 'Trip ID already exists'}
+                              ? "Data Successfully Submitted"
+                              : "Trip ID already exists"}
                           </Text>
                         </VStack>
                       </Alert>
@@ -512,25 +519,29 @@ console.log(tripStatus)
                   isOpen={showModal1}
                   onClose={() => {
                     setShowModal1(false);
-                    navigation.navigate('Main');
-                  }}>
+                    navigation.navigate("Main");
+                  }}
+                >
                   <Modal.Content
-                    backgroundColor={message1 === 1 ? '#fee2e2' : '#fee2e2'}>
+                    backgroundColor={message1 === 1 ? "#fee2e2" : "#fee2e2"}
+                  >
                     <Modal.CloseButton />
                     <Modal.Body>
                       <Alert
                         w="100%"
-                        status={message1 === 1 ? 'error' : 'error'}>
+                        status={message1 === 1 ? "error" : "error"}
+                      >
                         <VStack
                           space={1}
                           flexShrink={1}
                           w="100%"
-                          alignItems="center">
+                          alignItems="center"
+                        >
                           <Alert.Icon size="4xl" />
                           <Text my={3} fontSize="md" fontWeight="medium">
                             {message1 === 1
-                              ? 'No Pickup/Delivery Assigned'
-                              : 'Please complete handover before Start a trip'}
+                              ? "No Pickup/Delivery Assigned"
+                              : "Please complete handover before Start a trip"}
                           </Text>
                         </VStack>
                       </Alert>
@@ -540,21 +551,23 @@ console.log(tripStatus)
                 <Modal
                   isOpen={modalVisible}
                   onClose={() => setModalVisible(false)}
-                  size="lg">
+                  size="lg"
+                >
                   <Modal.Content maxWidth="350">
                     <Modal.CloseButton />
                     <Modal.Header />
                     <Modal.Body>
                       <View
                         style={{
-                          width: '90%',
-                          flexDirection: 'row',
-                          justifyContent: 'space-between',
-                          alignSelf: 'center',
-                        }}>
+                          width: "90%",
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          alignSelf: "center",
+                        }}
+                      >
                         <Image
-                          source={{uri: startImageUrl}}
-                          style={{width: 400, height: 600}}
+                          source={{ uri: startImageUrl }}
+                          style={{ width: 400, height: 600 }}
                           alt="image not shown"
                         />
                       </View>
@@ -567,24 +580,27 @@ console.log(tripStatus)
                   px={6}
                   bg="#fff"
                   rounded="xl"
-                  width={'90%'}
+                  width={"90%"}
                   maxWidth="100%"
-                  _text={{fontWeight: 'medium'}}>
+                  _text={{ fontWeight: "medium" }}
+                >
                   <ScrollView>
                     <VStack space={6}>
                       <View
                         style={{
                           flex: 1,
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                        }}>
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
                         <Text
                           style={{
                             fontSize: 16,
-                            fontWeight: '500',
-                            color: 'gray',
+                            fontWeight: "500",
+                            color: "gray",
                           }}
-                          mb={2}>
+                          mb={2}
+                        >
                           Start Your Trip
                         </Text>
                       </View>
@@ -592,10 +608,11 @@ console.log(tripStatus)
                         <Text
                           style={{
                             fontSize: 16,
-                            fontWeight: '500',
-                            color: 'gray',
+                            fontWeight: "500",
+                            color: "gray",
                           }}
-                          mb={1}>
+                          mb={1}
+                        >
                           Vehicle Number:
                         </Text>
                         <Input
@@ -605,7 +622,7 @@ console.log(tripStatus)
                           backgroundColor="gray.300"
                           value={vehicle}
                           size="lg"
-                          type={'number'}
+                          type={"number"}
                           placeholder="Vehicle Number"
                         />
                       </View>
@@ -613,10 +630,11 @@ console.log(tripStatus)
                         <Text
                           style={{
                             fontSize: 16,
-                            fontWeight: '500',
-                            color: 'gray',
+                            fontWeight: "500",
+                            color: "gray",
                           }}
-                          mb={1}>
+                          mb={1}
+                        >
                           Start KMs:
                         </Text>
                         <Input
@@ -625,15 +643,15 @@ console.log(tripStatus)
                           value={startkm}
                           onChangeText={setStartKm}
                           size="lg"
-                          type={'number'}
+                          type={"number"}
                           placeholder="Start km"
                           style={{
                             fontSize: 18,
-                            color: '#000',
+                            color: "#000",
                             paddingVertical: 6,
                             paddingHorizontal: 12,
                             borderWidth: 1,
-                            borderColor: '#ccc',
+                            borderColor: "#ccc",
                             borderRadius: 4,
                           }}
                         />
@@ -641,39 +659,43 @@ console.log(tripStatus)
                       <Button
                         py={3}
                         variant="outline"
-                        _text={{color: 'white', fontSize: 20}}
-                        onPress={takeStartPhoto}>
-                        {uploadStatus === 'idle' && (
+                        _text={{ color: "white", fontSize: 20 }}
+                        onPress={takeStartPhoto}
+                      >
+                        {uploadStatus === "idle" && (
                           <MaterialIcons
                             name="cloud-upload"
                             size={22}
-                            color="gray">
-                            {' '}
+                            color="gray"
+                          >
+                            {" "}
                             Image
                           </MaterialIcons>
                         )}
-                        {uploadStatus === 'uploading' && (
+                        {uploadStatus === "uploading" && (
                           <ActivityIndicator size="small" color="gray" />
                         )}
-                        {uploadStatus === 'done' && (
+                        {uploadStatus === "done" && (
                           <MaterialIcons name="check" size={22} color="green" />
                         )}
-                        {uploadStatus === 'error' && (
+                        {uploadStatus === "error" && (
                           <MaterialIcons name="error" size={22} color="red" />
                         )}
                       </Button>
                       <View
                         style={{
                           flex: 1,
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                        }}>
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
                         {startImageUrl ? (
                           <TouchableOpacity
-                            onPress={() => setModalVisible(true)}>
+                            onPress={() => setModalVisible(true)}
+                          >
                             <Image
-                              source={{uri: startImageUrl}}
-                              style={{width: 300, height: 200}}
+                              source={{ uri: startImageUrl }}
+                              style={{ width: 300, height: 200 }}
                               alt="image not shown"
                             />
                           </TouchableOpacity>
@@ -682,11 +704,12 @@ console.log(tripStatus)
                       {startkm && vehicle && startImageUrl && tripid ? (
                         <Button
                           title="Login"
-                          backgroundColor={'#004aad'}
-                          _text={{color: 'white', fontSize: 20}}
+                          backgroundColor={"#004aad"}
+                          _text={{ color: "white", fontSize: 20 }}
                           onPress={() => {
                             submitStartTrip();
-                          }}>
+                          }}
+                        >
                           Start Trip
                         </Button>
                       ) : (
@@ -694,8 +717,9 @@ console.log(tripStatus)
                           opacity={0.5}
                           disabled={true}
                           title="Login"
-                          backgroundColor={'#004aad'}
-                          _text={{color: 'white', fontSize: 20}}>
+                          backgroundColor={"#004aad"}
+                          _text={{ color: "white", fontSize: 20 }}
+                        >
                           Start Trip
                         </Button>
                       )}
@@ -703,9 +727,9 @@ console.log(tripStatus)
                   </ScrollView>
                   <Center>
                     <Image
-                      style={{width: 150, height: 100}}
-                      source={require('../assets/image.png')}
-                      alt={'Logo Image'}
+                      style={{ width: 150, height: 100 }}
+                      source={require("../assets/image.png")}
+                      alt={"Logo Image"}
                     />
                   </Center>
                 </Box>
@@ -715,20 +739,22 @@ console.log(tripStatus)
                 flex={1}
                 bg="gray.300"
                 alignItems="center"
-                pt={'4%'}
-                pb={'50%'}>
+                pt={"4%"}
+                pb={"50%"}
+              >
                 <Modal
                   isOpen={modalVisible}
                   onClose={() => setModalVisible(false)}
-                  size="lg">
+                  size="lg"
+                >
                   <Modal.Content maxWidth="350">
                     <Modal.CloseButton />
                     <Modal.Header />
                     <Modal.Body>
-                      <View style={{alignSelf: 'center', marginVertical: 5}}>
+                      <View style={{ alignSelf: "center", marginVertical: 5 }}>
                         <Image
-                          source={{uri: endImageUrl}}
-                          style={{width: 400, height: 500}}
+                          source={{ uri: endImageUrl }}
+                          style={{ width: 400, height: 500 }}
                           alt="image not shown"
                         />
                       </View>
@@ -741,22 +767,34 @@ console.log(tripStatus)
                   px={6}
                   bg="#fff"
                   rounded="xl"
-                  width={'90%'}
+                  width={"90%"}
                   maxWidth="100%"
-                  _text={{fontWeight: 'medium'}}>
+                  _text={{ fontWeight: "medium" }}
+                >
                   <VStack space={6}>
                     <View
-                      style={{justifyContent: 'center', alignItems: 'center'}}>
+                      style={{ justifyContent: "center", alignItems: "center" }}
+                    >
                       <Text
-                        style={{fontSize: 16, fontWeight: '500', color: 'gray'}}
-                        mb={2}>
+                        style={{
+                          fontSize: 16,
+                          fontWeight: "500",
+                          color: "gray",
+                        }}
+                        mb={2}
+                      >
                         Trip Started
                       </Text>
                     </View>
                     <View flexDirection="column">
                       <Text
-                        style={{fontSize: 16, fontWeight: '500', color: 'gray'}}
-                        mb={1}>
+                        style={{
+                          fontSize: 16,
+                          fontWeight: "500",
+                          color: "gray",
+                        }}
+                        mb={1}
+                      >
                         Vehicle Number:
                       </Text>
                       <Input
@@ -766,14 +804,19 @@ console.log(tripStatus)
                         backgroundColor="gray.300"
                         value={vehicle}
                         size="lg"
-                        type={'number'}
+                        type={"number"}
                         placeholder="Vehicle Number"
                       />
                     </View>
                     <View flexDirection="column">
                       <Text
-                        style={{fontSize: 16, fontWeight: '500', color: 'gray'}}
-                        mb={1}>
+                        style={{
+                          fontSize: 16,
+                          fontWeight: "500",
+                          color: "gray",
+                        }}
+                        mb={1}
+                      >
                         Start KMs:
                       </Text>
                       <Input
@@ -783,31 +826,36 @@ console.log(tripStatus)
                         backgroundColor="gray.300"
                         value={startkm}
                         size="lg"
-                        type={'number'}
+                        type={"number"}
                         placeholder="Start Km"
                       />
                     </View>
                     <View flexDirection="column">
                       <Text
-                        style={{fontSize: 16, fontWeight: '500', color: 'gray'}}
-                        mb={1}>
+                        style={{
+                          fontSize: 16,
+                          fontWeight: "500",
+                          color: "gray",
+                        }}
+                        mb={1}
+                      >
                         End KMs:
                       </Text>
                       <Input
-                      ref={EndKmInputRef}
+                        ref={EndKmInputRef}
                         value={endkm}
                         keyboardType="numeric"
                         onChangeText={setEndkm}
                         size="lg"
-                        type={'number'}
+                        type={"number"}
                         placeholder="Input End KMs"
                         style={{
                           fontSize: 18,
-                          color: '#000',
+                          color: "#000",
                           paddingVertical: 6,
                           paddingHorizontal: 12,
                           borderWidth: 1,
-                          borderColor: '#ccc',
+                          borderColor: "#ccc",
                           borderRadius: 4,
                         }}
                       />
@@ -815,48 +863,52 @@ console.log(tripStatus)
                     <Button
                       py={3}
                       variant="outline"
-                      _text={{color: 'white', fontSize: 20}}
-                      onPress={takeEndPhoto}>
-                      {uploadStatus === 'idle' && (
+                      _text={{ color: "white", fontSize: 20 }}
+                      onPress={takeEndPhoto}
+                    >
+                      {uploadStatus === "idle" && (
                         <MaterialIcons
                           name="cloud-upload"
                           size={22}
-                          color="gray">
-                          {' '}
+                          color="gray"
+                        >
+                          {" "}
                           Image
                         </MaterialIcons>
                       )}
-                      {uploadStatus === 'uploading' && (
+                      {uploadStatus === "uploading" && (
                         <ActivityIndicator size="small" color="gray" />
                       )}
-                      {uploadStatus === 'done' && (
+                      {uploadStatus === "done" && (
                         <MaterialIcons name="check" size={22} color="green" />
                       )}
-                      {uploadStatus === 'error' && (
+                      {uploadStatus === "error" && (
                         <MaterialIcons name="error" size={22} color="red" />
                       )}
                     </Button>
                     <View
                       style={{
                         flex: 1,
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}>
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
                       {endImageUrl ? (
                         <TouchableOpacity onPress={() => setModalVisible(true)}>
                           <Image
-                            source={{uri: endImageUrl}}
-                            style={{width: 300, height: 200}}
+                            source={{ uri: endImageUrl }}
+                            style={{ width: 300, height: 200 }}
                             alt="image not shown"
                           />
                         </TouchableOpacity>
                       ) : null}
                     </View>
-                    {pendingPickup!=0 || pendingDelivery!=0  ? (
+                    {pendingPickup != 0 || pendingDelivery != 0 ? (
                       <Button
                         backgroundColor="#004aad"
-                        _text={{color: 'white', fontSize: 20}}
-                        onPress={() => navigation.navigate('PendingWork')}>
+                        _text={{ color: "white", fontSize: 20 }}
+                        onPress={() => navigation.navigate("PendingWork")}
+                      >
                         Pending Work
                       </Button>
                     ) : endkm &&
@@ -864,8 +916,9 @@ console.log(tripStatus)
                       parseInt(endkm) > parseInt(startkm) ? (
                       <Button
                         backgroundColor="#004aad"
-                        _text={{color: 'white', fontSize: 20}}
-                        onPress={() => submitEndTrip()}>
+                        _text={{ color: "white", fontSize: 20 }}
+                        onPress={() => submitEndTrip()}
+                      >
                         End Trip
                       </Button>
                     ) : (
@@ -873,16 +926,17 @@ console.log(tripStatus)
                         opacity={0.5}
                         disabled={true}
                         backgroundColor="#004aad"
-                        _text={{color: 'white', fontSize: 20}}>
+                        _text={{ color: "white", fontSize: 20 }}
+                      >
                         End Trip
                       </Button>
                     )}
                   </VStack>
                   <Center>
                     <Image
-                      style={{width: 150, height: 100}}
-                      source={require('../assets/image.png')}
-                      alt={'Logo Image'}
+                      style={{ width: 150, height: 100 }}
+                      source={require("../assets/image.png")}
+                      alt={"Logo Image"}
                     />
                   </Center>
                 </Box>

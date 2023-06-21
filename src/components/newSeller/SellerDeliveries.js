@@ -14,10 +14,13 @@ import {
   import React, {useEffect, useState} from 'react';
   import {useNavigation} from '@react-navigation/native';
   import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+  import { useDispatch } from "react-redux";
+  import { setAutoSync } from "../../redux/slice/autoSyncSlice";
   const db = openDatabase({name: 'rn_sqlite'});
   
   const SellerDeliveries = ({route}) => {
-  
+    const dispatch = useDispatch();
+    
     const [dataSeller, setData] = useState([]);
     const [data, setData11] = useState([]);
     const [keyword, setKeyword] = useState('');
@@ -57,6 +60,7 @@ import {
   
       useEffect(() => {
         const unsubscribe = navigation.addListener('focus', () => {
+          dispatch(setAutoSync(true));
           loadDetails();
         });
         return unsubscribe;

@@ -14,11 +14,14 @@ import {openDatabase} from 'react-native-sqlite-storage';
 import React, {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useDispatch } from "react-redux";
+import { setAutoSync } from "../../redux/slice/autoSyncSlice";
 // import { Header } from 'react-navigation';
 const db = openDatabase({name: 'rn_sqlite'});
 
 const NewSellerPickup = ({route}) => {
-
+  const dispatch = useDispatch();
+  dispatch(setAutoSync(true));
   const [dataSeller, setData] = useState([]);
   const [data, setData11] = useState([]);
   const [keyword, setKeyword] = useState('');

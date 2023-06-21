@@ -3,6 +3,7 @@ import tripSlice from "./slice/tripSlice";
 import userSlice from "./slice/userSlice";
 import newSyncSlice from "./slice/isNewSync";
 import newNotificationSlice from "./slice/notificationSlice";
+import autoSyncSlice from "./slice/autoSyncSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,5 +11,6 @@ export const store = configureStore({
     user: userSlice,
     newSync: newSyncSlice,
     notification: newNotificationSlice,
+    autoSync: autoSyncSlice,
   },
 });

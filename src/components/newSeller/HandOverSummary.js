@@ -14,9 +14,11 @@ import {openDatabase} from 'react-native-sqlite-storage';
 import React, {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {Picker} from '@react-native-picker/picker';
+import { useDispatch } from 'react-redux';
 const db = openDatabase({name: 'rn_sqlite'});
 
-const HandOverSummary = ({route}) => {
+const HandOverSummary = ({ route }) => {
+  const dispatch = useDispatch();
   const [data, setData] = useState([]);
 
   const [displayData, setDisplayData] = useState({});
@@ -27,6 +29,7 @@ const HandOverSummary = ({route}) => {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
+      dispatch(setAutoSync(true));
       loadDetails();
     });
     return unsubscribe;

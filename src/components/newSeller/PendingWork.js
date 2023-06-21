@@ -7,20 +7,22 @@ import {
   Modal,
   Input,
   Icon,
-} from 'native-base';
-import {StyleSheet, ScrollView, View, ToastAndroid} from 'react-native';
-import {DataTable, Searchbar, Text, Card} from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {openDatabase} from 'react-native-sqlite-storage';
-import React, {useEffect, useState} from 'react';
-import {useNavigation} from '@react-navigation/native';
-import {Picker} from '@react-native-picker/picker';
-const db = openDatabase({name: 'rn_sqlite'});
-import axios from 'axios';
-import {useSelector} from 'react-redux';
+} from "native-base";
+import { StyleSheet, ScrollView, View, ToastAndroid } from "react-native";
+import { DataTable, Searchbar, Text, Card } from "react-native-paper";
+import MaterialIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { openDatabase } from "react-native-sqlite-storage";
+import React, { useEffect, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import { Picker } from "@react-native-picker/picker";
+const db = openDatabase({ name: "rn_sqlite" });
+import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { setAutoSync } from "../../redux/slice/autoSyncSlice";
 
-const PendingWork = ({route}) => {
-  const userId = useSelector(state => state.user.user_id);
+const PendingWork = ({ route }) => {
+  const dispatch = useDispatch();
+  const userId = useSelector((state) => state.user.user_id);
 
   const navigation = useNavigation();
   const [pendingPickup, setPendingPickup] = useState(0);
@@ -37,7 +39,7 @@ const PendingWork = ({route}) => {
   const [modalVisible3, setModalVisible3] = useState(false);
   const [modalVisible4, setModalVisible4] = useState(false);
   const [displayData, setDisplayData] = useState({});
-  const [keyword, setKeyword] = useState('');
+  const [keyword, setKeyword] = useState("");
   const [MM, setMM] = useState(0);
 
   const DisplayData = async () => {
@@ -46,8 +48,8 @@ const PendingWork = ({route}) => {
   };
 
   const closePickup11 = () => {
-    db.transaction(tx => {
-      tx.executeSql('SELECT * FROM ClosePickupReasons', [], (tx1, results) => {
+    db.transaction((tx) => {
+      tx.executeSql("SELECT * FROM ClosePickupReasons", [], (tx1, results) => {
         let temp = [];
         console.log(results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
@@ -58,9 +60,9 @@ const PendingWork = ({route}) => {
     });
   };
   const closeDelivery = () => {
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM CloseDeliveryReasons',
+        "SELECT * FROM CloseDeliveryReasons",
         [],
         (tx1, results) => {
           let temp = [];
@@ -69,7 +71,7 @@ const PendingWork = ({route}) => {
             temp.push(results.rows.item(i));
           }
           setCloseDataD(temp);
-        },
+        }
       );
     });
   };
@@ -78,8 +80,8 @@ const PendingWork = ({route}) => {
   };
 
   const NotAttemptReasons11 = () => {
-    db.transaction(tx => {
-      tx.executeSql('SELECT * FROM NotAttemptReasons', [], (tx1, results) => {
+    db.transaction((tx) => {
+      tx.executeSql("SELECT * FROM NotAttemptReasons", [], (tx1, results) => {
         let temp = [];
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
@@ -97,15 +99,16 @@ const PendingWork = ({route}) => {
     DisplayData2();
   }, []);
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      dispatch(setAutoSync(true));
       loadDetails();
     });
     return unsubscribe;
   }, [navigation]);
 
   const loadDetails = () => {
-    db.transaction(tx => {
-      tx.executeSql('SELECT * FROM SyncSellerPickUp', [], (tx1, results) => {
+    db.transaction((tx) => {
+      tx.executeSql("SELECT * FROM SyncSellerPickUp", [], (tx1, results) => {
         let temp = [];
         var m = 0;
         for (let i = 0; i < results.rows.length; ++i) {
@@ -114,8 +117,8 @@ const PendingWork = ({route}) => {
           // var consignorcode=results.rows.item(i).consignorCode;
           var consignorLatitude = results.rows.item(i).consignorLatitude;
           console.log(consignorLatitude);
-          db.transaction(tx => {
-            db.transaction(tx => {
+          db.transaction((tx) => {
+            db.transaction((tx) => {
               tx.executeSql(
                 'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=? AND status IS NULL',
                 [results.rows.item(i).consignorCode],
@@ -136,14 +139,14 @@ const PendingWork = ({route}) => {
                       };
                       console.log(newData);
                       if (newData != null) {
-                        setDisplayData(prevData => ({
+                        setDisplayData((prevData) => ({
                           ...prevData,
                           ...newData,
                         }));
                       }
-                    },
+                    }
                   );
-                },
+                }
               );
             });
           });
@@ -151,23 +154,23 @@ const PendingWork = ({route}) => {
         setData(temp);
       });
     });
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND status IS NULL',
         [],
         (tx1, results) => {
           setPendingPickup(results.rows.length);
-        },
+        }
       );
     });
 
-    db.transaction(tx => {
+    db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL)',
         [],
         (tx1, results) => {
           setPendingDelivery(results.rows.length);
-        },
+        }
       );
     });
   };
@@ -179,7 +182,7 @@ const PendingWork = ({route}) => {
   }, []);
 
   const displayData11 = Object.keys(displayData)
-    .filter(sealID => sealID.toLowerCase().includes(keyword.toLowerCase()))
+    .filter((sealID) => sealID.toLowerCase().includes(keyword.toLowerCase()))
     .reduce((obj, key) => {
       obj[key] = displayData[key];
       return obj;
@@ -191,28 +194,30 @@ const PendingWork = ({route}) => {
         <ScrollView
           style={styles.homepage}
           showsVerticalScrollIndicator={true}
-          showsHorizontalScrollIndicator={false}>
+          showsHorizontalScrollIndicator={false}
+        >
           <Card>
             <DataTable>
               <DataTable.Header
                 style={{
-                  height: 'auto',
-                  backgroundColor: '#004aad',
+                  height: "auto",
+                  backgroundColor: "#004aad",
                   borderTopLeftRadius: 5,
                   borderTopRightRadius: 5,
-                }}>
-                <DataTable.Title style={{flex: 1.2}}>
-                  <Text style={{textAlign: 'center', color: 'white'}}>
+                }}
+              >
+                <DataTable.Title style={{ flex: 1.2 }}>
+                  <Text style={{ textAlign: "center", color: "white" }}>
                     Seller Name
                   </Text>
                 </DataTable.Title>
-                <DataTable.Title style={{flex: 1.2}}>
-                  <Text style={{textAlign: 'center', color: 'white'}}>
+                <DataTable.Title style={{ flex: 1.2 }}>
+                  <Text style={{ textAlign: "center", color: "white" }}>
                     Pending Pickups
                   </Text>
                 </DataTable.Title>
-                <DataTable.Title style={{flex: 1.2}}>
-                  <Text style={{textAlign: 'center', color: 'white'}}>
+                <DataTable.Title style={{ flex: 1.2 }}>
+                  <Text style={{ textAlign: "center", color: "white" }}>
                     Pending Deliveries
                   </Text>
                 </DataTable.Title>
@@ -226,29 +231,33 @@ const PendingWork = ({route}) => {
                       <View>
                         <DataTable.Row
                           style={{
-                            height: 'auto',
-                            backgroundColor: '#eeeeee',
+                            height: "auto",
+                            backgroundColor: "#eeeeee",
                             borderBottomWidth: 1,
                             borderWidth: 2,
-                            borderColor: 'white',
-                          }}>
+                            borderColor: "white",
+                          }}
+                        >
                           <DataTable.Cell
-                            style={{flex: 1.7}}
-                            key={consignorCode}>
+                            style={{ flex: 1.7 }}
+                            key={consignorCode}
+                          >
                             <Text style={styles.fontvalue}>
                               {displayData11[consignorCode].consignorName}
                             </Text>
                           </DataTable.Cell>
                           <DataTable.Cell
-                            style={{flex: 1, marginRight: 50}}
-                            key={consignorCode}>
+                            style={{ flex: 1, marginRight: 50 }}
+                            key={consignorCode}
+                          >
                             <Text style={styles.fontvalue}>
                               {displayData11[consignorCode].forward}
                             </Text>
                           </DataTable.Cell>
                           <DataTable.Cell
-                            style={{flex: 1, marginRight: -70}}
-                            key={consignorCode}>
+                            style={{ flex: 1, marginRight: -70 }}
+                            key={consignorCode}
+                          >
                             <Text style={styles.fontvalue}>
                               {displayData11[consignorCode].reverse}
                             </Text>
@@ -266,7 +275,7 @@ const PendingWork = ({route}) => {
                               />
                             }
                             onPress={() =>
-                              navigation.navigate('NotPicked', {
+                              navigation.navigate("NotPicked", {
                                 consignorCode: consignorCode,
                                 consignorLatitude:
                                   displayData11[consignorCode]
@@ -278,11 +287,12 @@ const PendingWork = ({route}) => {
                               })
                             }
                             style={{
-                              backgroundColor: '#004aad',
-                              width: '90%',
+                              backgroundColor: "#004aad",
+                              width: "90%",
                               marginTop: 10,
                               marginLeft: 20,
-                            }}>
+                            }}
+                          >
                             Close Pickup
                           </Button>
                         )}
@@ -298,7 +308,7 @@ const PendingWork = ({route}) => {
                               />
                             }
                             onPress={() =>
-                              navigation.navigate('NotDelivered', {
+                              navigation.navigate("NotDelivered", {
                                 consignorCode: consignorCode,
                                 consignorLatitude:
                                   displayData11[consignorCode]
@@ -310,11 +320,12 @@ const PendingWork = ({route}) => {
                               })
                             }
                             style={{
-                              backgroundColor: '#004aad',
-                              width: '90%',
+                              backgroundColor: "#004aad",
+                              width: "90%",
                               marginTop: 10,
                               marginLeft: 20,
-                            }}>
+                            }}
+                          >
                             Close Delivery
                           </Button>
                         )}
@@ -354,50 +365,58 @@ const PendingWork = ({route}) => {
         
       } */}
                       </View>
-                    ),
+                    )
                 )}
             </DataTable>
           </Card>
         </ScrollView>
         <View
           style={{
-            width: '90%',
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignSelf: 'center',
+            width: "90%",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignSelf: "center",
             marginTop: 10,
-          }}>
+          }}
+        >
           <Button
             w="48%"
             size="lg"
             bg="#004aad"
-            onPress={() => navigation.navigate('Main')}>
+            onPress={() => navigation.navigate("Main")}
+          >
             Dashboard
           </Button>
-          {pendingPickup==0 && pendingDelivery==0 ?
-          <Button
-          w="48%"
-          size="lg"
-          bg="#004aad"
-          onPress={() => navigation.navigate('MyTrip',{userId: userId})}>
-          Close Trip
-        </Button>
-        :
-        <Button
-            w="48%"
-            size="lg"
-            bg="gray.300"
-            onPress={() => ToastAndroid.show("Complete Pending Work Before Closing Trip", ToastAndroid.SHORT)}>
-            Close Trip
-          </Button>
-          }
-          
+          {pendingPickup == 0 && pendingDelivery == 0 ? (
+            <Button
+              w="48%"
+              size="lg"
+              bg="#004aad"
+              onPress={() => navigation.navigate("MyTrip", { userId: userId })}
+            >
+              Close Trip
+            </Button>
+          ) : (
+            <Button
+              w="48%"
+              size="lg"
+              bg="gray.300"
+              onPress={() =>
+                ToastAndroid.show(
+                  "Complete Pending Work Before Closing Trip",
+                  ToastAndroid.SHORT
+                )
+              }
+            >
+              Close Trip
+            </Button>
+          )}
         </View>
         <Center>
           <Image
-            style={{width: 150, height: 150}}
-            source={require('../../assets/image.png')}
-            alt={'Logo Image'}
+            style={{ width: 150, height: 150 }}
+            source={require("../../assets/image.png")}
+            alt={"Logo Image"}
           />
         </Center>
       </Box>
@@ -407,66 +426,66 @@ const PendingWork = ({route}) => {
 export default PendingWork;
 export const styles = StyleSheet.create({
   container112: {
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   tableHeader: {
-    backgroundColor: '#004aad',
-    alignItems: 'flex-start',
-    fontFamily: 'open sans',
+    backgroundColor: "#004aad",
+    alignItems: "flex-start",
+    fontFamily: "open sans",
     fontSize: 15,
-    color: 'white',
+    color: "white",
     margin: 1,
   },
   container222: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     zIndex: 1,
-    backgroundColor: 'rgba(0,0,0,0.2 )',
+    backgroundColor: "rgba(0,0,0,0.2 )",
   },
   normal: {
-    fontFamily: 'open sans',
-    fontWeight: 'normal',
-    color: '#eee',
+    fontFamily: "open sans",
+    fontWeight: "normal",
+    color: "#eee",
     marginTop: 27,
     paddingTop: 15,
     paddingBottom: 15,
-    backgroundColor: '#eee',
-    width: 'auto',
+    backgroundColor: "#eee",
+    width: "auto",
     borderRadius: 0,
-    alignContent: 'space-between',
+    alignContent: "space-between",
   },
   text: {
-    color: '#000',
-    fontWeight: 'bold',
+    color: "#000",
+    fontWeight: "bold",
     fontSize: 18,
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
     paddingLeft: 20,
   },
   main: {
-    backgroundColor: '#004aad',
-    width: 'auto',
-    height: 'auto',
+    backgroundColor: "#004aad",
+    width: "auto",
+    height: "auto",
     margin: 1,
   },
   textbox: {
-    alignItems: 'flex-start',
-    fontFamily: 'open sans',
+    alignItems: "flex-start",
+    fontFamily: "open sans",
     fontSize: 13,
-    color: '#fff',
+    color: "#fff",
   },
   homepage: {
     margin: 10,
     // backgroundColor:"blue",
   },
   mainbox: {
-    width: '98%',
+    width: "98%",
     height: 40,
-    backgroundColor: 'lightblue',
-    alignSelf: 'center',
+    backgroundColor: "lightblue",
+    alignSelf: "center",
     marginVertical: 15,
     borderRadius: 5,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 8,
@@ -476,43 +495,43 @@ export const styles = StyleSheet.create({
     elevation: 1,
   },
   innerup: {
-    flexDirection: 'row',
+    flexDirection: "row",
     padding: 10,
-    backgroundColor: 'blue',
+    backgroundColor: "blue",
   },
   innerdown: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   fontvalue: {
-    fontWeight: '300',
+    fontWeight: "300",
     flex: 1,
-    fontFamily: 'open sans',
-    justifyContent: 'center',
+    fontFamily: "open sans",
+    justifyContent: "center",
   },
   fontvalue1: {
-    fontWeight: '700',
+    fontWeight: "700",
     marginTop: 10,
     marginLeft: 100,
     marginRight: -10,
   },
   searchbar: {
-    width: '95%',
+    width: "95%",
     borderWidth: 2,
-    borderColor: 'white',
+    borderColor: "white",
     borderRadius: 1,
     marginLeft: 10,
     marginRight: 10,
   },
   bt1: {
-    fontFamily: 'open sans',
+    fontFamily: "open sans",
     fontSize: 15,
     lineHeight: 0,
     marginTop: 0,
     paddingTop: 10,
     paddingBottom: 10,
-    backgroundColor: '#004aad',
+    backgroundColor: "#004aad",
     width: 110,
     borderRadius: 10,
     paddingLeft: 0,
@@ -520,13 +539,13 @@ export const styles = StyleSheet.create({
     marginVertical: 0,
   },
   bt2: {
-    fontFamily: 'open sans',
+    fontFamily: "open sans",
     fontSize: 15,
     lineHeight: 0,
     marginTop: -45,
     paddingTop: 10,
     paddingBottom: 8,
-    backgroundColor: '#004aad',
+    backgroundColor: "#004aad",
     width: 110,
     borderRadius: 10,
     paddingLeft: 0,
@@ -534,17 +553,17 @@ export const styles = StyleSheet.create({
     marginVertical: 0,
   },
   btnText: {
-    alignSelf: 'center',
-    color: '#fff',
+    alignSelf: "center",
+    color: "#fff",
     fontSize: 15,
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   horizontal: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    justifyContent: "space-around",
     padding: 0,
   },
 });
