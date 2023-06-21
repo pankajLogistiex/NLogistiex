@@ -93,6 +93,7 @@ import {
   setSyncTime,
   setSyncTimeFull,
 } from "./src/redux/slice/autoSyncSlice";
+import Mixpanel from "react-native-mixpanel";
 
 const db = openDatabase({ name: "rn_sqlite" });
 
@@ -100,9 +101,12 @@ const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
 function StackNavigators({ navigation }) {
+  Mixpanel.sharedInstanceWithToken("c8b2a1b9ad65958a04d82787add43a72");
+
   const dispatch = useDispatch();
 
   const userId = useSelector((state) => state.user.user_id);
+  const userEmail = useSelector((state) => state.user.user_email);
   const notificationCount = useSelector((state) => state.notification.count);
   // const [notificationCount,setNotificationCount1]=useState(0);
   const syncTime = useSelector((state) => state.autoSync.syncTime);
@@ -118,9 +122,18 @@ function StackNavigators({ navigation }) {
   let m = 0;
 
   useEffect(() => {
+    Mixpanel.trackWithProperties("Background Task Run UseEffect Called", {
+      userId: userId,
+      userEmail: userEmail,
+    });
+
     BackgroundTimer.runBackgroundTimer(() => {
       if (isAutoSyncEnable) {
         push_Data();
+        Mixpanel.trackWithProperties("Auto sync called", {
+          userId: userId,
+          userEmail: userEmail,
+        });
         console.log("===Auto sync called===");
       }
     }, 180000);
@@ -131,6 +144,10 @@ function StackNavigators({ navigation }) {
   useEffect(() => {
     if (forceSync) {
       push_Data();
+      Mixpanel.trackWithProperties("Force sync called", {
+        userId: userId,
+        userEmail: userEmail,
+      });
       console.log("===Force sync called===");
     }
   }, [forceSync]);
@@ -552,6 +569,11 @@ function StackNavigators({ navigation }) {
     dispatch(setSyncTime(datetime));
     dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
     AsyncStorage.setItem("lastSyncTime112", datetime);
+
+    Mixpanel.trackWithProperties("Post SPS Done at time: " + datetime, {
+      userId: userId,
+      userEmail: userEmail,
+    });
 
     db.transaction((tx) => {
       tx.executeSql(

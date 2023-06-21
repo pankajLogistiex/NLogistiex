@@ -32,6 +32,7 @@ import {
   setIdToken,
 } from "../redux/slice/userSlice";
 import { authorize } from "react-native-app-auth";
+import { setForceSync } from "../redux/slice/autoSyncSlice";
 
 const config = {
   issuer: "https://uacc.logistiex.com/realms/Logistiex-Demo",
@@ -120,9 +121,14 @@ export default function Login() {
         setLoginClicked(false);
 
         setTimeout(() => {
+          dispatch(setForceSync(true));
+        }, 500);
+
+        setTimeout(() => {
           setShowModal(false);
+          dispatch(setForceSync(true));
           navigation.navigate("Main");
-        }, 100);
+        }, 1000);
       })
       .catch((err) => {
         console.log(err);
