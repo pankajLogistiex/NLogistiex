@@ -101,8 +101,6 @@ const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
 
 function StackNavigators({ navigation }) {
-  Mixpanel.sharedInstanceWithToken("c8b2a1b9ad65958a04d82787add43a72");
-
   const dispatch = useDispatch();
 
   const userId = useSelector((state) => state.user.user_id);
@@ -119,21 +117,38 @@ function StackNavigators({ navigation }) {
   const [data, setData] = useState([]);
   const [isLogin, setIsLogin] = useState(false);
   const [scannedStatus, SetScannedStatus] = useState(0);
+  const [isMixPanelInit, setIsMixPanelInit] = useState(false);
   let m = 0;
 
   useEffect(() => {
-    Mixpanel.trackWithProperties("Background Task Run UseEffect Called", {
-      userId: userId,
-      userEmail: userEmail,
-    });
+    Mixpanel.sharedInstanceWithToken("c8b2a1b9ad65958a04d82787add43a72")
+      .then(() => {
+        setIsMixPanelInit(true);
+        console.log("Mixpanel is initialized");
+      })
+      .catch((error) => {
+        console.log("Mixpanel initialization error:", error);
+      });
+  }, []);
+
+  useEffect(() => {
+    console.log("===Background Task Run UseEffect Called===");
+    if (isMixPanelInit) {
+      Mixpanel.trackWithProperties("Background Task Run UseEffect Called", {
+        userId: userId,
+        userEmail: userEmail,
+      });
+    }
 
     BackgroundTimer.runBackgroundTimer(() => {
       if (isAutoSyncEnable) {
         push_Data();
-        Mixpanel.trackWithProperties("Auto sync called", {
-          userId: userId,
-          userEmail: userEmail,
-        });
+        if (isMixPanelInit) {
+          Mixpanel.trackWithProperties("Auto sync called", {
+            userId: userId,
+            userEmail: userEmail,
+          });
+        }
         console.log("===Auto sync called===");
       }
     }, 180000);
@@ -144,10 +159,12 @@ function StackNavigators({ navigation }) {
   useEffect(() => {
     if (forceSync) {
       push_Data();
-      Mixpanel.trackWithProperties("Force sync called", {
-        userId: userId,
-        userEmail: userEmail,
-      });
+      if (isMixPanelInit) {
+        Mixpanel.trackWithProperties("Force sync called", {
+          userId: userId,
+          userEmail: userEmail,
+        });
+      }
       console.log("===Force sync called===");
     }
   }, [forceSync]);
@@ -570,10 +587,12 @@ function StackNavigators({ navigation }) {
     dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
     AsyncStorage.setItem("lastSyncTime112", datetime);
 
-    Mixpanel.trackWithProperties("Post SPS Done at time: " + datetime, {
-      userId: userId,
-      userEmail: userEmail,
-    });
+    if (isMixPanelInit) {
+      Mixpanel.trackWithProperties("Post SPS Done at time: " + datetime, {
+        userId: userId,
+        userEmail: userEmail,
+      });
+    }
 
     db.transaction((tx) => {
       tx.executeSql(
