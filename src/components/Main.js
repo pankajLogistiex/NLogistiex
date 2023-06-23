@@ -360,7 +360,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
 
     db.transaction((tx) => {
       tx.executeSql(
-        `SELECT consignorCode, AcceptedList
+        `SELECT stopId, AcceptedList
         FROM closeHandoverBag1`,
         [],
         (tx, resultSet) => {

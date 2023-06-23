@@ -5,7 +5,7 @@ import {
   Image,
   Center,
   Button,
-  Modal,
+  Modal, 
   Input,
 } from 'native-base';
 import { setAutoSync } from "../../redux/slice/autoSyncSlice";
@@ -48,19 +48,19 @@ const HandOverSummary = ({ route }) => {
           db.transaction(tx => {
             db.transaction(tx => {
               tx.executeSql(
-                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? ',
-                [results.rows.item(i).consignorCode],
+                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? ',
+                [results.rows.item(i).stopId],
                 (tx1, results11) => {
                   tx.executeSql(
-                    'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND handoverStatus ="accepted"',
-                    [results.rows.item(i).consignorCode],
+                    'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND handoverStatus ="accepted"',
+                    [results.rows.item(i).stopId],
                     (tx1, results22) => {
                       db.transaction(tx => {
                         tx.executeSql(
-                          'SELECT * FROM closeHandoverBag1 where consignorCode=? ',
-                          [results.rows.item(i).consignorCode],
+                          'SELECT * FROM closeHandoverBag1 where stopId=? ',
+                          [results.rows.item(i).stopId],
                           (tx1, results33) => {
-                            newData[results.rows.item(i).consignorCode] = {
+                            newData[results.rows.item(i).stopId] = {
                               consignorName: results.rows.item(i).consignorName,
                               bags: results33.rows.length,
                               scanned: results22.rows.length,
@@ -133,10 +133,10 @@ const HandOverSummary = ({ route }) => {
               </DataTable.Header>
 
               {displayData && data.length > 0
-                ? Object.keys(displayData11).map((consignorCode, index) =>
-                    // displayData11[consignorCode].scanned >= 0 &&
-                    displayData11[consignorCode].scanned +
-                      displayData11[consignorCode].bags !==
+                ? Object.keys(displayData11).map((stopId, index) =>
+                    // displayData11[stopId].scanned >= 0 &&
+                    displayData11[stopId].scanned +
+                      displayData11[stopId].bags !==
                     0 ? (
                       <DataTable.Row
                         style={{
@@ -144,21 +144,21 @@ const HandOverSummary = ({ route }) => {
                           backgroundColor: '#eeeeee',
                           borderBottomWidth: 1,
                         }}
-                        key={consignorCode}>
+                        key={stopId}>
                         <DataTable.Cell style={{flex: 1.7}}>
                           <Text style={styles.fontvalue}>
-                            {displayData11[consignorCode].consignorName}
+                            {displayData11[stopId].consignorName}
                           </Text>
                         </DataTable.Cell>
 
                         <DataTable.Cell style={{flex: 1, marginRight: 5}}>
                           <Text style={styles.fontvalue}>
-                            {displayData11[consignorCode].scanned}
+                            {displayData11[stopId].scanned}
                           </Text>
                         </DataTable.Cell>
                         <DataTable.Cell style={{flex: 1, marginRight: -45}}>
                           <Text style={styles.fontvalue}>
-                            {displayData11[consignorCode].bags}
+                            {displayData11[stopId].bags}
                           </Text>
                         </DataTable.Cell>
                         {/* <MaterialIcons name="check" style={{ fontSize: 30, color: 'green', marginTop: 8 }} /> */}

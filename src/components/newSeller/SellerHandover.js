@@ -7,7 +7,7 @@ import {
   Image,
   Center,
   Button,
-  ArrowForwardIcon,
+  ArrowForwardIcon, 
 } from 'native-base';
 import {StyleSheet,View, ScrollView, Linking,ActivityIndicator,TouchableOpacity} from 'react-native';
 import {DataTable, Searchbar, Text, Card} from 'react-native-paper';
@@ -36,7 +36,7 @@ const SellerHandover = ({ route }) => {
 //   const expectedSum = Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ? item.expected : 0), 0);
 // const scannedSum = Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ? item.scanned : 0), 0);
 
- const scannedSum = Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 && item.expected === item.scanned && !acceptedItemData[item.consignorCode] ? 1 : 0), 0);
+ const scannedSum = Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 && item.expected === item.scanned && !acceptedItemData[item.stopId] ? 1 : 0), 0);
  const expectedSum = Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ?  1 : 0), 0);
 
   // const progress = Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ? item.scanned : 0), 0) / Object.values(displayData).reduce((sum, item) => sum + (item.expected > 0 ? item.expected : 0), 0);
@@ -79,27 +79,27 @@ return unsubscribe;
           temp.push(results.rows.item(i));
           // console.log(results.rows.item(i).consignorName," " ,results.rows.item(i).sellerIndex);
 
-          // var consignorcode=results.rows.item(i).consignorCode;
+          // var stopId=results.rows.item(i).stopId;
           var consignorName=results.rows.item(i).sellerIndex;
 // console.log(consignorName);
           db.transaction(tx => {
             db.transaction(tx => {
               tx.executeSql(
-                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? ',
-                [results.rows.item(i).consignorCode],
+                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? ',
+                [results.rows.item(i).stopId],
                 (tx1, results11) => {
                   //    console.log(results11,'1',results11.rows.length);
                   //    var expected=results11.rows.length;
                   tx.executeSql(
-                    'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND handoverStatus IS NOT NULL',
-                    [results.rows.item(i).consignorCode],
+                    'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND handoverStatus IS NOT NULL',
+                    [results.rows.item(i).stopId],
                     (tx1, results22) => {
                       setMM(MM + results22.rows.length);
                       // console.log(results22,'2',results22.rows.length);
                       // var scanned=results.rows.length;
-                      newData[results.rows.item(i).consignorCode] = {
+                      newData[results.rows.item(i).stopId] = {
                         consignorName: results.rows.item(i).consignorName,
-                        consignorCode:results.rows.item(i).consignorCode,
+                        stopId:results.rows.item(i).stopId,
                         consignorContact:results.rows.item(i).consignorContact,
                         consignorAddress1 :results.rows.item(i).consignorAddress1,
                         consignorCity:results.rows.item(i).consignorCity,
@@ -137,7 +137,7 @@ return unsubscribe;
 
     db.transaction((tx) => {
       tx.executeSql(
-        `SELECT consignorCode, AcceptedList
+        `SELECT stopId, AcceptedList
         FROM closeHandoverBag1`,
         [],
         (tx, resultSet) => {
@@ -146,14 +146,14 @@ return unsubscribe;
           const updatedResults = {};
     
           rows.forEach((item) => {
-            const consignorCode = item.consignorCode;
+            const stopId = item.stopId;
             const acceptedList = JSON.parse(item.AcceptedList);
     
-            if (!updatedResults[consignorCode]) {
-              updatedResults[consignorCode] = 0;
+            if (!updatedResults[stopId]) {
+              updatedResults[stopId] = 0;
             }
     
-            updatedResults[consignorCode] += acceptedList.length;
+            updatedResults[stopId] += acceptedList.length;
     
             // console.log("item", item);
           });
@@ -253,8 +253,8 @@ const handleMapIconPress = (seller) => {
           showsHorizontalScrollIndicator={false}>
 
               {displayData && data.length > 0
-                ? Object.keys(displayData11).map((consignorCode, i) =>
-                    displayData11[consignorCode].expected > 0 ? displayData11[consignorCode].expected !== displayData11[consignorCode].scanned ? (
+                ? Object.keys(displayData11).map((stopId, i) =>
+                    displayData11[stopId].expected > 0 ? displayData11[stopId].expected !== displayData11[stopId].scanned ? (
 
          <View > 
           <View
@@ -275,21 +275,21 @@ const handleMapIconPress = (seller) => {
           >
             <View style={{ flex: 1 }}>
             <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
-   {i+1}.{" "}{displayData11[consignorCode].consignorName}
+   {i+1}.{" "}{displayData11[stopId].consignorName}
 </Text>
 
-              <Text style={{ marginBottom: 4 , color: 'black'}}>{displayData11[consignorCode].consignorAddress1}</Text>
-              <Text style={{ marginBottom: 4 , color: 'black'}}>{displayData11[consignorCode].consignorCity}, {displayData11[consignorCode].consignorAddress2}, {displayData11[consignorCode].consignorPincode}</Text>
-              <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Handovers({displayData11[consignorCode].expected}) </Text>
+              <Text style={{ marginBottom: 4 , color: 'black'}}>{displayData11[stopId].consignorAddress1}</Text>
+              <Text style={{ marginBottom: 4 , color: 'black'}}>{displayData11[stopId].consignorCity}, {displayData11[stopId].consignorAddress2}, {displayData11[stopId].consignorPincode}</Text>
+              <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Handovers({displayData11[stopId].expected}) </Text>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
-              <TouchableOpacity onPress={() => handlePhoneIconPress( displayData11[consignorCode].consignorContact)}>
+              <TouchableOpacity onPress={() => handlePhoneIconPress( displayData11[stopId].consignorContact)}>
                 <MaterialIcons name="phone" size={24} style={{ marginBottom: 12 , }} color="green" />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleMapIconPress( displayData11[consignorCode])}>
+              <TouchableOpacity onPress={() => handleMapIconPress( displayData11[stopId])}>
                 <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
               </TouchableOpacity>
-              <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Scanned({displayData11[consignorCode].scanned}) </Text>
+              <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Scanned({displayData11[stopId].scanned}) </Text>
             </View>
           </View>
          </View>
@@ -299,8 +299,8 @@ const handleMapIconPress = (seller) => {
                       : 
                       (
 
-                      //  results && results[consignorCode]  && results[consignorCode] === displayData11[consignorCode].expected
-                      !acceptedItemData[consignorCode]
+                      //  results && results[stopId]  && results[stopId] === displayData11[stopId].expected
+                      !acceptedItemData[stopId]
                        ? 
 
 <View>
@@ -338,24 +338,24 @@ const handleMapIconPress = (seller) => {
 
     <View style={{ flex: 1 }}>
       <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad' }}>
-        {i + 1}. {displayData11[consignorCode].consignorName}
+        {i + 1}. {displayData11[stopId].consignorName}
       </Text>
 
-      <Text style={{ marginBottom: 4, color: 'black' }}>{displayData11[consignorCode].consignorAddress1}</Text>
+      <Text style={{ marginBottom: 4, color: 'black' }}>{displayData11[stopId].consignorAddress1}</Text>
       <Text style={{ marginBottom: 4, color: 'black' }}>
-        {displayData11[consignorCode].consignorCity}, {displayData11[consignorCode].consignorAddress2},{' '}
-        {displayData11[consignorCode].consignorPincode}
+        {displayData11[stopId].consignorCity}, {displayData11[stopId].consignorAddress2},{' '}
+        {displayData11[stopId].consignorPincode}
       </Text>
       <Text style={{ fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>
-        Handovers({displayData11[consignorCode].expected})
+        Handovers({displayData11[stopId].expected})
       </Text>
     </View>
 
     <View style={{ alignItems: 'flex-end' }}>
-      <TouchableOpacity onPress={() => handlePhoneIconPress(displayData11[consignorCode].consignorContact)}>
+      <TouchableOpacity onPress={() => handlePhoneIconPress(displayData11[stopId].consignorContact)}>
         <MaterialIcons name="phone" size={24} style={{ marginBottom: 12 }} color="green" />
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => handleMapIconPress(displayData11[consignorCode])}>
+      <TouchableOpacity onPress={() => handleMapIconPress(displayData11[stopId])}>
         <MaterialIcons
           name="map-marker-account-outline"
           size={28}
@@ -363,7 +363,7 @@ const handleMapIconPress = (seller) => {
           color="#FFBF00"
         />
       </TouchableOpacity>
-      <Text style={{ fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Scanned({displayData11[consignorCode].scanned})</Text>
+      <Text style={{ fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Scanned({displayData11[stopId].scanned})</Text>
     </View>
   </View>
 </View>
@@ -392,21 +392,21 @@ const handleMapIconPress = (seller) => {
           > 
             <View style={{ flex: 1 }}>
             <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
-   {i+1}.{" "}{displayData11[consignorCode].consignorName}
+   {i+1}.{" "}{displayData11[stopId].consignorName}
 </Text>
 
-              <Text style={{ marginBottom: 4 , color: 'black'}}>{ displayData11[consignorCode].consignorAddress1}</Text>
-              <Text style={{ marginBottom: 4 , color: 'black'}}>{ displayData11[consignorCode].consignorCity}, { displayData11[consignorCode].consignorAddress2}, { displayData11[consignorCode].consignorPincode}</Text>
-              <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Handovers({displayData11[consignorCode].expected}) </Text>
+              <Text style={{ marginBottom: 4 , color: 'black'}}>{ displayData11[stopId].consignorAddress1}</Text>
+              <Text style={{ marginBottom: 4 , color: 'black'}}>{ displayData11[stopId].consignorCity}, { displayData11[stopId].consignorAddress2}, { displayData11[stopId].consignorPincode}</Text>
+              <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Handovers({displayData11[stopId].expected}) </Text>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
-              <TouchableOpacity onPress={() => handlePhoneIconPress( displayData11[consignorCode].consignorContact)}>
+              <TouchableOpacity onPress={() => handlePhoneIconPress( displayData11[stopId].consignorContact)}>
                 <MaterialIcons name="phone" size={24} style={{ marginBottom: 12 , }} color="green" />
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleMapIconPress( displayData11[consignorCode])}>
+              <TouchableOpacity onPress={() => handleMapIconPress( displayData11[stopId])}>
                 <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
               </TouchableOpacity>
-              <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Scanned({displayData11[consignorCode].scanned}) </Text>
+              <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Scanned({displayData11[stopId].scanned}) </Text>
             </View>
           </View>
         </View> 
