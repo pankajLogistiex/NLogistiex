@@ -52,20 +52,23 @@ const NewSellerPickup = ({route}) => {
   
     if(value && value.length>0 && data && data.length===0){
       setData11(dataSeller.filter((_, index) => valueSeller[index] !== 0));
-    
+    // console.log(" ",data.length);
     }
     
-      }, [valueSeller]);
+      }, [valueSeller,data]);
   
-
+      // console.log(data.length);
   useEffect(() => {
       const unsubscribe = navigation.addListener('focus', () => {
+        setData11([]);
         loadDetails();
+       
+        
       });
       return unsubscribe;
     }, [navigation]);
     // console.log(data.length," ",data.filter((_, index) => value[index] !== 0).length);
-    console.log(dataSeller.length," ",pending11Seller+" ",reverseSeller+" ",valueSeller);
+    // console.log(dataSeller.length," ",pending11Seller+" ",reverseSeller+" ",valueSeller);
     // console.log(data.length,"  ",pending11+" ",reverse+" ",value);
 
   const loadDetails = () => { // setIsLoading(!isLoading);
@@ -75,7 +78,7 @@ const NewSellerPickup = ({route}) => {
               for (let i = 0; i < results.rows.length; ++i) {
                 // console.log(results.rows.item(i).sellerIndex);
                   temp.push(results.rows.item(i));
-                  console.log(results.rows.item(i).sellerIndex," " ,results.rows.item(i).consignorName);
+                  // console.log(results.rows.item(i).sellerIndex," " ,results.rows.item(i).consignorName);
               }
               setData(temp);
               // console.log(temp[0]);
@@ -327,14 +330,30 @@ return (
               padding: 16,
               borderRadius: 10,
               marginVertical: 8,
-              backgroundColor:'#90ee90', 
+              backgroundColor:i  % 2 === 0 ? '#E6F2FF' : '#FFFFFF', 
               shadowColor:'black' ,
               shadowOffset: { width: 5, height: 5 },
               shadowOpacity: 0.8,
               shadowRadius: 20,
               elevation: 5,
-            }}
-          >
+position: 'relative',
+    }}
+  >
+    <Image alt={'Completed Icon'}
+      source={require('../../assets/complete/IMG_complete.png')}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: 150,
+        height: 150,
+        opacity: 0.8,
+        marginLeft:'31%',
+        tintColor: '#90ee90',
+        resizeMode: 'cover',
+      }}
+    />
+
             <View style={{ flex: 1 }}>
             <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
   {i+1}.{" "}{seller.consignorName}
@@ -354,6 +373,8 @@ return (
               <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Delivery({pendingR[i]}/{reverse[i]}) </Text>
             </View>
           </View>
+
+          
         </TouchableOpacity>
                     )
                : 
@@ -385,9 +406,11 @@ return (
                         borderRadius: 10,
                         marginVertical: 8,
                         backgroundColor:
-                        seller.otpSubmitted== 'true'
-                          ? '#FFBF00'
-                          : i % 2 === 0
+
+                        // seller.otpSubmitted== 'true'
+                        //   ? '#FFBF00':
+                        
+                          i % 2 === 0
                           ? '#E6F2FF'
                           : '#FFFFFF',
                         shadowColor:'black' ,
@@ -396,8 +419,25 @@ return (
                         shadowRadius: 18,
                         elevation: 5,
                         
-                      }}
-                    >
+                    position: 'relative',
+    }}
+  >
+    {seller.otpSubmitted== 'true'
+                          ? 
+    <Image alt={'Completed Icon'}
+      source={require('../../assets/complete/IMG_complete.png')}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: 150,
+        height: 150,
+        opacity: 0.8,
+        marginLeft:'31%',
+        tintColor: '#FFBF00',
+        resizeMode: 'cover',
+      }}
+    /> :null}
                       <View style={{ flex: 1 }}>
                       <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
             {i+1}.{" "}{seller.consignorName}
@@ -476,15 +516,30 @@ return (
                     padding: 16,
                     borderRadius: 10,
                     marginVertical: 8,
-                    backgroundColor: '#90ee90',
+                    backgroundColor: i  % 2 === 0 ? '#E6F2FF' : '#FFFFFF',
                     shadowColor:'black' ,
                     shadowOffset: { width: 5, height: 5 },
                     shadowOpacity: 0.8,
                     shadowRadius: 20,
                     elevation: 5,
                     
+                    position: 'relative',
                   }}
                 >
+                  <Image alt={'Completed Icon'}
+                    source={require('../../assets/complete/IMG_complete.png')}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: 150,
+                      height: 150,
+                      opacity: 0.8,
+                      marginLeft:'31%',
+                      tintColor: '#90ee90',
+                      resizeMode: 'cover',
+                    }}
+                  />
                   <View style={{ flex: 1 }}>
                   <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
         {i+1}.{" "}{seller.consignorName}
@@ -504,6 +559,7 @@ return (
                     <Text style={{fontWeight: 'bold',marginTop: 8, color: '#004aad' }}>Delivery({pendingR[i]}/{reverse[i]}) </Text>
                   </View>
                 </View>
+               
               </TouchableOpacity>
                 )
                 : null,
