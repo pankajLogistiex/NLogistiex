@@ -8,6 +8,7 @@ import {
   Modal,
   Input,
 } from 'native-base';
+import { setAutoSync } from "../../redux/slice/autoSyncSlice";
 import {StyleSheet, ScrollView, View} from 'react-native';
 import {DataTable, Searchbar, Text, Card} from 'react-native-paper';
 import {openDatabase} from 'react-native-sqlite-storage';
@@ -16,7 +17,7 @@ import {useNavigation} from '@react-navigation/native';
 import {Picker} from '@react-native-picker/picker';
 import { useDispatch } from 'react-redux';
 const db = openDatabase({name: 'rn_sqlite'});
-
+ 
 const HandOverSummary = ({ route }) => {
   const dispatch = useDispatch();
   const [data, setData] = useState([]);
