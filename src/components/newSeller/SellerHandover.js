@@ -303,43 +303,73 @@ const handleMapIconPress = (seller) => {
                       !acceptedItemData[consignorCode]
                        ? 
 
-<View  >
-          <View
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: 16,
-              borderRadius: 10,
-              marginVertical: 8,
-              backgroundColor:'#90ee90', 
-              shadowColor:'black' ,
-              shadowOffset: { width: 5, height: 5 },
-              shadowOpacity: 0.8,
-              shadowRadius: 20,
-              elevation: 5,
-            }}
-          >
-            <View style={{ flex: 1 }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
-   {i+1}.{" "}{displayData11[consignorCode].consignorName}
-</Text>
+<View>
+  <View
+    style={{
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      padding: 16,
+      borderRadius: 10,
+      marginVertical: 8,
+      backgroundColor: i % 2 === 0 ? '#E6F2FF' : '#FFFFFF',
+      shadowColor: 'black',
+      shadowOffset: { width: 5, height: 5 },
+      shadowOpacity: 0.8,
+      shadowRadius: 20,
+      elevation: 5,
+      position: 'relative',
+    }}
+  >
+    <Image alt={'Completed Icon'}
+      source={require('../../assets/complete/IMG_complete.png')}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: 150,
+        height: 150,
+        opacity: 0.8,
+        marginLeft:'31%',
+        tintColor: '#90ee90',
+        resizeMode: 'cover',
+      }}
+    />
 
-              <Text style={{ marginBottom: 4 , color: 'black'}}>{ displayData11[consignorCode].consignorAddress1}</Text>
-              <Text style={{ marginBottom: 4 , color: 'black'}}>{ displayData11[consignorCode].consignorCity}, { displayData11[consignorCode].consignorAddress2}, { displayData11[consignorCode].consignorPincode}</Text>
-              <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Handovers({displayData11[consignorCode].expected}) </Text>
-            </View>
-            <View style={{ alignItems: 'flex-end' }}>
-              <TouchableOpacity onPress={() => handlePhoneIconPress( displayData11[consignorCode].consignorContact)}>
-                <MaterialIcons name="phone" size={24} style={{ marginBottom: 12 , }} color="green" />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => handleMapIconPress( displayData11[consignorCode])}>
-                <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
-              </TouchableOpacity>
-              <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Scanned({displayData11[consignorCode].scanned}) </Text>
-            </View>
-          </View>
-        </View>
+    <View style={{ flex: 1 }}>
+      <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad' }}>
+        {i + 1}. {displayData11[consignorCode].consignorName}
+      </Text>
+
+      <Text style={{ marginBottom: 4, color: 'black' }}>{displayData11[consignorCode].consignorAddress1}</Text>
+      <Text style={{ marginBottom: 4, color: 'black' }}>
+        {displayData11[consignorCode].consignorCity}, {displayData11[consignorCode].consignorAddress2},{' '}
+        {displayData11[consignorCode].consignorPincode}
+      </Text>
+      <Text style={{ fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>
+        Handovers({displayData11[consignorCode].expected})
+      </Text>
+    </View>
+
+    <View style={{ alignItems: 'flex-end' }}>
+      <TouchableOpacity onPress={() => handlePhoneIconPress(displayData11[consignorCode].consignorContact)}>
+        <MaterialIcons name="phone" size={24} style={{ marginBottom: 12 }} color="green" />
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => handleMapIconPress(displayData11[consignorCode])}>
+        <MaterialIcons
+          name="map-marker-account-outline"
+          size={28}
+          style={{ marginBottom: 12 }}
+          color="#FFBF00"
+        />
+      </TouchableOpacity>
+      <Text style={{ fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Scanned({displayData11[consignorCode].scanned})</Text>
+    </View>
+  </View>
+</View>
+
+
+
                       
                       :
 

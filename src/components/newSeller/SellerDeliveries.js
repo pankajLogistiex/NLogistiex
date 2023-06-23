@@ -48,12 +48,12 @@ import {
       
     if(reverse && reverse.length>0 && data && data.length===0){
       setData11(dataSeller.filter((_, index) => reverseSeller[index] !== 0));
-    
+    // console.log(data.length);
     }
     
-      }, [reverseSeller])
-
-      console.log(dataSeller.length," ",pending11Seller+" ",reverseSeller+" ",valueSeller);
+      }, [reverseSeller,data])
+      // console.log(data.length);
+      // console.log(dataSeller.length," ",pending11Seller+" ",reverseSeller+" ",valueSeller);
       // console.log(data.length,"  ",pending11+" ",reverse+" ",value);
       const scannedSum  =  data.reduce((sum, seller, i) => sum + (reverse[i] > 0 && pending11[i]===reverse[i] && seller.otpSubmittedDelivery === "true" ? 1 : 0), 0);
       const expectedSum = reverse.reduce((accumulator, currentValue) => accumulator + (currentValue > 0 ? 1 : 0), 0);
@@ -62,6 +62,7 @@ import {
         const unsubscribe = navigation.addListener('focus', () => {
           dispatch(setAutoSync(true));
           loadDetails();
+          setData11([]);
         });
         return unsubscribe;
       }, [navigation]);
@@ -70,7 +71,7 @@ import {
         db.transaction((tx) => {
             tx.executeSql('SELECT * FROM SyncSellerPickUp ORDER BY  CAST(sellerIndex AS INTEGER) ASC', [], (tx1, results) => { // ToastAndroid.show("Loading...", ToastAndroid.SHORT);
                 let temp = [];
-                console.log(results.rows.length);
+                // console.log(results.rows.length);
                 for (let i = 0; i < results.rows.length; ++i) {
                     temp.push(results.rows.item(i));
                 }
@@ -303,14 +304,29 @@ import {
                             padding: 16,
                             borderRadius: 10,
                             marginVertical: 8,
-                            backgroundColor:'#90ee90', 
+                            backgroundColor: i  % 2 === 0 ? '#E6F2FF' : '#FFFFFF', 
                             shadowColor:'black' ,
                             shadowOffset: { width: 5, height: 5 },
                             shadowOpacity: 0.8,
                             shadowRadius: 20,
                             elevation: 5,
+                            position: 'relative',
                           }}
                         >
+                          <Image alt={'Completed Icon'}
+                            source={require('../../assets/complete/IMG_complete.png')}
+                            style={{
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              width: 150,
+                              height: 150,
+                              opacity: 0.8,
+                              marginLeft:'31%',
+                              tintColor: '#90ee90',
+                              resizeMode: 'cover',
+                            }}
+                          />
                           <View style={{ flex: 1 }}>
                           <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
                 {i+1}.{" "}{single.consignorName}
@@ -459,14 +475,29 @@ import {
                             padding: 16,
                             borderRadius: 10,
                             marginVertical: 8,
-                            backgroundColor: '#90ee90', 
+                            backgroundColor:  i  % 2 === 0 ? '#E6F2FF' : '#FFFFFF', 
                             shadowColor:'black' ,
                             shadowOffset: { width: 5, height: 5 },
                             shadowOpacity: 0.8,
                             shadowRadius: 20,
                             elevation: 5,
+                            position: 'relative',
                           }}
                         >
+                          <Image alt={'Completed Icon'}
+                            source={require('../../assets/complete/IMG_complete.png')}
+                            style={{
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              width: 150,
+                              height: 150,
+                              opacity: 0.8,
+                              marginLeft:'31%',
+                              tintColor: '#90ee90',
+                              resizeMode: 'cover',
+                            }}
+                          />
                           <View style={{ flex: 1 }}>
                           <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8, color: '#004aad'}}>
                 {i+1}.{" "}{single.consignorName}
