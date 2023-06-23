@@ -377,6 +377,7 @@ function StackNavigators({ navigation }) {
     console.log("api pull");
     loadAPI_Data1();
     loadAPI_Data2();
+    loadAPI_3();
     // loadAPI_Data3();
     // loadAPI_Data4();
     // loadAPI_Data5();
@@ -638,7 +639,7 @@ function StackNavigators({ navigation }) {
       // txn.executeSql('DROP TABLE IF EXISTS SyncSellerPickUp', []);
       txn.executeSql(
         `CREATE TABLE IF NOT EXISTS SyncSellerPickUp( consignorCode ID VARCHAR(200) PRIMARY KEY ,userId VARCHAR(100), 
-            consignorName VARCHAR(200),sellerIndex INT(20),consignorAddress1 VARCHAR(200),consignorAddress2 VARCHAR(200),consignorCity VARCHAR(200),consignorPincode,consignorLatitude INT(20),consignorLongitude DECIMAL(20,10),consignorContact VARCHAR(200),ReverseDeliveries INT(20),runSheetNumber VARCHAR(200),ForwardPickups INT(20), BagOpenClose11 VARCHAR(200), ShipmentListArray VARCHAR(800),contactPersonName VARCHAR(100),otpSubmitted VARCHAR(50),otpSubmittedDelivery VARCHAR(50))`,
+            consignorName VARCHAR(200),sellerIndex INT(20),consignorAddress1 VARCHAR(200),consignorAddress2 VARCHAR(200),consignorCity VARCHAR(200),consignorPincode,consignorLatitude INT(20),consignorLongitude DECIMAL(20,10),consignorContact VARCHAR(200),ReverseDeliveries INT(20),runSheetNumber VARCHAR(200),ForwardPickups INT(20), BagOpenClose11 VARCHAR(200), ShipmentListArray VARCHAR(800),contactPersonName VARCHAR(100),otpSubmitted VARCHAR(50),otpSubmittedDelivery VARCHAR(50), stopId VARCHAR(200), FMtripId VARCHAR(200))`,
         [],
         (sqlTxn, res) => {
           // console.log("table created successfully1212");
@@ -653,9 +654,21 @@ function StackNavigators({ navigation }) {
   const loadAPI_Data1 = () => {
     setIsLoading(!isLoading);
     createTables1();
+    db.transaction((txn) => {
+      txn.executeSql(
+        "SELECT tripID FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ?",
+        [20, 50, userId],
+        (tx, result) => {
+          if (result.rows.length > 0) {
+            var tripId = result.rows.item(0).tripID;
+          }
     (async () => {
       await axios
-        .get(backendUrl + `SellerMainScreen/consignorsList/${userId}`)
+        .get(backendUrl + `SellerMainScreen/consignorsList/${userId}`,{
+          params: {
+            tripID: tripId,
+          },
+        })
         .then(
           (res) => {
             console.log("API 1 OK: " + res.data.data.length);
@@ -671,7 +684,7 @@ function StackNavigators({ navigation }) {
                     if (result.rows.length <= 0) {
                       db.transaction((txn) => {
                         txn.executeSql(
-                          "INSERT OR REPLACE INTO SyncSellerPickUp( contactPersonName,consignorCode ,userId ,consignorName,sellerIndex,consignorAddress1,consignorAddress2,consignorCity,consignorPincode,consignorLatitude,consignorLongitude,consignorContact,ReverseDeliveries,runSheetNumber,ForwardPickups,BagOpenClose11, ShipmentListArray,otpSubmitted,otpSubmittedDelivery) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                          "INSERT OR REPLACE INTO SyncSellerPickUp( contactPersonName,consignorCode ,userId ,consignorName,sellerIndex,consignorAddress1,consignorAddress2,consignorCity,consignorPincode,consignorLatitude,consignorLongitude,consignorContact,ReverseDeliveries,runSheetNumber,ForwardPickups,BagOpenClose11, ShipmentListArray,otpSubmitted,otpSubmittedDelivery,stopId, FMtripId) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                           [
                             res.data.data[i].contactPersonName,
                             res.data.data[i].consignorCode,
@@ -692,6 +705,8 @@ function StackNavigators({ navigation }) {
                             " ",
                             "false",
                             "false",
+                            res.data.data[i].stopId,
+                            res.data.data[i].FMtripId,
                           ],
                           (sqlTxn, _res) => {
                             console.log(
@@ -736,33 +751,36 @@ function StackNavigators({ navigation }) {
           }
         );
     })();
+  }
+  );
+});
   };
   const viewDetails1 = () => {
     db.transaction((tx) => {
-      tx.executeSql("SELECT * FROM SyncSellerPickUp", [], (tx1, results) => {
+      tx.executeSql("SELECT * FROM SellerMainScreenDetails", [], (tx1, results) => {
         let temp = [];
         // console.log(results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
 
-          console.log(results.rows.item(i).contactPersonName);
+          // console.log("SyncSellerPickUp",results.rows.item(i));
           // var address121 = results.rows.item(i).consignorAddress;
           // var address_json = JSON.parse(address121);
           // console.log(typeof (address_json));
           // console.log("Address from local db : " + address_json.consignorAddress1 + " " + address_json.consignorAddress2);
           // ToastAndroid.show('consignorName:' + results.rows.item(i).consignorName + "\n" + 'PRSNumber : ' + results.rows.item(i).PRSNumber, ToastAndroid.SHORT);
         }
-        if (m === 3) {
+        if (m === 4) {
           ToastAndroid.show("Sync Successful", ToastAndroid.SHORT);
           setIsLoading(false);
           setIsLogin(true);
           AsyncStorage.setItem("apiDataLoaded", "true");
-          console.log("All " + m + " APIs loaded successfully ");
+          console.log("All " + 4 + " APIs loaded successfully ");
           m = 0;
 
           AsyncStorage.setItem("refresh11", "refresh");
         } else {
-          console.log("Only " + m + " APIs loaded out of 3 ");
+          console.log("Only " + m + " APIs loaded out of 4 ");
         }
         // m++;
         // ToastAndroid.show("Sync Successful",ToastAndroid.SHORT);
@@ -803,7 +821,9 @@ function StackNavigators({ navigation }) {
           longitude VARCHAR(200),
           bagId VARCHAR(200),
           packagingAction VARCHAR(200),
-          postRDStatus VARCHAR(200)
+          postRDStatus VARCHAR(200),
+          stopId VARCHAR(200),
+          FMtripId VARCHAR(200)
           )`,
         [],
         (sqlTxn, res) => {
@@ -811,7 +831,7 @@ function StackNavigators({ navigation }) {
           // loadAPI_Data();
         },
         (error) => {
-          console.log("error on creating table " + error.message);
+          console.log("error on creating table SellerMainScreenDetails" + error.message);
         }
       );
     });
@@ -819,8 +839,21 @@ function StackNavigators({ navigation }) {
 
   const loadAPI_Data2 = () => {
     setIsLoading(!isLoading);
+    db.transaction((txn) => {
+      txn.executeSql(
+        "SELECT tripID FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ?",
+        [20, 50, userId],
+        (tx, result) => {
+          if (result.rows.length > 0) {
+            var tripID = result.rows.item(0).tripID;
+          }
+          console.log("Trip ID: ", tripID);
     (async () => {
-      await axios.get(backendUrl + `SellerMainScreen/workload/${userId}`).then(
+      await axios.get(backendUrl + `SellerMainScreen/workload/${userId}`,{
+        params: {
+          tripID: tripID,
+        },
+      }).then(
         (res) => {
           createTables2();
           console.log("API 2 OK: " + res.data.data.length);
@@ -855,8 +888,10 @@ function StackNavigators({ navigation }) {
                           syncHandoverStatus,
                           bagId,
                           packagingAction,
-                          postRDStatus
-                        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                          postRDStatus,
+                          stopId,
+                          FMtripId
+                        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
                         [
                           res.data.data[i].clientShipmentReferenceNumber,
                           res.data.data[i].clientRefId,
@@ -895,6 +930,8 @@ function StackNavigators({ navigation }) {
                           "",
                           res.data.data[i].packagingAction,
                           null,
+                          res.data.data[i].stopId,
+                          res.data.data[i].FMtripId,
                         ],
                         (sqlTxn, _res) => {
                           // console.log(`\n Data Added to local db successfully`);
@@ -929,6 +966,72 @@ function StackNavigators({ navigation }) {
         },
         (error) => {
           console.log(error);
+        }
+      );
+    })();
+  }
+  );
+});
+  };
+  const createTables3 = () => {
+    db.transaction((txn) => {
+      txn.executeSql(
+        `CREATE TABLE IF NOT EXISTS TripDetails( 
+          tripID VARCHAR(200),
+          userID VARCHAR(200),
+          vehicleNumber VARCHAR(200),
+          tripStatus VARCHAR(200),
+          createdAt VARCHAR(200),
+          updatedAt VARCHAR(200)
+          )`,
+        [],
+        (sqlTxn, res) => {
+          console.log("table created successfully TripDetails");
+          // loadAPI_Data();
+        },
+        (error) => {
+          console.log("error on creating table " + error.message);
+        }
+      );
+    });
+  };
+ 
+  const loadAPI_3 = () => {
+    createTables3();
+    (async () => {
+      await axios
+      .get(backendUrl + "UserTripInfo/getUserTripInfo", {
+        params: {
+          feUserID: userId,
+        },
+      }).then(
+        (res) => {          
+          for (let i = 0; i < res.data.res_data.length; i++) {
+            // const dateValue = parseInt(res.data.res_data[i].date);
+            db.transaction((txn) => {
+              txn.executeSql(
+                `INSERT OR REPLACE INTO TripDetails(tripID , userID, vehicleNumber, tripStatus, createdAt ,updatedAt
+                          ) VALUES (?,?,?,?,?,?)`,
+                [
+                  res.data.res_data[i].tripID,
+                  res.data.res_data[i].userID,
+                  res.data.res_data[i].vehicleNumber,
+                  res.data.res_data[i].tripStatus,
+                  res.data.res_data[i].createdAt,
+                  res.data.res_data[i].updatedAt
+                ],
+                (sqlTxn, _res) => {
+                },
+                (error) => {
+                  console.log("error on adding data in tripdetails " + error.message);
+                }
+              );
+            });
+          }
+          m++;
+        },
+        (error) => {
+          console.log("tripdetailserror",error);
         }
       );
     })();
