@@ -35,13 +35,13 @@ import { setAutoSync } from "../../redux/slice/autoSyncSlice";
 const OpenBags = ({ route }) => {
   const dispatch = useDispatch();
   const userId = useSelector((state) => state.user.user_id);
-
+ 
   const [data, setData] = useState([]);
   const navigation = useNavigation();
   const [showCloseBagModal, setShowCloseBagModal] = useState(false);
   const [keyword, setKeyword] = useState("");
   const [consignorNames, setconsignorNames] = useState("");
-  const [consignorCode, setconsignorCode] = useState("");
+  const [stopId, setstopId] = useState("");
   const [NoShipment, setNoShipment] = useState(45);
   const [bagSeal, setBagSeal] = useState("");
   const [totalAccepted, setTotalAccepted] = useState(0);
@@ -176,18 +176,18 @@ const OpenBags = ({ route }) => {
   };
 
   function CloseBag(consCode) {
-    var consName = acceptedItemData[consignorCode].consignorName;
+    var consName = acceptedItemData[stopId].consignorName;
     console.log(bagSeal);
     // console.log(acceptedArray);
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM closeHandoverBag1 Where consignorCode=? AND bagDate=? ",
+        "SELECT * FROM closeHandoverBag1 Where stopId=? AND bagDate=? ",
         [consCode, currentDate],
         (tx, results) => {
           console.log(results.rows.length);
           console.log(results);
           tx.executeSql(
-            "INSERT INTO closeHandoverBag1 (bagSeal, bagId, bagDate, AcceptedList,status,consignorCode,consignorName) VALUES (?, ?, ?, ?,?,?,?)",
+            "INSERT INTO closeHandoverBag1 (bagSeal, bagId, bagDate, AcceptedList,status,stopId,consignorName) VALUES (?, ?, ?, ?,?,?,?)",
             [
               bagSeal,
               consCode + "-" + currentDate + "-" + (results.rows.length + 1),
@@ -281,11 +281,11 @@ const OpenBags = ({ route }) => {
     getAllConsignors();
   }, []);
 
-  function getAllAcceptedHandovers(consignorCode) {
+  function getAllAcceptedHandovers(stopId) {
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" And consignorCode=?',
-        [consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" And stopId=?',
+        [stopId],
         (tx1, results) => {
           let exp = results.rows.length;
           let acc = 0;
@@ -305,12 +305,12 @@ const OpenBags = ({ route }) => {
               expected: exp,
               accepted: acc,
               rejected: 0,
-              consignorCode: consignorCode,
+              consignorCode: stopId,
               rejectReason: "",
             };
             const tempHandoverStatus = [...acceptedHandoverStatus];
             const conIndex = tempHandoverStatus.findIndex(
-              (obj) => obj.consignorCode === consignorCode
+              (obj) => obj.consignorCode === stopId
             );
             if (conIndex != -1) {
               tempHandoverStatus[conIndex] = consignorData;
@@ -329,7 +329,7 @@ const OpenBags = ({ route }) => {
     db.transaction((tx) => {
       tx.executeSql("SELECT * FROM SyncSellerPickUp", [], (tx1, results) => {
         for (var i = 0; i < results.rows.length; i++) {
-          getAllAcceptedHandovers(results.rows.item(i).consignorCode);
+          getAllAcceptedHandovers(results.rows.item(i).stopId);
         }
       });
     });
@@ -359,7 +359,7 @@ const OpenBags = ({ route }) => {
         ToastAndroid.show("Successfully Handover Closed", ToastAndroid.SHORT);
       })
       .catch((error) => {
-        ToastAndroid.show("Somthing Went Wrong", ToastAndroid.SHORT);
+        ToastAndroid.show("Something Went Wrong", ToastAndroid.SHORT);
         console.error("Error:", error);
       });
   }
@@ -412,7 +412,7 @@ const OpenBags = ({ route }) => {
               mt={2}
               bg="#004aad"
               onPress={() => {
-                CloseBag(consignorCode);
+                CloseBag(stopId);
                 setShowCloseBagModal(false);
               }}
             >
@@ -441,7 +441,7 @@ const OpenBags = ({ route }) => {
                   <Text
                     style={{ fontSize: 16, fontWeight: "500", color: "black" }}
                   >
-                    {consignorCode}
+                    {stopId}
                   </Text>
                 ) : null}
                 {/* <Text style={{fontSize: 16, fontWeight: '500', color : 'black'}}>{sellerCode11}</Text> */}
@@ -466,8 +466,8 @@ const OpenBags = ({ route }) => {
                   <Text
                     style={{ fontSize: 16, fontWeight: "500", color: "black" }}
                   >
-                    {data && consignorCode && acceptedItemData[consignorCode]
-                      ? acceptedItemData[consignorCode].consignorName
+                    {data && stopId && acceptedItemData[stopId]
+                      ? acceptedItemData[stopId].consignorName
                       : null}
                   </Text>
                 ) : null}
@@ -495,10 +495,10 @@ const OpenBags = ({ route }) => {
                     style={{ fontSize: 16, fontWeight: "500", color: "black" }}
                   >
                     {data &&
-                    consignorCode &&
-                    acceptedItemData[consignorCode] &&
-                    acceptedItemData[consignorCode].acceptedItems11.length > 0
-                      ? acceptedItemData[consignorCode].acceptedItems11.length
+                    stopId &&
+                    acceptedItemData[stopId] &&
+                    acceptedItemData[stopId].acceptedItems11.length > 0
+                      ? acceptedItemData[stopId].acceptedItems11.length
                       : null}
                   </Text>
                 ) : null}
@@ -561,7 +561,7 @@ const OpenBags = ({ route }) => {
                         style={{ backgroundColor: "#004aad", color: "#fff" }}
                         onPress={() => {
                           setShowCloseBagModal(true);
-                          setconsignorCode(key);
+                          setstopId(key);
                         }}
                       >
                         Close Bag

@@ -215,9 +215,9 @@ const HandoverShipmentRTO = ({ route }) => {
   const buttonColor =
     data &&
     data.length &&
-    data[0].consignorCode &&
-    acceptedItemData[data[0].consignorCode] &&
-    acceptedItemData[data[0].consignorCode].acceptedItems11.length > 0
+    data[0].stopId &&
+    acceptedItemData[data[0].stopId] &&
+    acceptedItemData[data[0].stopId].acceptedItems11.length > 0
       ? "#004aad"
       : "gray.300";
   // let serialNo = 0;
@@ -226,7 +226,7 @@ const HandoverShipmentRTO = ({ route }) => {
     if (data && data.length > 0) {
       const fetchData = async () => {
         try {
-          const storedValue = await AsyncStorage.getItem(data[0].consignorCode);
+          const storedValue = await AsyncStorage.getItem(data[0].stopId);
           if (storedValue !== null) {
             setBagStatus(JSON.parse(storedValue));
           } else {
@@ -278,7 +278,7 @@ const HandoverShipmentRTO = ({ route }) => {
   //   db.transaction(tx => {
   //     // tx.executeSql('DROP TABLE IF EXISTS closeHandoverBag1', []);
   //     tx.executeSql(
-  //       'CREATE TABLE IF NOT EXISTS closeHandoverBag1 (bagSeal TEXT , bagId TEXT PRIMARY KEY, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode Text,consignorName Text)',
+  //       'CREATE TABLE IF NOT EXISTS closeHandoverBag1 (bagSeal TEXT , bagId TEXT PRIMARY KEY, bagDate TEXT, AcceptedList TEXT,status TEXT,stopId Text,consignorName Text)',
   //       [],
   //       (tx, results) => {
   //         console.log('Table created successfully');
@@ -295,19 +295,19 @@ const HandoverShipmentRTO = ({ route }) => {
     console.log(acceptedArray);
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM closeHandoverBag1 Where consignorCode=? AND bagDate=? ",
+        "SELECT * FROM closeHandoverBag1 Where stopId=? AND bagDate=? ",
         [consCode, currentDate],
         (tx, results) => {
           console.log(results.rows.length);
           console.log(results);
           tx.executeSql(
-            "INSERT INTO closeHandoverBag1 (bagSeal, bagId, bagDate, AcceptedList,status,consignorCode,consignorName) VALUES (?, ?, ?, ?,?,?,?)",
+            "INSERT INTO closeHandoverBag1 (bagSeal, bagId, bagDate, AcceptedList,status,stopId,consignorName) VALUES (?, ?, ?, ?,?,?,?)",
             [
               bagSeal,
               consCode + "-" + currentDate + "-" + (results.rows.length + 1),
               currentDate,
               JSON.stringify(
-                acceptedItemData[data[0].consignorCode].acceptedItems11
+                acceptedItemData[data[0].stopId].acceptedItems11
               ),
               "pending",
               consCode,
@@ -387,12 +387,12 @@ const HandoverShipmentRTO = ({ route }) => {
             });
             db.transaction((tx) => {
               tx.executeSql(
-                'SELECT consignorCode FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND (awbNo = ? OR clientShipmentReferenceNumber = ? OR clientRefId = ? )  AND handoverStatus="accepted"',
+                'SELECT stopId FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND (awbNo = ? OR clientShipmentReferenceNumber = ? OR clientRefId = ? )  AND handoverStatus="accepted"',
                 [data, data, data],
                 (tx2, results122) => {
                   console.log(results122.rows.item(0));
                   loadDetails(
-                    results122.rows.item(0).consignorCode,
+                    results122.rows.item(0).stopId,
                     data,
                     false
                   );
@@ -431,7 +431,7 @@ const HandoverShipmentRTO = ({ route }) => {
         : null
       : db.transaction((tx) => {
           tx.executeSql(
-            "SELECT BagOpenClose11 FROM SyncSellerPickUp where  consignorCode=? ",
+            "SELECT BagOpenClose11 FROM SyncSellerPickUp where  stopId=? ",
             [data333],
             (tx1, results) => {
               if (results.rows.item(0).BagOpenClose11 === "true" && !check) {
@@ -445,7 +445,7 @@ const HandoverShipmentRTO = ({ route }) => {
 
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM SyncSellerPickUp WHERE consignorCode=?",
+        "SELECT * FROM SyncSellerPickUp WHERE stopId=?",
         [data333],
         (tx1, results) => {
           let temp = [];
@@ -458,7 +458,7 @@ const HandoverShipmentRTO = ({ route }) => {
 
       db.transaction((tx) => {
         tx.executeSql(
-          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=?  AND handoverStatus="accepted"',
+          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=?  AND handoverStatus="accepted"',
           [data333],
           (tx1, results) => {
             setScanProgressRD(results.rows.length);
@@ -468,7 +468,7 @@ const HandoverShipmentRTO = ({ route }) => {
 
       db.transaction((tx) => {
         tx.executeSql(
-          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=?  ',
+          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=?  ',
           [data333],
           (tx1, results) => {
             setSellerNoOfShipment(results.rows.length);
@@ -491,7 +491,7 @@ const HandoverShipmentRTO = ({ route }) => {
           courierCode: row.courierCode,
           feUserID: userId,
           isAccepted: true,
-          consignorCode: row.consignorCode,
+          consignorCode: row.stopId,
           eventTime: parseInt(new Date().valueOf()),
           latitude: latitude,
           longitude: longitude,
@@ -569,16 +569,16 @@ const HandoverShipmentRTO = ({ route }) => {
                     setBarcode(() => data);
                     db.transaction((tx) => {
                       tx.executeSql(
-                        'SELECT consignorCode FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND (awbNo = ? OR clientShipmentReferenceNumber = ? OR clientRefId = ? )  AND handoverStatus="accepted"',
+                        'SELECT stopId FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND (awbNo = ? OR clientShipmentReferenceNumber = ? OR clientRefId = ? )  AND handoverStatus="accepted"',
                         [data, data, data],
                         (tx2, results122) => {
                           console.log(results122.rows.item(0));
-                          //  if (acceptedItemData[results122.rows.item(0).consignorCode] !== null)
+                          //  if (acceptedItemData[results122.rows.item(0).stopId] !== null)
                           //  {
 
-                          // if (acceptedItemData[results122.rows.item(0).consignorCode] && acceptedItemData[results122.rows.item(0).consignorCode].acceptedItems11.length > 0)
+                          // if (acceptedItemData[results122.rows.item(0).stopId] && acceptedItemData[results122.rows.item(0).stopId].acceptedItems11.length > 0)
                           //  {
-                          //     acceptedItemData[results122.rows.item(0).consignorCode].acceptedItems11.push(data);
+                          //     acceptedItemData[results122.rows.item(0).stopId].acceptedItems11.push(data);
                           //   }
                           // else {
                           //
@@ -589,7 +589,7 @@ const HandoverShipmentRTO = ({ route }) => {
                           // }
 
                           loadDetails(
-                            results122.rows.item(0).consignorCode,
+                            results122.rows.item(0).stopId,
                             data,
                             true
                           );
@@ -611,7 +611,7 @@ const HandoverShipmentRTO = ({ route }) => {
             // loadDetails(data);
             uploadDataToServer(res.rows);
           }
-        },
+        }, 
         (error) => {
           console.log("error on getting categories " + error.message);
         }
@@ -653,7 +653,7 @@ const HandoverShipmentRTO = ({ route }) => {
   const updateBagStatus11 = (conscode12) => {
     db.transaction((txn) => {
       txn.executeSql(
-        'UPDATE SyncSellerPickUp SET BagOpenClose11="false" WHERE consignorCode=?',
+        'UPDATE SyncSellerPickUp SET BagOpenClose11="false" WHERE stopId=?',
         [conscode12],
         (sqlTxn, _res) => {
           setModalVisible(false);
@@ -690,11 +690,11 @@ const HandoverShipmentRTO = ({ route }) => {
 
   //   const displayConsignorDetails11 = () => {
   //     db.transaction(tx => {
-  //         tx.executeSql('SELECT * FROM SyncSellerPickUp where consignorCode= ?', [barcode], (tx1, results) => {
+  //         tx.executeSql('SELECT * FROM SyncSellerPickUp where stopId= ?', [barcode], (tx1, results) => {
   //             // let temp = [];
   //             console.log(results.rows.length);
   //             for (let i = 0; i < results.rows.length; ++i) {
-  //                 setCode11(results.rows.item(i).consignorCode);
+  //                 setCode11(results.rows.item(i).stopId);
   //                 setSellerName11(results.rows.item(i).consignorName);
   //                 setScanProgressRD(results.rows.item(i).ReverseDeliveries);
   //                 console.log(results.rows.item(i).consignorName);
@@ -766,7 +766,7 @@ const HandoverShipmentRTO = ({ route }) => {
               mt={2}
               bg="#004aad"
               onPress={() => {
-                CloseBag(data[0].consignorCode, data[0].consignorName);
+                CloseBag(data[0].stopId, data[0].consignorName);
                 setShowCloseBagModal(false);
               }}
             >
@@ -795,7 +795,7 @@ const HandoverShipmentRTO = ({ route }) => {
                   <Text
                     style={{ fontSize: 16, fontWeight: "500", color: "black" }}
                   >
-                    {data[0].consignorCode}
+                    {data[0].stopId}
                   </Text>
                 ) : null}
                 {/* <Text style={{fontSize: 16, fontWeight: '500', color : 'black'}}>{sellerCode11}</Text> */}
@@ -848,11 +848,11 @@ const HandoverShipmentRTO = ({ route }) => {
                   >
                     {data &&
                     data.length &&
-                    data[0].consignorCode &&
-                    acceptedItemData[data[0].consignorCode] &&
-                    acceptedItemData[data[0].consignorCode].acceptedItems11
+                    data[0].stopId &&
+                    acceptedItemData[data[0].stopId] &&
+                    acceptedItemData[data[0].stopId].acceptedItems11
                       .length > 0
-                      ? acceptedItemData[data[0].consignorCode].acceptedItems11
+                      ? acceptedItemData[data[0].stopId].acceptedItems11
                           .length
                       : null}
                   </Text>
@@ -920,7 +920,7 @@ const HandoverShipmentRTO = ({ route }) => {
               <Button
                 onPress={() => {
                   bagopenCloseHandler(
-                    data[0].consignorCode,
+                    data[0].stopId,
                     data[0].consignorName
                   );
                   setSellerNoOfShipment11(0);
@@ -936,7 +936,7 @@ const HandoverShipmentRTO = ({ route }) => {
                 onPress={() => {
                   setSellerNoOfShipment11(0);
                   setModalVisible(false);
-                  updateBagStatus11(data[0].consignorCode);
+                  updateBagStatus11(data[0].stopId);
                 }}
                 w="48%"
                 size="lg"
@@ -1036,7 +1036,7 @@ const HandoverShipmentRTO = ({ route }) => {
                 </Text>
                 {data && data.length ? (
                   <Text style={{ fontSize: 18, fontWeight: "500" }}>
-                    {data[0].consignorCode}
+                    {data[0].stopId}
                   </Text>
                 ) : null}
               </View>
@@ -1073,12 +1073,12 @@ const HandoverShipmentRTO = ({ route }) => {
                   padding: 10,
                 }}
               >
-                {/* <Text style={{fontSize: 18, fontWeight: '500' }}>Shipment scan Progress{'\n'}for {data[0].consignorCode} </Text> */}
+                {/* <Text style={{fontSize: 18, fontWeight: '500' }}>Shipment scan Progress{'\n'}for {data[0].stopId} </Text> */}
                 {
                   data && data.length ? (
                     <>
                       <Text style={{ fontSize: 18, fontWeight: "500" }}>
-                        Shipment scan Progress{"\n"}for {data[0].consignorCode}{" "}
+                        Shipment scan Progress{"\n"}for {data[0].stopId}{" "}
                       </Text>
                       <Text style={{ fontSize: 18, fontWeight: "500" }}>
                         {scanprogressRD}/{sellerNoOfShipment}
@@ -1114,9 +1114,9 @@ const HandoverShipmentRTO = ({ route }) => {
                   <Text style={{ fontSize: 18, fontWeight: "500" }}>
                     {data &&
                     data.length &&
-                    data[0].consignorCode &&
-                    acceptedItemData[data[0].consignorCode] &&
-                    acceptedItemData[data[0].consignorCode].acceptedItems11
+                    data[0].stopId &&
+                    acceptedItemData[data[0].stopId] &&
+                    acceptedItemData[data[0].stopId].acceptedItems11
                       .length > 0
                       ? "Yes"
                       : "No"}
@@ -1147,9 +1147,9 @@ const HandoverShipmentRTO = ({ route }) => {
                     ? setShowCloseBagModal(true)
                     : data &&
                       data.length > 0 &&
-                      data[0].consignorCode &&
-                      acceptedItemData[data[0].consignorCode] &&
-                      acceptedItemData[data[0].consignorCode].acceptedItems11
+                      data[0].stopId &&
+                      acceptedItemData[data[0].stopId] &&
+                      acceptedItemData[data[0].stopId].acceptedItems11
                         .length === 0
                     ? ToastAndroid.show("Bag is empty", ToastAndroid.SHORT)
                     : ToastAndroid.show(

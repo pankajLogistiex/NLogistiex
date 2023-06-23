@@ -13,7 +13,7 @@ import {
   ScrollView,
   View,
   ToastAndroid,
-  ActivityIndicator,
+  ActivityIndicator, 
 } from "react-native";
 import { DataTable, Searchbar, Text, Card } from "react-native-paper";
 import { openDatabase } from "react-native-sqlite-storage";
@@ -46,7 +46,7 @@ const PendingHandover = ({ route }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [DropDownValue, setDropDownValue] = useState("");
   const [totalPending, setTotalPending] = useState(0);
-  const [consignorCode, setConsignorCode] = useState("");
+  const [stopId, setstopId] = useState("");
   const [showCloseBagModal, setShowCloseBagModal] = useState(false);
   const [latitude, setLatitude] = useState(0);
   const [data11, setData11] = useState([]);
@@ -105,24 +105,24 @@ const PendingHandover = ({ route }) => {
         for (let i = 0; i < results.rows.length; ++i) {
           const newData = {};
           temp.push(results.rows.item(i));
-          // var consignorcode=results.rows.item(i).consignorCode;
+          // var stopId=results.rows.item(i).stopId;
           // var consignorName=results.rows.item(i).consignorName;
 
           db.transaction((tx) => {
             db.transaction((tx) => {
               tx.executeSql(
-                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? ',
-                [results.rows.item(i).consignorCode],
+                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? ',
+                [results.rows.item(i).stopId],
                 (tx1, results11) => {
                   //    console.log(results11,'1',results11.rows.length);
                   //    var expected=results11.rows.length;
                   tx.executeSql(
-                    'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND handoverStatus IS  NULL',
-                    [results.rows.item(i).consignorCode],
+                    'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND handoverStatus IS  NULL',
+                    [results.rows.item(i).stopId],
                     (tx1, results22) => {
                       // console.log(results22,'2',results22.rows.length);
                       // var scanned=results.rows.length;
-                      newData[results.rows.item(i).consignorCode] = {
+                      newData[results.rows.item(i).stopId] = {
                         consignorName: results.rows.item(i).consignorName,
                         expected: results11.rows.length,
                         pending: results22.rows.length,
@@ -181,19 +181,19 @@ const PendingHandover = ({ route }) => {
     const DropDownValue112 = DropDownValue;
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? ',
-        [consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? ',
+        [stopId],
         (tx1, results111) => {
           const consignorData = {
             expected: expected11,
             accepted: expected11 - rejected11,
             rejected: rejected11,
-            consignorCode: consignorCode,
+            consignorCode: stopId,
             rejectReason: DropDownValue112,
           };
           const tempHandoverStatus = [...handoverStatus];
           const conIndex = tempHandoverStatus.findIndex(
-            (obj) => obj.consignorCode === consignorCode
+            (obj) => obj.consignorCode === stopId
           );
           if (conIndex != -1) {
             tempHandoverStatus[conIndex] = consignorData;
@@ -233,17 +233,17 @@ const PendingHandover = ({ route }) => {
     });
   };
 
-  function updateQueryLocal(eventTime, rejectReason, consignorCode) {
+  function updateQueryLocal(eventTime, rejectReason, stopId) {
     db.transaction((tx) => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET handoverStatus=?, rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Delivery" AND handoverStatus IS Null And consignorCode=?',
+        'UPDATE SellerMainScreenDetails SET handoverStatus=?, rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Delivery" AND handoverStatus IS Null And stopId=?',
         [
           "pendingHandover",
           rejectReason,
           eventTime,
           latitude,
           longitude,
-          consignorCode,
+          stopId,
         ],
         (tx1, results) => {
           console.log(results);
@@ -261,7 +261,7 @@ const PendingHandover = ({ route }) => {
         updateQueryLocal(
           time11,
           handoverStatus[i]?.rejectReason,
-          handoverStatus[i]?.consignorCode
+          handoverStatus[i]?.stopId
         );
       }
     } catch (error) {
@@ -272,7 +272,7 @@ const PendingHandover = ({ route }) => {
 
   function closeHandover() {
     let time11 = new Date().valueOf();
-    console.log("===handover close data===", {
+    console.log("===handover close data P===", {
       handoverStatus: handoverStatus.concat(
         route.params.acceptedHandoverStatus
       ),
@@ -342,8 +342,8 @@ const PendingHandover = ({ route }) => {
               </DataTable.Row> */}
 
               {displayData && data.length > 0 ? (
-                Object.keys(displayData11).map((consignorCode, index) =>
-                  displayData11[consignorCode].pending > 0 ? (
+                Object.keys(displayData11).map((stopId, index) =>
+                  displayData11[stopId].pending > 0 ? (
                     <>
                       <DataTable.Row
                         style={{
@@ -351,22 +351,22 @@ const PendingHandover = ({ route }) => {
                           backgroundColor: "#eeeeee",
                           borderBottomWidth: 1,
                         }}
-                        key={consignorCode}
+                        key={stopId}
                       >
                         <DataTable.Cell style={{ flex: 1.7 }}>
                           <Text style={styles.fontvalue}>
-                            {displayData11[consignorCode].consignorName}
+                            {displayData11[stopId].consignorName}
                           </Text>
                         </DataTable.Cell>
 
                         <DataTable.Cell style={{ flex: 1, marginRight: 5 }}>
                           <Text style={styles.fontvalue}>
-                            {displayData11[consignorCode].expected}
+                            {displayData11[stopId].expected}
                           </Text>
                         </DataTable.Cell>
                         <DataTable.Cell style={{ flex: 1, marginRight: -45 }}>
                           <Text style={styles.fontvalue}>
-                            {displayData11[consignorCode].pending}
+                            {displayData11[stopId].pending}
                           </Text>
                         </DataTable.Cell>
                         {/* <MaterialIcons name="check" style={{ fontSize: 30, color: 'green', marginTop: 8 }} /> */}
@@ -374,9 +374,9 @@ const PendingHandover = ({ route }) => {
                       <Button
                         title="Pending Handover"
                         onPress={() => {
-                          setConsignorCode(consignorCode);
-                          setExpected11(displayData11[consignorCode].expected);
-                          setRejected11(displayData11[consignorCode].pending);
+                          setstopId(stopId);
+                          setExpected11(displayData11[stopId].expected);
+                          setRejected11(displayData11[stopId].pending);
                           setModalVisible(true);
                         }}
                         w="100%"
@@ -387,7 +387,7 @@ const PendingHandover = ({ route }) => {
                       >
                         {handoverStatus.length > 0 &&
                         handoverStatus.filter(
-                          (obj) => obj.consignorCode === consignorCode
+                          (obj) => obj.stopId === stopId
                         )[0]?.rejectReason
                           ? (data11
                               ?.filter((d) => d.applies_to.includes("PRHC"))
@@ -395,7 +395,7 @@ const PendingHandover = ({ route }) => {
                                 (obj) =>
                                   obj.short_code ==
                                   handoverStatus.filter(
-                                    (obj) => obj.consignorCode === consignorCode
+                                    (obj) => obj.stopId === stopId
                                   )[0].rejectReason
                               ))[0]?.description
                           : "Select Exception Reason"}
