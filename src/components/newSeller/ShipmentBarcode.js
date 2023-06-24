@@ -218,8 +218,8 @@ const [text12,setText12] = useState('');
   const sellerLatLongLoad = ()=>{
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SyncSellerPickUp where  consignorCode=? ',
-        [route.params.consignorCode],
+        'SELECT * FROM SyncSellerPickUp where  stopId=? ',
+        [route.params.stopId],
         (tx1, results) => {
           setSellerLatitude(results.rows.item(0).consignorLatitude);
           setSellerLongitude(results.rows.item(0).consignorLongitude);
@@ -311,8 +311,8 @@ var dingAccept = new Sound(dingAccept11, error => {
   const check121 = ()=>{
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM closeBag1 WHERE  consignorCode=? And status="scanPending"',
-        [route.params.consignorCode],
+        'SELECT * FROM closeBag1 WHERE  stopId=? And status="scanPending"',
+        [route.params.stopId],
         (tx1, results) => {
           if (results.rows.length > 0){
           setPDCheck(true);
@@ -341,8 +341,8 @@ var dingAccept = new Sound(dingAccept11, error => {
 
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=?  AND status="accepted"',
-        [route.params.consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=?  AND status="accepted"',
+        [route.params.stopId],
         (tx1, results) => {
           setnewAccepted(results.rows.length);
         },
@@ -350,8 +350,8 @@ var dingAccept = new Sound(dingAccept11, error => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=? AND status="notPicked"',
-        [route.params.consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status="notPicked"',
+        [route.params.stopId],
         (tx1, results) => {
           setNewNotPicked(results.rows.length);
         },
@@ -359,8 +359,8 @@ var dingAccept = new Sound(dingAccept11, error => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=? AND status="rejected"',
-        [route.params.consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status="rejected"',
+        [route.params.stopId],
         (tx1, results) => {
           setnewRejected(results.rows.length);
         },
@@ -383,6 +383,8 @@ var dingAccept = new Sound(dingAccept11, error => {
         userId: route.params.userId,
         DropDownValue: DropDownValue11,
         consignorCode: route.params.consignorCode,
+        stopId:route.params.stopId,
+        tripId:route.params.tripId,
         contactPersonName: route.params.contactPersonName,
         runsheetno: route.params.PRSNumber,
         latitude: latitude,
@@ -392,8 +394,8 @@ var dingAccept = new Sound(dingAccept11, error => {
       setDropDownValue11('');
       db.transaction(tx => {
         tx.executeSql(
-          'SELECT * FROM closeBag1 WHERE  consignorCode=? And status="scanPending"',
-          [route.params.consignorCode],
+          'SELECT * FROM closeBag1 WHERE  stopId=? And status="scanPending"',
+          [route.params.stopId],
           (tx1, results) => {
             if (results.rows.length > 0){
             setPDCheck(true);
@@ -466,6 +468,7 @@ var dingAccept = new Sound(dingAccept11, error => {
       navigation.navigate('Dispatch', {
         consignorCode: route.params.consignorCode,
         userId:route.params.userId,
+        stopId:route.params.stopId
       });
     }
     if(item == 'CNA'){
@@ -536,7 +539,7 @@ var dingAccept = new Sound(dingAccept11, error => {
           console.log(bagID);
           console.log(results);
           tx.executeSql(
-            'INSERT INTO closeBag1 (bagSeal, bagId, bagDate, AcceptedList,status,consignorCode) VALUES (?, ?, ?, ?,?,?)',
+            'INSERT INTO closeBag1 (bagSeal, bagId, bagDate, AcceptedList,status,consignorCode, stopId) VALUES (?, ?, ?, ?,?,?,?)',
             [
               bagSeal,
               route.params.userId +
@@ -548,6 +551,7 @@ var dingAccept = new Sound(dingAccept11, error => {
               JSON.stringify(acceptedArray),
               'scanPending',
               route.params.consignorCode,
+              route.params.stopId
             ],
             (tx, results11) => {
               console.log('Row inserted successfully');
@@ -603,7 +607,7 @@ var dingAccept = new Sound(dingAccept11, error => {
           console.log(results);
 
           tx.executeSql(
-            'INSERT INTO closeBag1 (bagSeal, bagId, bagDate, AcceptedList,status,consignorCode) VALUES (?, ?, ?, ?,?,?)',
+            'INSERT INTO closeBag1 (bagSeal, bagId, bagDate, AcceptedList,status,consignorCode,stopId) VALUES (?,?, ?, ?, ?,?,?)',
             [
               bagSeal,
               route.params.userId +
@@ -615,6 +619,7 @@ var dingAccept = new Sound(dingAccept11, error => {
               JSON.stringify(acceptedArray),
               'scanPending',
               route.params.consignorCode,
+              route.params.stopId
             ],
             (tx, results11) => {
               console.log('Row inserted successfully');
@@ -668,7 +673,7 @@ var dingAccept = new Sound(dingAccept11, error => {
   const createTableBag1 = () => {
     db.transaction(tx => {
       tx.executeSql(
-        'CREATE TABLE IF NOT EXISTS closeBag1 (bagSeal TEXT PRIMARY KEY, bagId TEXT, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode Text)',
+        'CREATE TABLE IF NOT EXISTS closeBag1 (bagSeal TEXT PRIMARY KEY, bagId TEXT, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode Text, stopId Text)',
         [],
         (tx, results) => {
           console.log('Table created successfully');
@@ -685,14 +690,14 @@ var dingAccept = new Sound(dingAccept11, error => {
     console.log(acceptedArray);
     db.transaction(tx => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="accepted", packagingId=?, expectedPackagingId=?, eventTime=?, latitude=?, longitude=? WHERE  consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+        'UPDATE SellerMainScreenDetails SET status="accepted", packagingId=?, expectedPackagingId=?, eventTime=?, latitude=?, longitude=? WHERE  stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
         [
           packagingID,
           expectedPackagingId,
           new Date().valueOf(),
           latitude,
           longitude,
-          route.params.consignorCode,
+          route.params.stopId,
           barcode,
           barcode,
           barcode,
@@ -767,8 +772,8 @@ var barcode11 = barcode;
       //   );
       // });
         db.transaction((tx) => {
-          tx.executeSql('UPDATE SellerMainScreenDetails SET status="rejected", eventTime=?, latitude=?, longitude=? ,packagingId=?, expectedPackagingId=?, rejectionReasonL1=?  WHERE consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ', 
-          [new Date().valueOf(), latitude, longitude, packagingID, expectedPackagingId, reason,route.params.consignorCode, barcode11,barcode11,barcode11], (tx1, results) => {
+          tx.executeSql('UPDATE SellerMainScreenDetails SET status="rejected", eventTime=?, latitude=?, longitude=? ,packagingId=?, expectedPackagingId=?, rejectionReasonL1=?  WHERE stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ', 
+          [new Date().valueOf(), latitude, longitude, packagingID, expectedPackagingId, reason,route.params.stopId, barcode11,barcode11,barcode11], (tx1, results) => {
             let temp = [];
             console.log('Rejected Reason : ', reason);
             console.log('Results', results.rowsAffected);
@@ -853,16 +858,16 @@ var barcode11 = barcode;
   const getCategories = (data) => {
     db.transaction(txn => {
       txn.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE status IS NULL AND shipmentAction="Seller Pickup" AND  consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber = ?)',
-        [route.params.consignorCode, data, data, data],
+        'SELECT * FROM SellerMainScreenDetails WHERE status IS NULL AND shipmentAction="Seller Pickup" AND  stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber = ?)',
+        [route.params.stopId, data, data, data],
         (sqlTxn, res) => {
           setLen(res.rows.length);
           setBarcode(data);
           if (!res.rows.length) {
             db.transaction(tx => {
               tx.executeSql(
-                'Select * FROM SellerMainScreenDetails WHERE status IS NOT NULL And shipmentAction="Seller Pickup" And consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?)',
-                [route.params.consignorCode, data, data, data],
+                'Select * FROM SellerMainScreenDetails WHERE status IS NOT NULL And shipmentAction="Seller Pickup" And stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?)',
+                [route.params.stopId, data, data, data],
                 (tx1, results) => {
                   if (results.rows.length === 0) {
                     ToastAndroid.show(
@@ -1226,6 +1231,8 @@ console.log('scanned',scannedValue);
                     phone: route.params.phone,
                     userId: route.params.userId,
                     consignorCode: route.params.consignorCode,
+                    stopId:route.params.stopId,
+                    tripId:route.params.tripId,
                     DropDownValue: DropDownValue11,
                     contactPersonName: route.params.contactPersonName,
                     runsheetno: route.params.PRSNumber,
@@ -1294,6 +1301,8 @@ console.log('scanned',scannedValue);
                     phone: route.params.phone,
                     userId: route.params.userId,
                     consignorCode: route.params.consignorCode,
+                    stopId:route.params.stopId,
+                    tripId:route.params.tripId,
                     DropDownValue: DropDownValue11,
                     contactPersonName: route.params.contactPersonName,
                     runsheetno: route.params.PRSNumber,

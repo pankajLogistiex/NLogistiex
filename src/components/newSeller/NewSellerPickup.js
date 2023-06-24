@@ -107,8 +107,8 @@ const NewSellerPickup = ({route}) => {
         dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
-              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=? AND status IS NOT NULL',
-              [single.consignorCode],
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status IS NOT NULL',
+              [single.stopId],
               (tx1, results) => {
                 counts.push(results.rows.length);
                 if (counts.length === dataSeller.length) {
@@ -127,8 +127,8 @@ const NewSellerPickup = ({route}) => {
         dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
-              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=?',
-              [single.consignorCode],
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=?',
+              [single.stopId],
               (tx1, results) => {
                 counts.push(results.rows.length);
                 if (counts.length === dataSeller.length) {
@@ -148,8 +148,8 @@ const NewSellerPickup = ({route}) => {
         dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
-              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND handoverStatus="accepted"',
-              [single.consignorCode],
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND handoverStatus="accepted"',
+              [single.stopId],
               (tx1, results) => {
                 counts.push(results.rows.length);
                 if (counts.length === dataSeller.length) {
@@ -169,8 +169,8 @@ const NewSellerPickup = ({route}) => {
         dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
-              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND status IS NOT NULL',
-              [single.consignorCode],
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status IS NOT NULL',
+              [single.stopId],
               (tx1, results) => {
                 counts.push(results.rows.length);
                 if (counts.length === dataSeller.length) {
@@ -188,8 +188,8 @@ const NewSellerPickup = ({route}) => {
         dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
-              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND status IS NOT NULL',
-              [single.consignorCode],
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status IS NOT NULL',
+              [single.stopId],
               (tx1, results) => {
                 counts.push(results.rows.length);
                 if (counts.length === dataSeller.length) {
@@ -304,8 +304,8 @@ return (
                 ? data.filter(searched(keyword)).map((seller, i) =>
                     value[i] > 0 ? (value[i] == pending11[i]) && seller.otpSubmitted === "true" ? 
                     (
-        <TouchableOpacity key={seller.consignorCode} onPress={() => {navigation.navigate('NewSellerSelection', {
-          paramKey: seller.consignorCode,
+        <TouchableOpacity key={seller.stopId} onPress={() => {navigation.navigate('NewSellerSelection', {
+          paramKey: seller.stopId,
           Forward: value[i],
           consignorAddress1: seller.consignorAddress1,
           consignorAddress2: seller.consignorAddress2,
@@ -316,10 +316,12 @@ return (
           contactPersonName: seller.contactPersonName,
           consignorName: seller.consignorName,
           PRSNumber: seller.PRSNumber,
-          consignorCode: seller.consignorCode,
+          consignorCode: seller.stopId,
+          stopId:seller.stopId,
           userId: seller.userId,
           phone: seller.consignorContact,
           otpSubmitted: seller.otpSubmitted,
+          FMtripId: seller.FMtripId
         });
         }}>
           <View
@@ -379,8 +381,8 @@ position: 'relative',
                     )
                : 
                (
-                  <TouchableOpacity key={seller.consignorCode} onPress={() => {navigation.navigate('NewSellerSelection', {
-                    paramKey: seller.consignorCode,
+                  <TouchableOpacity key={seller.stopId} onPress={() => {navigation.navigate('NewSellerSelection', {
+                    paramKey: seller.stopId,
                     Forward: value[i],
                     consignorAddress1: seller.consignorAddress1,
                     consignorAddress2: seller.consignorAddress2,
@@ -392,9 +394,11 @@ position: 'relative',
                     consignorName: seller.consignorName,
                     PRSNumber: seller.PRSNumber,
                     consignorCode: seller.consignorCode,
+                    stopId:seller.stopId,
                     userId: seller.userId,
                     phone: seller.consignorContact,
                     otpSubmitted: seller.otpSubmitted,
+                    FMtripId: seller.FMtripId
                   });
                   }}>
                     <View
@@ -467,7 +471,7 @@ position: 'relative',
                 ? data.filter(searched(keyword)).map((seller, i) =>
                     value[i] > 0 ? (value[i] != pending11[i])? 
                     (
-        <TouchableOpacity key={seller.consignorCode} onPress={() => {handleTrip()}}>
+        <TouchableOpacity key={seller.stopId} onPress={() => {handleTrip()}}>
           <View
             style={{
               flexDirection: 'row',
@@ -507,7 +511,7 @@ position: 'relative',
         </TouchableOpacity>
               ):
               (
-                <TouchableOpacity key={seller.consignorCode} >
+                <TouchableOpacity key={seller.stopId} >
                 <View
                   style={{
                     flexDirection: 'row',

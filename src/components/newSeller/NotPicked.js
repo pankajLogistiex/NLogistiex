@@ -84,8 +84,8 @@ const NotPicked = ({route}) => {
       AsyncStorage.setItem('refresh11', 'refresh');
       db.transaction(tx => {
         tx.executeSql(
-          'UPDATE SyncSellerPickUp  SET otpSubmitted="true" WHERE consignorCode=? ',
-          [route.params.consignorCode],
+          'UPDATE SyncSellerPickUp  SET otpSubmitted="true" WHERE stopId=? ',
+          [route.params.stopId],
           (tx1, results) => {
             if (results.rowsAffected > 0) {
               console.log('otp status updated  in seller table ');
@@ -97,13 +97,13 @@ const NotPicked = ({route}) => {
       });
       db.transaction(tx => {
         tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Pickup" AND status IS Null And consignorCode=?',
+          'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Pickup" AND status IS Null And stopId=?',
           [
             rejectionCode,
             new Date().valueOf(),
             latitude,
             longitude,
-            route.params.consignorCode,
+            route.params.stopId,
           ],
           (tx1, results) => {
             let temp = [];
@@ -122,7 +122,9 @@ const NotPicked = ({route}) => {
           latitude: parseFloat(latitude),
           longitude: parseFloat(longitude),
           eventTime: new Date().valueOf(),
-          rejectionStage: rejectStage,
+          rejectionStage: "SLPF",
+          stopId:route.params.stopId,
+          tripID:route.params.tripId
         })
         .then(function (response) {
           console.log(response.data);

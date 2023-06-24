@@ -116,8 +116,8 @@ const NewSellerSelection = ({ route }) => {
     AsyncStorage.setItem("refresh11", "refresh");
     db.transaction((tx) => {
       tx.executeSql(
-        'UPDATE SyncSellerPickUp  SET otpSubmitted="true" WHERE consignorCode=? ',
-        [route.params.consignorCode],
+        'UPDATE SyncSellerPickUp  SET otpSubmitted="true" WHERE stopId=? ',
+        [route.params.stopId],
         (tx1, results) => {
           if (results.rowsAffected > 0) {
             console.log("otp status updated  in seller table ");
@@ -129,13 +129,13 @@ const NewSellerSelection = ({ route }) => {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=?, postRDStatus="true" WHERE shipmentAction="Seller Pickup" AND status IS Null And consignorCode=?',
+        'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Pickup" AND status IS Null AND stopId=?',
         [
           rejectionCode,
           new Date().valueOf(),
           latitude,
           longitude,
-          route.params.consignorCode,
+          route.params.stopId,
         ],
         (tx1, results) => {
           let temp = [];
@@ -154,7 +154,9 @@ const NewSellerSelection = ({ route }) => {
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
         eventTime: new Date().valueOf(),
-        rejectionStage: rejectStage,
+        rejectionStage: "SLPF",
+        stopId:route.params.stopId,
+        tripID: route.params.FMtripId
       })
       .then(function (response) {
         console.log(response.data);
@@ -250,16 +252,16 @@ const NewSellerSelection = ({ route }) => {
     db.transaction((tx) => {
       db.transaction((tx) => {
         tx.executeSql(
-          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=? ',
-          [route.params.consignorCode],
+          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? ',
+          [route.params.stopId],
           (tx1, results) => {
             setForward(results.rows.length);
           }
         );
       });
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=?  AND status="accepted"',
-        [route.params.consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=?  AND status="accepted"',
+        [route.params.stopId],
         (tx1, results) => {
           // let temp = [];
           // console.log(results.rows.length);
@@ -285,8 +287,8 @@ const NewSellerSelection = ({ route }) => {
 
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=? AND status="notPicked"',
-        [route.params.consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status="notPicked"',
+        [route.params.stopId],
         (tx1, results) => {
           setNotPicked11(results.rows.length);
         }
@@ -294,8 +296,8 @@ const NewSellerSelection = ({ route }) => {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=? AND status="rejected"',
-        [route.params.consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status="rejected"',
+        [route.params.stopId],
         (tx1, results) => {
           setRejectedOrder11(results.rows.length);
         }
@@ -303,8 +305,8 @@ const NewSellerSelection = ({ route }) => {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=? AND status IS NULL',
-        [route.params.consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status IS NULL',
+        [route.params.stopId],
         (tx1, results) => {
           setPending(results.rows.length);
           setLoading(false);
@@ -916,6 +918,8 @@ const NewSellerSelection = ({ route }) => {
                           Forward: Forward,
                           PRSNumber: route.params.PRSNumber,
                           consignorCode: route.params.consignorCode,
+                          stopId:route.params.stopId,
+                          tripID:route.params.FMtripId,
                           userId: route.params.userId,
                           phone: route.params.phone,
                           contactPersonName: route.params.contactPersonName,

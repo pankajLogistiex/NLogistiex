@@ -62,8 +62,8 @@ const Dispatch = ({ route }) => {
           //  sealID = 'SI001004';
           db.transaction(tx => {
             tx.executeSql(
-              'SELECT bagId, AcceptedList FROM closeBag1 WHERE consignorCode=? AND bagSeal = ? And status="Scanned"',
-              [route.params.consignorCode,sealID],
+              'SELECT bagId, AcceptedList FROM closeBag1 WHERE stopId=? AND bagSeal = ? And status="Scanned"',
+              [route.params.stopId,sealID],
               (tx, results) => {
                 console.log(results);
                 if (results.rows.length > 0) {
@@ -126,8 +126,8 @@ const Dispatch = ({ route }) => {
         console.log('dispatch 45456');
         db.transaction((tx) => {
           tx.executeSql(
-            'SELECT * FROM closeBag1 WHERE status="Scanned" AND consignorCode=?',
-            [route.params.consignorCode],
+            'SELECT * FROM closeBag1 WHERE status="Scanned" AND stopId=?',
+            [route.params.stopId],
             (tx1, results) => {
               for (let i = 0; i < results.rows.length; i++) {
                 const data = results.rows.item(i);
@@ -137,6 +137,7 @@ const Dispatch = ({ route }) => {
                     bagSealId: data.bagSeal,
                     acceptedList: JSON.parse(data.AcceptedList),
                     consignorCode: route.params.consignorCode,
+                    stopId:route.params.stopId,
                     bagDate: data.bagDate,
                     feUserID: route.params.userId,
                     receivingTime: parseInt(new Date().valueOf(), 10)
@@ -166,7 +167,7 @@ const Dispatch = ({ route }) => {
                 // });
                 if(i === results.rows.length -1){
                   db.transaction((tx) => {
-                    tx.executeSql('UPDATE closeBag1 SET status="dispatched"  WHERE status="Scanned" AND consignorCode=?  ', [route.params.consignorCode], (tx1, results12) => {
+                    tx.executeSql('UPDATE closeBag1 SET status="dispatched"  WHERE status="Scanned" AND stopId=?  ', [route.params.stopId], (tx1, results12) => {
                       if (results12.rowsAffected > 0) {
                         ToastAndroid.show('Bags Dispatch Successfully',ToastAndroid.SHORT);
                         console.log('Bags Dispatched');
@@ -202,11 +203,11 @@ const Dispatch = ({ route }) => {
     };
 
       const displayDataSPScan = async () => {
-        console.log('consignor code' + route.params.consignorCode);
+        console.log('consignor code' + route.params.stopId);
         db.transaction(tx => {
           tx.executeSql(
-            'SELECT * FROM closeBag1 WHERE  consignorCode=? And status <> "dispatched"',
-            [route.params.consignorCode],
+            'SELECT * FROM closeBag1 WHERE  stopId=? And status <> "dispatched"',
+            [route.params.stopId],
             (tx1, results) => {
               setEligibleBags(results.rows.length);
               // setPending(results.rows.length - scanned);
@@ -215,8 +216,8 @@ const Dispatch = ({ route }) => {
         });
         db.transaction(tx => {
           tx.executeSql(
-            'SELECT * FROM closeBag1 WHERE  consignorCode=? And status="scanPending"',
-            [route.params.consignorCode],
+            'SELECT * FROM closeBag1 WHERE  stopId=? And status="scanPending"',
+            [route.params.stopId],
             (tx1, results) => {
               setPending(results.rows.length);
             },
@@ -224,8 +225,8 @@ const Dispatch = ({ route }) => {
         });
         db.transaction(tx => {
           tx.executeSql(
-            'SELECT * FROM closeBag1 WHERE  consignorCode=? And status="Scanned"',
-            [route.params.consignorCode],
+            'SELECT * FROM closeBag1 WHERE  stopId=? And status="Scanned"',
+            [route.params.stopId],
             (tx1, results) => {
               setScanned(results.rows.length);
             },
@@ -233,8 +234,8 @@ const Dispatch = ({ route }) => {
         });
         db.transaction(tx => {
           tx.executeSql(
-            'SELECT bagSeal FROM  closeBag1 WHERE  consignorCode=? And status="Scanned"',
-            [route.params.consignorCode],
+            'SELECT bagSeal FROM  closeBag1 WHERE  stopId=? And status="Scanned"',
+            [route.params.stopId],
             (tx, results) => {
               const newSealIds = [];
     
@@ -259,8 +260,8 @@ const Dispatch = ({ route }) => {
 
         db.transaction(txn => {
           txn.executeSql(
-            'SELECT * FROM closeBag1 WHERE  consignorCode=? AND bagSeal=? AND status="Scanned" ',
-            [route.params.consignorCode,bagSeal],
+            'SELECT * FROM closeBag1 WHERE  stopId=? AND bagSeal=? AND status="Scanned" ',
+            [route.params.stopId,bagSeal],
             (sqlTxn, res) => {
               console.log(bagSeal + '' + data + '',res.rows);
               if (res.rows.length > 0) {
@@ -270,14 +271,14 @@ const Dispatch = ({ route }) => {
               } else {
                 db.transaction(txn => {
                   txn.executeSql(
-                    'SELECT * FROM closeBag1 WHERE  consignorCode=? AND bagSeal=? AND status="scanPending" ',
-                    [route.params.consignorCode,bagSeal],
+                    'SELECT * FROM closeBag1 WHERE  stopId=? AND bagSeal=? AND status="scanPending" ',
+                    [route.params.stopId,bagSeal],
                     (sqlTxn, res) => {
                       console.log(bagSeal + '' + data + '',res.rows);
                       if (res.rows.length > 0) {
                         console.log(data);
                         db.transaction((tx) => {
-                          tx.executeSql('UPDATE closeBag1 SET status="Scanned" WHERE bagSeal=? And consignorCode=?', [bagSeal,route.params.consignorCode], (tx1, results) => {
+                          tx.executeSql('UPDATE closeBag1 SET status="Scanned" WHERE bagSeal=? And stopId=?', [bagSeal,route.params.stopId], (tx1, results) => {
                             // let temp = [];
                             if (results.rowsAffected > 0) {
                               setScanned(scanned + 1);

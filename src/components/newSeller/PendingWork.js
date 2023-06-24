@@ -136,6 +136,8 @@ const PendingWork = ({ route }) => {
                           results.rows.item(i).consignorLongitude,
                         forward: results11.rows.length,
                         reverse: results22.rows.length,
+                        stopId:results.rows.item(i).stopId,
+                        tripId:results.rows.item(i).FMtripId
                       };
                       console.log(newData);
                       if (newData != null) {
@@ -187,7 +189,7 @@ const PendingWork = ({ route }) => {
       obj[key] = displayData[key];
       return obj;
     }, {});
-
+console.log(displayData11)
   return (
     <NativeBaseProvider>
       <Box flex={1} bg="#fff" width="auto" maxWidth="100%">
@@ -284,6 +286,8 @@ const PendingWork = ({ route }) => {
                                   displayData11[consignorCode]
                                     .consignorLongitude,
                                 userId: userId,
+                                stopId:displayData11[consignorCode].stopId,
+                                tripId:displayData11[consignorCode].tripId
                               })
                             }
                             style={{
@@ -317,6 +321,8 @@ const PendingWork = ({ route }) => {
                                   displayData11[consignorCode]
                                     .consignorLongitude,
                                 userId: userId,
+                                stopId:displayData11[consignorCode].stopId,
+                                tripId:displayData11[consignorCode].tripId
                               })
                             }
                             style={{

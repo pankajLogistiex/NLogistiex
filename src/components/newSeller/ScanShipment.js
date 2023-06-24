@@ -268,8 +268,8 @@ const ScanShipment = ({ route }) => {
   const displayDataSPScan = async () => {
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=?  AND status="accepted"',
-        [route.params.consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=?  AND status="accepted"',
+        [route.params.stopId],
         (tx1, results) => {
           setnewAccepted(results.rows.length);
         },
@@ -277,8 +277,8 @@ const ScanShipment = ({ route }) => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND status="notDelivered"',
-        [route.params.consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status="notDelivered"',
+        [route.params.stopId],
         (tx1, results) => {
           setnotDelivered(results.rows.length);
         },
@@ -286,8 +286,8 @@ const ScanShipment = ({ route }) => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND status="rejected"',
-        [route.params.consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status="rejected"',
+        [route.params.stopId],
         (tx1, results) => {
           setnewRejected(results.rows.length);
         },
@@ -295,8 +295,8 @@ const ScanShipment = ({ route }) => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND status="tagged"',
-        [route.params.consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status="tagged"',
+        [route.params.stopId],
         (tx1, results) => {
           setnewTagged(results.rows.length);
         },
@@ -340,13 +340,13 @@ console.log("packagingId",packagingID)
     console.log(acceptedArray);
     db.transaction(tx => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="accepted", expectedPackagingId=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+        'UPDATE SellerMainScreenDetails SET status="accepted", expectedPackagingId=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Delivery" AND stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
         [
           expectedPackagingId,
           new Date().valueOf(),
           latitude,
           longitude,
-          route.params.consignorCode,
+          route.params.stopId,
           barcode,
           barcode,
           barcode,
@@ -417,8 +417,8 @@ console.log("packagingId",packagingID)
       // setImageUrls([]);
       db.transaction(tx => {
         tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET status="rejected" , eventTime=?, latitude=?, longitude=? , expectedPackagingId=?, rejectionReasonL1=?  WHERE  shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-          [new Date().valueOf(), latitude, longitude, expectedPackagingId, reason, route.params.consignorCode, barcode, barcode, barcode],
+          'UPDATE SellerMainScreenDetails SET status="rejected" , eventTime=?, latitude=?, longitude=? , expectedPackagingId=?, rejectionReasonL1=?  WHERE  shipmentAction="Seller Delivery" AND stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+          [new Date().valueOf(), latitude, longitude, expectedPackagingId, reason, route.params.stopId, barcode, barcode, barcode],
           (tx1, results) => {
             let temp = [];
             console.log('Rejected Reason : ', reason);
@@ -485,8 +485,8 @@ console.log("packagingId",packagingID)
   
     db.transaction(tx => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="tagged", eventTime=?, latitude=?, longitude=? , expectedPackagingId=?, rejectionReasonL1=?  WHERE consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-        [new Date().valueOf(), latitude, longitude, expectedPackagingId, DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
+        'UPDATE SellerMainScreenDetails SET status="tagged", eventTime=?, latitude=?, longitude=? , expectedPackagingId=?, rejectionReasonL1=?  WHERE stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+        [new Date().valueOf(), latitude, longitude, expectedPackagingId, DropDownValue, route.params.stopId, barcode, barcode, barcode],
         (tx1, results) => {
           let temp = [];
           console.log('Rejected Reason : ', DropDownValue);
@@ -520,16 +520,16 @@ console.log("packagingId",packagingID)
   const getCategories = data => {
     db.transaction(txn => {
       txn.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE status IS NULL AND shipmentAction="Seller Delivery" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber = ?) ',
-        [route.params.consignorCode, data, data, data],
+        'SELECT * FROM SellerMainScreenDetails WHERE status IS NULL AND shipmentAction="Seller Delivery" AND stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber = ?) ',
+        [route.params.stopId, data, data, data],
         (sqlTxn, res) => {
           setLen(res.rows.length);
           setBarcode(data);
           if (!res.rows.length) {
             db.transaction(tx => {  
               tx.executeSql(
-                'Select * FROM SellerMainScreenDetails WHERE status IS NOT NULL And shipmentAction="Seller Delivery" And consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?)',
-                [route.params.consignorCode, data, data, data],
+                'Select * FROM SellerMainScreenDetails WHERE status IS NOT NULL And shipmentAction="Seller Delivery" And stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?)',
+                [route.params.stopId, data, data, data],
                 (tx1, results) => {
                   if (results.rows.length === 0) {
                     ToastAndroid.show(
@@ -702,6 +702,8 @@ console.log("packagingId",packagingID)
                   isAccepted: 'false',
                   rejectionReason: 'null',
                   consignorCode: res.consignorCode,
+                  stopId:res.stopId,
+                  tripId:res.FMtripId,
                   pickupTime: new Date()
                     .toJSON()
                     .slice(0, 10)
@@ -771,6 +773,8 @@ console.log("packagingId",packagingID)
         isAccepted: 'false',
         rejectionReason: DropDownValue,
         consignorCode: route.params.consignorCode,
+        stopId:route.params.stopId,
+        tripId:route.params.tripId,
         DeliveryTime: new Date().toJSON().slice(0, 10).replace(/-/g, '/'),
         latitude: latitude,
         longitude: longitude,
@@ -794,6 +798,8 @@ console.log("packagingId",packagingID)
         isAccepted: 'true',
         rejectionReason: DropDownValue,
         consignorCode: route.params.consignorCode,
+        stopId:route.params.stopId,
+        tripId:route.params.tripId,
         DeliveryTime: new Date().toJSON().slice(0, 10).replace(/-/g, '/'),
         latitude: latitude,
         longitude: longitude,
@@ -819,6 +825,8 @@ console.log("packagingId",packagingID)
         phone: route.params.phone,
         userId: route.params.userId,
         consignorCode: route.params.consignorCode,
+        stopId:route.params.stopId,
+        tripId:route.params.tripId,
         contactPersonName: route.params.contactPersonName,
         notDelivered: notDelivered,
         runsheetno: route.params.PRSNumber,
@@ -897,6 +905,8 @@ console.log("packagingId",packagingID)
                     phone: route.params.phone,
                     userId: route.params.userId,
                     consignorCode: route.params.consignorCode,
+                    stopId:route.params.stopId,
+                    tripId:route.params.tripId,
                     contactPersonName: route.params.contactPersonName,
                     notDelivered: notDelivered,
                     runsheetno: route.params.PRSNumber,
@@ -963,6 +973,8 @@ console.log("packagingId",packagingID)
                     phone: route.params.phone,
                     userId: route.params.userId,
                     consignorCode: route.params.consignorCode,
+                    stopId: route.params.stopId,
+                    tripId:route.params.tripId,
                     contactPersonName: route.params.contactPersonName,
                     notDelivered: notDelivered,
                     runsheetno: route.params.PRSNumber,

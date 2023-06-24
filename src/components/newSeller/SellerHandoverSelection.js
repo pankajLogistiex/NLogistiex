@@ -114,8 +114,8 @@ const SellerHandoverSelection = ({ route }) => {
     AsyncStorage.setItem('refresh11', 'refresh');
     db.transaction(tx => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND consignorCode=?',
-        [new Date().valueOf(), latitude, longitude, rejectionCode, route.params.consignorCode],
+        'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND stopId=?',
+        [new Date().valueOf(), latitude, longitude, rejectionCode, route.params.stopId],
         (tx1, results) => {
           let temp = [];
           console.log(results.rows.length);
@@ -128,8 +128,8 @@ const SellerHandoverSelection = ({ route }) => {
     
     db.transaction(tx => {
       tx.executeSql(
-        'UPDATE SyncSellerPickUp  SET otpSubmittedDelivery="true" WHERE consignorCode=? ',
-        [route.params.consignorCode],
+        'UPDATE SyncSellerPickUp  SET otpSubmittedDelivery="true" WHERE stopId=? ',
+        [route.params.stopId],
         (tx1, results) => {
           // console.log('Results', results.rowsAffected);
           // console.log(results);
@@ -151,7 +151,9 @@ const SellerHandoverSelection = ({ route }) => {
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
         eventTime: new Date().valueOf(),
-        rejectionStage: rejectStage,
+        rejectionStage: "SLDF",
+        stopId: route.params.stopId,
+        tripId:route.params.tripId
       })
       .then(function (response) {
         console.log(response.data);
@@ -242,16 +244,16 @@ const SellerHandoverSelection = ({ route }) => {
     db.transaction(tx => {
       db.transaction(tx => {
         tx.executeSql(
-          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND handoverStatus="accepted"',
-          [route.params.consignorCode],
+          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND handoverStatus="accepted"',
+          [route.params.stopId],
           (tx1, results) => {
             setForward(results.rows.length);
           },
         );
       });
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=?  AND (status="accepted" OR status="tagged")',
-        [route.params.consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=?  AND (status="accepted" OR status="tagged")',
+        [route.params.stopId],
         (tx1, results) => {
           // let temp = [];
           // console.log(results.rows.length);
@@ -265,8 +267,8 @@ const SellerHandoverSelection = ({ route }) => {
 
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND status="notDelivered"',
-        [route.params.consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status="notDelivered"',
+        [route.params.stopId],
         (tx1, results) => {
           setNotPicked11(results.rows.length);
         },
@@ -274,8 +276,8 @@ const SellerHandoverSelection = ({ route }) => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND status="rejected"',
-        [route.params.consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status="rejected"',
+        [route.params.stopId],
         (tx1, results) => {
           setRejectedOrder11(results.rows.length);
         },
@@ -283,8 +285,8 @@ const SellerHandoverSelection = ({ route }) => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND (handoverStatus="accepted" AND status IS NULL)',
-        [route.params.consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND (handoverStatus="accepted" AND status IS NULL)',
+        [route.params.stopId],
         (tx1, results) => {
           setPending(results.rows.length);
           setLoading(false);
@@ -805,6 +807,8 @@ const SellerHandoverSelection = ({ route }) => {
           Forward: Forward,
           PRSNumber: route.params.PRSNumber,
           consignorCode: route.params.consignorCode,
+          stopId:route.params.stopId,
+          tripId:route.params.tripId,
           userId: route.params.userId,
           phone: route.params.phone,
           contactPersonName: route.params.contactPersonName,

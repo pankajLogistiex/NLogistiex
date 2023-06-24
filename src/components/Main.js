@@ -118,35 +118,23 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   }
   useEffect(() => {
     const fetchTripInfo = async () => {
-      if (id) {
-        const storedTripID = await AsyncStorage.getItem('tripID');
-        if (storedTripID) {
-          setTripID(storedTripID);
-        } else {
-          axios
-            .get(backendUrl + 'UserTripInfo/getUserTripInfo', {
-              params: {
-                feUserID: id,
-              },
-            })
-            .then((response) => {
-              const filteredData = response.data.res_data.filter((trip) => trip.startTime && !trip.endTime);
-              if (filteredData.length > 0) {
-                const tripID = filteredData[0].tripID;
-                AsyncStorage.setItem('tripID', tripID); 
-                setTripID(tripID);
-              }
-            });
-        }
-      }
+      db.transaction((txn) => {
+        txn.executeSql(
+          "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ?",
+          [20, 50, id],
+          (tx, result) => {
+            if (result.rows.length > 0) {
+              setTripID(result.rows.item(0).tripID);
+            }
+          })})
     };
     fetchTripInfo(); 
-  }, [id, tripID]);
-  function getTripDetails(tripId) {
+  }, [id]);
+  function getTripDetails() {
     axios
       .get(backendUrl + 'UserTripInfo/getUserTripInfo', {
         params: {
-          tripID: tripId,
+          tripID: tripID,
         },
       })
       .then(response => {
@@ -170,7 +158,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   }, [id,tripID]);
 
   useEffect(() => {
-    getTripDetails(tripID);
+    getTripDetails();
   }, [tripID]);
 
   useEffect(() => {

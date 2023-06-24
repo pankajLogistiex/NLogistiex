@@ -80,7 +80,7 @@ useEffect(() => {
         setLoading(false);
       }
     };
-  
+  console.log(tripDetails);
     if (userId) {
       fetchData();
     }
@@ -176,7 +176,7 @@ useEffect(() => {
         </View>
         ) : (
           <Box flex={1}>
-  {tripDetails.length==0 ? (
+  {tripDetails && tripDetails[0].tripStatus==20 ? (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' , marginTop:'70%'}}>
     <Text
       style={{
