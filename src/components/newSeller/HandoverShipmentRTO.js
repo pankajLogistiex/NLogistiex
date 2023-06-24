@@ -290,7 +290,7 @@ const HandoverShipmentRTO = ({ route }) => {
   //   });
   // };
 
-  function CloseBag(consCode, consName) {
+  function CloseBag(consCode, consName,consignorCodeRTO) {
     console.log(bagSeal);
     console.log(acceptedArray);
     db.transaction((tx) => {
@@ -301,7 +301,7 @@ const HandoverShipmentRTO = ({ route }) => {
           console.log(results.rows.length);
           console.log(results);
           tx.executeSql(
-            "INSERT INTO closeHandoverBag1 (bagSeal, bagId, bagDate, AcceptedList,status,stopId,consignorName) VALUES (?, ?, ?, ?,?,?,?)",
+            "INSERT INTO closeHandoverBag1 (bagSeal, bagId, bagDate, AcceptedList,status,consignorCode,stopId,consignorName) VALUES (?, ?, ?, ?,?,?,?,?)",
             [
               bagSeal,
               consCode + "-" + currentDate + "-" + (results.rows.length + 1),
@@ -310,6 +310,7 @@ const HandoverShipmentRTO = ({ route }) => {
                 acceptedItemData[data[0].stopId].acceptedItems11
               ),
               "pending",
+              consignorCodeRTO,
               consCode,
               consName,
             ],
@@ -766,7 +767,7 @@ const HandoverShipmentRTO = ({ route }) => {
               mt={2}
               bg="#004aad"
               onPress={() => {
-                CloseBag(data[0].stopId, data[0].consignorName);
+                CloseBag(data[0].stopId, data[0].consignorName,data[0].consignorCode);
                 setShowCloseBagModal(false);
               }}
             >

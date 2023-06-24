@@ -180,6 +180,9 @@ const OpenBags = ({ route }) => {
     console.log(bagSeal);
     // console.log(acceptedArray);
     db.transaction((tx) => {
+
+      tx.executeSql("SELECT * FROM SyncSellerPickUp Where stopId=?  ", [consCode], (tx1, resultsCC) => {        
+        console.log(resultsCC.rows.item(0).consignorCode);
       tx.executeSql(
         "SELECT * FROM closeHandoverBag1 Where stopId=? AND bagDate=? ",
         [consCode, currentDate],
@@ -187,13 +190,14 @@ const OpenBags = ({ route }) => {
           console.log(results.rows.length);
           console.log(results);
           tx.executeSql(
-            "INSERT INTO closeHandoverBag1 (bagSeal, bagId, bagDate, AcceptedList,status,stopId,consignorName) VALUES (?, ?, ?, ?,?,?,?)",
+            "INSERT INTO closeHandoverBag1 (bagSeal, bagId, bagDate, AcceptedList,status,consignorCode,stopId,consignorName) VALUES (?, ?, ?,?, ?,?,?,?)",
             [
               bagSeal,
               consCode + "-" + currentDate + "-" + (results.rows.length + 1),
               currentDate,
               JSON.stringify(acceptedItemData[consCode].acceptedItems11),
               "pending",
+              resultsCC.rows.item(0).consignorCode,
               consCode,
               consName,
             ],
@@ -228,6 +232,7 @@ const OpenBags = ({ route }) => {
           );
         }
       );
+    });
     });
   }
 
