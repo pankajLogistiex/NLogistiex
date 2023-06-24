@@ -261,7 +261,7 @@ const PendingHandover = ({ route }) => {
         updateQueryLocal(
           time11,
           handoverStatus[i]?.rejectReason,
-          handoverStatus[i]?.stopId
+          handoverStatus[i]?.consignorCode
         );
       }
     } catch (error) {
@@ -269,7 +269,7 @@ const PendingHandover = ({ route }) => {
     }
     navigation.navigate("HandOverSummary");
   }
-
+ 
   function closeHandover() {
     let time11 = new Date().valueOf();
     console.log("===handover close data P===", {
