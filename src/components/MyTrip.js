@@ -79,50 +79,12 @@ export default function MyTrip({ navigation, route }) {
     }, 200);
   }, []);
 
-  let current = new Date();
-  let tripid = current.toString();
-  let time = tripid.match(/\d{2}:\d{2}:\d{2}/)[0];
-  let dateStart = 0;
-  let dateEnd = tripid.indexOf(
-    " ",
-    tripid.indexOf(" ", tripid.indexOf(" ") + 1) + 1
-  );
-  let date = dateEnd
-    ? tripid.substring(dateStart, dateEnd + 5)
-    : "No match found";
-
   useEffect(() => {
     if (userId) {
-      AsyncStorage.getItem("tripID")
-        .then((storedTripID) => {
-          if (storedTripID) {
-            setTripID(storedTripID);
-          } else {
-            const tripID = userId + "_" + date + "_" + new Date().valueOf();
-            setTripID(tripID);
-            AsyncStorage.setItem("tripID", tripID);
-          }
-          getVehicleNumber(userId);
           getTripDetails(tripID);
           getTripData(userId);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
     }
   }, [userId, tripID]);
-  function getVehicleNumber(userId) {
-    axios
-      .get(backendUrl + `SellerMainScreen/vehicleNumber/${userId}`)
-      .then((response) => {
-        if (response?.data?.data?.vehicleNumber) {
-          setVehicle(response.data.data.vehicleNumber);
-        }
-      })
-      .catch((error) => {
-        console.log(error, "error");
-      });
-  }
   function getTripDetails(tripID) {
     axios
       .get(backendUrl + "UserTripInfo/getUserTripInfo", {
@@ -169,6 +131,16 @@ export default function MyTrip({ navigation, route }) {
     }
   }, [focus]);
   const loadDetails = async () => {
+    db.transaction((txn) => {
+      txn.executeSql(
+        "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ?",
+        [20, 50, userId],
+        (tx, result) => {
+          if (result.rows.length > 0) {
+            setTripID(result.rows.item(0).tripID);
+            setVehicle(result.rows.item(0).vehicleNumber);
+          }
+        })})
     db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="accepted"',
@@ -395,6 +367,7 @@ export default function MyTrip({ navigation, route }) {
           endTime: new Date().valueOf(),
           endkilometer: endkm,
           endVehicleImageUrl: endImageUrl,
+          tripStatus:200,
           tripsummary: {
             acceptedPickup: completePickup,
             notPicked: notPicked,
@@ -409,7 +382,17 @@ export default function MyTrip({ navigation, route }) {
           getTripDetails(tripID);
           setMessage(1);
           navigation.navigate("StartEndDetails", { tripID: tripID });
-          AsyncStorage.removeItem("tripID");
+          db.transaction((tx) => {
+            tx.executeSql(
+              'UPDATE TripDetails SET tripStatus=? WHERE tripID = ?',
+              [200, tripID],
+              (tx1, results) => {
+                if (results.rowsAffected > 0) {
+                  console.log("tripStatus updated");
+                } 
+              }
+            );
+          });
         })
         .catch(function (error) {
           console.log(error);
@@ -436,17 +419,28 @@ export default function MyTrip({ navigation, route }) {
         .post(backendUrl + "UserTripInfo/userTripDetails", {
           tripID: tripID,
           userID: userId,
-          date: currentDate,
           startTime: new Date().valueOf(),
           vehicleNumber: vehicle,
           startKilometer: startkm,
           startVehicleImageUrl: startImageUrl,
+          tripStatus:50
         })
         .then(function (res) {
           if (res.data.msg === "TripID already exists") {
             getTripDetails(tripID);
             setMessage(2);
           } else {
+            db.transaction((tx) => {
+              tx.executeSql(
+                'UPDATE TripDetails SET tripStatus=? WHERE tripID = ?',
+                [50, tripID],
+                (tx1, results) => {
+                  if (results.rowsAffected > 0) {
+                    console.log("tripStatus updated");
+                  } 
+                }
+              );
+            });
             dispatch(setTripStatus(1));
             getTripDetails(tripID);
             setMessage(1);
@@ -468,7 +462,6 @@ export default function MyTrip({ navigation, route }) {
     //   setLabel('Input vehicle KMs');
     // }
   };
-  console.log(tripStatus);
   return (
     <NativeBaseProvider>
       <ScrollView>
@@ -701,7 +694,7 @@ export default function MyTrip({ navigation, route }) {
                           </TouchableOpacity>
                         ) : null}
                       </View>
-                      {startkm && vehicle && startImageUrl && tripid ? (
+                      {startkm && vehicle && startImageUrl ? (
                         <Button
                           title="Login"
                           backgroundColor={"#004aad"}

@@ -87,8 +87,8 @@ import {
         dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
-              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=? AND status IS NOT NULL',
-              [single.consignorCode],
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status IS NOT NULL',
+              [single.stopId],
               (tx1, results) => {
                 counts.push(results.rows.length);
                 if (counts.length === dataSeller.length) {
@@ -106,8 +106,8 @@ import {
           dataSeller.forEach((single) => {
             db.transaction((tx) => {
               tx.executeSql(
-                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND status IS NOT NULL',
-                [single.consignorCode],
+                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status IS NOT NULL',
+                [single.stopId],
                 (tx1, results) => {
                   counts.push(results.rows.length);
                   if (counts.length === dataSeller.length) {
@@ -125,8 +125,8 @@ import {
           dataSeller.forEach((single) => {
             db.transaction((tx) => {
               tx.executeSql(
-                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=?',
-                [single.consignorCode],
+                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=?',
+                [single.stopId],
                 (tx1, results) => {
                   counts.push(results.rows.length);
                   if (counts.length === dataSeller.length) {
@@ -144,8 +144,8 @@ import {
           dataSeller.forEach((single) => {
             db.transaction((tx) => {
               tx.executeSql(
-                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND handoverStatus="accepted"',
-                [single.consignorCode],
+                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND handoverStatus="accepted"',
+                [single.stopId],
                 (tx1, results) => {
                   counts.push(results.rows.length);
                   if (counts.length === dataSeller.length) {
@@ -276,9 +276,9 @@ import {
                 ? data.filter(searched(keyword)).map((single, i) =>
                     reverse[i] > 0 ? (pending11[i]==reverse[i]) && single.otpSubmittedDelivery === "true"? (
 
-                      <TouchableOpacity key={single.consignorCode} onPress={() => {
+                      <TouchableOpacity key={single.stopId} onPress={() => {
                                   navigation.navigate('SellerHandoverSelection', {
-                                 paramKey: single.consignorCode,
+                                 paramKey: single.stopId,
                                  Forward: value[i],
                                  consignorAddress1: single.consignorAddress1,
                                  consignorAddress2: single.consignorAddress2,
@@ -290,6 +290,8 @@ import {
                                  consignorName: single.consignorName,
                                  PRSNumber: single.PRSNumber,
                                  consignorCode: single.consignorCode,
+                                 stopId:single.stopId,
+                                 tripId:single.FMtripId,
                                  userId: single.userId,
                                  phone: single.consignorContact,
                                  Reverse: reverse[i],
@@ -354,9 +356,9 @@ import {
                
                ):(
 
-                     <TouchableOpacity key={single.consignorCode} onPress={() => {
+                     <TouchableOpacity key={single.stopId} onPress={() => {
                           navigation.navigate('SellerHandoverSelection', {
-                         paramKey: single.consignorCode,
+                         paramKey: single.stopId,
                          Forward: value[i],
                          consignorAddress1: single.consignorAddress1,
                          consignorAddress2: single.consignorAddress2,
@@ -368,6 +370,8 @@ import {
                          consignorName: single.consignorName,
                          PRSNumber: single.PRSNumber,
                          consignorCode: single.consignorCode,
+                         stopId:single.stopId,
+                         tripId:single.FMtripId,
                          userId: single.userId,
                          phone: single.consignorContact,
                          Reverse: reverse[i],
@@ -421,7 +425,7 @@ import {
                 ? data.filter(searched(keyword)).map((single, i) =>
                     reverse[i] > 0 ? (pending11[i]!==reverse[i])? (
 
-                   <TouchableOpacity key={single.consignorCode} onPress={() => {
+                   <TouchableOpacity key={single.stopId} onPress={() => {
                         handleTrip()
                }}>
                         <View
@@ -466,7 +470,7 @@ import {
                ):(
 
 
-                  <TouchableOpacity key={single.consignorCode} >
+                  <TouchableOpacity key={single.stopId} >
                         <View
                           style={{
                             flexDirection: 'row',

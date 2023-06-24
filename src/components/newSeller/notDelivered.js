@@ -72,8 +72,8 @@ const NotDelivered = ({route}) => {
       
       db.transaction(tx => {
         tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND consignorCode=?',
-          [new Date().valueOf(), latitude, longitude, rejectionCode, route.params.consignorCode],
+          'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND stopId=?',
+          [new Date().valueOf(), latitude, longitude, rejectionCode, route.params.stopId],
           (tx1, results) => {
             let temp = [];
             console.log(results.rows.length);
@@ -86,8 +86,8 @@ const NotDelivered = ({route}) => {
 
       db.transaction(tx => {
         tx.executeSql(
-          'UPDATE SyncSellerPickUp  SET otpSubmittedDelivery="true" WHERE consignorCode=? ',
-          [route.params.consignorCode],
+          'UPDATE SyncSellerPickUp  SET otpSubmittedDelivery="true" WHERE stopId=? ',
+          [route.params.stopId],
           (tx1, results) => {
             // console.log('Results', results.rowsAffected);
             // console.log(results);
@@ -109,7 +109,9 @@ const NotDelivered = ({route}) => {
           latitude: parseFloat(latitude),
           longitude: parseFloat(longitude),
           eventTime: new Date().valueOf(),
-          rejectionStage: rejectStage,
+          rejectionStage: "SLDF",
+          stopId:route.params.stopId,
+          tripID:route.params.tripId
         })
         .then(function (response) {
           console.log(response.data);

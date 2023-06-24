@@ -485,6 +485,8 @@ function StackNavigators({ navigation }) {
       packagingStatus: 1,
       scanStatus:
         row.status == "accepted" ? 1 : row.status == "rejected" ? 2 : 0,
+        stopId:row.stopId,
+        tripID: row.FMtripId
     });
     await axios
       .post(backendUrl + "SellerMainScreen/postSPS", {
@@ -511,6 +513,8 @@ function StackNavigators({ navigation }) {
         packagingStatus: 1,
         scanStatus:
           row.status == "accepted" ? 1 : row.status == "rejected" ? 2 : 0,
+        stopId:row.stopId,
+        tripID: row.FMtripId
       })
       .then((response) => {
         console.log("sync Successfully pushed");
@@ -684,7 +688,7 @@ function StackNavigators({ navigation }) {
                     if (result.rows.length <= 0) {
                       db.transaction((txn) => {
                         txn.executeSql(
-                          "INSERT OR REPLACE INTO SyncSellerPickUp( contactPersonName,consignorCode ,userId ,consignorName,sellerIndex,consignorAddress1,consignorAddress2,consignorCity,consignorPincode,consignorLatitude,consignorLongitude,consignorContact,ReverseDeliveries,runSheetNumber,ForwardPickups,BagOpenClose11, ShipmentListArray,otpSubmitted,otpSubmittedDelivery,stopId, FMtripId) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                          "INSERT OR REPLACE INTO SyncSellerPickUp( contactPersonName,consignorCode ,userId ,consignorName,sellerIndex ,consignorAddress1,consignorAddress2,consignorCity,consignorPincode,consignorLatitude,consignorLongitude,consignorContact,ReverseDeliveries,runSheetNumber,ForwardPickups,BagOpenClose11, ShipmentListArray,otpSubmitted,otpSubmittedDelivery,stopId, FMtripId) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                           [
                             res.data.data[i].contactPersonName,
                             res.data.data[i].consignorCode,
@@ -706,7 +710,7 @@ function StackNavigators({ navigation }) {
                             "false",
                             "false",
                             res.data.data[i].stopId,
-                            res.data.data[i].FMtripId,
+                            res.data.data[i].FMtripId
                           ],
                           (sqlTxn, _res) => {
                             console.log(
@@ -757,7 +761,7 @@ function StackNavigators({ navigation }) {
   };
   const viewDetails1 = () => {
     db.transaction((tx) => {
-      tx.executeSql("SELECT * FROM SellerMainScreenDetails", [], (tx1, results) => {
+      tx.executeSql("SELECT * FROM SyncSellerPickUp", [], (tx1, results) => {
         let temp = [];
         // console.log(results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {

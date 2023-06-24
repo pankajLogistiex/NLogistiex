@@ -115,8 +115,8 @@ const CollectPOD = ({ route }) => {
   const displayDataSPScan = async () => {
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND (status="accepted" OR status="tagged")',
-        [route.params.consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND (status="accepted" OR status="tagged")',
+        [route.params.stopId],
         (tx1, results) => {
           setnewAccepted(results.rows.length);
           let temp = [];
@@ -129,8 +129,8 @@ const CollectPOD = ({ route }) => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND (handoverStatus="accepted" AND status IS NULL)',
-        [route.params.consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND (handoverStatus="accepted" AND status IS NULL)',
+        [route.params.stopId],
         (tx1, results) => {
           setNewNotDelivered(results.rows.length);
           let temp = [];
@@ -144,8 +144,8 @@ const CollectPOD = ({ route }) => {
 
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND status="rejected"',
-        [route.params.consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status="rejected"',
+        [route.params.stopId],
         (tx1, results) => {
           setnewRejected(results.rows.length);
           let temp = [];
@@ -173,6 +173,8 @@ const CollectPOD = ({ route }) => {
       receiverName: name,
       consignorAction: 'Seller Delivery',
       consignorCode: route.params.consignorCode,
+      stopId:route.params.stopId,
+      tripId:route.params.tripId,
       acceptedShipments: acceptedArray,
       rejectedShipments: rejectedArray,
       nothandedOverShipments: notDeliveredArray,
@@ -195,6 +197,8 @@ const CollectPOD = ({ route }) => {
         acceptedShipments: acceptedArray,
         rejectedShipments: rejectedArray,
         nothandedOverShipments: notDeliveredArray,
+        stopId:route.params.stopId,
+        tripId:route.params.tripId,
       })
       .then(function (response) {
         console.log('POST RD Data Submitted', response.data);
@@ -246,8 +250,8 @@ const CollectPOD = ({ route }) => {
 
           db.transaction(tx => {
             tx.executeSql(
-              'UPDATE SyncSellerPickUp  SET otpSubmittedDelivery="true" WHERE consignorCode=? ',
-              [route.params.consignorCode],
+              'UPDATE SyncSellerPickUp  SET otpSubmittedDelivery="true" WHERE stopId=? ',
+              [route.params.stopId],
               (tx1, results) => {
                 // console.log('Results', results.rowsAffected);
                 // console.log(results);
@@ -263,13 +267,13 @@ const CollectPOD = ({ route }) => {
 
           db.transaction(tx => {
             tx.executeSql(
-              'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND consignorCode=?',
+              'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND stopId=?',
               [
                 route.params.DropDownValue,
                 new Date().valueOf(),
                 route.params.latitude,
                 route.params.longitude,
-                route.params.consignorCode,
+                route.params.stopId,
               ],
               (tx1, results) => {
                 if (results.rowsAffected > 0) {
@@ -297,8 +301,8 @@ const CollectPOD = ({ route }) => {
   const displayData = async () => {
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? ',
-        [route.params.consignorCode],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? ',
+        [route.params.stopId],
         (tx1, results) => {
           // ToastAndroid.show("Loading...", ToastAndroid.SHORT);
           let temp = [];
