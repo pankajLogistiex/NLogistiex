@@ -30,7 +30,7 @@ import OTPTextInput from 'react-native-otp-textinput';
 import {openDatabase} from 'react-native-sqlite-storage';
 import { backendUrl } from '../../utils/backendUrl';
 import { setAutoSync } from '../../redux/slice/autoSyncSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const db = openDatabase({
   name: 'rn_sqlite',
@@ -38,6 +38,7 @@ const db = openDatabase({
 const CollectPOD = ({ route }) => {
   
   const dispatch = useDispatch();
+  const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
 
   var otpInput = useRef(null);
   const navigation = useNavigation();
@@ -110,7 +111,7 @@ const CollectPOD = ({ route }) => {
       displayDataSPScan();
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
 
   const displayDataSPScan = async () => {
     db.transaction(tx => {
@@ -321,7 +322,7 @@ const CollectPOD = ({ route }) => {
       displayData();
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
 
   return (
     <NativeBaseProvider>

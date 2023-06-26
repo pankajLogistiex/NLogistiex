@@ -22,6 +22,7 @@ import { setAutoSync } from "../../redux/slice/autoSyncSlice";
 
 const PendingWork = ({ route }) => {
   const dispatch = useDispatch();
+  const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
   const userId = useSelector((state) => state.user.user_id);
 
   const navigation = useNavigation();
@@ -104,7 +105,7 @@ const PendingWork = ({ route }) => {
       loadDetails();
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
 
   const loadDetails = () => {
     db.transaction((tx) => {

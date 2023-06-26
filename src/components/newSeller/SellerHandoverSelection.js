@@ -43,10 +43,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import GetLocation from 'react-native-get-location';
 import { backendUrl } from '../../utils/backendUrl';
 import { setAutoSync } from '../../redux/slice/autoSyncSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const SellerHandoverSelection = ({ route }) => {
   const dispatch = useDispatch();
+  const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
+
   const [barcodeValue, setBarcodeValue] = useState('');
   const shipmentData =
     backendUrl + `SellerMainScreen/getSellerDetails/${route.params.paramKey}`;
@@ -215,7 +217,7 @@ const SellerHandoverSelection = ({ route }) => {
       loadSellerPickupDetails();
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
 
   const getData = async () => {
     try {

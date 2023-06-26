@@ -15,7 +15,7 @@ import {openDatabase} from 'react-native-sqlite-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useState} from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setAutoSync } from "../../redux/slice/autoSyncSlice";
 
 import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -23,6 +23,7 @@ const db = openDatabase({name: 'rn_sqlite'});
 
 const SellerHandover = ({ route }) => {
   const dispatch = useDispatch();
+  const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
 
   const [data, setData] = useState([]);
   const [keyword, setKeyword] = useState('');
@@ -47,7 +48,7 @@ const SellerHandover = ({ route }) => {
       loadDetails();
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
 
 useEffect(() => {
   const unsubscribe = navigation.addListener('focus', () => {
@@ -66,7 +67,7 @@ useEffect(() => {
   });
 });
 return unsubscribe;
-}, [navigation]);
+}, [navigation, syncTimeFull]);
 // console.log(loading);
   const loadDetails = () => {
     db.transaction(tx => {

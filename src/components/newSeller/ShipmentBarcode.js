@@ -45,13 +45,15 @@ import dingReject11 from '../../assets/rejected_sound.mp3';
 import dingAccept11 from '../../assets/beep_accepted.mp3';
 import { backendUrl } from '../../utils/backendUrl';
 import { setAutoSync } from '../../redux/slice/autoSyncSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 const db = openDatabase({
   name: 'rn_sqlite',
 });
 
 const ShipmentBarcode = ({ route }) => {
   const dispatch = useDispatch();
+  const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
+
   const [expected, setExpected] = useState(0);
   const [newaccepted, setnewAccepted] = useState(0);
   const [newrejected, setnewRejected] = useState(0);
@@ -303,7 +305,7 @@ var dingAccept = new Sound(dingAccept11, error => {
       Sound.setCategory('Playback');
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
   // useEffect(() => {
   //   partialClose112();
   // }, []);
@@ -938,7 +940,7 @@ var barcode11 = barcode;
       displayData();
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
   useEffect(() => {
     (async () => {
         displayData();

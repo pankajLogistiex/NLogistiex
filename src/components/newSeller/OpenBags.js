@@ -35,7 +35,9 @@ import { setAutoSync } from "../../redux/slice/autoSyncSlice";
 
 const OpenBags = ({ route }) => {
   const dispatch = useDispatch();
+
   const userId = useSelector((state) => state.user.user_id);
+  const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
  
   const [data, setData] = useState([]);
   const navigation = useNavigation();
@@ -148,7 +150,7 @@ const OpenBags = ({ route }) => {
       // loadAcceptedItemData12();
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
   useEffect(() => {
     loadDetails112();
     // loadAcceptedItemData12();

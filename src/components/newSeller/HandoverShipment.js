@@ -44,7 +44,7 @@ import {Console} from 'console';
 import {truncate} from 'fs/promises';
 import { backendUrl } from '../../utils/backendUrl';
 import { setAutoSync } from '../../redux/slice/autoSyncSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const db = openDatabase({
   name: 'rn_sqlite',
@@ -52,6 +52,8 @@ const db = openDatabase({
 
 const HandoverShipment = ({route}) => {
   const dispatch = useDispatch();
+  const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
+  
   const [barcodeValue, setBarcodeValue] = useState('');
   const [packageValue, setpackageValue] = useState('');
   const [otp, setOtp] = useState('');
@@ -84,7 +86,7 @@ const HandoverShipment = ({route}) => {
       dispatch(setAutoSync(false));
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
 
   // useEffect(() => {
   //       updateDetails2();

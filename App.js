@@ -133,6 +133,7 @@ function StackNavigators({ navigation }) {
 
   useEffect(() => {
     console.log("===Background Task Run UseEffect Called===");
+    console.log("isAutoSyncEnable===", isAutoSyncEnable);
     if (isMixPanelInit) {
       Mixpanel.trackWithProperties("Background Task Run UseEffect Called", {
         userId: userId,
@@ -485,8 +486,8 @@ function StackNavigators({ navigation }) {
       packagingStatus: 1,
       scanStatus:
         row.status == "accepted" ? 1 : row.status == "rejected" ? 2 : 0,
-        stopId:row.stopId,
-        tripID: row.FMtripId
+      stopId: row.stopId,
+      tripID: row.FMtripId,
     });
     await axios
       .post(backendUrl + "SellerMainScreen/postSPS", {
@@ -513,8 +514,8 @@ function StackNavigators({ navigation }) {
         packagingStatus: 1,
         scanStatus:
           row.status == "accepted" ? 1 : row.status == "rejected" ? 2 : 0,
-        stopId:row.stopId,
-        tripID: row.FMtripId
+        stopId: row.stopId,
+        tripID: row.FMtripId,
       })
       .then((response) => {
         console.log("sync Successfully pushed");
@@ -666,98 +667,102 @@ function StackNavigators({ navigation }) {
           if (result.rows.length > 0) {
             var tripId = result.rows.item(0).tripID;
           }
-    (async () => {
-      await axios
-        .get(backendUrl + `SellerMainScreen/consignorsList/${userId}`,{
-          params: {
-            tripID: tripId,
-          },
-        })
-        .then(
-          (res) => {
-            console.log("API 1 OK: " + res.data.data.length);
-            // console.log(res);
-            for (let i = 0; i < res.data.data.length; i++) {
-              // let m21 = JSON.stringify(res.data[i].consignorAddress, null, 4);
+          (async () => {
+            await axios
+              .get(backendUrl + `SellerMainScreen/consignorsList/${userId}`, {
+                params: {
+                  tripID: tripId,
+                },
+              })
+              .then(
+                (res) => {
+                  console.log("API 1 OK: " + res.data.data.length);
+                  // console.log(res);
+                  for (let i = 0; i < res.data.data.length; i++) {
+                    // let m21 = JSON.stringify(res.data[i].consignorAddress, null, 4);
 
-              db.transaction((txn) => {
-                txn.executeSql(
-                  "SELECT * FROM SyncSellerPickUp where consignorCode = ?",
-                  [res.data.data[i].consignorCode],
-                  (tx, result) => {
-                    if (result.rows.length <= 0) {
-                      db.transaction((txn) => {
-                        txn.executeSql(
-                          "INSERT OR REPLACE INTO SyncSellerPickUp( contactPersonName,consignorCode ,userId ,consignorName,sellerIndex ,consignorAddress1,consignorAddress2,consignorCity,consignorPincode,consignorLatitude,consignorLongitude,consignorContact,ReverseDeliveries,runSheetNumber,ForwardPickups,BagOpenClose11, ShipmentListArray,otpSubmitted,otpSubmittedDelivery,stopId, FMtripId) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                          [
-                            res.data.data[i].contactPersonName,
-                            res.data.data[i].consignorCode,
-                            userId,
-                            res.data.data[i].consignorName,
-                            res.data.data[i].sequenceNumber,
-                            res.data.data[i].consignorAddress1,
-                            res.data.data[i].consignorState,
-                            res.data.data[i].consignorCity,
-                            res.data.data[i].consignorPincode,
-                            res.data.data[i].consignorLatitude,
-                            res.data.data[i].consignorLongitude,
-                            res.data.data[i].consignorContact,
-                            res.data.data[i].ReverseDeliveries,
-                            res.data.data[i].runsheetNo,
-                            res.data.data[i].ForwardPickups,
-                            "true",
-                            " ",
-                            "false",
-                            "false",
-                            res.data.data[i].stopId,
-                            res.data.data[i].FMtripId
-                          ],
-                          (sqlTxn, _res) => {
-                            console.log(
-                              "\n Data Added to local db successfully1212"
-                            );
-                            // console.log(res);
-                          },
-                          (error) => {
-                            console.log(
-                              "error on loading  data from api SellerMainScreen/consignorslist/" +
-                                error.message
-                            );
+                    db.transaction((txn) => {
+                      txn.executeSql(
+                        "SELECT * FROM SyncSellerPickUp where consignorCode = ?",
+                        [res.data.data[i].consignorCode],
+                        (tx, result) => {
+                          if (result.rows.length <= 0) {
+                            db.transaction((txn) => {
+                              txn.executeSql(
+                                "INSERT OR REPLACE INTO SyncSellerPickUp( contactPersonName,consignorCode ,userId ,consignorName,sellerIndex ,consignorAddress1,consignorAddress2,consignorCity,consignorPincode,consignorLatitude,consignorLongitude,consignorContact,ReverseDeliveries,runSheetNumber,ForwardPickups,BagOpenClose11, ShipmentListArray,otpSubmitted,otpSubmittedDelivery,stopId, FMtripId) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                                [
+                                  res.data.data[i].contactPersonName,
+                                  res.data.data[i].consignorCode,
+                                  userId,
+                                  res.data.data[i].consignorName,
+                                  res.data.data[i].sequenceNumber,
+                                  res.data.data[i].consignorAddress1,
+                                  res.data.data[i].consignorState,
+                                  res.data.data[i].consignorCity,
+                                  res.data.data[i].consignorPincode,
+                                  res.data.data[i].consignorLatitude,
+                                  res.data.data[i].consignorLongitude,
+                                  res.data.data[i].consignorContact,
+                                  res.data.data[i].ReverseDeliveries,
+                                  res.data.data[i].runsheetNo,
+                                  res.data.data[i].ForwardPickups,
+                                  "true",
+                                  " ",
+                                  "false",
+                                  "false",
+                                  res.data.data[i].stopId,
+                                  res.data.data[i].FMtripId,
+                                ],
+                                (sqlTxn, _res) => {
+                                  console.log(
+                                    "\n Data Added to local db successfully1212"
+                                  );
+                                  // console.log(res);
+                                },
+                                (error) => {
+                                  console.log(
+                                    "error on loading  data from api SellerMainScreen/consignorslist/" +
+                                      error.message
+                                  );
+                                }
+                              );
+                            });
                           }
-                        );
-                      });
-                    }
+                        }
+                      );
+                    });
                   }
-                );
-              });
-            }
-            viewDetails1();
-            m++;
-            // console.log('value of m1 '+m);
-            var date = new Date();
-            var hours = date.getHours();
-            var minutes = date.getMinutes();
-            var seconds = date.getSeconds();
-            var miliseconds = date.getMilliseconds();
-            var ampm = hours >= 12 ? "PM" : "AM";
-            hours = hours % 12;
-            hours = hours ? hours : 12;
-            minutes = minutes < 10 ? "0" + minutes : minutes;
-            var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
-            dispatch(setSyncTime(datetime));
-            dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
-            AsyncStorage.setItem("lastSyncTime112", datetime);
-            AsyncStorage.setItem("load11", "notload");
-            setIsLoading(false);
-          },
-          (error) => {
-            console.log("error api SellerMainScreen/consignorslist/", error);
-          }
-        );
-    })();
-  }
-  );
-});
+                  viewDetails1();
+                  m++;
+                  // console.log('value of m1 '+m);
+                  var date = new Date();
+                  var hours = date.getHours();
+                  var minutes = date.getMinutes();
+                  var seconds = date.getSeconds();
+                  var miliseconds = date.getMilliseconds();
+                  var ampm = hours >= 12 ? "PM" : "AM";
+                  hours = hours % 12;
+                  hours = hours ? hours : 12;
+                  minutes = minutes < 10 ? "0" + minutes : minutes;
+                  var datetime =
+                    "Last Sync\n" + hours + ":" + minutes + " " + ampm;
+                  dispatch(setSyncTime(datetime));
+                  dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
+                  AsyncStorage.setItem("lastSyncTime112", datetime);
+                  AsyncStorage.setItem("load11", "notload");
+                  setIsLoading(false);
+                },
+                (error) => {
+                  console.log(
+                    "error api SellerMainScreen/consignorslist/",
+                    error
+                  );
+                }
+              );
+          })();
+        }
+      );
+    });
   };
   const viewDetails1 = () => {
     db.transaction((tx) => {
@@ -835,7 +840,9 @@ function StackNavigators({ navigation }) {
           // loadAPI_Data();
         },
         (error) => {
-          console.log("error on creating table SellerMainScreenDetails" + error.message);
+          console.log(
+            "error on creating table SellerMainScreenDetails" + error.message
+          );
         }
       );
     });
@@ -852,25 +859,27 @@ function StackNavigators({ navigation }) {
             var tripID = result.rows.item(0).tripID;
           }
           console.log("Trip ID: ", tripID);
-    (async () => {
-      await axios.get(backendUrl + `SellerMainScreen/workload/${userId}`,{
-        params: {
-          tripID: tripID,
-        },
-      }).then(
-        (res) => {
-          createTables2();
-          console.log("API 2 OK: " + res.data.data.length);
-          for (let i = 0; i < res.data.data.length; i++) {
-            db.transaction((txn) => {
-              txn.executeSql(
-                "SELECT * FROM SellerMainScreenDetails where clientShipmentReferenceNumber = ?",
-                [res.data.data[i].clientShipmentReferenceNumber],
-                (tx, result) => {
-                  if (result.rows.length <= 0) {
+          (async () => {
+            await axios
+              .get(backendUrl + `SellerMainScreen/workload/${userId}`, {
+                params: {
+                  tripID: tripID,
+                },
+              })
+              .then(
+                (res) => {
+                  createTables2();
+                  console.log("API 2 OK: " + res.data.data.length);
+                  for (let i = 0; i < res.data.data.length; i++) {
                     db.transaction((txn) => {
                       txn.executeSql(
-                        `INSERT OR REPLACE INTO SellerMainScreenDetails( 
+                        "SELECT * FROM SellerMainScreenDetails where clientShipmentReferenceNumber = ?",
+                        [res.data.data[i].clientShipmentReferenceNumber],
+                        (tx, result) => {
+                          if (result.rows.length <= 0) {
+                            db.transaction((txn) => {
+                              txn.executeSql(
+                                `INSERT OR REPLACE INTO SellerMainScreenDetails( 
                           clientShipmentReferenceNumber,
                           clientRefId,
                           awbNo,
@@ -896,86 +905,98 @@ function StackNavigators({ navigation }) {
                           stopId,
                           FMtripId
                         ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-                        [
-                          res.data.data[i].clientShipmentReferenceNumber,
-                          res.data.data[i].clientRefId,
-                          res.data.data[i].awbNo,
-                          res.data.data[i].courierCode,
-                          res.data.data[i].consignorCode,
-                          res.data.data[i].packagingStatus,
-                          res.data.data[i].expectedPackagingId,
-                          res.data.data[i].scannedPackageingId,
-                          res.data.data[i].runsheetNo,
-                          res.data.data[i].shipmentStatus,
-                          res.data.data[i].shipmentAction,
-                          "",
-                          "",
-                          0,
-                          res.data.data[i].actionTime,
-                          res.data.data[i].shipmentStatus == "PUS" ||
-                          res.data.data[i].shipmentStatus == "PUC" ||
-                          res.data.data[i].shipmentStatus == "DLR" ||
-                          res.data.data[i].shipmentStatus == "RDS"
-                            ? "accepted"
-                            : res.data.data[i].shipmentStatus == "PUR" ||
-                              res.data.data[i].shipmentStatus == "RDR" ||
-                              res.data.data[i].shipmentStatus == "UDU" ||
-                              res.data.data[i].shipmentStatus == "PUF"
-                            ? "rejected"
-                            : null,
-                          // null,
-                          res.data.data[i].handoverStatus == 1
-                            ? "accepted"
-                            : res.data.data[i].handoverStatus == 2
-                            ? "rejected"
-                            : null,
-                          null,
-                          null,
-                          "",
-                          res.data.data[i].packagingAction,
-                          null,
-                          res.data.data[i].stopId,
-                          res.data.data[i].FMtripId,
-                        ],
-                        (sqlTxn, _res) => {
-                          // console.log(`\n Data Added to local db successfully`);
-                          // console.log(res);
-                        },
-                        (error) => {
-                          console.log("error on adding data " + error.message);
+                                [
+                                  res.data.data[i]
+                                    .clientShipmentReferenceNumber,
+                                  res.data.data[i].clientRefId,
+                                  res.data.data[i].awbNo,
+                                  res.data.data[i].courierCode,
+                                  res.data.data[i].consignorCode,
+                                  res.data.data[i].packagingStatus,
+                                  res.data.data[i].expectedPackagingId,
+                                  res.data.data[i].scannedPackageingId,
+                                  res.data.data[i].runsheetNo,
+                                  res.data.data[i].shipmentStatus,
+                                  res.data.data[i].shipmentAction,
+                                  "",
+                                  "",
+                                  0,
+                                  res.data.data[i].actionTime,
+                                  res.data.data[i].shipmentStatus == "PUS" ||
+                                  res.data.data[i].shipmentStatus == "PUC" ||
+                                  res.data.data[i].shipmentStatus == "DLR" ||
+                                  res.data.data[i].shipmentStatus == "RDS"
+                                    ? "accepted"
+                                    : res.data.data[i].shipmentStatus ==
+                                        "PUR" ||
+                                      res.data.data[i].shipmentStatus ==
+                                        "RDR" ||
+                                      res.data.data[i].shipmentStatus ==
+                                        "UDU" ||
+                                      res.data.data[i].shipmentStatus == "PUF"
+                                    ? "rejected"
+                                    : res.data.data[i].shipmentStatus == "RAH"
+                                    ? res.data.data[i].shipmentAction ==
+                                      "Seller Pickup"
+                                      ? "accepted"
+                                      : "rejected"
+                                    : null,
+                                  // null,
+                                  res.data.data[i].handoverStatus == 1
+                                    ? "accepted"
+                                    : res.data.data[i].handoverStatus == 2
+                                    ? "rejected"
+                                    : null,
+                                  null,
+                                  null,
+                                  "",
+                                  res.data.data[i].packagingAction,
+                                  null,
+                                  res.data.data[i].stopId,
+                                  res.data.data[i].FMtripId,
+                                ],
+                                (sqlTxn, _res) => {
+                                  // console.log(`\n Data Added to local db successfully`);
+                                  // console.log(res);
+                                },
+                                (error) => {
+                                  console.log(
+                                    "error on adding data " + error.message
+                                  );
+                                }
+                              );
+                            });
+                          }
                         }
                       );
                     });
                   }
+                  m++;
+                  var date = new Date();
+                  var hours = date.getHours();
+                  var minutes = date.getMinutes();
+                  var seconds = date.getSeconds();
+                  var miliseconds = date.getMilliseconds();
+                  var ampm = hours >= 12 ? "PM" : "AM";
+                  hours = hours % 12;
+                  hours = hours ? hours : 12;
+                  minutes = minutes < 10 ? "0" + minutes : minutes;
+                  var datetime =
+                    "Last Sync\n" + hours + ":" + minutes + " " + ampm;
+                  dispatch(setSyncTime(datetime));
+                  dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
+                  AsyncStorage.setItem("lastSyncTime112", datetime);
+                  // console.log('value of m2 '+m);
+                  setIsLoading(false);
+                },
+                (error) => {
+                  console.log(error);
                 }
               );
-            });
-          }
-          m++;
-          var date = new Date();
-          var hours = date.getHours();
-          var minutes = date.getMinutes();
-          var seconds = date.getSeconds();
-          var miliseconds = date.getMilliseconds();
-          var ampm = hours >= 12 ? "PM" : "AM";
-          hours = hours % 12;
-          hours = hours ? hours : 12;
-          minutes = minutes < 10 ? "0" + minutes : minutes;
-          var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
-          dispatch(setSyncTime(datetime));
-          dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
-          AsyncStorage.setItem("lastSyncTime112", datetime);
-          // console.log('value of m2 '+m);
-          setIsLoading(false);
-        },
-        (error) => {
-          console.log(error);
+          })();
         }
       );
-    })();
-  }
-  );
-});
+    });
   };
   const createTables3 = () => {
     db.transaction((txn) => {
@@ -999,45 +1020,47 @@ function StackNavigators({ navigation }) {
       );
     });
   };
- 
+
   const loadAPI_3 = () => {
     createTables3();
     (async () => {
       await axios
-      .get(backendUrl + "UserTripInfo/getUserTripInfo", {
-        params: {
-          feUserID: userId,
-        },
-      }).then(
-        (res) => {          
-          for (let i = 0; i < res.data.res_data.length; i++) {
-            // const dateValue = parseInt(res.data.res_data[i].date);
-            db.transaction((txn) => {
-              txn.executeSql(
-                `INSERT OR REPLACE INTO TripDetails(tripID , userID, vehicleNumber, tripStatus, createdAt ,updatedAt
+        .get(backendUrl + "UserTripInfo/getUserTripInfo", {
+          params: {
+            feUserID: userId,
+          },
+        })
+        .then(
+          (res) => {
+            for (let i = 0; i < res.data.res_data.length; i++) {
+              // const dateValue = parseInt(res.data.res_data[i].date);
+              db.transaction((txn) => {
+                txn.executeSql(
+                  `INSERT OR REPLACE INTO TripDetails(tripID , userID, vehicleNumber, tripStatus, createdAt ,updatedAt
                           ) VALUES (?,?,?,?,?,?)`,
-                [
-                  res.data.res_data[i].tripID,
-                  res.data.res_data[i].userID,
-                  res.data.res_data[i].vehicleNumber,
-                  res.data.res_data[i].tripStatus,
-                  res.data.res_data[i].createdAt,
-                  res.data.res_data[i].updatedAt
-                ],
-                (sqlTxn, _res) => {
-                },
-                (error) => {
-                  console.log("error on adding data in tripdetails " + error.message);
-                }
-              );
-            });
+                  [
+                    res.data.res_data[i].tripID,
+                    res.data.res_data[i].userID,
+                    res.data.res_data[i].vehicleNumber,
+                    res.data.res_data[i].tripStatus,
+                    res.data.res_data[i].createdAt,
+                    res.data.res_data[i].updatedAt,
+                  ],
+                  (sqlTxn, _res) => {},
+                  (error) => {
+                    console.log(
+                      "error on adding data in tripdetails " + error.message
+                    );
+                  }
+                );
+              });
+            }
+            m++;
+          },
+          (error) => {
+            console.log("tripdetailserror", error);
           }
-          m++;
-        },
-        (error) => {
-          console.log("tripdetailserror",error);
-        }
-      );
+        );
     })();
   };
 

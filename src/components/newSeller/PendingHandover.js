@@ -30,6 +30,7 @@ import { setAutoSync } from "../../redux/slice/autoSyncSlice";
 
 const PendingHandover = ({ route }) => {
   const dispatch = useDispatch();
+  const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
   // const [data, setData] = useState([]);
   const [selected, setSelected] = useState("Select Exception Reason");
   const navigation = useNavigation();
@@ -95,7 +96,7 @@ const PendingHandover = ({ route }) => {
       loadDetails112();
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
 
   const loadDetails = () => {
     db.transaction((tx) => {

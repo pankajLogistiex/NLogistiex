@@ -37,6 +37,7 @@ import { setAutoSync, setForceSync } from "../redux/slice/autoSyncSlice";
 export default function MyTrip({ navigation, route }) {
   const dispatch = useDispatch();
   const tripStatus = useSelector((state) => state.trip.tripStatus);
+  const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
 
   const [vehicle, setVehicle] = useState("");
   const [startkm, setStartKm] = useState(0);
@@ -81,8 +82,8 @@ export default function MyTrip({ navigation, route }) {
 
   useEffect(() => {
     if (userId) {
-          getTripDetails(tripID);
-          getTripData(userId);
+      getTripDetails(tripID);
+      getTripData(userId);
     }
   }, [userId, tripID]);
   function getTripDetails(tripID) {
@@ -140,7 +141,9 @@ export default function MyTrip({ navigation, route }) {
             setTripID(result.rows.item(0).tripID);
             setVehicle(result.rows.item(0).vehicleNumber);
           }
-        })})
+        }
+      );
+    });
     db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="accepted"',
@@ -239,7 +242,7 @@ export default function MyTrip({ navigation, route }) {
       loadDetails();
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
 
   const requestCameraPermission = async () => {
     try {
@@ -367,7 +370,7 @@ export default function MyTrip({ navigation, route }) {
           endTime: new Date().valueOf(),
           endkilometer: endkm,
           endVehicleImageUrl: endImageUrl,
-          tripStatus:200,
+          tripStatus: 200,
           tripsummary: {
             acceptedPickup: completePickup,
             notPicked: notPicked,
@@ -384,12 +387,12 @@ export default function MyTrip({ navigation, route }) {
           navigation.navigate("StartEndDetails", { tripID: tripID });
           db.transaction((tx) => {
             tx.executeSql(
-              'UPDATE TripDetails SET tripStatus=? WHERE tripID = ?',
+              "UPDATE TripDetails SET tripStatus=? WHERE tripID = ?",
               [200, tripID],
               (tx1, results) => {
                 if (results.rowsAffected > 0) {
                   console.log("tripStatus updated");
-                } 
+                }
               }
             );
           });
@@ -423,7 +426,7 @@ export default function MyTrip({ navigation, route }) {
           vehicleNumber: vehicle,
           startKilometer: startkm,
           startVehicleImageUrl: startImageUrl,
-          tripStatus:50
+          tripStatus: 50,
         })
         .then(function (res) {
           if (res.data.msg === "TripID already exists") {
@@ -432,12 +435,12 @@ export default function MyTrip({ navigation, route }) {
           } else {
             db.transaction((tx) => {
               tx.executeSql(
-                'UPDATE TripDetails SET tripStatus=? WHERE tripID = ?',
+                "UPDATE TripDetails SET tripStatus=? WHERE tripID = ?",
                 [50, tripID],
                 (tx1, results) => {
                   if (results.rowsAffected > 0) {
                     console.log("tripStatus updated");
-                  } 
+                  }
                 }
               );
             });

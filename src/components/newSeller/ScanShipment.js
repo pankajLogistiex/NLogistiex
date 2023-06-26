@@ -53,13 +53,15 @@ import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 import {panGestureHandlerCustomNativeProps} from 'react-native-gesture-handler/lib/typescript/handlers/PanGestureHandler';
 import { backendUrl } from '../../utils/backendUrl';
 import { setAutoSync } from '../../redux/slice/autoSyncSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 const db = openDatabase({
   name: 'rn_sqlite',
 });
 
 const ScanShipment = ({ route }) => {
   const dispatch = useDispatch();
+  const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
+
   const [expected, setExpected] = useState(0);
   const [newaccepted, setnewAccepted] = useState(0);
   const [newrejected, setnewRejected] = useState(0);
@@ -244,7 +246,7 @@ const ScanShipment = ({ route }) => {
       displayDataSPScan();
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
 
   const NotAttemptReasons11 = () => {
     db.transaction(tx => {
@@ -326,7 +328,7 @@ console.log("packagingId",packagingID)
       displayData();
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
   useEffect(() => {
     (async () => {
         displayData();

@@ -61,6 +61,7 @@ const HandoverShipmentRTO = ({ route }) => {
   const dispatch = useDispatch();
 
   const userId = useSelector((state) => state.user.user_id);
+  const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
 
   const [barcode, setBarcode] = useState("");
   const [len, setLen] = useState(0);
@@ -206,7 +207,7 @@ const HandoverShipmentRTO = ({ route }) => {
       loadAcceptedItemData12();
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
 
   useEffect(() => {
     loadAcceptedItemData12();

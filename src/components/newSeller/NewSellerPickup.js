@@ -14,14 +14,15 @@ import {openDatabase} from 'react-native-sqlite-storage';
 import React, {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setAutoSync } from "../../redux/slice/autoSyncSlice";
 // import { Header } from 'react-navigation';
 const db = openDatabase({name: 'rn_sqlite'});
 
 const NewSellerPickup = ({route}) => {
   const dispatch = useDispatch();
-  dispatch(setAutoSync(true));
+  const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
+
   const [dataSeller, setData] = useState([]);
   const [data, setData11] = useState([]);
   const [keyword, setKeyword] = useState('');
@@ -59,14 +60,13 @@ const NewSellerPickup = ({route}) => {
   
       // console.log(data.length);
   useEffect(() => {
-      const unsubscribe = navigation.addListener('focus', () => {
+    const unsubscribe = navigation.addListener('focus', () => {
+        dispatch(setAutoSync(true));
         setData11([]);
         loadDetails();
-       
-        
       });
       return unsubscribe;
-    }, [navigation]);
+    }, [navigation, syncTimeFull]);
     // console.log(data.length," ",data.filter((_, index) => value[index] !== 0).length);
     // console.log(dataSeller.length," ",pending11Seller+" ",reverseSeller+" ",valueSeller);
     // console.log(data.length,"  ",pending11+" ",reverse+" ",value);

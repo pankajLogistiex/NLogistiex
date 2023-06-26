@@ -481,7 +481,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
       loadAcceptedItemData12();
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
 
   useEffect(() => {
     loadAcceptedItemData12();

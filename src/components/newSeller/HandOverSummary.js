@@ -15,11 +15,13 @@ import {openDatabase} from 'react-native-sqlite-storage';
 import React, {useEffect, useState} from 'react';
 import {useNavigation} from '@react-navigation/native';
 import {Picker} from '@react-native-picker/picker';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 const db = openDatabase({name: 'rn_sqlite'});
  
 const HandOverSummary = ({ route }) => {
   const dispatch = useDispatch();
+  const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
+
   const [data, setData] = useState([]);
 
   const [displayData, setDisplayData] = useState({});
@@ -34,7 +36,7 @@ const HandOverSummary = ({ route }) => {
       loadDetails();
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
 
   const loadDetails = () => {
     db.transaction(tx => {

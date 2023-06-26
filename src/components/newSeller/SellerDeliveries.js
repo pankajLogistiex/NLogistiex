@@ -14,12 +14,13 @@ import {
   import React, {useEffect, useState} from 'react';
   import {useNavigation} from '@react-navigation/native';
   import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-  import { useDispatch } from "react-redux";
+  import { useDispatch, useSelector } from "react-redux";
   import { setAutoSync } from "../../redux/slice/autoSyncSlice";
   const db = openDatabase({name: 'rn_sqlite'});
   
   const SellerDeliveries = ({route}) => {
     const dispatch = useDispatch();
+    const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
     
     const [dataSeller, setData] = useState([]);
     const [data, setData11] = useState([]);
@@ -65,7 +66,7 @@ import {
           setData11([]);
         });
         return unsubscribe;
-      }, [navigation]);
+      }, [navigation, syncTimeFull]);
 
     const loadDetails = () => { // setIsLoading(!isLoading);
         db.transaction((tx) => {

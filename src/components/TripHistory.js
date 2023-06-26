@@ -39,6 +39,7 @@ import { ProgressBar } from "@react-native-community/progress-bar-android";
 export default function TripHistory({navigation, route}) {
   const dispatch = useDispatch();
   const tripStatus = useSelector(state => state.trip.tripStatus);
+  const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
 
   const [vehicle, setVehicle] = useState('');
   const [startkm, setStartKm] = useState(0);
@@ -120,7 +121,7 @@ useEffect(() => {
       loadDetails();
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
   return (
     <NativeBaseProvider>
       <Modal

@@ -32,13 +32,14 @@ import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons'
 import {openDatabase} from 'react-native-sqlite-storage';
 import { backendUrl } from '../../utils/backendUrl';
 import { setAutoSync } from '../../redux/slice/autoSyncSlice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const db = openDatabase({
   name: 'rn_sqlite',
 });
 const POD = ({ route }) => {
   const dispatch = useDispatch();
+  const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
   // console.log("========post rd params=======", route.params);
   const navigation = useNavigation();
   const [name, setName] = useState(route.params.contactPersonName);
@@ -118,7 +119,7 @@ const POD = ({ route }) => {
       displayDataSPScan();
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
 
   const displayDataSPScan = async () => {
     db.transaction(tx => {
@@ -359,7 +360,7 @@ const POD = ({ route }) => {
       displayData();
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, syncTimeFull]);
 
   return (
     <NativeBaseProvider>
