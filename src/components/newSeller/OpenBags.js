@@ -15,6 +15,7 @@ import {
   View,
   ToastAndroid,
   Vibration,
+  TouchableOpacity
 } from "react-native";
 import { DataTable, Searchbar, Text, Card } from "react-native-paper";
 import { openDatabase } from "react-native-sqlite-storage";
@@ -586,27 +587,29 @@ const OpenBags = ({ route }) => {
                           {single.consignorName}
                         </Text>
                       </DataTable.Cell>
-                      <DataTable.Cell style={{ flex: 1 }}>
+                      <DataTable.Cell style={{ flex: 1,}}>
                         {/* <Text style={styles.fontvalue}>{data[0].ShipmentListArray.split().length}</Text> */}
                         <Text style={styles.fontvalue}>
                           {single.shipmentsCount}
                         </Text>
                       </DataTable.Cell>
-                      <DataTable.Cell style={{ flex: 1 }}>
-                        <Button
-                          // disabled={single.BagOpenClose === 'close' ? true : false}
-                          // style={{backgroundColor: single.BagOpenClose === 'close' ? 'grey' : '#004aad', color: '#fff'}}
-                          style={{ backgroundColor: "gray", color: "#fff" }}
+                      <DataTable.Cell style={{  flex: 1,backgroundColor: "lightgrey",padding:5,margin:10}}>
+                        
+                        <TouchableOpacity
+                          style={{ color: "black",}}
                           onPress={() => {
-                            // navigation.navigate('PendingHandover',{consignorName:single.consignorName,expected:single.ReverseDeliveries});
                             ToastAndroid.show(
                               "Bag already closed",
                               ToastAndroid.SHORT
                             );
                           }}
-                        >
-                          Closed Bag
-                        </Button>
+                        ><Center>
+                          <Text>
+                            Closed Bag
+                            
+                            </Text>
+                        </Center>
+                        </TouchableOpacity>
                       </DataTable.Cell>
                       {/* <DataTable.Cell style={{flex: 1}}><Button style={{backgroundColor:'#004aad', color:'#fff'}} onPress={
                   () => {navigation.navigate('PendingHandover',{consignorName:single.consignorName,expected:single.ReverseDeliveries})}
