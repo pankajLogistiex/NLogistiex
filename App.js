@@ -132,30 +132,33 @@ function StackNavigators({ navigation }) {
   }, []);
 
   useEffect(() => {
-    console.log("===Background Task Run UseEffect Called===");
-    console.log("isAutoSyncEnable===", isAutoSyncEnable);
-    if (isMixPanelInit) {
-      Mixpanel.trackWithProperties("Background Task Run UseEffect Called", {
-        userId: userId,
-        userEmail: userEmail,
-      });
-    }
-
-    BackgroundTimer.runBackgroundTimer(() => {
-      if (isAutoSyncEnable) {
-        push_Data();
-        if (isMixPanelInit) {
-          Mixpanel.trackWithProperties("Auto sync called", {
-            userId: userId,
-            userEmail: userEmail,
-          });
-        }
-        console.log("===Auto sync called===");
+    if (userId) {
+      console.log("===Background Task Run UseEffect Called===");
+      if (isMixPanelInit) {
+        Mixpanel.trackWithProperties("Background Task Run UseEffect Called", {
+          userId: userId,
+          userEmail: userEmail,
+        });
       }
-    }, 180000);
 
-    BackgroundTimer.stopBackgroundTimer();
-  }, []);
+      const timer = BackgroundTimer.runBackgroundTimer(() => {
+        if (isAutoSyncEnable) {
+          push_Data();
+          if (isMixPanelInit) {
+            Mixpanel.trackWithProperties("Auto sync called", {
+              userId: userId,
+              userEmail: userEmail,
+            });
+          }
+          console.log("===Auto sync called===");
+        }
+      }, 180000);
+
+      return () => {
+        BackgroundTimer.stopBackgroundTimer(timer);
+      };
+    }
+  }, [userId]);
 
   useEffect(() => {
     if (forceSync) {
@@ -171,8 +174,13 @@ function StackNavigators({ navigation }) {
   }, [forceSync]);
 
   useEffect(() => {
+    pull_API_Data();
+  }, [userId]);
+
+  useEffect(() => {
     requestPermissions();
   }, []);
+
   const requestPermissions = async () => {
     try {
       const cameraPermission = await PermissionsAndroid.request(
