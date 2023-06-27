@@ -50,7 +50,7 @@ export default function TripHistory({navigation, route}) {
   const [pendingHandover, setPendingHandover] = useState(0);
   const [showModal1, setShowModal1] = useState(false);
   const [message1, setMessage1] = useState(0);
-  
+  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   const [tripDetails, setTripDetails] = useState([]);
   const [loading, setLoading] = useState(true);
   

@@ -4,7 +4,7 @@ import userSlice from "./slice/userSlice";
 import newSyncSlice from "./slice/isNewSync";
 import newNotificationSlice from "./slice/notificationSlice";
 import autoSyncSlice from "./slice/autoSyncSlice";
-
+import currentDateSlice from "./slice/currentDateSlice";
 export const store = configureStore({
   reducer: {
     trip: tripSlice,
@@ -12,5 +12,6 @@ export const store = configureStore({
     newSync: newSyncSlice,
     notification: newNotificationSlice,
     autoSync: autoSyncSlice,
+    currentDate:currentDateSlice,
   },
 });

@@ -21,7 +21,7 @@ const db = openDatabase({name: 'rn_sqlite'});
 const HandOverSummary = ({ route }) => {
   const dispatch = useDispatch();
   const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
-
+  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   const [data, setData] = useState([]);
 
   const [displayData, setDisplayData] = useState({});

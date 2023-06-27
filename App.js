@@ -83,6 +83,7 @@ import {
   setUserId,
   setUserName,
 } from "./src/redux/slice/userSlice";
+import { setCurrentDateValue } from './src/redux/slice/currentDateSlice';
 import { setTripStatus } from "./src/redux/slice/tripSlice";
 import { logout } from "react-native-app-auth";
 import PushNotification from "react-native-push-notification";
@@ -113,6 +114,8 @@ function StackNavigators({ navigation }) {
     (state) => state.autoSync.isAutoSyncEnable
   );
 
+  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
+
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState([]);
   const [isLogin, setIsLogin] = useState(false);
@@ -130,6 +133,23 @@ function StackNavigators({ navigation }) {
         console.log("Mixpanel initialization error:", error);
       });
   }, []);
+console.log("CurrentDate :",currentDateValue);
+
+useEffect(() => {
+  const updateDateAtMidnight = () => {
+    const currentDate = new Date();
+    const currentDay = currentDate.toISOString().split('T')[0];
+    if (currentDay !== currentDateValue) {
+      console.log("New Date :",currentDay);
+      dispatch(setCurrentDateValue(currentDay));
+    }
+  };
+
+  const checkAndUpdateDate = setInterval(updateDateAtMidnight, 6000); // Checks every minute
+
+  return () => clearInterval(checkAndUpdateDate);
+}, [currentDateValue, dispatch]);
+
 
   useEffect(() => {
     if (userId) {

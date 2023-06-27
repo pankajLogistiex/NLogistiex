@@ -59,6 +59,7 @@ const CollectPOD = ({ route }) => {
   const [newNotDelivered, setNewNotDelivered] = useState(
     route.params.notDelivered,
   );
+  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   const [acceptedArray, setAcceptedArray] = useState([]);
   const [rejectedArray, setRejectedArray] = useState([]);
   const [notDeliveredArray, setNotDeliveredArray] = useState([]);

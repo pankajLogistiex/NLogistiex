@@ -21,7 +21,7 @@ export default function Additional_workload() {
   const dispatch = useDispatch();
   const userId = useSelector((state) => state.user.user_id);
   const notificationCount = useSelector((state) => state.notification.count);
-
+  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   const navigation = useNavigation();
   const [data, setData] = useState([]);
 
@@ -231,12 +231,15 @@ console.log("Data ",data.length +" ",consignorCodeAccept);
             _light={{
               backgroundColor: "white",
             }}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
           >
-            <Stack p="4" space={3}>
+            <Stack p="4" space={3} textAlign="center"> 
               <HStack
                 alignItems="center"
                 space={4}
-                justifyContent="space-between"
+                justifyContent="center" 
               >
                 <HStack alignItems="center">
                   <Text
@@ -249,7 +252,6 @@ console.log("Data ",data.length +" ",consignorCodeAccept);
                     No new notification
                   </Text>
                 </HStack>
-              
               </HStack>
              
               <Stack space={2}>
@@ -272,7 +274,7 @@ console.log("Data ",data.length +" ",consignorCodeAccept);
               <HStack
                 alignItems="center"
                 space={4}
-                // justifyContent="space-between"
+                justifyContent="center" 
               >
                 <HStack alignItems="center">
                   <TouchableOpacity onPress={() => navigation.popToTop()}>
@@ -289,7 +291,10 @@ console.log("Data ",data.length +" ",consignorCodeAccept);
                 </HStack>
               </HStack>
             </Stack>
-          </Box>}
+          </Box>
+          
+
+          }
 
           <Center>
             <Image

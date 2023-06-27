@@ -158,12 +158,15 @@ const Notices = () => {
             _light={{
               backgroundColor: "white",
             }}
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
           >
-            <Stack p="4" space={3}>
+            <Stack p="4" space={3} textAlign="center"> 
               <HStack
                 alignItems="center"
                 space={4}
-                justifyContent="space-between"
+                justifyContent="center" 
               >
                 <HStack alignItems="center">
                   <Text
@@ -176,7 +179,6 @@ const Notices = () => {
                     No new notice
                   </Text>
                 </HStack>
-              
               </HStack>
              
               <Stack space={2}>
@@ -199,7 +201,7 @@ const Notices = () => {
               <HStack
                 alignItems="center"
                 space={4}
-                // justifyContent="space-between"
+                justifyContent="center" 
               >
                 <HStack alignItems="center">
                   <TouchableOpacity onPress={() => navigation.popToTop()}>

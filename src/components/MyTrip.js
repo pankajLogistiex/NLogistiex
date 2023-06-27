@@ -68,7 +68,7 @@ export default function MyTrip({ navigation, route }) {
   const focus = useIsFocused();
   const startKmInputRef = useRef(null);
   const EndKmInputRef = useRef(null);
-
+  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   useEffect(() => {
     setTimeout(() => {
       if (startKmInputRef.current) {

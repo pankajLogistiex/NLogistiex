@@ -58,6 +58,7 @@ const NewSellerSelection = ({ route }) => {
   const [reject, setReject] = useState(0);
   const [data, setData] = useState([]);
   const [order, setOrder] = useState([]);
+  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   const [newdata, setnewdata] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [phone, setPhone] = useState(route.params.phone);

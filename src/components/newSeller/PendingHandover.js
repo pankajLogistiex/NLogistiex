@@ -56,7 +56,7 @@ const PendingHandover = ({ route }) => {
   const [handoverStatus, setHandoverStatus] = useState([]);
   const [runSheetNumbers, setRunSheetNumbers] = useState([]);
   const [totalDone, setTotalDone] = useState(0);
-
+  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   const userId = useSelector((state) => state.user.user_id);
 
   useEffect(() => {

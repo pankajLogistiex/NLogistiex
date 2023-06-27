@@ -24,7 +24,7 @@ const SellerSelection = ({ route }) => {
     const navigation = useNavigation();
     const [modalVisible, setModalVisible] = useState(false);
     const [modalVisible2, setModalVisible2] = useState(false);
-
+    // const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
 
 
     return (

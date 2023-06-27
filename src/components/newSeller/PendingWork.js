@@ -29,6 +29,7 @@ const PendingWork = ({ route }) => {
   const [pendingPickup, setPendingPickup] = useState(0);
   const [pendingDelivery, setPendingDelivery] = useState(0);
   const [data, setData] = useState([]);
+  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   const [DropDownValue, setDropDownValue] = useState(null);
   const [DropDownValue1, setDropDownValue1] = useState(null);
   const [rejectStage, setRejectStage] = useState(null);

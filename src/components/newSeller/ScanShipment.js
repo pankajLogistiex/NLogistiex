@@ -99,7 +99,7 @@ const ScanShipment = ({ route }) => {
   const [imageUrls, setImageUrls] = useState([]);
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   const requestCameraPermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
