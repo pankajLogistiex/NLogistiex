@@ -31,7 +31,7 @@ const Dispatch = ({ route }) => {
     const [pending,setPending] = useState(0);
     const [bagSeal, setBagSeal] = useState('');
     const [showCloseBagModal11, setShowCloseBagModal11] = useState(false);
-
+    const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
     const navigation = useNavigation();
     // const onSuccess = e => {
     //     console.log(e.data, 'barcode');

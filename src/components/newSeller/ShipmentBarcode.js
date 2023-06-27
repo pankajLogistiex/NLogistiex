@@ -70,7 +70,7 @@ const ShipmentBarcode = ({ route }) => {
   const[enableGeoFence, setEnableGeoFence]= useState(0);
   const [sellerLatitude, setSellerLatitude] = useState(0);
   const [sellerLongitude, setSellerLongitude] = useState(0);
-
+  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   const [modalVisible, setModalVisible] = useState(false);
   const [modalVisibleCNA, setModalVisibleCNA] = useState(false);
   const [bagId, setBagId] = useState('');

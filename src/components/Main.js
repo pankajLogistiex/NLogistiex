@@ -49,7 +49,7 @@ export default function Main({navigation, route}) {
   const tripStatus = useSelector(state => state.trip.tripStatus);
   const isNewSync = useSelector(state => state.newSync.value);
   const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
-
+  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   const [data, setData] = useState(0);
   // const [data1, setData1] = useState(0);
   // const [data2, setData2] = useState('');

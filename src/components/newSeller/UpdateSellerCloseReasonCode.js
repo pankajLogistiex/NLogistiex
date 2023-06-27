@@ -12,6 +12,7 @@ const UpdateSellerCloseReasonCode = ({route}) => {
     // const [data, setData] = useState([]);
     const [selected,setSelected]=useState('Select Exception Reason');
     const navigation = useNavigation();
+    // const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
     const [showCloseBagModal, setShowCloseBagModal] = useState(false);
     let data = [
         { value: 'Select Exception Reason', label: 'Select Exception Reason' },

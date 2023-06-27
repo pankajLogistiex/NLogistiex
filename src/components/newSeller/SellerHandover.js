@@ -30,7 +30,7 @@ const SellerHandover = ({ route }) => {
   const [numScanned, setNumScanned] = useState(0);
   const [displayData, setDisplayData] = useState({});
   const [results, setResults] = useState({});
-  
+  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   const [loading, setLoading] = useState(true);
   const [MM,setMM] = useState(0);
   const [acceptedItemData, setAcceptedItemData] = useState({});

@@ -21,7 +21,7 @@ import {
   const SellerDeliveries = ({route}) => {
     const dispatch = useDispatch();
     const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
-    
+    const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
     const [dataSeller, setData] = useState([]);
     const [data, setData11] = useState([]);
     const [keyword, setKeyword] = useState('');

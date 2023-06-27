@@ -25,6 +25,7 @@ const NewSellerPickup = ({route}) => {
 
   const [dataSeller, setData] = useState([]);
   const [data, setData11] = useState([]);
+  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   const [keyword, setKeyword] = useState('');
   const [pending11Seller,setPending] =useState([]);
   const [pendingR,setPendingR] =useState([]);

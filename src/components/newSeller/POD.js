@@ -51,6 +51,7 @@ const POD = ({ route }) => {
   const [PartialCloseData, setPartialCloseData] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [message, setMessage] = useState(0);
+  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   const [runsheetNo, setRunsheetNo] = useState('');
   const [newaccepted, setnewAccepted] = useState(route.params.accepted);
   const [newrejected, setnewRejected] = useState(route.params.rejected);

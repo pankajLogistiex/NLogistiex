@@ -79,7 +79,7 @@ const SellerHandoverSelection = ({ route }) => {
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
   const [loading, setLoading] = useState(true);
-
+  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   useEffect(() => {
     current_location();
   }, []);

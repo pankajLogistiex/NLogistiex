@@ -66,6 +66,7 @@ const HandoverShipment = ({route}) => {
   const [newrejected, setnewRejected] = useState(0);
   const [barcode, setBarcode] = useState('');
   const [len, setLen] = useState(0);
+  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   const [DropDownValue, setDropDownValue] = useState(null);
   const [rejectedData, setRejectedData] = useState([]);
   const RejectReason = backendUrl + 'ADupdatePrams/getUSER';

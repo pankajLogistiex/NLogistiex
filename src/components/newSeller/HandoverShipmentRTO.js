@@ -83,6 +83,7 @@ const HandoverShipmentRTO = ({ route }) => {
   const [acceptedItemData, setAcceptedItemData] = useState(
     route.params.allCloseBAgData || {}
   );
+  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   const [bagStatus, setBagStatus] = useState(true);
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
