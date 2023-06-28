@@ -139,7 +139,7 @@ useEffect(() => {
   const updateDateAtMidnight = () => {
     const currentDate = new Date();
     const currentDay = currentDate.toISOString().split('T')[0];
-    const temp=currentDateValue;
+    // const temp=currentDateValue;
     if (currentDay !== currentDateValue) {
       console.log("New Date :",currentDay);
       dispatch(setCurrentDateValue(currentDay));
@@ -152,9 +152,9 @@ useEffect(() => {
       deleteRowsByDate('ShipmentFailure');
       deleteRowsByDateBag('closeBag1');
       deleteRowsByDateBag('closeHandoverBag1');
-      if(temp!==0){
-        pull_API_Data();
-      }
+      // if(temp!==0){
+      //   pull_API_Data();
+      // }
 
     }
   };
@@ -167,7 +167,7 @@ useEffect(() => {
 
 const deleteRowsByDate = (tableName) => {
   const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setDate(yesterday.getDate() - 3);
   const yesterdayDateString = yesterday.toISOString().split('T')[0];
 
   db.transaction((tx) => {
@@ -187,7 +187,7 @@ const deleteRowsByDate = (tableName) => {
 
 const deleteRowsByDateBag = (tableName) => {
   const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setDate(yesterday.getDate() - 3);
   const yesterdayDateString = yesterday.toISOString().split('T')[0];
   console.log(yesterdayDateString);
   db.transaction((tx) => {
