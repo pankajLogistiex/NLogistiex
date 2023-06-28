@@ -1000,7 +1000,7 @@ const deleteRowsByDateBag = (tableName) => {
                                   res.data.data[i].expectedPackagingId,
                                   res.data.data[i].scannedPackageingId,
                                   res.data.data[i].runsheetNo,
-                                  res.data.data[i].shipmentStatus,
+                                  result.rows.item(0).tripStatus==50 && res.data.data[i].shipmentStatus=="WFP"? null: res.data.data[i].shipmentStatus,
                                   res.data.data[i].shipmentAction,
                                   "",
                                   "",

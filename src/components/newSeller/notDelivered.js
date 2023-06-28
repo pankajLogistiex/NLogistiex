@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import GetLocation from 'react-native-get-location';
 import { backendUrl } from '../../utils/backendUrl';
+import OTPTextInput from 'react-native-otp-textinput';
 
 const NotDelivered = ({route}) => {
     const navigation = useNavigation();
@@ -34,6 +35,10 @@ const NotDelivered = ({route}) => {
     const [rejectionCode, setRejectionCode]=useState("")
     const [latitude, setLatitude] = useState(0);
     const [longitude, setLongitude] = useState(0);
+    const [name, setName] = useState(route.params.contactPersonName);
+    const [enableOTP, setEnableOTP] = useState(0);
+    const [inputOtp, setInputOtp] = useState('');
+    const [phone, setPhone] = useState(route.params.phone);
   
     useEffect(() => {
       current_location();
@@ -157,7 +162,7 @@ const NotDelivered = ({route}) => {
     }, []);
       
       
-      function handleButtonPress(item,item2) {
+      function handleButtonPress(item,item2,item3) {
         if (item == 'Could Not Attempt') {
           setModalVisible2(true);
           setModalVisible(false);
@@ -165,13 +170,51 @@ const NotDelivered = ({route}) => {
           setDropDownValue(item);
           setRejectionCode(item2);
           setRejectStage("L1")
+          setEnableOTP(item3);
         }
       }
-      function handleButtonPress2(item,item2) {
+      function handleButtonPress2(item,item2,item3) {
         setDropDownValue1(item);
         setRejectionCode(item2)
+        setEnableOTP(item3)
         setRejectStage("L2")
       }
+      const sendSmsOtp = async () => {
+        await axios
+          .post(backendUrl + 'SMS_new/sendOTP', {
+            mobileNumber: phone,
+            useCase: "POSTRD DELIVERY OTP",
+            payLoad:{
+              acceptedCount: 0,
+              failedCount: pending
+            }
+          })
+          .then(console.log("OTP sent"))
+          .catch(err => console.log('OTP not send'));
+      };
+      function validateOTP() {
+        console.log(inputOtp,phone)
+        var otp11=inputOtp;
+        axios
+          .post(backendUrl + 'SMS_new/OTPValidate', {
+            mobileNumber: phone,
+            useCase:"POSTRD DELIVERY OTP",
+            otp: otp11,
+          })
+          .then(response => {
+            if (response.data.return) {
+              setInputOtp('');
+              NotDelivered();
+              setModalVisible3(false);
+          }
+          else {
+            alert('Invalid OTP, please try again !!');
+          }})
+          .catch(error => {
+            console.log(error);
+          });
+      }
+    
       
 return (
   <NativeBaseProvider>
@@ -198,7 +241,7 @@ return (
                     }}
                     title={d.description}
                     onPress={() =>
-                      handleButtonPress(d.description,d.short_code)
+                      handleButtonPress(d.description,d.short_code, d.enable_otp)
                     }>
                     <Text
                       style={{
@@ -221,8 +264,11 @@ return (
                     if (!DropDownValue) {
                       ToastAndroid.show('Please Select Reason ', ToastAndroid.SHORT);                  
                     } else {
-                      NotDelivered();
-                      navigation.navigate('PendingWork');
+                      if(enableOTP==1){
+                        setModalVisible3(true);
+                        setModalVisible(false);
+                      }else{ NotDelivered();
+                        navigation.navigate('PendingWork');}
                     }
                   }}>
                   Submit
@@ -252,7 +298,7 @@ return (
                             : '#C8C8C8',
                       }}
                       title={d.description}
-                      onPress={() => handleButtonPress2(d.description, d.short_code)}>
+                      onPress={() => handleButtonPress2(d.description, d.short_code, d.enable_otp)}>
                       <Text
                         style={{
                           color:
@@ -272,8 +318,14 @@ return (
                     if (!DropDownValue1) {
                       ToastAndroid.show('Please Select Reason ', ToastAndroid.SHORT);                  
                     } else {
-                      NotDelivered();
-                      navigation.navigate('PendingWork');
+                      if(enableOTP==1){
+                      setModalVisible3(true);
+                      setModalVisible2(false);
+                      }
+                      else{
+                        NotDelivered();
+                        navigation.navigate('PendingWork');
+                      }
                     }
                   }}>
                   Submit
@@ -288,6 +340,110 @@ return (
                     setModalVisible(true), setModalVisible2(false);
                   }}>
                   Back
+                </Button>
+              </Modal.Body>
+            </Modal.Content>
+          </Modal>
+          <Modal
+            isOpen={modalVisible3}
+            onClose={() => {
+              setModalVisible3(false);
+              setDropDownValue("");
+              setDropDownValue1("");
+              setEnableOTP(0);
+              navigation.navigate('PendingWork');
+            }}
+            size="lg"
+          >
+            <Modal.Content maxWidth="350">
+              <Modal.CloseButton />
+              <Modal.Header>Submit OTP</Modal.Header>
+              <Modal.Body>
+              <Input
+              mx="3"
+              mt={4}
+              placeholder="Receiver Name"
+              w="90%"
+              bg="gray.200"
+              size="lg"
+              value={name}
+              onChangeText={e => setName(e)}
+            />
+            <Input
+              mx="3"
+              my={4}
+              placeholder="Mobile Number"
+              w="90%"
+              bg="gray.200"
+              size="lg"
+              value={phone}
+              onChangeText={e => setPhone(e)}
+            />
+            <View style={{
+                width: '90%',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignSelf: 'center',
+                marginTop: 10,
+              }}>
+            <Button
+              flex="1"
+              mt={2}
+              bg="#004aad"
+              marginBottom={1.5}
+              marginTop={1.5}
+              marginRight={1}
+              onPress={() => {
+                sendSmsOtp();
+              }}>
+              Send OTP
+            </Button>
+            <Button
+              flex="1"
+              mt={2}
+              bg="gray.500"
+              marginBottom={1.5}
+              marginTop={1.5}
+              onPress={() => {
+                sendSmsOtp();
+              }}>
+              Resend
+            </Button>
+            </View>
+            <Center>
+            <OTPTextInput 
+            handleTextChange={e => setInputOtp(e)}
+            inputCount={6} 
+            tintColor="#004aad" 
+            offTintColor="gray" 
+            containerStyle={{
+              marginTop: 4,
+              padding:10,
+            }}
+            textInputStyle={{
+              width: '15%',
+              backgroundColor: '#F5F5F5',
+              borderRadius: 10,
+              borderWidth: 1,
+              borderColor: '#BDBDBD',
+              padding: 10,
+            }}
+            keyboardType="number-pad"
+            onBackspace={() => console.log('back')}
+          />
+            </Center>
+            
+                <Button
+                  flex="1"
+                  mt={2}
+                  bg="#004aad"
+                  marginBottom={1.5}
+                  marginTop={1.5}
+                  onPress={() => {
+                    validateOTP();
+                  }}
+                >
+                  Submit
                 </Button>
               </Modal.Body>
             </Modal.Content>
