@@ -555,8 +555,7 @@ const deleteRowsByDateBag = (tableName) => {
       runsheetNo: row.runSheetNumber,
       shipmentAction: row.shipmentAction,
       feUserID: userId,
-      rejectionReasonL1: row.rejectionReasonL1,
-      rejectionReasonL2: row.rejectionReasonL2
+      rejectionReason: row.rejectionReasonL2
         ? row.rejectionReasonL2
         : row.rejectionReasonL1,
       rejectionStage: 1,
