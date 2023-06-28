@@ -555,8 +555,7 @@ const deleteRowsByDateBag = (tableName) => {
       runsheetNo: row.runSheetNumber,
       shipmentAction: row.shipmentAction,
       feUserID: userId,
-      rejectionReasonL1: row.rejectionReasonL1,
-      rejectionReasonL2: row.rejectionReasonL2
+      rejectionReason: row.rejectionReasonL2
         ? row.rejectionReasonL2
         : row.rejectionReasonL1,
       rejectionStage: 1,
@@ -583,8 +582,7 @@ const deleteRowsByDateBag = (tableName) => {
         runsheetNo: row.runSheetNumber,
         shipmentAction: row.shipmentAction,
         feUserID: userId,
-        rejectionReasonL1: row.rejectionReasonL1,
-        rejectionReasonL2: row.rejectionReasonL2
+        rejectionReason: row.rejectionReasonL2
           ? row.rejectionReasonL2
           : row.rejectionReasonL1,
         rejectionStage: 1,
@@ -1000,7 +998,7 @@ const deleteRowsByDateBag = (tableName) => {
                                   res.data.data[i].expectedPackagingId,
                                   res.data.data[i].scannedPackageingId,
                                   res.data.data[i].runsheetNo,
-                                  res.data.data[i].shipmentStatus,
+                                  result.rows.item(0).tripStatus==50 && res.data.data[i].shipmentStatus=="WFP"? null: res.data.data[i].shipmentStatus,
                                   res.data.data[i].shipmentAction,
                                   "",
                                   "",

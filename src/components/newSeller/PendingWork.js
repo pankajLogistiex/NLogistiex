@@ -136,6 +136,8 @@ const PendingWork = ({ route }) => {
                           results.rows.item(i).consignorLatitude,
                         consignorLongitude:
                           results.rows.item(i).consignorLongitude,
+                          contactPersonName: results.rows.item(i).contactPersonName,
+                          phone: results.rows.item(i).consignorContact,
                         forward: results11.rows.length,
                         reverse: results22.rows.length,
                         stopId:results.rows.item(i).stopId,
@@ -289,7 +291,9 @@ console.log(displayData11)
                                     .consignorLongitude,
                                 userId: userId,
                                 stopId:displayData11[consignorCode].stopId,
-                                tripId:displayData11[consignorCode].tripId
+                                tripId:displayData11[consignorCode].tripId,
+                                contactPersonName:displayData11[consignorCode].contactPersonName,
+                                phone:displayData11[consignorCode].phone
                               })
                             }
                             style={{
@@ -324,7 +328,9 @@ console.log(displayData11)
                                     .consignorLongitude,
                                 userId: userId,
                                 stopId:displayData11[consignorCode].stopId,
-                                tripId:displayData11[consignorCode].tripId
+                                tripId:displayData11[consignorCode].tripId,
+                                contactPersonName:displayData11[consignorCode].contactPersonName,
+                                phone:displayData11[consignorCode].phone
                               })
                             }
                             style={{
