@@ -139,9 +139,23 @@ useEffect(() => {
   const updateDateAtMidnight = () => {
     const currentDate = new Date();
     const currentDay = currentDate.toISOString().split('T')[0];
+    const temp=currentDateValue;
     if (currentDay !== currentDateValue) {
       console.log("New Date :",currentDay);
       dispatch(setCurrentDateValue(currentDay));
+
+
+      deleteRowsByDate('SellerMainScreenDetails');
+      deleteRowsByDate('SyncSellerPickUp');
+      deleteRowsByDate('TripDetails');
+      deleteRowsByDate('noticeMessages');
+      deleteRowsByDate('ShipmentFailure');
+      deleteRowsByDateBag('closeBag1');
+      deleteRowsByDateBag('closeHandoverBag1');
+      if(temp!==0){
+        pull_API_Data();
+      }
+
     }
   };
 
@@ -150,6 +164,45 @@ useEffect(() => {
   return () => clearInterval(checkAndUpdateDate);
 }, [currentDateValue, dispatch]);
 
+
+const deleteRowsByDate = (tableName) => {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayDateString = yesterday.toISOString().split('T')[0];
+
+  db.transaction((tx) => {
+    tx.executeSql(
+      `DELETE FROM ${tableName} WHERE date <= ?`,
+      [yesterdayDateString],
+      (_, { rowsAffected }) => {
+        console.log(`${rowsAffected} rows deleted from ${tableName}`);
+      },
+      (error) => {
+        console.log(`Error deleting rows from ${tableName}:`, error);
+      }
+    );
+  });
+};
+
+
+const deleteRowsByDateBag = (tableName) => {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayDateString = yesterday.toISOString().split('T')[0];
+  console.log(yesterdayDateString);
+  db.transaction((tx) => {
+    tx.executeSql(
+      `DELETE FROM ${tableName} WHERE bagDate <= ?`,
+      [yesterdayDateString],
+      (_, { rowsAffected }) => {
+        console.log(`${rowsAffected} rows deleted from ${tableName}`);
+      },
+      (error) => {
+        console.log(`Error deleting rows from ${tableName}:`, error);
+      }
+    );
+  });
+};
 
   useEffect(() => {
     if (userId) {
@@ -280,7 +333,7 @@ useEffect(() => {
 
     db.transaction((tx) => {
       tx.executeSql(
-        "INSERT INTO noticeMessages (messageId, notificationTitle, notificationBody, sendDate, sentTime) VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO noticeMessages (messageId, notificationTitle, notificationBody, date, sentTime) VALUES (?, ?, ?, ?, ?)",
         [
           messageId,
           notification.title,
@@ -672,7 +725,7 @@ useEffect(() => {
       // txn.executeSql('DROP TABLE IF EXISTS SyncSellerPickUp', []);
       txn.executeSql(
         `CREATE TABLE IF NOT EXISTS SyncSellerPickUp( consignorCode ID VARCHAR(200) PRIMARY KEY ,userId VARCHAR(100), 
-            consignorName VARCHAR(200),sellerIndex INT(20),consignorAddress1 VARCHAR(200),consignorAddress2 VARCHAR(200),consignorCity VARCHAR(200),consignorPincode,consignorLatitude INT(20),consignorLongitude DECIMAL(20,10),consignorContact VARCHAR(200),ReverseDeliveries INT(20),runSheetNumber VARCHAR(200),ForwardPickups INT(20), BagOpenClose11 VARCHAR(200), ShipmentListArray VARCHAR(800),contactPersonName VARCHAR(100),otpSubmitted VARCHAR(50),otpSubmittedDelivery VARCHAR(50), stopId VARCHAR(200), FMtripId VARCHAR(200))`,
+            consignorName VARCHAR(200),sellerIndex INT(20),consignorAddress1 VARCHAR(200),consignorAddress2 VARCHAR(200),consignorCity VARCHAR(200),consignorPincode,consignorLatitude INT(20),consignorLongitude DECIMAL(20,10),consignorContact VARCHAR(200),ReverseDeliveries INT(20),runSheetNumber VARCHAR(200),ForwardPickups INT(20), BagOpenClose11 VARCHAR(200), ShipmentListArray VARCHAR(800),contactPersonName VARCHAR(100),otpSubmitted VARCHAR(50),otpSubmittedDelivery VARCHAR(50), stopId VARCHAR(200), FMtripId VARCHAR(200),date Text)`,
         [],
         (sqlTxn, res) => {
           // console.log("table created successfully1212");
@@ -717,7 +770,7 @@ useEffect(() => {
                           if (result.rows.length <= 0) {
                             db.transaction((txn) => {
                               txn.executeSql(
-                                "INSERT OR REPLACE INTO SyncSellerPickUp( contactPersonName,consignorCode ,userId ,consignorName,sellerIndex ,consignorAddress1,consignorAddress2,consignorCity,consignorPincode,consignorLatitude,consignorLongitude,consignorContact,ReverseDeliveries,runSheetNumber,ForwardPickups,BagOpenClose11, ShipmentListArray,otpSubmitted,otpSubmittedDelivery,stopId, FMtripId) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                                "INSERT OR REPLACE INTO SyncSellerPickUp( contactPersonName,consignorCode ,userId ,consignorName,sellerIndex ,consignorAddress1,consignorAddress2,consignorCity,consignorPincode,consignorLatitude,consignorLongitude,consignorContact,ReverseDeliveries,runSheetNumber,ForwardPickups,BagOpenClose11, ShipmentListArray,otpSubmitted,otpSubmittedDelivery,stopId, FMtripId,date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                                 [
                                   res.data.data[i].contactPersonName,
                                   res.data.data[i].consignorCode,
@@ -740,11 +793,12 @@ useEffect(() => {
                                   "false",
                                   res.data.data[i].stopId,
                                   res.data.data[i].FMtripId,
+                                  currentDateValue,
                                 ],
                                 (sqlTxn, _res) => {
-                                  console.log(
-                                    "\n Data Added to local db successfully1212"
-                                  );
+                                  // console.log(
+                                    // "\n Data Added to local db successfully1212"
+                                  // );
                                   // console.log(res);
                                 },
                                 (error) => {
@@ -860,7 +914,8 @@ useEffect(() => {
           packagingAction VARCHAR(200),
           postRDStatus VARCHAR(200),
           stopId VARCHAR(200),
-          FMtripId VARCHAR(200)
+          FMtripId VARCHAR(200),
+          date Text
           )`,
         [],
         (sqlTxn, res) => {
@@ -931,8 +986,9 @@ useEffect(() => {
                           packagingAction,
                           postRDStatus,
                           stopId,
-                          FMtripId
-                        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                          FMtripId,
+                          date
+                        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
                                 [
                                   res.data.data[i]
                                     .clientShipmentReferenceNumber,
@@ -982,6 +1038,7 @@ useEffect(() => {
                                   null,
                                   res.data.data[i].stopId,
                                   res.data.data[i].FMtripId,
+                                  currentDateValue,
                                 ],
                                 (sqlTxn, _res) => {
                                   // console.log(`\n Data Added to local db successfully`);
@@ -1035,7 +1092,8 @@ useEffect(() => {
           vehicleNumber VARCHAR(200),
           tripStatus VARCHAR(200),
           createdAt VARCHAR(200),
-          updatedAt VARCHAR(200)
+          updatedAt VARCHAR(200),
+          date Text
           )`,
         [],
         (sqlTxn, res) => {
@@ -1064,8 +1122,8 @@ useEffect(() => {
               // const dateValue = parseInt(res.data.res_data[i].date);
               db.transaction((txn) => {
                 txn.executeSql(
-                  `INSERT OR REPLACE INTO TripDetails(tripID , userID, vehicleNumber, tripStatus, createdAt ,updatedAt
-                          ) VALUES (?,?,?,?,?,?)`,
+                  `INSERT OR REPLACE INTO TripDetails(tripID , userID, vehicleNumber, tripStatus, createdAt ,updatedAt,date
+                          ) VALUES (?,?,?,?,?,?,?)`,
                   [
                     res.data.res_data[i].tripID,
                     res.data.res_data[i].userID,
@@ -1073,6 +1131,7 @@ useEffect(() => {
                     res.data.res_data[i].tripStatus,
                     res.data.res_data[i].createdAt,
                     res.data.res_data[i].updatedAt,
+                    currentDateValue,
                   ],
                   (sqlTxn, _res) => {},
                   (error) => {
@@ -1100,7 +1159,7 @@ useEffect(() => {
           messageId TEXT,
           notificationTitle TEXT,
           notificationBody TEXT,
-          sendDate TEXT,
+          date TEXT,
           sentTime TEXT
         )`,
         [],
@@ -1115,7 +1174,7 @@ useEffect(() => {
     db.transaction((txn) => {
       // txn.executeSql('DROP TABLE IF EXISTS ShipmentFailure', []);
       txn.executeSql(
-        "CREATE TABLE IF NOT EXISTS ShipmentFailure(_id VARCHAR(24) PRIMARY KEY,description VARCHAR(255),parentCode VARCHAR(20), short_code VARCHAR(20), consignor_failure BOOLEAN, fe_failure BOOLEAN, operational_failure BOOLEAN, system_failure BOOLEAN, enable_geo_fence BOOLEAN, enable_future_scheduling BOOLEAN, enable_otp BOOLEAN, enable_call_validation BOOLEAN, created_by VARCHAR(10), last_updated_by VARCHAR(10), applies_to VARCHAR(255),life_cycle_code INT(20), __v INT(10))",
+        "CREATE TABLE IF NOT EXISTS ShipmentFailure(_id VARCHAR(24) PRIMARY KEY,description VARCHAR(255),parentCode VARCHAR(20), short_code VARCHAR(20), consignor_failure BOOLEAN, fe_failure BOOLEAN, operational_failure BOOLEAN, system_failure BOOLEAN, enable_geo_fence BOOLEAN, enable_future_scheduling BOOLEAN, enable_otp BOOLEAN, enable_call_validation BOOLEAN, created_by VARCHAR(10), last_updated_by VARCHAR(10), applies_to VARCHAR(255),life_cycle_code INT(20), __v INT(10),date Text)",
         [],
         (sqlTxn, res) => {
           console.log("table ShipmentFailure created successfully");
@@ -1140,8 +1199,8 @@ useEffect(() => {
             const appliesto = String(res.data.data[i].appliesTo.slice());
             db.transaction((txn) => {
               txn.executeSql(
-                `INSERT OR REPLACE INTO ShipmentFailure(_id ,description , parentCode, short_code , consignor_failure , fe_failure , operational_failure , system_failure , enable_geo_fence , enable_future_scheduling , enable_otp , enable_call_validation, created_by , last_updated_by, applies_to ,life_cycle_code , __v
-                          ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                `INSERT OR REPLACE INTO ShipmentFailure(_id ,description , parentCode, short_code , consignor_failure , fe_failure , operational_failure , system_failure , enable_geo_fence , enable_future_scheduling , enable_otp , enable_call_validation, created_by , last_updated_by, applies_to ,life_cycle_code , __v,date
+                          ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
                 [
                   res.data.data[i]._id,
                   res.data.data[i].description,
@@ -1160,6 +1219,7 @@ useEffect(() => {
                   appliesto,
                   res.data.data[i].lifeCycleCode,
                   res.data.data[i].__v,
+                  currentDateValue,
                 ],
                 (sqlTxn, _res) => {
                   // console.log('\n Data Added to local db 6 ');
@@ -1186,6 +1246,21 @@ useEffect(() => {
 
   const createTableBag1 = () => {
     // AsyncStorage.setItem("acceptedItemData11", "");
+
+      db.transaction(tx => {
+        tx.executeSql(
+          'CREATE TABLE IF NOT EXISTS closeBag1 (bagSeal TEXT PRIMARY KEY, bagId TEXT, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode Text, stopId Text)',
+          [],
+          (tx, results) => {
+            console.log('Seller Pickup close bag Table created successfully');
+          },
+          error => {
+            console.log('Error occurred while creating the table:', error);
+          },
+        );
+      });
+
+
     db.transaction((tx) => {
       // tx.executeSql('DROP TABLE IF EXISTS closeHandoverBag1', []);
       tx.executeSql(
@@ -2893,6 +2968,7 @@ function CustomDrawerContent({ navigation }) {
       dispatch(setUserName(""));
       dispatch(setToken(""));
       dispatch(setNotificationCount(0));
+      dispatch(setCurrentDateValue(0));
     } catch (e) {
       console.log(e);
     }
