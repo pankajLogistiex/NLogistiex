@@ -846,13 +846,13 @@ const deleteRowsByDateBag = (tableName) => {
   };
   const viewDetails1 = () => {
     db.transaction((tx) => {
-      tx.executeSql("SELECT * FROM SyncSellerPickUp", [], (tx1, results) => {
+      tx.executeSql("SELECT * FROM SellerMainScreenDetails", [], (tx1, results) => {
         let temp = [];
         // console.log(results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
 
-          // console.log("SyncSellerPickUp",results.rows.item(i));
+          // console.log("SellerMainScreenDetails",results.rows.item(i));
           // var address121 = results.rows.item(i).consignorAddress;
           // var address_json = JSON.parse(address121);
           // console.log(typeof (address_json));
@@ -933,13 +933,14 @@ const deleteRowsByDateBag = (tableName) => {
     setIsLoading(!isLoading);
     db.transaction((txn) => {
       txn.executeSql(
-        "SELECT tripID FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ?",
+        "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ?",
         [20, 50, userId],
         (tx, result) => {
           if (result.rows.length > 0) {
             var tripID = result.rows.item(0).tripID;
+            var tripStatus=result.rows.item(0).tripStatus;
           }
-          console.log("Trip ID: ", tripID);
+          console.log("Trip id: ", tripID, tripStatus);
           (async () => {
             await axios
               .get(backendUrl + `SellerMainScreen/workload/${userId}`, {
@@ -952,6 +953,9 @@ const deleteRowsByDateBag = (tableName) => {
                   createTables2();
                   console.log("API 2 OK: " + res.data.data.length);
                   for (let i = 0; i < res.data.data.length; i++) {
+                    const shipmentStatus = res.data.data[i].shipmentStatus;
+
+                if (!(tripStatus == 50 && shipmentStatus === "WFP")) {
                     db.transaction((txn) => {
                       txn.executeSql(
                         "SELECT * FROM SellerMainScreenDetails where clientShipmentReferenceNumber = ?",
@@ -998,7 +1002,7 @@ const deleteRowsByDateBag = (tableName) => {
                                   res.data.data[i].expectedPackagingId,
                                   res.data.data[i].scannedPackageingId,
                                   res.data.data[i].runsheetNo,
-                                  result.rows.item(0).tripStatus==50 && res.data.data[i].shipmentStatus=="WFP"? null: res.data.data[i].shipmentStatus,
+                                  res.data.data[i].shipmentStatus,
                                   res.data.data[i].shipmentAction,
                                   "",
                                   "",
@@ -1054,6 +1058,7 @@ const deleteRowsByDateBag = (tableName) => {
                       );
                     });
                   }
+                }
                   m++;
                   var date = new Date();
                   var hours = date.getHours();
