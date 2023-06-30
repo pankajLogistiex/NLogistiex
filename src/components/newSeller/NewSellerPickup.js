@@ -16,6 +16,8 @@ import {useNavigation} from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useDispatch, useSelector } from "react-redux";
 import { setAutoSync } from "../../redux/slice/autoSyncSlice";
+import Lottie from 'lottie-react-native';
+import {ProgressBar} from '@react-native-community/progress-bar-android';
 // import { Header } from 'react-navigation';
 const db = openDatabase({name: 'rn_sqlite'});
 
@@ -134,7 +136,7 @@ const NewSellerPickup = ({route}) => {
                 counts.push(results.rows.length);
                 if (counts.length === dataSeller.length) {
                   setValue(counts);
-                  setLoading(false);
+                  // setLoading(false);
                   // setTotalValue(tc);
                 }
               },
@@ -155,7 +157,8 @@ const NewSellerPickup = ({route}) => {
                 counts.push(results.rows.length);
                 if (counts.length === dataSeller.length) {
                   setReverse(counts);
-                  setLoadingR(false);
+                  // setLoadingR(false);
+                  // setLoading(false);
                 }
               },
             );
@@ -195,6 +198,7 @@ const NewSellerPickup = ({route}) => {
                 counts.push(results.rows.length);
                 if (counts.length === dataSeller.length) {
                   setPendingR(counts);
+                  setLoading(false);
                 }
               },
             );
@@ -249,7 +253,28 @@ return (
                 </Modal.Content>
       </Modal>
 {loading &&loadingR ? 
-        <ActivityIndicator size="large" color="blue" style={{marginTop: 44}} />
+        // <ActivityIndicator size="large" color="blue" style={{marginTop: 44}} />
+        <View
+              style={[
+                StyleSheet.absoluteFillObject,
+                {
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  zIndex: 1,
+                  backgroundColor: 'rgba(0,0,0,0.65)',
+                },
+              ]}>
+              <Text style={{color: 'white'}}>Loading...</Text>
+              <Lottie
+                source={require('../../assets/loading11.json')}
+                autoPlay
+                loop
+                speed={1}
+                //   progress={animationProgress.current}
+              />
+              <ProgressBar width={70} />
+            </View>
       :
       <Box flex={1} bg="#fff"  width="auto" maxWidth="100%">
     <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 0, padding: 14, justifyContent: 'center', alignItems: 'center' }}> 

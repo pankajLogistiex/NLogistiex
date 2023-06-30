@@ -497,11 +497,32 @@ const NewSellerSelection = ({ route }) => {
   return (
     <NativeBaseProvider>
       {loading ? (
-        <ActivityIndicator
-          size="large"
-          color="blue"
-          style={{ marginTop: 44 }}
-        />
+        // <ActivityIndicator
+        //   size="large"
+        //   color="blue"
+        //   style={{ marginTop: 44 }}
+        // />
+        <View
+              style={[
+                StyleSheet.absoluteFillObject,
+                {
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  zIndex: 1,
+                  backgroundColor: 'rgba(0,0,0,0.65)',
+                },
+              ]}>
+              <Text style={{color: 'white'}}>Loading...</Text>
+              <Lottie
+                source={require('../../assets/loading11.json')}
+                autoPlay
+                loop
+                speed={1}
+                //   progress={animationProgress.current}
+              />
+              <ProgressBar width={70} />
+            </View>
       ) : (
         <View>
           <Modal>
