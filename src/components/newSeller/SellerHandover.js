@@ -11,6 +11,8 @@ import {
 } from 'native-base';
 import {StyleSheet,View, ScrollView, Linking,ActivityIndicator,TouchableOpacity} from 'react-native';
 import {DataTable, Searchbar, Text, Card} from 'react-native-paper';
+import Lottie from 'lottie-react-native';
+import {ProgressBar} from '@react-native-community/progress-bar-android';
 import {openDatabase} from 'react-native-sqlite-storage';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useState} from 'react';
@@ -204,7 +206,28 @@ const handleMapIconPress = (seller) => {
   return (
     <NativeBaseProvider>
       {loading ? 
-        <ActivityIndicator size="large" color="blue" style={{marginTop: 44}} />
+        // <ActivityIndicator size="large" color="blue" style={{marginTop: 44}} />
+        <View
+              style={[
+                StyleSheet.absoluteFillObject,
+                {
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  zIndex: 1,
+                  backgroundColor: 'rgba(0,0,0,0.65)',
+                },
+              ]}>
+              <Text style={{color: 'white'}}>Loading...</Text>
+              <Lottie
+                source={require('../../assets/loading11.json')}
+                autoPlay
+                loop
+                speed={1}
+                //   progress={animationProgress.current}
+              />
+              <ProgressBar width={70} />
+            </View>
       :
       <Box flex={1} bg="#fff" width="auto" maxWidth="100%">
 

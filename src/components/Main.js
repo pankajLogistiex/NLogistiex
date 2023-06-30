@@ -689,9 +689,9 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
       {loading ? (
         <ActivityIndicator size="large" color="blue" style={{marginTop: 44}} />
       ) : (
-        <Box flex={1} bg="gray.300">
+        <Box flex={1} bg="coolGray.200">
           <ScrollView>
-            <Box flex={1} bg="gray.300" p={4}>
+            <Box flex={1} bg="coolGray.200" p={4}>
               {dashboardData.map((it, index) => {
                 if (
                   it.completedOrder !== 0 ||
