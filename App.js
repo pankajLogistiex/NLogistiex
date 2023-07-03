@@ -133,9 +133,10 @@ function StackNavigators({ navigation }) {
         console.log("Mixpanel initialization error:", error);
       });
   }, []);
-console.log("CurrentDate :",currentDateValue);
+// console.log("CurrentDate :",currentDateValue);
 
 useEffect(() => {
+  console.log("CurrentDate :",currentDateValue);
   const updateDateAtMidnight = () => {
     const currentDate = new Date();
     const currentDay = currentDate.toISOString().split('T')[0];
@@ -354,12 +355,7 @@ const deleteRowsByDateBag = (tableName) => {
     });
   };
 
-  console.log(
-    "Notification Count",
-    notificationCount,
-    " ",
-    useSelector((state) => state.notification.count)
-  );
+  // console.log("Notification Count",notificationCount," ",useSelector((state) => state.notification.count));
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
       console.log(remoteMessage.notification);
@@ -480,7 +476,8 @@ const deleteRowsByDateBag = (tableName) => {
   useEffect(() => {
     (async () => {
       if (userId) {
-        pull_API_Data();
+        // pull_API_Data();
+        // console.log('Pull Data from Api');
       } else {
         navigation.navigate("Login");
       }
@@ -726,7 +723,7 @@ const deleteRowsByDateBag = (tableName) => {
             consignorName VARCHAR(200),sellerIndex INT(20),consignorAddress1 VARCHAR(200),consignorAddress2 VARCHAR(200),consignorCity VARCHAR(200),consignorPincode,consignorLatitude INT(20),consignorLongitude DECIMAL(20,10),consignorContact VARCHAR(200),ReverseDeliveries INT(20),runSheetNumber VARCHAR(200),ForwardPickups INT(20), BagOpenClose11 VARCHAR(200), ShipmentListArray VARCHAR(800),contactPersonName VARCHAR(100),otpSubmitted VARCHAR(50),otpSubmittedDelivery VARCHAR(50), stopId VARCHAR(200), FMtripId VARCHAR(200),date Text)`,
         [],
         (sqlTxn, res) => {
-          // console.log("table created successfully1212");
+          console.log("table created successfully consignorList");
           // loadAPI_Data();
         },
         (error) => {
@@ -886,8 +883,7 @@ const deleteRowsByDateBag = (tableName) => {
       // txn.executeSql('DROP TABLE IF EXISTS SellerMainScreenDetails', []);
       txn.executeSql(
         `CREATE TABLE IF NOT EXISTS SellerMainScreenDetails( 
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          clientShipmentReferenceNumber VARCHAR(200),
+          clientShipmentReferenceNumber id VARCHAR(200) PRIMARY KEY,
           clientRefId VARCHAR(200),
           awbNo VARCHAR(200),
           courierCode VARCHAR(200),
@@ -917,7 +913,7 @@ const deleteRowsByDateBag = (tableName) => {
           )`,
         [],
         (sqlTxn, res) => {
-          console.log("table created successfully SellerMainScreenDetails");
+          console.log("table created successfully workload");
           // loadAPI_Data();
         },
         (error) => {
@@ -1167,7 +1163,7 @@ const deleteRowsByDateBag = (tableName) => {
         )`,
         [],
         (tx, results) => {
-          console.log("Table created successfully");
+          console.log("Table created successfully Notice");
         },
         (error) => {
           console.log("Error creating table: ", error);
@@ -1180,7 +1176,7 @@ const deleteRowsByDateBag = (tableName) => {
         "CREATE TABLE IF NOT EXISTS ShipmentFailure(_id VARCHAR(24) PRIMARY KEY,description VARCHAR(255),parentCode VARCHAR(20), short_code VARCHAR(20), consignor_failure BOOLEAN, fe_failure BOOLEAN, operational_failure BOOLEAN, system_failure BOOLEAN, enable_geo_fence BOOLEAN, enable_future_scheduling BOOLEAN, enable_otp BOOLEAN, enable_call_validation BOOLEAN, created_by VARCHAR(10), last_updated_by VARCHAR(10), applies_to VARCHAR(255),life_cycle_code INT(20), __v INT(10),date Text)",
         [],
         (sqlTxn, res) => {
-          console.log("table ShipmentFailure created successfully");
+          console.log("Table created successfully ShipmentFailure");
           // loadAPI_Data();
         },
         (error) => {
@@ -1255,7 +1251,7 @@ const deleteRowsByDateBag = (tableName) => {
           'CREATE TABLE IF NOT EXISTS closeBag1 (bagSeal TEXT PRIMARY KEY, bagId TEXT, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode Text, stopId Text)',
           [],
           (tx, results) => {
-            console.log('Seller Pickup close bag Table created successfully');
+            console.log('Table created successfully Pickup close bag');
           },
           error => {
             console.log('Error occurred while creating the table:', error);
@@ -1270,7 +1266,7 @@ const deleteRowsByDateBag = (tableName) => {
         "CREATE TABLE IF NOT EXISTS closeHandoverBag1 (bagSeal TEXT , bagId TEXT PRIMARY KEY, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode text,stopId Text,consignorName Text)",
         [],
         (tx, results) => {
-          console.log("Table created successfully");
+          console.log("Table created successfully Handover Close Bag");
         },
         (error) => {
           console.log("Error occurred while creating the table:", error);
