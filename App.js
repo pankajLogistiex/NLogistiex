@@ -438,6 +438,7 @@ const deleteRowsByDateBag = (tableName) => {
   // }, []);
 
   const pull_API_Data = () => {
+    if(userId){
     var date = new Date();
     var hours = date.getHours();
     var minutes = date.getMinutes();
@@ -451,21 +452,15 @@ const deleteRowsByDateBag = (tableName) => {
     dispatch(setSyncTime(datetime));
     dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
     AsyncStorage.setItem("lastSyncTime112", datetime);
-
-    console.log("api pull");
-    loadAPI_Data1();
-    loadAPI_Data2();
-    loadAPI_3();
-    // loadAPI_Data3();
-    // loadAPI_Data4();
-    // loadAPI_Data5();
-    // loadAPI_Data6();
-    // loadAPI_DataCD();
-    createTableBag1();
-    loadAPI_DataSF();
-
-    const randomValue = Math.floor(Math.random() * (100 - 1 + 1)) + 1;
-    dispatch(setIsNewSync(randomValue));
+        console.log("api pull");
+        loadAPI_Data1();
+        loadAPI_Data2();
+        loadAPI_3();
+        createTableBag1();
+        loadAPI_DataSF();
+        const randomValue = Math.floor(Math.random() * (100 - 1 + 1)) + 1;
+        dispatch(setIsNewSync(randomValue));
+    }
   };
   useEffect(() => {
     // This useEffect  is use to hide warnings in mobile screen .
@@ -843,7 +838,7 @@ const deleteRowsByDateBag = (tableName) => {
   };
   const viewDetails1 = () => {
     db.transaction((tx) => {
-      tx.executeSql("SELECT * FROM SellerMainScreenDetails", [], (tx1, results) => {
+      tx.executeSql("SELECT * FROM SyncSellerPickup", [], (tx1, results) => {
         let temp = [];
         // console.log(results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
@@ -2946,7 +2941,7 @@ function CustomDrawerContent({ navigation }) {
       });
     };
     loadDetails();
-  }, []);
+  }, [pendingPickup, pendingDelivery]);
   const handleStartTrip = () => {
     if ((pendingPickup != 0 || pendingDelivery != 0) && tripStatus == 1) {
       navigation.navigate("PendingWork");

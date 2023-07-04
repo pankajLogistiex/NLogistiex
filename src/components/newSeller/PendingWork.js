@@ -293,7 +293,8 @@ console.log(displayData11)
                                 stopId:displayData11[consignorCode].stopId,
                                 tripId:displayData11[consignorCode].tripId,
                                 contactPersonName:displayData11[consignorCode].contactPersonName,
-                                phone:displayData11[consignorCode].phone
+                                phone:displayData11[consignorCode].phone,
+                                pending:displayData11[consignorCode].forward
                               })
                             }
                             style={{
@@ -330,7 +331,8 @@ console.log(displayData11)
                                 stopId:displayData11[consignorCode].stopId,
                                 tripId:displayData11[consignorCode].tripId,
                                 contactPersonName:displayData11[consignorCode].contactPersonName,
-                                phone:displayData11[consignorCode].phone
+                                phone:displayData11[consignorCode].phone,
+                                pending:displayData11[consignorCode].reverse
                               })
                             }
                             style={{
