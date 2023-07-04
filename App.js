@@ -65,7 +65,7 @@ import NetInfo from "@react-native-community/netinfo";
 import axios from "axios";
 import { openDatabase } from "react-native-sqlite-storage";
 import NewSellerAdditionNotification from "./src/components/NewSellerAdditionNotification";
-import DeviceInfoScreen from './src/components/newSeller/DeviceInfoScreen';
+import DeviceInfoScreen from "./src/components/newSeller/DeviceInfoScreen";
 import StartEndDetails from "./src/components/StartEndDetails";
 import SellerSelection from "./src/components/newSeller/SellerSelection";
 import UpdateSellerCloseReasonCode from "./src/components/newSeller/UpdateSellerCloseReasonCode";
@@ -84,7 +84,7 @@ import {
   setUserId,
   setUserName,
 } from "./src/redux/slice/userSlice";
-import { setCurrentDateValue } from './src/redux/slice/currentDateSlice';
+import { setCurrentDateValue } from "./src/redux/slice/currentDateSlice";
 import { setTripStatus } from "./src/redux/slice/tripSlice";
 import { logout } from "react-native-app-auth";
 import PushNotification from "react-native-push-notification";
@@ -115,7 +115,9 @@ function StackNavigators({ navigation }) {
     (state) => state.autoSync.isAutoSyncEnable
   );
 
-  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
+  const currentDateValue =
+    useSelector((state) => state.currentDate.currentDateValue) ||
+    new Date().toISOString().split("T")[0];
 
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState([]);
@@ -134,77 +136,73 @@ function StackNavigators({ navigation }) {
         console.log("Mixpanel initialization error:", error);
       });
   }, []);
-// console.log("CurrentDate :",currentDateValue);
+  // console.log("CurrentDate :",currentDateValue);
 
-useEffect(() => {
-  console.log("CurrentDate :",currentDateValue);
-  const updateDateAtMidnight = () => {
-    const currentDate = new Date();
-    const currentDay = currentDate.toISOString().split('T')[0];
-    // const temp=currentDateValue;
-    if (currentDay !== currentDateValue) {
-      console.log("New Date :",currentDay);
-      dispatch(setCurrentDateValue(currentDay));
+  useEffect(() => {
+    console.log("CurrentDate :", currentDateValue);
+    const updateDateAtMidnight = () => {
+      const currentDate = new Date();
+      const currentDay = currentDate.toISOString().split("T")[0];
+      // const temp=currentDateValue;
+      if (currentDay !== currentDateValue) {
+        console.log("New Date :", currentDay);
+        dispatch(setCurrentDateValue(currentDay));
 
+        deleteRowsByDate("SellerMainScreenDetails");
+        deleteRowsByDate("SyncSellerPickUp");
+        deleteRowsByDate("TripDetails");
+        deleteRowsByDate("noticeMessages");
+        deleteRowsByDate("ShipmentFailure");
+        deleteRowsByDateBag("closeBag1");
+        deleteRowsByDateBag("closeHandoverBag1");
+        // if(temp!==0){
+        //   pull_API_Data();
+        // }
+      }
+    };
 
-      deleteRowsByDate('SellerMainScreenDetails');
-      deleteRowsByDate('SyncSellerPickUp');
-      deleteRowsByDate('TripDetails');
-      deleteRowsByDate('noticeMessages');
-      deleteRowsByDate('ShipmentFailure');
-      deleteRowsByDateBag('closeBag1');
-      deleteRowsByDateBag('closeHandoverBag1');
-      // if(temp!==0){
-      //   pull_API_Data();
-      // }
+    const checkAndUpdateDate = setInterval(updateDateAtMidnight, 6000); // Checks every minute
 
-    }
+    return () => clearInterval(checkAndUpdateDate);
+  }, [currentDateValue, dispatch]);
+
+  const deleteRowsByDate = (tableName) => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 3);
+    const yesterdayDateString = yesterday.toISOString().split("T")[0];
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        `DELETE FROM ${tableName} WHERE date <= ?`,
+        [yesterdayDateString],
+        (_, { rowsAffected }) => {
+          console.log(`${rowsAffected} rows deleted from ${tableName}`);
+        },
+        (error) => {
+          console.log(`Error deleting rows from ${tableName}:`, error);
+        }
+      );
+    });
   };
 
-  const checkAndUpdateDate = setInterval(updateDateAtMidnight, 6000); // Checks every minute
-
-  return () => clearInterval(checkAndUpdateDate);
-}, [currentDateValue, dispatch]);
-
-
-const deleteRowsByDate = (tableName) => {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 3);
-  const yesterdayDateString = yesterday.toISOString().split('T')[0];
-
-  db.transaction((tx) => {
-    tx.executeSql(
-      `DELETE FROM ${tableName} WHERE date <= ?`,
-      [yesterdayDateString],
-      (_, { rowsAffected }) => {
-        console.log(`${rowsAffected} rows deleted from ${tableName}`);
-      },
-      (error) => {
-        console.log(`Error deleting rows from ${tableName}:`, error);
-      }
-    );
-  });
-};
-
-
-const deleteRowsByDateBag = (tableName) => {
-  const yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 3);
-  const yesterdayDateString = yesterday.toISOString().split('T')[0];
-  console.log(yesterdayDateString);
-  db.transaction((tx) => {
-    tx.executeSql(
-      `DELETE FROM ${tableName} WHERE bagDate <= ?`,
-      [yesterdayDateString],
-      (_, { rowsAffected }) => {
-        console.log(`${rowsAffected} rows deleted from ${tableName}`);
-      },
-      (error) => {
-        console.log(`Error deleting rows from ${tableName}:`, error);
-      }
-    );
-  });
-};
+  const deleteRowsByDateBag = (tableName) => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 3);
+    const yesterdayDateString = yesterday.toISOString().split("T")[0];
+    console.log(yesterdayDateString);
+    db.transaction((tx) => {
+      tx.executeSql(
+        `DELETE FROM ${tableName} WHERE bagDate <= ?`,
+        [yesterdayDateString],
+        (_, { rowsAffected }) => {
+          console.log(`${rowsAffected} rows deleted from ${tableName}`);
+        },
+        (error) => {
+          console.log(`Error deleting rows from ${tableName}:`, error);
+        }
+      );
+    });
+  };
 
   useEffect(() => {
     if (userId) {
@@ -439,28 +437,28 @@ const deleteRowsByDateBag = (tableName) => {
   // }, []);
 
   const pull_API_Data = () => {
-    if(userId){
-    var date = new Date();
-    var hours = date.getHours();
-    var minutes = date.getMinutes();
-    var seconds = date.getSeconds();
-    var miliseconds = date.getMilliseconds();
-    var ampm = hours >= 12 ? "PM" : "AM";
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    minutes = minutes < 10 ? "0" + minutes : minutes;
-    var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
-    dispatch(setSyncTime(datetime));
-    dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
-    AsyncStorage.setItem("lastSyncTime112", datetime);
-        console.log("api pull");
-        loadAPI_Data1();
-        loadAPI_Data2();
-        loadAPI_3();
-        createTableBag1();
-        loadAPI_DataSF();
-        const randomValue = Math.floor(Math.random() * (100 - 1 + 1)) + 1;
-        dispatch(setIsNewSync(randomValue));
+    if (userId) {
+      var date = new Date();
+      var hours = date.getHours();
+      var minutes = date.getMinutes();
+      var seconds = date.getSeconds();
+      var miliseconds = date.getMilliseconds();
+      var ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      minutes = minutes < 10 ? "0" + minutes : minutes;
+      var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
+      dispatch(setSyncTime(datetime));
+      dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
+      AsyncStorage.setItem("lastSyncTime112", datetime);
+      console.log("api pull");
+      loadAPI_Data1();
+      loadAPI_Data2();
+      loadAPI_3();
+      createTableBag1();
+      loadAPI_DataSF();
+      const randomValue = Math.floor(Math.random() * (100 - 1 + 1)) + 1;
+      dispatch(setIsNewSync(randomValue));
     }
   };
   useEffect(() => {
@@ -472,7 +470,11 @@ const deleteRowsByDateBag = (tableName) => {
   useEffect(() => {
     (async () => {
       if (userId) {
-        // pull_API_Data();
+        pull_API_Data();
+        setTimeout(() => {
+          loadAPI_Data1();
+          loadAPI_Data2();
+        }, 2000);
         // console.log('Pull Data from Api');
       } else {
         navigation.navigate("Login");
@@ -788,7 +790,7 @@ const deleteRowsByDateBag = (tableName) => {
                                 ],
                                 (sqlTxn, _res) => {
                                   // console.log(
-                                    // "\n Data Added to local db successfully1212"
+                                  // "\n Data Added to local db successfully1212"
                                   // );
                                   // console.log(res);
                                 },
@@ -930,7 +932,7 @@ const deleteRowsByDateBag = (tableName) => {
         (tx, result) => {
           if (result.rows.length > 0) {
             var tripID = result.rows.item(0).tripID;
-            var tripStatus=result.rows.item(0).tripStatus;
+            var tripStatus = result.rows.item(0).tripStatus;
           }
           console.log("Trip id: ", tripID, tripStatus);
           (async () => {
@@ -947,16 +949,16 @@ const deleteRowsByDateBag = (tableName) => {
                   for (let i = 0; i < res.data.data.length; i++) {
                     const shipmentStatus = res.data.data[i].shipmentStatus;
 
-                if (!(tripStatus == 50 && shipmentStatus === "WFP")) {
-                    db.transaction((txn) => {
-                      txn.executeSql(
-                        "SELECT * FROM SellerMainScreenDetails where clientShipmentReferenceNumber = ?",
-                        [res.data.data[i].clientShipmentReferenceNumber],
-                        (tx, result) => {
-                          if (result.rows.length <= 0) {
-                            db.transaction((txn) => {
-                              txn.executeSql(
-                                `INSERT OR REPLACE INTO SellerMainScreenDetails( 
+                    if (!(tripStatus == 50 && shipmentStatus === "WFP")) {
+                      db.transaction((txn) => {
+                        txn.executeSql(
+                          "SELECT * FROM SellerMainScreenDetails where clientShipmentReferenceNumber = ?",
+                          [res.data.data[i].clientShipmentReferenceNumber],
+                          (tx, result) => {
+                            if (result.rows.length <= 0) {
+                              db.transaction((txn) => {
+                                txn.executeSql(
+                                  `INSERT OR REPLACE INTO SellerMainScreenDetails( 
                           clientShipmentReferenceNumber,
                           clientRefId,
                           awbNo,
@@ -983,74 +985,74 @@ const deleteRowsByDateBag = (tableName) => {
                           FMtripId,
                           date
                         ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-                                [
-                                  res.data.data[i]
-                                    .clientShipmentReferenceNumber,
-                                  res.data.data[i].clientRefId,
-                                  res.data.data[i].awbNo,
-                                  res.data.data[i].courierCode,
-                                  res.data.data[i].consignorCode,
-                                  res.data.data[i].packagingStatus,
-                                  res.data.data[i].expectedPackagingId,
-                                  res.data.data[i].scannedPackageingId,
-                                  res.data.data[i].runsheetNo,
-                                  res.data.data[i].shipmentStatus,
-                                  res.data.data[i].shipmentAction,
-                                  "",
-                                  "",
-                                  0,
-                                  res.data.data[i].actionTime,
-                                  res.data.data[i].shipmentStatus == "PUS" ||
-                                  res.data.data[i].shipmentStatus == "PUC" ||
-                                  res.data.data[i].shipmentStatus == "DLR" ||
-                                  res.data.data[i].shipmentStatus == "RDS"
-                                    ? "accepted"
-                                    : res.data.data[i].shipmentStatus ==
-                                        "PUR" ||
-                                      res.data.data[i].shipmentStatus ==
-                                        "RDR" ||
-                                      res.data.data[i].shipmentStatus ==
-                                        "UDU" ||
-                                      res.data.data[i].shipmentStatus == "PUF"
-                                    ? "rejected"
-                                    : res.data.data[i].shipmentStatus == "RAH"
-                                    ? res.data.data[i].shipmentAction ==
-                                      "Seller Pickup"
+                                  [
+                                    res.data.data[i]
+                                      .clientShipmentReferenceNumber,
+                                    res.data.data[i].clientRefId,
+                                    res.data.data[i].awbNo,
+                                    res.data.data[i].courierCode,
+                                    res.data.data[i].consignorCode,
+                                    res.data.data[i].packagingStatus,
+                                    res.data.data[i].expectedPackagingId,
+                                    res.data.data[i].scannedPackageingId,
+                                    res.data.data[i].runsheetNo,
+                                    res.data.data[i].shipmentStatus,
+                                    res.data.data[i].shipmentAction,
+                                    "",
+                                    "",
+                                    0,
+                                    res.data.data[i].actionTime,
+                                    res.data.data[i].shipmentStatus == "PUS" ||
+                                    res.data.data[i].shipmentStatus == "PUC" ||
+                                    res.data.data[i].shipmentStatus == "DLR" ||
+                                    res.data.data[i].shipmentStatus == "RDS"
                                       ? "accepted"
-                                      : "rejected"
-                                    : null,
-                                  // null,
-                                  res.data.data[i].handoverStatus == 1
-                                    ? "accepted"
-                                    : res.data.data[i].handoverStatus == 2
-                                    ? "rejected"
-                                    : null,
-                                  null,
-                                  null,
-                                  "",
-                                  res.data.data[i].packagingAction,
-                                  null,
-                                  res.data.data[i].stopId,
-                                  res.data.data[i].FMtripId,
-                                  currentDateValue,
-                                ],
-                                (sqlTxn, _res) => {
-                                  // console.log(`\n Data Added to local db successfully`);
-                                  // console.log(res);
-                                },
-                                (error) => {
-                                  console.log(
-                                    "error on adding data " + error.message
-                                  );
-                                }
-                              );
-                            });
+                                      : res.data.data[i].shipmentStatus ==
+                                          "PUR" ||
+                                        res.data.data[i].shipmentStatus ==
+                                          "RDR" ||
+                                        res.data.data[i].shipmentStatus ==
+                                          "UDU" ||
+                                        res.data.data[i].shipmentStatus == "PUF"
+                                      ? "rejected"
+                                      : res.data.data[i].shipmentStatus == "RAH"
+                                      ? res.data.data[i].shipmentAction ==
+                                        "Seller Pickup"
+                                        ? "accepted"
+                                        : "rejected"
+                                      : null,
+                                    // null,
+                                    res.data.data[i].handoverStatus == 1
+                                      ? "accepted"
+                                      : res.data.data[i].handoverStatus == 2
+                                      ? "rejected"
+                                      : null,
+                                    null,
+                                    null,
+                                    "",
+                                    res.data.data[i].packagingAction,
+                                    null,
+                                    res.data.data[i].stopId,
+                                    res.data.data[i].FMtripId,
+                                    currentDateValue,
+                                  ],
+                                  (sqlTxn, _res) => {
+                                    // console.log(`\n Data Added to local db successfully`);
+                                    // console.log(res);
+                                  },
+                                  (error) => {
+                                    console.log(
+                                      "error on adding data " + error.message
+                                    );
+                                  }
+                                );
+                              });
+                            }
                           }
-                        }
-                      );
-                    });
+                        );
+                      });
+                    }
                   }
-                }
                   m++;
                   var date = new Date();
                   var hours = date.getHours();
@@ -1242,19 +1244,18 @@ const deleteRowsByDateBag = (tableName) => {
   const createTableBag1 = () => {
     // AsyncStorage.setItem("acceptedItemData11", "");
 
-      db.transaction(tx => {
-        tx.executeSql(
-          'CREATE TABLE IF NOT EXISTS closeBag1 (bagSeal TEXT PRIMARY KEY, bagId TEXT, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode Text, stopId Text)',
-          [],
-          (tx, results) => {
-            console.log('Table created successfully Pickup close bag');
-          },
-          error => {
-            console.log('Error occurred while creating the table:', error);
-          },
-        );
-      });
-
+    db.transaction((tx) => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS closeBag1 (bagSeal TEXT PRIMARY KEY, bagId TEXT, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode Text, stopId Text)",
+        [],
+        (tx, results) => {
+          console.log("Table created successfully Pickup close bag");
+        },
+        (error) => {
+          console.log("Error occurred while creating the table:", error);
+        }
+      );
+    });
 
     db.transaction((tx) => {
       // tx.executeSql('DROP TABLE IF EXISTS closeHandoverBag1', []);
@@ -1346,8 +1347,7 @@ const deleteRowsByDateBag = (tableName) => {
           }}
         />
 
-
-<Stack.Screen
+        <Stack.Screen
           name="DeviceInfoScreen"
           component={DeviceInfoScreen}
           options={{
@@ -1366,7 +1366,7 @@ const deleteRowsByDateBag = (tableName) => {
                     onPress={() => navigation.toggleDrawer()}
                   />
                   <Heading style={{ color: "white", marginLeft: 10 }} size="md">
-                  Device Info
+                    Device Info
                   </Heading>
                 </View>
               </NativeBaseProvider>
@@ -1374,7 +1374,6 @@ const deleteRowsByDateBag = (tableName) => {
             headerLeft: () => null,
           }}
         />
-
 
         <Stack.Screen
           name="CloseReasonCode"
