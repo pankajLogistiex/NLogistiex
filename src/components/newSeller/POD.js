@@ -553,7 +553,6 @@ const POD = ({ route }) => {
         containerStyle={{
           marginTop: 4,
           padding:10,
-          // size:20
         }}
         textInputStyle={{
           backgroundColor: '#F5F5F5',
@@ -562,35 +561,12 @@ const POD = ({ route }) => {
           borderColor: '#BDBDBD',
           padding: 10,
         }}
-        // secureTextEntry={!showPassword}
         keyboardType="number-pad"
         onBackspace={() => console.log('back')}
       />
-
-      {/* <MaterialIcons
-                name={showPassword ? "eye-off" : "eye"}
-                style={{fontSize: 20, marginTop: 10, color: 'gray.950'}}
-                onPress={toggleShowPassword}
-              /> */}
-              {/* </Center> */}
 </View>
 </Center>
-{/* <Box flexDir="row" justifyContent="space-between" mt={3}> */}
-              {/* {timer ? (
-                <Button w="40%" bg="gray.500">
-                  <Text style={{color: 'white'}}>OTP Sent {timer}s</Text>
-                </Button>
-              ) : (
-                <Button
-                  w="40%"
-                  bg="gray.500"
-                  onPress={() => {
-                    sendSmsOtp();
-                    setTimer(60);
-                  }}>
-                  Resend
-                </Button>
-              )} */}
+
               <Button
                 w="90%" size="lg"
                 bg="#004aad"
@@ -599,10 +575,8 @@ const POD = ({ route }) => {
                 }}>
                 Verify OTP
               </Button>
-            {/* </Box> */}
             </>:null}
   
-            {/* <Button w="90%" mt={2} size="lg" style={{backgroundColor:'#004aad', color:'#fff'}}  title="Submit"  onPress={() => setModalVisible11(true)} >Partial Close</Button> */}
           </Center>
           <Center>
             <Image

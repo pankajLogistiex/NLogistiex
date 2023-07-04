@@ -39,6 +39,19 @@ const NotDelivered = ({route}) => {
     const [enableOTP, setEnableOTP] = useState(0);
     const [inputOtp, setInputOtp] = useState('');
     const [phone, setPhone] = useState(route.params.phone);
+    const [showModal11, setShowModal11] = useState(false);
+    const [timer, setTimer] = useState(60);
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        if (timer > 0) {
+          setTimer(timer - 1);
+        }
+      }, 1000);
+      return () => {
+        clearInterval(interval);
+      };
+    }, [timer]);
   
     useEffect(() => {
       current_location();
@@ -75,37 +88,7 @@ const NotDelivered = ({route}) => {
     const NotDelivered = () => {
       AsyncStorage.setItem('refresh11', 'refresh');
       
-      db.transaction(tx => {
-        tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND stopId=?',
-          [new Date().valueOf(), latitude, longitude, rejectionCode, route.params.stopId],
-          (tx1, results) => {
-            let temp = [];
-            console.log(results.rows.length);
-            for (let i = 0; i < results.rows.length; ++i) {
-              temp.push(results.rows.item(i));
-            }
-          },
-        );
-      });
-
-      db.transaction(tx => {
-        tx.executeSql(
-          'UPDATE SyncSellerPickUp  SET otpSubmittedDelivery="true" WHERE stopId=? ',
-          [route.params.stopId],
-          (tx1, results) => {
-            // console.log('Results', results.rowsAffected);
-            // console.log(results);
-            if (results.rowsAffected > 0) {
-              console.log('otp status updated seller delivery in seller table ');
-            } else {
-              console.log('opt status not updated in seller delivery in local table');
-            }
-            // console.log(results.rows.length);
-          },
-        );
-      });
-  
+      
       axios
         .post(backendUrl + 'SellerMainScreen/attemptFailed', {
           consignorCode: route.params.consignorCode,
@@ -116,10 +99,38 @@ const NotDelivered = ({route}) => {
           eventTime: new Date().valueOf(),
           rejectionStage: "SLDF",
           stopId:route.params.stopId,
-          tripID:route.params.tripId
+          tripID: route.params.tripId
         })
         .then(function (response) {
           console.log(response.data);
+          db.transaction(tx => {
+            tx.executeSql(
+              'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND stopId=?',
+              [new Date().valueOf(), latitude, longitude, rejectionCode, route.params.stopId],
+              (tx1, results) => {
+                let temp = [];
+                console.log(results.rows.length);
+                for (let i = 0; i < results.rows.length; ++i) {
+                  temp.push(results.rows.item(i));
+                }
+              },
+            );
+          });
+    
+          db.transaction(tx => {
+            tx.executeSql(
+              'UPDATE SyncSellerPickUp  SET otpSubmittedDelivery="true" WHERE stopId=? ',
+              [route.params.stopId],
+              (tx1, results) => {
+                if (results.rowsAffected > 0) {
+                  console.log('otp status updated seller delivery in seller table ');
+                } else {
+                  console.log('opt status not updated in seller delivery in local table');
+                }
+              },
+            );
+          });
+      
         })
         .catch(function (error) {
           console.log(error);
@@ -186,10 +197,10 @@ const NotDelivered = ({route}) => {
             useCase: "POSTRD DELIVERY OTP",
             payLoad:{
               acceptedCount: 0,
-              failedCount: pending
+              failedCount: route.params.pending
             }
           })
-          .then(console.log("OTP sent"))
+          .then(setShowModal11(true))
           .catch(err => console.log('OTP not send'));
       };
       function validateOTP() {
@@ -206,6 +217,7 @@ const NotDelivered = ({route}) => {
               setInputOtp('');
               NotDelivered();
               setModalVisible3(false);
+              setShowModal11(false);
           }
           else {
             alert('Invalid OTP, please try again !!');
@@ -379,72 +391,73 @@ return (
               value={phone}
               onChangeText={e => setPhone(e)}
             />
-            <View style={{
-                width: '90%',
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignSelf: 'center',
-                marginTop: 10,
-              }}>
-            <Button
-              flex="1"
-              mt={2}
-              bg="#004aad"
-              marginBottom={1.5}
-              marginTop={1.5}
-              marginRight={1}
-              onPress={() => {
-                sendSmsOtp();
-              }}>
+            {!showModal11?<Center><Button
+              w="90%"
+              size="lg"
+              style={{backgroundColor: '#004aad', color: '#fff'}}
+              title="Submit"
+              onPress={() => {sendSmsOtp();setTimer(60);}}>
               Send OTP
-            </Button>
-            <Button
-              flex="1"
-              mt={2}
-              bg="gray.500"
-              marginBottom={1.5}
-              marginTop={1.5}
-              onPress={() => {
-                sendSmsOtp();
-              }}>
-              Resend
-            </Button>
-            </View>
-            <Center>
-            <OTPTextInput 
-            handleTextChange={e => setInputOtp(e)}
-            inputCount={6} 
-            tintColor="#004aad" 
-            offTintColor="gray" 
-            containerStyle={{
-              marginTop: 4,
-              padding:10,
-            }}
-            textInputStyle={{
-              width: '15%',
-              backgroundColor: '#F5F5F5',
-              borderRadius: 10,
-              borderWidth: 1,
-              borderColor: '#BDBDBD',
-              padding: 10,
-            }}
-            keyboardType="number-pad"
-            onBackspace={() => console.log('back')}
-          />
-            </Center>
-            
-                <Button
-                  flex="1"
-                  mt={2}
-                  bg="#004aad"
-                  marginBottom={1.5}
-                  marginTop={1.5}
-                  onPress={() => {
-                    validateOTP();
-                  }}
-                >
-                  Submit
+            </Button></Center>: timer ? (
+              <Center>
+                <Button w="90%" size="lg" bg="gray.500">
+                  <Text style={{color: 'white', fontSize:16.5}}>Resend OTP in {timer}sec</Text>
                 </Button>
+                </Center>
+              ) : (
+                <Center>
+                <Button
+                  w="90%" size="lg"
+                  bg="gray.500"
+                  onPress={() => {
+                    sendSmsOtp();
+                    setTimer(60);
+                  }}>
+                  Resend
+                </Button>
+                </Center>
+              )}
+
+            { showModal11? 
+            <>
+             <Center>
+              <View style={{
+    flexDirection: 'row',
+    justifyContent: 'center',
+  }}>
+ <OTPTextInput 
+        handleTextChange={e => setInputOtp(e)}
+        inputCount={6} 
+        tintColor="#004aad" 
+        offTintColor="gray" 
+        containerStyle={{
+          marginTop: 4,
+          padding:10,
+        }}
+        textInputStyle={{
+          width:'12.5%',
+          backgroundColor: '#F5F5F5',
+          borderRadius: 10,
+          borderWidth: 1,
+          borderColor: '#BDBDBD',
+          padding: 10,
+        }}
+        keyboardType="number-pad"
+        onBackspace={() => console.log('back')}
+      />
+</View>
+</Center>
+<Center>
+              <Button
+                w="90%" size="lg"
+                bg="#004aad"
+                onPress={() => {
+                  validateOTP();
+                }}>
+                Verify OTP
+              </Button>
+              </Center>
+            </>:null}   
               </Modal.Body>
             </Modal.Content>
           </Modal>

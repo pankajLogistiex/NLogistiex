@@ -177,7 +177,7 @@ useEffect(() => {
         </View>
         ) : (
           <Box flex={1}>
-  {tripDetails && tripDetails[0].tripStatus==20 ? (
+  {tripDetails && tripDetails[0]?.tripStatus==20 ? (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' , marginTop:'70%'}}>
     <Text
       style={{
@@ -206,8 +206,8 @@ useEffect(() => {
     </View>
 ) : (
   <>
-  {tripDetails
-    .filter(data => !data.endTime)
+  {tripDetails && tripDetails
+    .filter(data => !data?.endTime)
     .map((data, i) => (
         <Box
         key={i}
@@ -329,8 +329,8 @@ useEffect(() => {
       </Box>
     ))
     }
-  {tripDetails
-    .filter(data => data.startTime && data.endTime)
+  {tripDetails && tripDetails
+    .filter(data => data?.startTime && data?.endTime)
     .sort((a, b) => new Date(b.endTime) - new Date(a.endTime))
     .map((data, i) => (
         <Box
