@@ -65,6 +65,7 @@ import NetInfo from "@react-native-community/netinfo";
 import axios from "axios";
 import { openDatabase } from "react-native-sqlite-storage";
 import NewSellerAdditionNotification from "./src/components/NewSellerAdditionNotification";
+import DeviceInfoScreen from './src/components/newSeller/DeviceInfoScreen';
 import StartEndDetails from "./src/components/StartEndDetails";
 import SellerSelection from "./src/components/newSeller/SellerSelection";
 import UpdateSellerCloseReasonCode from "./src/components/newSeller/UpdateSellerCloseReasonCode";
@@ -1344,6 +1345,36 @@ const deleteRowsByDateBag = (tableName) => {
             headerLeft: () => null,
           }}
         />
+
+
+<Stack.Screen
+          name="DeviceInfoScreen"
+          component={DeviceInfoScreen}
+          options={{
+            headerTitle: (props) => (
+              <NativeBaseProvider>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginLeft: -15,
+                  }}
+                >
+                  <MaterialIcons
+                    name="menu"
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
+                  Device Info
+                  </Heading>
+                </View>
+              </NativeBaseProvider>
+            ),
+            headerLeft: () => null,
+          }}
+        />
+
 
         <Stack.Screen
           name="CloseReasonCode"
@@ -3174,6 +3205,29 @@ function CustomDrawerContent({ navigation }) {
               }
             >
               <Text style={{ color: "#004aad" }}>Additional Workload</Text>
+            </Button>
+            <Button
+              variant="outline"
+              onPress={() => {
+                navigation.navigate("DeviceInfoScreen");
+              }}
+              mt={4}
+              style={{
+                color: "#004aad",
+                borderColor: "#004aad",
+                justifyContent: "flex-start",
+                alignItems: "flex-start",
+                paddingLeft: 25,
+              }}
+              startIcon={
+                // <MaterialIcons
+                //   name="motorbike"
+                //   style={{ fontSize: 20, color: "#004aad" }}
+                // />
+                <Icon name="mobile" size={22} color="#004aad" />
+              }
+            >
+              <Text style={{ color: "#004aad" }}>Device Info</Text>
             </Button>
           </Box>
         </View>
