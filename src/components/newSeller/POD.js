@@ -210,9 +210,45 @@ const POD = ({ route }) => {
           acceptedShipments: acceptedArray,
           rejectedShipments: rejectedArray,
           nothandedOverShipments: notPickedArray,
-          tripId: route.params.tripId,
+          tripID: route.params.tripId,
         })
         .then(function (response) {
+          db.transaction(tx => {
+            tx.executeSql(
+              'UPDATE SyncSellerPickUp  SET otpSubmitted="true" WHERE stopId=? ',
+              [route.params.stopId],
+              (tx1, results) => {
+                // console.log('Results', results.rowsAffected);
+                // console.log(results);
+                if (results.rowsAffected > 0) {
+                  console.log('otp status updated  in seller table ');
+                } else {
+                  console.log('opt status not updated in local table');
+                }
+                // console.log(results.rows.length);
+              },
+            );
+          });
+
+          db.transaction(tx => {
+            tx.executeSql(
+              'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Pickup" AND status IS Null And stopId=?',
+              [
+                route.params.DropDownValue,
+                new Date().valueOf(),
+                route.params.latitude,
+                route.params.longitude,
+                route.params.stopId,
+              ],
+              (tx1, results) => {
+                if (results.rowsAffected > 0) {
+                  console.log('added notPicked item locally');
+                } else {
+                  console.log('failed to add notPicked item locally');
+                }
+              },
+            );
+          });
           console.log('POST RD Data Submitted', response.data);
           alert('Pickup Successfully completed');
           navigation.navigate('Main');
@@ -284,46 +320,7 @@ const POD = ({ route }) => {
           setInputOtp('');
           setShowModal11(false);
 
-          db.transaction(tx => {
-            tx.executeSql(
-              'UPDATE SyncSellerPickUp  SET otpSubmitted="true" WHERE stopId=? ',
-              [route.params.stopId],
-              (tx1, results) => {
-                // console.log('Results', results.rowsAffected);
-                // console.log(results);
-                if (results.rowsAffected > 0) {
-                  console.log('otp status updated  in seller table ');
-                } else {
-                  console.log('opt status not updated in local table');
-                }
-                // console.log(results.rows.length);
-              },
-            );
-          });
-
-          db.transaction(tx => {
-            tx.executeSql(
-              'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Pickup" AND status IS Null And stopId=?',
-              [
-                route.params.DropDownValue,
-                new Date().valueOf(),
-                route.params.latitude,
-                route.params.longitude,
-                route.params.stopId,
-              ],
-              (tx1, results) => {
-                if (results.rowsAffected > 0) {
-                  // ToastAndroid.show(
-                  // 'Partial Closed Successfully',
-                  // ToastAndroid.SHORT,
-                  // );
-                  console.log('added notPicked item locally');
-                } else {
-                  console.log('failed to add notPicked item locally');
-                }
-              },
-            );
-          });
+          
         } else {
           alert('Invalid OTP, please try again !!');
           setMessage(2);
