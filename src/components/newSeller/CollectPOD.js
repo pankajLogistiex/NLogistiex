@@ -200,9 +200,48 @@ const CollectPOD = ({ route }) => {
         rejectedShipments: rejectedArray,
         nothandedOverShipments: notDeliveredArray,
         stopId:route.params.stopId,
-        tripId:route.params.tripId,
+        tripID:route.params.tripId,
       })
       .then(function (response) {
+        db.transaction(tx => {
+          tx.executeSql(
+            'UPDATE SyncSellerPickUp  SET otpSubmittedDelivery="true" WHERE stopId=? ',
+            [route.params.stopId],
+            (tx1, results) => {
+              // console.log('Results', results.rowsAffected);
+              // console.log(results);
+              if (results.rowsAffected > 0) {
+                console.log('otp status updated seller delivery in seller table ');
+              } else {
+                console.log('opt status not updated in seller delivery in local table');
+              }
+              // console.log(results.rows.length);
+            },
+          );
+        });
+
+        db.transaction(tx => {
+          tx.executeSql(
+            'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND stopId=?',
+            [
+              route.params.DropDownValue,
+              new Date().valueOf(),
+              route.params.latitude,
+              route.params.longitude,
+              route.params.stopId,
+            ],
+            (tx1, results) => {
+              if (results.rowsAffected > 0) {
+                ToastAndroid.show(
+                  'Partial Closed Successfully',
+                  ToastAndroid.SHORT,
+                );
+              } else {
+                console.log('failed to add notPicked item locally');
+              }
+            },
+          );
+        });
         console.log('POST RD Data Submitted', response.data);
         alert('Delivery Successfully completed');
         navigation.navigate('Main');
@@ -248,47 +287,6 @@ const CollectPOD = ({ route }) => {
           submitForm11();
           setInputOtp('');
           setShowModal11(false);
-
-
-          db.transaction(tx => {
-            tx.executeSql(
-              'UPDATE SyncSellerPickUp  SET otpSubmittedDelivery="true" WHERE stopId=? ',
-              [route.params.stopId],
-              (tx1, results) => {
-                // console.log('Results', results.rowsAffected);
-                // console.log(results);
-                if (results.rowsAffected > 0) {
-                  console.log('otp status updated seller delivery in seller table ');
-                } else {
-                  console.log('opt status not updated in seller delivery in local table');
-                }
-                // console.log(results.rows.length);
-              },
-            );
-          });
-
-          db.transaction(tx => {
-            tx.executeSql(
-              'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND stopId=?',
-              [
-                route.params.DropDownValue,
-                new Date().valueOf(),
-                route.params.latitude,
-                route.params.longitude,
-                route.params.stopId,
-              ],
-              (tx1, results) => {
-                if (results.rowsAffected > 0) {
-                  ToastAndroid.show(
-                    'Partial Closed Successfully',
-                    ToastAndroid.SHORT,
-                  );
-                } else {
-                  console.log('failed to add notPicked item locally');
-                }
-              },
-            );
-          });
         } else {
           alert('Invalid OTP, please try again !!');
           setMessage(2);
