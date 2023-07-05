@@ -42,12 +42,18 @@ export default function Additional_workload() {
     DisplayData();
   }, []);
 
-  const AcceptHandler = async (consignorCodeAccept) => {
+  const AcceptHandler = async (consignorCodeAccept, stopId, tripId) => {
     // console.log('df')
+    console.log({consignorCode: consignorCodeAccept,
+      feUserId: userId,
+      stopId: stopId,
+      tripID: tripId})
     axios
       .post(backendUrl + "SellerMainScreen/acceptWorkLoad", {
         consignorCode: consignorCodeAccept,
         feUserId: userId,
+        stopId: stopId,
+        tripID: tripId
       })
       .then((response) => {
         console.log("Msg Accepted ", response.data,'',userId);
@@ -61,12 +67,14 @@ console.log("Data ",data.length +" ",consignorCodeAccept);
       });
   }; 
 
-  const RejectHandler = async (consignorCodeReject) => {
+  const RejectHandler = async (consignorCodeReject, stopId, tripId) => {
     // console.log('df')
     axios
       .post(backendUrl + "SellerMainScreen/rejectWorkLoad", {
         consignorCode: consignorCodeReject,
         feUserId: userId,
+        stopId:stopId,
+        tripID:tripId
       })
       .then((response) => {
         console.log("Msg Rejected ", response.data);
@@ -182,7 +190,7 @@ console.log("Data ",data.length +" ",consignorCodeAccept);
                           justifyContent="space-between"
                         >
                           <HStack alignItems="center">
-                            <TouchableOpacity onPress={() => RejectHandler(d.consignorCode)}>
+                            <TouchableOpacity onPress={() => RejectHandler(d.consignorCode, d.stopId, d.FMtripId)}>
                               <Button
                                 style={{ backgroundColor: "#FF2E2E" }}
                                 _dark={{
@@ -195,7 +203,7 @@ console.log("Data ",data.length +" ",consignorCodeAccept);
                             </TouchableOpacity>
                           </HStack>
                           <HStack alignItems="center">
-                            <TouchableOpacity onPress={() => AcceptHandler(d.consignorCode)}>
+                            <TouchableOpacity onPress={() => AcceptHandler(d.consignorCode, d.stopId, d.FMtripId)}>
                               <Button
                                 style={{ backgroundColor: "#004aad" }}
                                 _dark={{

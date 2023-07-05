@@ -202,7 +202,6 @@ const [text12,setText12] = useState('');
         console.log('Location Lat long error', error);
       });
   };
-  
   const vibrateDevice = (type) => {
     const options = {
       enableVibrateFallback: true,
@@ -386,7 +385,7 @@ var dingAccept = new Sound(dingAccept11, error => {
         DropDownValue: DropDownValue11,
         consignorCode: route.params.consignorCode,
         stopId:route.params.stopId,
-        tripId:route.params.tripId,
+        tripId:route.params.tripID,
         contactPersonName: route.params.contactPersonName,
         runsheetno: route.params.PRSNumber,
         latitude: latitude,
@@ -1234,7 +1233,7 @@ console.log('scanned',scannedValue);
                     userId: route.params.userId,
                     consignorCode: route.params.consignorCode,
                     stopId:route.params.stopId,
-                    tripId:route.params.tripId,
+                    tripId:route.params.tripID,
                     DropDownValue: DropDownValue11,
                     contactPersonName: route.params.contactPersonName,
                     runsheetno: route.params.PRSNumber,
@@ -1304,7 +1303,7 @@ console.log('scanned',scannedValue);
                     userId: route.params.userId,
                     consignorCode: route.params.consignorCode,
                     stopId:route.params.stopId,
-                    tripId:route.params.tripId,
+                    tripId:route.params.tripID,
                     DropDownValue: DropDownValue11,
                     contactPersonName: route.params.contactPersonName,
                     runsheetno: route.params.PRSNumber,
