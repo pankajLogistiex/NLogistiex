@@ -78,6 +78,7 @@ import TripHistory from "./src/components/TripHistory";
 import { backendUrl } from "./src/utils/backendUrl";
 import messaging from "@react-native-firebase/messaging";
 import { setIsNewSync } from "./src/redux/slice/isNewSync";
+import { setCurrentDeviceInfo } from "./src/redux/slice/deviceInfoSlice";
 import {
   setToken,
   setUserEmail,
@@ -95,6 +96,8 @@ import {
   setSyncTime,
   setSyncTimeFull,
 } from "./src/redux/slice/autoSyncSlice";
+import DeviceInfo from 'react-native-device-info';
+import * as RNLocalize from 'react-native-localize';
 import Mixpanel from "react-native-mixpanel";
 
 const db = openDatabase({ name: "rn_sqlite" });
@@ -115,9 +118,8 @@ function StackNavigators({ navigation }) {
     (state) => state.autoSync.isAutoSyncEnable
   );
 
-  const currentDateValue =
-    useSelector((state) => state.currentDate.currentDateValue) ||
-    new Date().toISOString().split("T")[0];
+  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
+  const deviceInfo= useSelector((state) => state.deviceInfo.currentDeviceInfo);
 
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState([]);
@@ -203,6 +205,207 @@ function StackNavigators({ navigation }) {
       );
     });
   };
+
+
+// console.log("Redux deviceInfo Value ",deviceInfo);
+useEffect(() => {
+  fetchDeviceInfo();
+}, []);
+
+const fetchDeviceInfo = async () => {
+  try {
+    const uniqueId = await getUniqueIdWithCatch();
+    const manufacturer = await getManufacturerWithCatch();
+    const modelName = await getModelWithCatch();
+    const brand = await getBrandWithCatch();
+    const systemName = await getSystemNameWithCatch();
+    const systemVersion = await getSystemVersionWithCatch();
+    const bundleId = await getBundleIdWithCatch();
+    const buildNumber = await getBuildNumberWithCatch();
+    const version = await getVersionWithCatch();
+    // const buildNumberIOS = await getBuildNumberIOSWithCatch();
+    const installReferrer = await getInstallReferrerWithCatch();
+    const ipAddress = await getIpAddressWithCatch();
+    // const macAddress = await getMacAddressWithCatch();
+    const locale = await getLocaleWithCatch();
+    const country = await getCountryWithCatch();
+    const timezone = await getTimezoneWithCatch();
+
+    const deviceInfoData = {
+      uniqueId,
+      manufacturer,
+      modelName,
+      brand,
+      systemName,
+      systemVersion,
+      bundleId,
+      buildNumber,
+      version,
+      // buildNumberIOS,
+      installReferrer,
+      ipAddress,
+      // macAddress,
+      locale,
+      country,
+      timezone,
+    };
+
+    // setDeviceInfo(deviceInfoData);
+    console.log(deviceInfoData);
+    dispatch(setCurrentDeviceInfo(deviceInfoData));
+  } catch (error) {
+    console.error('Error fetching device information:', error);
+  }
+};
+
+const getUniqueIdWithCatch = async () => {
+  try {
+    return await DeviceInfo.getUniqueId();
+  } catch (error) {
+    console.error('Error getting unique ID:', error);
+    return null;
+  }
+};
+
+const getManufacturerWithCatch = async () => {
+  try {
+    return await DeviceInfo.getManufacturer();
+  } catch (error) {
+    console.error('Error getting manufacturer:', error);
+    return null;
+  }
+};
+
+const getModelWithCatch = async () => {
+  try {
+    return await DeviceInfo.getModel();
+  } catch (error) {
+    console.error('Error getting model:', error);
+    return null;
+  }
+};
+
+const getBrandWithCatch = async () => {
+  try {
+    return await DeviceInfo.getBrand();
+  } catch (error) {
+    console.error('Error getting brand:', error);
+    return null;
+  }
+};
+
+const getSystemNameWithCatch = async () => {
+  try {
+    return await DeviceInfo.getSystemName();
+  } catch (error) {
+    console.error('Error getting system name:', error);
+    return null;
+  }
+};
+
+const getSystemVersionWithCatch = async () => {
+  try {
+    return await DeviceInfo.getSystemVersion();
+  } catch (error) {
+    console.error('Error getting system version:', error);
+    return null;
+  }
+};
+
+const getBundleIdWithCatch = async () => {
+  try {
+    return await DeviceInfo.getBundleId();
+  } catch (error) {
+    console.error('Error getting bundle ID:', error);
+    return null;
+  }
+};
+
+const getBuildNumberWithCatch = async () => {
+  try {
+    return await DeviceInfo.getBuildNumber();
+  } catch (error) {
+    console.error('Error getting build number:', error);
+    return null;
+  }
+};
+
+const getVersionWithCatch = async () => {
+  try {
+    return await DeviceInfo.getVersion();
+  } catch (error) {
+    console.error('Error getting version:', error);
+    return null;
+  }
+};
+
+const getBuildNumberIOSWithCatch = async () => {
+  try {
+    return await DeviceInfo.getBuildNumber();
+  } catch (error) {
+    console.error('Error getting iOS build number:', error);
+    return null;
+  }
+};
+
+const getInstallReferrerWithCatch = async () => {
+  try {
+    return await DeviceInfo.getInstallReferrer();
+  } catch (error) {
+    console.error('Error getting install referrer:', error);
+    return null;
+  }
+};
+
+const getIpAddressWithCatch = async () => {
+  try {
+    return await DeviceInfo.getIpAddress();
+  } catch (error) {
+    console.error('Error getting IP address:', error);
+    return null;
+  }
+};
+
+const getMacAddressWithCatch = async () => {
+  try {
+    return await DeviceInfo.getMacAddress();
+  } catch (error) {
+    console.log('Error getting MAC address:', error);
+    return null;
+  }
+};
+
+const getLocaleWithCatch = async () => {
+  try {
+    return await RNLocalize.getLocales()[0].languageCode;
+  } catch (error) {
+    console.error('Error getting locale:', error);
+    return null;
+  }
+};
+
+const getCountryWithCatch = async () => {
+  try {
+    return await RNLocalize.getLocales()[0].countryCode;
+  } catch (error) {
+    console.error('Error getting country:', error);
+    return null;
+  }
+};
+
+
+const getTimezoneWithCatch = async () => {
+  try {
+    return await RNLocalize.getTimeZone();
+  } catch (error) {
+    console.error('Error getting timezone:', error);
+    return null;
+  }
+};
+
+
+
+
 
   useEffect(() => {
     if (userId) {
@@ -2993,6 +3196,7 @@ function CustomDrawerContent({ navigation }) {
       dispatch(setToken(""));
       dispatch(setNotificationCount(0));
       dispatch(setCurrentDateValue(0));
+      dispatch(setCurrentDeviceInfo(""));
     } catch (e) {
       console.log(e);
     }
