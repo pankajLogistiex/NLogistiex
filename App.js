@@ -717,8 +717,8 @@ function StackNavigators({ navigation }) {
     db.transaction((txn) => {
       // txn.executeSql('DROP TABLE IF EXISTS SyncSellerPickUp', []);
       txn.executeSql(
-        `CREATE TABLE IF NOT EXISTS SyncSellerPickUp( consignorCode ID VARCHAR(200) PRIMARY KEY ,userId VARCHAR(100), 
-            consignorName VARCHAR(200),sellerIndex INT(20),consignorAddress1 VARCHAR(200),consignorAddress2 VARCHAR(200),consignorCity VARCHAR(200),consignorPincode,consignorLatitude INT(20),consignorLongitude DECIMAL(20,10),consignorContact VARCHAR(200),ReverseDeliveries INT(20),runSheetNumber VARCHAR(200),ForwardPickups INT(20), BagOpenClose11 VARCHAR(200), ShipmentListArray VARCHAR(800),contactPersonName VARCHAR(100),otpSubmitted VARCHAR(50),otpSubmittedDelivery VARCHAR(50), stopId VARCHAR(200), FMtripId VARCHAR(200),date Text)`,
+        `CREATE TABLE IF NOT EXISTS SyncSellerPickUp( consignorCode VARCHAR(200) ,userId VARCHAR(100), 
+            consignorName VARCHAR(200),sellerIndex INT(20),consignorAddress1 VARCHAR(200),consignorAddress2 VARCHAR(200),consignorCity VARCHAR(200),consignorPincode,consignorLatitude INT(20),consignorLongitude DECIMAL(20,10),consignorContact VARCHAR(200),ReverseDeliveries INT(20),runSheetNumber VARCHAR(200),ForwardPickups INT(20), BagOpenClose11 VARCHAR(200), ShipmentListArray VARCHAR(800),contactPersonName VARCHAR(100),otpSubmitted VARCHAR(50),otpSubmittedDelivery VARCHAR(50), stopId VARCHAR(200) PRIMARY KEY, FMtripId VARCHAR(200),date Text)`,
         [],
         (sqlTxn, res) => {
           console.log("table created successfully consignorList");
@@ -754,11 +754,11 @@ function StackNavigators({ navigation }) {
                   // console.log(res);
                   for (let i = 0; i < res.data.data.length; i++) {
                     // let m21 = JSON.stringify(res.data[i].consignorAddress, null, 4);
-
+                    console.log("STOP ID",res.data.data[i].stopId)
                     db.transaction((txn) => {
                       txn.executeSql(
-                        "SELECT * FROM SyncSellerPickUp where consignorCode = ?",
-                        [res.data.data[i].consignorCode],
+                        "SELECT * FROM SyncSellerPickUp where stopId = ?",
+                        [res.data.data[i].stopId],
                         (tx, result) => {
                           if (result.rows.length <= 0) {
                             db.transaction((txn) => {

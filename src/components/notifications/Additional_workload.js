@@ -58,8 +58,8 @@ export default function Additional_workload() {
       .then((response) => {
         console.log("Msg Accepted ", response.data,'',userId);
         dispatch(setNotificationCount(notificationCount - 1));
-        // const updatedData = data.filter(item => item.consignorCode !== consignorCodeAccept);
-        // setData(updatedData);
+        const updatedData = data.filter(item => item.consignorCode !== consignorCodeAccept);
+        setData(updatedData);
 console.log("Data ",data.length +" ",consignorCodeAccept);
       })
       .catch((error) => {
@@ -79,8 +79,8 @@ console.log("Data ",data.length +" ",consignorCodeAccept);
       .then((response) => {
         console.log("Msg Rejected ", response.data);
         dispatch(setNotificationCount(notificationCount - 1));
-        // const updatedData = data.filter(item => item.consignorCode !== consignorCodeReject);
-        // setData(updatedData);
+        const updatedData = data.filter(item => item.consignorCode !== consignorCodeReject);
+        setData(updatedData);
       })
       .catch((error) => {
         console.log(error);
