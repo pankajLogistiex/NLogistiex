@@ -102,7 +102,6 @@ const NewSellerPickup = ({route}) => {
       // navigation.navigate('Main');
     }
   }
-  
   useEffect(() => {
       if (dataSeller.length > 0) {
         // const tc=0;
