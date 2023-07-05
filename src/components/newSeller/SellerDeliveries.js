@@ -31,7 +31,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
     const [valueSeller,setValue] =useState([]);
     const [reverseSeller,setReverse] =useState([]);
     // const [pending11,setPending] =useState([]);
-    const [pendingP,setPendingP] =useState([]);
+    const [pendingPSeller,setPendingP] =useState([]);
     // const [value,setValue] =useState([]);
     // const [reverse,setReverse] =useState([]);
     const [loading, setLoading] = useState(true);
@@ -46,7 +46,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
       const pending11 =pending11Seller.filter((_, index) => reverseSeller[index] !== 0);
       const value = valueSeller.filter((_, index) => reverseSeller[index] !== 0);
       const reverse = reverseSeller.filter((_, index) => reverseSeller[index] !== 0);
-    
+      const pendingP =pendingPSeller.filter((_, index) => reverseSeller[index] !== 0);
       useEffect(() => {
       
     if(reverse && reverse.length>0 && data && data.length===0){
@@ -57,7 +57,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
       }, [reverseSeller,data])
       // console.log(data.length);
       // console.log(dataSeller.length," ",pending11Seller+" ",reverseSeller+" ",valueSeller);
-      // console.log(data.length,"  ",pending11+" ",reverse+" ",value);
+      console.log(data.length,"  ",pending11+" ",reverse+" ",value," ",pendingP);
       const scannedSum  =  data.reduce((sum, seller, i) => sum + (reverse[i] > 0 && pending11[i]===reverse[i] && seller.otpSubmittedDelivery === "true" ? 1 : 0), 0);
       const expectedSum = reverse.reduce((accumulator, currentValue) => accumulator + (currentValue > 0 ? 1 : 0), 0);
   
