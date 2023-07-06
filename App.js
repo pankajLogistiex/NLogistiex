@@ -226,11 +226,13 @@ const fetchDeviceInfo = async () => {
     // const buildNumberIOS = await getBuildNumberIOSWithCatch();
     const installReferrer = await getInstallReferrerWithCatch();
     const ipAddress = await getIpAddressWithCatch();
-    // const macAddress = await getMacAddressWithCatch();
+    const macAddress = await getMacAddressWithCatch();
     const locale = await getLocaleWithCatch();
     const country = await getCountryWithCatch();
     const timezone = await getTimezoneWithCatch();
-
+    const RamUsage=await getRAMUsagePercentage();
+    const DiskUsage =await getDiskUtilizationPercentage();
+    const SignalStrength= await getSignalStrength();
     const deviceInfoData = {
       uniqueId,
       manufacturer,
@@ -244,10 +246,13 @@ const fetchDeviceInfo = async () => {
       // buildNumberIOS,
       installReferrer,
       ipAddress,
-      // macAddress,
+      macAddress,
       locale,
       country,
       timezone,
+      RamUsage,
+      DiskUsage,
+      SignalStrength,
     };
 
     // setDeviceInfo(deviceInfoData);
@@ -362,6 +367,57 @@ const getIpAddressWithCatch = async () => {
     return await DeviceInfo.getIpAddress();
   } catch (error) {
     console.error('Error getting IP address:', error);
+    return null;
+  }
+};
+
+
+const getRAMUsagePercentage= async () =>  {
+  try {
+    const totalMemory = await DeviceInfo.getTotalMemory();
+    const usedMemory = await DeviceInfo.getUsedMemory();
+
+    if (totalMemory === 0) {
+      throw new Error('Invalid total memory value');
+    }
+
+    const ramUsagePercentage = Math.floor((usedMemory / totalMemory) * 100);
+
+    if (isNaN(ramUsagePercentage)) {
+      throw new Error('Invalid RAM usage calculation');
+    }
+
+    return ramUsagePercentage;
+  } catch (error) {
+    console.log('Error occurred while calculating RAM usage:', error);
+    return 0; // Default value or error handling logic
+  }
+}
+
+const getDiskUtilizationPercentage= async () => {
+  try {
+    const diskSpace = await DeviceInfo.getFreeDiskStorage();
+const totalSpace=await DeviceInfo.getTotalDiskCapacity();
+    const diskUsagePercentage =  Math.floor(
+      ((totalSpace-diskSpace) / totalSpace) * 100
+    );
+
+    if (isNaN(diskUsagePercentage)) {
+      throw new Error('Invalid disk utilization calculation');
+    }
+
+    return diskUsagePercentage;
+  } catch (error) {
+    console.log('Error occurred while calculating disk utilization:', error);
+    return 0; // Default value or error handling logic
+  }
+}
+
+const getSignalStrength = async () => {
+  try {
+    return (await NetInfo.fetch()).details?.strength;
+  } catch (error) {
+    console.log('Error getting Signal Strength:', error);
     return null;
   }
 };

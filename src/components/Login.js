@@ -33,7 +33,8 @@ import {
 } from "../redux/slice/userSlice";
 import { authorize } from "react-native-app-auth";
 import { setForceSync } from "../redux/slice/autoSyncSlice";
-
+import GetLocation from 'react-native-get-location';
+import DeviceInfo from 'react-native-device-info';
 const config = {
   issuer: "https://uacc.logistiex.com/realms/Logistiex-Demo",
   clientId: "logistiex-demo",
@@ -63,6 +64,9 @@ export default function Login() {
   const [message, setMessage] = useState(0);
   const [loginClicked, setLoginClicked] = useState(false);
   const [notificationToken, setNotificationToken] = useState("");
+  const deviceInfo= useSelector((state) => state.deviceInfo.currentDeviceInfo);
+  const [latitude, setLatitude] = useState(0);
+  const [longitude, setLongitude] = useState(0);
   const navigation = useNavigation();
 
   const getData = async () => {
@@ -75,18 +79,26 @@ export default function Login() {
       console.log(e);
     }
   };
-
+// console.log(deviceInfo);
   async function getProfile(token, idToken) {
+    const deviceId=await DeviceInfo.getUniqueId();
+    const IpAddress= await DeviceInfo.getIpAddress();
     await axios
       .post(
         backendUrl + "Login/userLogin",
         {
           notificationToken: notificationToken,
+          deviceId: deviceId,
+          deviceIPaddress: IpAddress,
+          latitude: latitude,
+          longitude: longitude,
         },
         { headers: { Authorization: token } }
       )
       .then((response) => {
         console.log("===login response===", response?.data?.userDetails);
+        // console.log(deviceId," ",IpAddress," ",latitude," ",longitude, " ", notificationToken);
+
         setMessage(1);
         setShowModal(true);
         AsyncStorage.setItem("userId", response?.data?.userDetails?.userId);
@@ -137,7 +149,35 @@ export default function Login() {
         setLoginClicked(false);
       });
   }
+  useEffect(() => {
+    current_location();
+  }, []);
 
+  const current_location = () => {
+    GetLocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 10000,
+    })
+      .then(location => {
+        setLatitude(location.latitude);
+        setLongitude(location.longitude);
+      })
+      .catch(error => {
+        RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+          interval: 10000,
+          fastInterval: 5000,
+        })
+          .then(status => {
+            if (status) {
+              console.log('Location enabled');
+            }
+          })
+          .catch(err => {
+            console.log(err);
+          });
+        console.log('Location Lat long error', error);
+      });
+  };
   async function handleLogin() {
     setLoginClicked(true);
     try {
