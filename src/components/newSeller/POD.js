@@ -33,6 +33,7 @@ import {openDatabase} from 'react-native-sqlite-storage';
 import { backendUrl } from '../../utils/backendUrl';
 import { setAutoSync } from '../../redux/slice/autoSyncSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import DeviceInfo from 'react-native-device-info';
 
 const db = openDatabase({
   name: 'rn_sqlite',
@@ -168,7 +169,9 @@ const POD = ({ route }) => {
     });
   };
 
-  const submitForm11 = () => {
+  const submitForm11 = async () =>{
+    const deviceId= await DeviceInfo.getUniqueId();
+    const IpAddress= await DeviceInfo.getIpAddress();
     console.log('========postRD Data==========', {
       runsheetNo: runsheetNo,
       expected: route.params.Forward,
@@ -187,7 +190,9 @@ const POD = ({ route }) => {
       acceptedShipments: acceptedArray,
       rejectedShipments: rejectedArray,
       nothandedOverShipments: notPickedArray,
-      tripId:route.params.tripId
+      tripId:route.params.tripId,
+      deviceId: deviceId,
+      deviceIPaddress: IpAddress,
     });
 
     try {
@@ -211,6 +216,8 @@ const POD = ({ route }) => {
           rejectedShipments: rejectedArray,
           nothandedOverShipments: notPickedArray,
           tripID: route.params.tripId,
+          deviceId: deviceId,
+          deviceIPaddress: IpAddress,
         })
         .then(function (response) {
           db.transaction(tx => {

@@ -797,6 +797,8 @@ const getTimezoneWithCatch = async () => {
   };
   // console.log(userId);
   async function postSPSCalling(row) {
+    const deviceId= await DeviceInfo.getUniqueId();
+    const IpAddress=await DeviceInfo.getIpAddress();
     console.log("===========row=========", {
       clientShipmentReferenceNumber: row.clientShipmentReferenceNumber,
       awbNo: row.awbNo,
@@ -822,6 +824,8 @@ const getTimezoneWithCatch = async () => {
         row.status == "accepted" ? 1 : row.status == "rejected" ? 2 : 0,
       stopId: row.stopId,
       tripID: row.FMtripId,
+      deviceId: deviceId,
+      deviceIPaddress: IpAddress,
     });
     await axios
       .post(backendUrl + "SellerMainScreen/postSPS", {
@@ -849,6 +853,8 @@ const getTimezoneWithCatch = async () => {
           row.status == "accepted" ? 1 : row.status == "rejected" ? 2 : 0,
         stopId: row.stopId,
         tripID: row.FMtripId,
+        deviceId: deviceId,
+        deviceIPaddress: IpAddress,
       })
       .then((response) => {
         console.log("sync Successfully pushed");

@@ -12,6 +12,7 @@ import axios from 'axios';
 import GetLocation from 'react-native-get-location';
 import { backendUrl } from '../../utils/backendUrl';
 import OTPTextInput from 'react-native-otp-textinput';
+import DeviceInfo from 'react-native-device-info';
 
 const NotPicked = ({route}) => {
     const navigation = useNavigation();
@@ -98,8 +99,10 @@ const NotPicked = ({route}) => {
       NotAttemptReasons11();
     };
     
-    const notPicked = () => {
+    const notPicked = async () => {
       AsyncStorage.setItem('refresh11', 'refresh');
+      const deviceId= await DeviceInfo.getUniqueId();
+      const IpAddress= await DeviceInfo.getIpAddress();
       axios
         .post(backendUrl + 'SellerMainScreen/attemptFailed', {
           consignorCode: route.params.consignorCode,
@@ -110,7 +113,9 @@ const NotPicked = ({route}) => {
           eventTime: new Date().valueOf(),
           rejectionStage: "SLPF",
           stopId:route.params.stopId,
-          tripID:route.params.tripId
+          tripID:route.params.tripId,
+          deviceId: deviceId,
+          deviceIPaddress: IpAddress,
         })
         .then(function (response) {
           console.log(response.data);

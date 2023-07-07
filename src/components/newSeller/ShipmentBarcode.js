@@ -145,8 +145,8 @@ const [text12,setText12] = useState('');
   };
 
   // Handle the action based on the geofencing logic
-  const handleRejectAction = (reason,geofencing) => {
-    GetLocation.getCurrentPosition({
+  const handleRejectAction =  async (reason, geofencing) => {
+   await GetLocation.getCurrentPosition({
       enableHighAccuracy: true,
       timeout: 10000,
     })
@@ -953,7 +953,6 @@ var barcode11 = barcode;
 //   }
 // }, [packagingAction,barcode]);
 
-console.log('pa',packagingAction);
   const updateCategories = data => {
     db.transaction(tx => {
       tx.executeSql(
@@ -965,7 +964,6 @@ console.log('pa',packagingAction);
       );
     });
   };
-console.log('scanned',scannedValue);
     const updateCategories1 = (data) => {
       db.transaction((tx) => {
         tx.executeSql(
@@ -1334,6 +1332,8 @@ console.log('scanned',scannedValue);
           setShowCloseBagModal11(false);
           reloadScanner();
           setShowOuterScanner(true);
+          setExpectedPackaging('');
+          setPackagingAction();
         }}
         size="lg">
         <Modal.Content maxWidth="350">
@@ -1456,7 +1456,9 @@ console.log('scanned',scannedValue);
         onClose={() => {
           setShowCloseBagModal(false);
           reloadScanner();
-          setShowOuterScanner(true)
+          setShowOuterScanner(true);
+          setExpectedPackaging('');
+          setPackagingAction();
         }}
         size="lg">
         <Modal.Content maxWidth="350">

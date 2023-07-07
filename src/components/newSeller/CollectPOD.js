@@ -21,6 +21,7 @@ import {
   TextInput,
   ToastAndroid,
 } from 'react-native';
+import DeviceInfo from 'react-native-device-info';
 import axios from 'axios';
 import {HStack, Button} from 'native-base';
 import React, {useState, useEffect, useRef} from 'react';
@@ -160,7 +161,9 @@ const CollectPOD = ({ route }) => {
     });
   };
 
-  const submitForm11 = () => {
+  const submitForm11 = async () => {
+    const deviceId= await DeviceInfo.getUniqueId();
+    const IpAddress= await DeviceInfo.getIpAddress();
     console.log('=======post rd delivery====', {
       runsheetNo: runsheetNo,
       expected: route.params.Forward,
@@ -201,6 +204,8 @@ const CollectPOD = ({ route }) => {
         nothandedOverShipments: notDeliveredArray,
         stopId:route.params.stopId,
         tripID:route.params.tripId,
+        deviceId: deviceId,
+        deviceIPaddress: IpAddress,
       })
       .then(function (response) {
         db.transaction(tx => {
