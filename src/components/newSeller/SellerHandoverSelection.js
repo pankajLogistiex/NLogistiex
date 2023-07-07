@@ -46,6 +46,7 @@ import { backendUrl } from '../../utils/backendUrl';
 import { setAutoSync } from '../../redux/slice/autoSyncSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import OTPTextInput from 'react-native-otp-textinput';
+import DeviceInfo from 'react-native-device-info';
 
 const SellerHandoverSelection = ({ route }) => {
   const dispatch = useDispatch();
@@ -131,8 +132,10 @@ const SellerHandoverSelection = ({ route }) => {
   const DisplayData = async () => {
     closePickup11();
   };
-  const notPicked = () => {
+  const notPicked = async () => {
     AsyncStorage.setItem('refresh11', 'refresh');
+    const deviceId= await DeviceInfo.getUniqueId();
+    const IpAddress= await DeviceInfo.getIpAddress();
     axios
       .post(backendUrl + 'SellerMainScreen/attemptFailed', {
         consignorCode: route.params.consignorCode,
@@ -143,7 +146,9 @@ const SellerHandoverSelection = ({ route }) => {
         eventTime: new Date().valueOf(),
         rejectionStage: "SLDF",
         stopId: route.params.stopId,
-        tripID: route.params.stopId
+        tripID: route.params.stopId,
+        deviceId: deviceId,
+        deviceIPaddress: IpAddress,
       })
       .then(function (response) {
         console.log(response.data);

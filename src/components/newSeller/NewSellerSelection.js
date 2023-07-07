@@ -46,6 +46,7 @@ import { backendUrl } from "../../utils/backendUrl";
 import { useDispatch, useSelector } from "react-redux";
 import { setAutoSync } from "../../redux/slice/autoSyncSlice";
 import OTPTextInput from 'react-native-otp-textinput';
+import DeviceInfo from 'react-native-device-info';
 
 const NewSellerSelection = ({ route }) => {
   const dispatch = useDispatch();
@@ -134,8 +135,10 @@ const NewSellerSelection = ({ route }) => {
     closePickup11();
   };
 
-  const notPicked = () => {
+  const notPicked = async () => {
     AsyncStorage.setItem("refresh11", "refresh");
+    const deviceId= await DeviceInfo.getUniqueId();
+    const IpAddress= await DeviceInfo.getIpAddress();
     console.log("***Attempt Failed")
     console.log({consignorCode: route.params.consignorCode,
       rejectionReason: rejectionCode,
@@ -145,7 +148,9 @@ const NewSellerSelection = ({ route }) => {
       eventTime: new Date().valueOf(),
       rejectionStage: "SLPF",
       stopId:route.params.stopId,
-    tripId:route.params.FMtripId})
+    tripId:route.params.FMtripId,
+    deviceId: deviceId,
+    deviceIPaddress: IpAddress,})
     axios
       .post(backendUrl + "SellerMainScreen/attemptFailed", {
         consignorCode: route.params.consignorCode,
@@ -156,7 +161,9 @@ const NewSellerSelection = ({ route }) => {
         eventTime: new Date().valueOf(),
         rejectionStage: "SLPF",
         stopId:route.params.stopId,
-        tripID:route.params.FMtripId
+        tripID:route.params.FMtripId,
+        deviceId: deviceId,
+        deviceIPaddress: IpAddress,
       })
       .then(function (response) {
         console.log(response.data);
