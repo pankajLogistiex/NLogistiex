@@ -233,6 +233,8 @@ const fetchDeviceInfo = async () => {
     const RamUsage=await getRAMUsagePercentage();
     const DiskUsage =await getDiskUtilizationPercentage();
     const SignalStrength= await getSignalStrength();
+    const deviceType =await getDeviceType();
+    // const device= await fetchDeviceType();
     const deviceInfoData = {
       uniqueId,
       manufacturer,
@@ -253,6 +255,8 @@ const fetchDeviceInfo = async () => {
       RamUsage,
       DiskUsage,
       SignalStrength,
+      deviceType,
+      // device,
     };
 
     // setDeviceInfo(deviceInfoData);
@@ -271,6 +275,27 @@ const getUniqueIdWithCatch = async () => {
     return null;
   }
 };
+
+// const fetchDeviceType = async () => {
+//   const isTablet = await DeviceInfo.isTablet();
+//   const isMobile = !isTablet;
+
+//   if (isTablet) {
+//     return 'Tablet';
+//   } else if (isMobile) {
+//     return 'Mobile';
+//   } 
+// };
+
+const getDeviceType = async () => {
+  try {
+    return await DeviceInfo.getDeviceType();
+  } catch (error) {
+    console.error('Error getting Device Type:', error);
+    return null;
+  }
+};
+
 
 const getManufacturerWithCatch = async () => {
   try {

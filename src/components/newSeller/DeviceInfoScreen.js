@@ -15,7 +15,7 @@ import {
 const DeviceInformation = () => {
   const deviceInfo = useSelector((state) => state.deviceInfo.currentDeviceInfo);
   const groups = [
-    ['manufacturer','modelName', 'uniqueId','brand',  'systemName', 'systemVersion'],
+    ['manufacturer','modelName', 'uniqueId','brand',  'systemName', 'systemVersion','deviceType'],
     ['bundleId', 'buildNumber','installReferrer', 'version' ],
     ['DiskUsage', 'RamUsage', 'SignalStrength'],
     [ 'ipAddress', 'locale', 'timezone','country']
