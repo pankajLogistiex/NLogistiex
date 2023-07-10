@@ -99,12 +99,13 @@ import {
 import DeviceInfo from 'react-native-device-info';
 import * as RNLocalize from 'react-native-localize';
 import Mixpanel from "react-native-mixpanel";
-
+import GetLocation from 'react-native-get-location';
+import { callApi } from "./src/components/ApiError";
 const db = openDatabase({ name: "rn_sqlite" });
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
-
+ 
 function StackNavigators({ navigation }) {
   const dispatch = useDispatch();
 
@@ -126,8 +127,39 @@ function StackNavigators({ navigation }) {
   const [isLogin, setIsLogin] = useState(false);
   const [scannedStatus, SetScannedStatus] = useState(0);
   const [isMixPanelInit, setIsMixPanelInit] = useState(false);
+  const [latitude, setLatitude] = useState(0);
+  const [longitude, setLongitude] = useState(0);
   let m = 0;
+  // console.log(latitude," " ,longitude);
+  useEffect(() => {
+    current_location();
+  }, []);
 
+  const current_location = () => {
+    GetLocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 10000,
+    })
+      .then(location => {
+        setLatitude(location.latitude);
+        setLongitude(location.longitude);
+      })
+      .catch(error => {
+        RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+          interval: 10000,
+          fastInterval: 5000,
+        })
+          .then(status => {
+            if (status) {
+              console.log('Location enabled');
+            }
+          })
+          .catch(err => {
+            console.log(err);
+          });
+        console.log('Location Lat long error', error);
+      });
+  };
   useEffect(() => {
     Mixpanel.sharedInstanceWithToken("c8b2a1b9ad65958a04d82787add43a72")
       .then(() => {
@@ -745,12 +777,19 @@ const getTimezoneWithCatch = async () => {
       dispatch(setIsNewSync(randomValue));
     }
   };
+
+  const handleButtonClick = async (APIerror1) => {
+    try {
+      console.log("API EROOR","userid");
+      // await callApi("APIerror1", "userid");
+    } catch (error) {
+    }
+  };
   useEffect(() => {
     // This useEffect  is use to hide warnings in mobile screen .
     // LogBox.ignoreLogs(['Warning: Each child in a list should have a unique "key" prop.']);
     LogBox.ignoreAllLogs(true);
   }, []);
-
   useEffect(() => {
     (async () => {
       if (userId) {
@@ -907,6 +946,7 @@ const getTimezoneWithCatch = async () => {
       })
       .catch((error) => {
         setIsLoading(false);
+        callApi(error,userId);
         console.log("sync error", { error });
       });
   }
@@ -1138,7 +1178,7 @@ const getTimezoneWithCatch = async () => {
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
 
-          console.log("SellerMainScreenDetails",results.rows.item(i));
+          // console.log("SellerMainScreenDetails",results.rows.item(i));
           // var address121 = results.rows.item(i).consignorAddress;
           // var address_json = JSON.parse(address121);
           // console.log(typeof (address_json));
