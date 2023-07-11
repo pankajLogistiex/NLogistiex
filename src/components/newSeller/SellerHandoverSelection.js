@@ -173,6 +173,7 @@ const SellerHandoverSelection = ({ route }) => {
             (tx1, results) => {
               if (results.rowsAffected > 0) {
                 console.log('otp status updated seller delivery in seller table ');
+                navigation.goBack();
               } else {
                 console.log('opt status not updated in seller delivery in local table');
               }
@@ -185,10 +186,11 @@ const SellerHandoverSelection = ({ route }) => {
       .catch(function (error) {
         console.log(error);
         setMessage('Submission failed');
+        navigation.goBack();
         setStatus('error');
       });
     setShowModal(true);
-    navigation.navigate('SellerDeliveries')
+    // navigation.navigate('SellerDeliveries')
   };
   const closePickup11 = () => {
     db.transaction(tx => {

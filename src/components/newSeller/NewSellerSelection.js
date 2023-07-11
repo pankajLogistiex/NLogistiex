@@ -174,6 +174,7 @@ const NewSellerSelection = ({ route }) => {
             (tx1, results) => {
               if (results.rowsAffected > 0) {
                 console.log("otp status updated  in seller table ");
+                navigation.goBack();
               } else {
                 console.log("opt status not updated in local table");
               }
@@ -206,9 +207,10 @@ const NewSellerSelection = ({ route }) => {
       .catch(function (error) {
         console.log(error);
         setMessage("Submission failed");
+        navigation.goBack();
         setStatus("error");
       });
-    navigation.navigate("NewSellerPickup");
+    // navigation.goBack();
   };
   const closePickup11 = () => {
     db.transaction((tx) => {

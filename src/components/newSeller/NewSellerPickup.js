@@ -48,20 +48,25 @@ const NewSellerPickup = ({route}) => {
   const value = valueSeller.filter((_, index) => valueSeller[index] !== 0);
   const reverse = reverseSeller.filter((_, index) => valueSeller[index] !== 0);
   const navigation = useNavigation();
- 
- 
+  // dataSeller.forEach(item => {console.log(`consignorName: ${item.consignorName}, otpSubmitted: ${item.otpSubmitted}`)});
+  // data.forEach(item => console.log(`consignorName: ${item.consignorName}, otpSubmitted: ${item.otpSubmitted}`));
   const progress = 
   (data.reduce((sum, seller, i) => sum + (value[i] > 0 && value[i] === pending11[i] && seller.otpSubmitted === "true" ? 1 : 0), 0)/value.reduce((accumulator, currentValue) => accumulator + (currentValue > 0 ? 1 : 0), 0)) * 100;
   useEffect(() => {
   
     if(value && value.length>0 && data && data.length===0){
       setData11(dataSeller.filter((_, index) => valueSeller[index] !== 0));
-    // console.log(" ",data.length);
+    console.log("check ",data.length);
     }
     
       }, [valueSeller,data]);
   
       // console.log(data.length);
+      useEffect(() => {
+        if(dataSeller){
+      setData11([]);
+        }
+      }, [dataSeller]);
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
         dispatch(setAutoSync(true));
@@ -81,9 +86,15 @@ const NewSellerPickup = ({route}) => {
               for (let i = 0; i < results.rows.length; ++i) {
                 // console.log(results.rows.item(i).sellerIndex);
                   temp.push(results.rows.item(i));
-                  // console.log(results.rows.item(i).sellerIndex," " ,results.rows.item(i).consignorName);
+                  // console.log(results.rows.item(i).otpSubmitted," " ,results.rows.item(i).consignorName);
               }
               setData(temp);
+              // setData11([]);
+              // console.log(value);
+              // if(value && value.length>0 && data){
+              //   setData11(temp.filter((_, index) => valueSeller[index] !== 0));
+              // console.log("check table",data.length);
+              // }
               // console.log(temp[0]);
               // setLoading(false);
           });
@@ -206,10 +217,13 @@ const NewSellerPickup = ({route}) => {
       }
     }, [dataSeller, db]);
   useEffect(() => {
-      (async () => {
-          loadDetails();
-      })();
-  }, []);
+    const unsubscribe = navigation.addListener('focus', () => {
+        // setData11([]);
+        // setData([]);
+      // console.log("check!2 ",data.length);
+    });
+    return unsubscribe;
+  }, [navigation]);
   const searched = (keyword1) => (c) => {
       let f = c.consignorName;
       return (f.includes(keyword1));
@@ -451,7 +465,7 @@ position: 'relative',
                     position: 'relative',
     }}
   >
-    {seller.otpSubmitted== 'true'
+    {value[i] === pending11[i] && seller.otpSubmitted== 'false'
                           ? 
     <Image alt={'Completed Icon'}
       source={require('../../assets/complete/IMG_complete.png')}
@@ -461,7 +475,7 @@ position: 'relative',
         left: 0,
         width: 150,
         height: 150,
-        opacity: 0.8,
+        opacity: 0.55,
         marginLeft:'31%',
         tintColor: '#FFBF00',
         resizeMode: 'cover',
