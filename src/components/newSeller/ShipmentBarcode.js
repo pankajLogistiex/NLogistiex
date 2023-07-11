@@ -342,8 +342,8 @@ var dingAccept = new Sound(dingAccept11, error => {
 
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=?  AND status="accepted"',
-        [route.params.stopId],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=?  AND status="accepted" AND FMtripId=?',
+        [route.params.stopId, route.params.tripID],
         (tx1, results) => {
           setnewAccepted(results.rows.length);
         },
@@ -351,8 +351,8 @@ var dingAccept = new Sound(dingAccept11, error => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status="notPicked"',
-        [route.params.stopId],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status="notPicked" AND FMtripId=?',
+        [route.params.stopId, route.params.tripID],
         (tx1, results) => {
           setNewNotPicked(results.rows.length);
         },
@@ -360,8 +360,8 @@ var dingAccept = new Sound(dingAccept11, error => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status="rejected"',
-        [route.params.stopId],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status="rejected" AND FMtripId=?',
+        [route.params.stopId, route.params.tripID],
         (tx1, results) => {
           setnewRejected(results.rows.length);
         },
@@ -691,7 +691,7 @@ var dingAccept = new Sound(dingAccept11, error => {
     console.log(acceptedArray);
     db.transaction(tx => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="accepted", packagingId=?, expectedPackagingId=?, eventTime=?, latitude=?, longitude=? WHERE  stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+        'UPDATE SellerMainScreenDetails SET status="accepted", packagingId=?, expectedPackagingId=?, eventTime=?, latitude=?, longitude=? WHERE  stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) AND FMtripId=?',
         [
           packagingID,
           expectedPackagingId,
@@ -702,6 +702,7 @@ var dingAccept = new Sound(dingAccept11, error => {
           barcode,
           barcode,
           barcode,
+          route.params.tripID
         ],
         (tx1, results) => {
           let temp = [];
@@ -773,8 +774,8 @@ var barcode11 = barcode;
       //   );
       // });
         db.transaction((tx) => {
-          tx.executeSql('UPDATE SellerMainScreenDetails SET status="rejected", eventTime=?, latitude=?, longitude=? ,packagingId=?, expectedPackagingId=?, rejectionReasonL1=?  WHERE stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ', 
-          [new Date().valueOf(), latitude, longitude, packagingID, expectedPackagingId, reason,route.params.stopId, barcode11,barcode11,barcode11], (tx1, results) => {
+          tx.executeSql('UPDATE SellerMainScreenDetails SET status="rejected", eventTime=?, latitude=?, longitude=? ,packagingId=?, expectedPackagingId=?, rejectionReasonL1=?  WHERE stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) AND FMtripId=?', 
+          [new Date().valueOf(), latitude, longitude, packagingID, expectedPackagingId, reason,route.params.stopId, barcode11,barcode11,barcode11, route.params.tripID], (tx1, results) => {
             let temp = [];
             console.log('Rejected Reason : ', reason);
             console.log('Results', results.rowsAffected);
@@ -859,16 +860,16 @@ var barcode11 = barcode;
   const getCategories = (data) => {
     db.transaction(txn => {
       txn.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE status IS NULL AND shipmentAction="Seller Pickup" AND  stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber = ?)',
-        [route.params.stopId, data, data, data],
+        'SELECT * FROM SellerMainScreenDetails WHERE status IS NULL AND shipmentAction="Seller Pickup" AND  stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber = ?) AND FMtripId=?',
+        [route.params.stopId, data, data, data, route.params.tripID],
         (sqlTxn, res) => {
           setLen(res.rows.length);
           setBarcode(data);
           if (!res.rows.length) {
             db.transaction(tx => {
               tx.executeSql(
-                'Select * FROM SellerMainScreenDetails WHERE status IS NOT NULL And shipmentAction="Seller Pickup" And stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?)',
-                [route.params.stopId, data, data, data],
+                'Select * FROM SellerMainScreenDetails WHERE status IS NOT NULL And shipmentAction="Seller Pickup" And stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) AND FMtripId=?',
+                [route.params.stopId, data, data, data, route.params.tripID],
                 (tx1, results) => {
                   if (results.rows.length === 0) {
                     ToastAndroid.show(

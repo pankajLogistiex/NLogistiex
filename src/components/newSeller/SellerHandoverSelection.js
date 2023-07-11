@@ -146,7 +146,7 @@ const SellerHandoverSelection = ({ route }) => {
         eventTime: new Date().valueOf(),
         rejectionStage: "SLDF",
         stopId: route.params.stopId,
-        tripID: route.params.stopId,
+        tripID: route.params.tripId,
         deviceId: deviceId,
         deviceIPaddress: IpAddress,
       })
@@ -154,8 +154,8 @@ const SellerHandoverSelection = ({ route }) => {
         console.log(response.data);
         db.transaction(tx => {
           tx.executeSql(
-            'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND stopId=?',
-            [new Date().valueOf(), latitude, longitude, rejectionCode, route.params.stopId],
+            'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND stopId=? AND FMtripId=?',
+            [new Date().valueOf(), latitude, longitude, rejectionCode, route.params.stopId, route.params.tripId],
             (tx1, results) => {
               let temp = [];
               console.log(results.rows.length);
@@ -168,8 +168,8 @@ const SellerHandoverSelection = ({ route }) => {
         
         db.transaction(tx => {
           tx.executeSql(
-            'UPDATE SyncSellerPickUp  SET otpSubmittedDelivery="true" WHERE stopId=? ',
-            [route.params.stopId],
+            'UPDATE SyncSellerPickUp  SET otpSubmittedDelivery="true" WHERE stopId=? AND FMtripId=? ',
+            [route.params.stopId, route.params.tripId],
             (tx1, results) => {
               if (results.rowsAffected > 0) {
                 console.log('otp status updated seller delivery in seller table ');
@@ -266,16 +266,16 @@ const SellerHandoverSelection = ({ route }) => {
     db.transaction(tx => {
       db.transaction(tx => {
         tx.executeSql(
-          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND handoverStatus="accepted"',
-          [route.params.stopId],
+          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND handoverStatus="accepted"',
+          [route.params.stopId, route.route.tripId],
           (tx1, results) => {
             setForward(results.rows.length);
           },
         );
       });
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=?  AND (status="accepted" OR status="tagged")',
-        [route.params.stopId],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND (status="accepted" OR status="tagged")',
+        [route.params.stopId, route.params.tripId],
         (tx1, results) => {
           // let temp = [];
           // console.log(results.rows.length);
@@ -289,8 +289,8 @@ const SellerHandoverSelection = ({ route }) => {
 
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status="notDelivered"',
-        [route.params.stopId],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND status="notDelivered"',
+        [route.params.stopId, route.params.tripId],
         (tx1, results) => {
           setNotPicked11(results.rows.length);
         },
@@ -298,8 +298,8 @@ const SellerHandoverSelection = ({ route }) => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status="rejected"',
-        [route.params.stopId],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND status="rejected"',
+        [route.params.stopId, route.params.tripId],
         (tx1, results) => {
           setRejectedOrder11(results.rows.length);
         },
@@ -307,8 +307,8 @@ const SellerHandoverSelection = ({ route }) => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND (handoverStatus="accepted" AND status IS NULL)',
-        [route.params.stopId],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND (handoverStatus="accepted" AND status IS NULL)',
+        [route.params.stopId, route.params.tripId],
         (tx1, results) => {
           setPending(results.rows.length);
           setLoading(false);
