@@ -17,6 +17,7 @@ import { backendUrl } from "../../utils/backendUrl";
 import { useSelector, useDispatch } from "react-redux";
 import { setNotificationCount } from "../../redux/slice/notificationSlice";
 import {useNavigation} from '@react-navigation/native';
+import { setForceSync } from "../../redux/slice/autoSyncSlice";
 export default function Additional_workload() {
   const dispatch = useDispatch();
   const userId = useSelector((state) => state.user.user_id);
@@ -58,9 +59,10 @@ export default function Additional_workload() {
       .then((response) => {
         console.log("Msg Accepted ", response.data,'',userId);
         dispatch(setNotificationCount(notificationCount - 1));
+        dispatch(setForceSync(false));
         const updatedData = data.filter(item => item.consignorCode !== consignorCodeAccept);
         setData(updatedData);
-console.log("Data ",data.length +" ",consignorCodeAccept);
+        console.log("Data ", data.length + " ", consignorCodeAccept);
       })
       .catch((error) => {
         console.log(error);
