@@ -47,6 +47,12 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
       const value = valueSeller.filter((_, index) => reverseSeller[index] !== 0);
       const reverse = reverseSeller.filter((_, index) => reverseSeller[index] !== 0);
       const pendingP =pendingPSeller.filter((_, index) => reverseSeller[index] !== 0);
+
+      useEffect(() => {
+        if(dataSeller){
+      setData11([]);
+        }
+      }, [dataSeller]);
       useEffect(() => {
       
     if(reverse && reverse.length>0 && data && data.length===0){
