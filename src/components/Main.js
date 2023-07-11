@@ -213,8 +213,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     // await AsyncStorage.setItem('refresh11', 'notrefresh');
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup"',
-        [],
+        'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setSpts(results.rows.item(0).count);
           if (results.rows.item(0).count != 0) {
@@ -225,8 +225,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND status IS NULL',
-        [],
+        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND status IS NULL AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setSpp(results.rows.length);
         },
@@ -234,8 +234,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup"',
-        [],
+        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setForward(results.rows.length);
         },
@@ -244,8 +244,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
 
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="accepted"',
-        [],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="accepted" AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setSpc(results.rows.length);
         },
@@ -253,8 +253,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="accepted" OR status="rejected"',
-        [],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="accepted" OR status="rejected" AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setSpARC(results.rows.length);
         },
@@ -262,8 +262,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="notPicked"',
-        [],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="notPicked" AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           let temp = [];
           setSpnp(results.rows.length);
@@ -276,8 +276,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
 
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="rejected"',
-        [],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="rejected" AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setSpr(results.rows.length);
           setIsLoading(false);
@@ -296,8 +296,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     await AsyncStorage.setItem('refresh11', 'notrefresh');
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery"',
-        [],
+        'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setShts(results.rows.item(0).count);
           if (results.rows.item(0).count != 0) {
@@ -308,8 +308,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND handoverStatus IS NULL',
-        [],
+        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND handoverStatus IS NULL AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setShp1(results.rows.length);
         },
@@ -317,8 +317,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND handoverStatus="pendingHandover"',
-        [],
+        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND handoverStatus="pendingHandover" AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setShnp1(results.rows.length);
         },
@@ -327,8 +327,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
 
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND handoverStatus="accepted" ',
-        [],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND handoverStatus="accepted" AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           let temp = [];
           setShc1(results.rows.length);
@@ -337,8 +337,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND  handoverStatus="rejected"',
-        [],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND  handoverStatus="rejected" AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setShr1(results.rows.length);
         },
@@ -378,8 +378,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     await AsyncStorage.setItem('refresh11', 'notrefresh');
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery"',
-        [],
+        'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setSdts(results.rows.item(0).count);
         },
@@ -387,8 +387,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL)',
-        [],
+        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setSpp1(results.rows.length);
         },
@@ -396,8 +396,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery"',
-        [],
+        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setReverse(results.rows.length);
         },
@@ -406,8 +406,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
 
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="accepted" OR  status="tagged"',
-        [],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND (status="accepted" OR  status="tagged") AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           let temp = [];
           setSpc1(results.rows.length);
@@ -416,8 +416,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="accepted" OR status="rejected"',
-        [],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND(status="accepted" OR status="rejected") AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setSpARC1(results.rows.length);
         },
@@ -425,8 +425,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="notDelivered"',
-        [],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="notDelivered" AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           let temp = [];
           setSpnp1(results.rows.length);
@@ -439,8 +439,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
 
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="rejected"',
-        [],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="rejected" AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setSpr1(results.rows.length);
           setIsLoading(false);
@@ -1009,6 +1009,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                                   Reverse: Reverse,
                                   Trip: tripValue,
                                   PendingHandover: shp1,
+                                  tripID:tripID
                                 })}}
                               >
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -1094,6 +1095,7 @@ w="100%"
         Trip: tripValue,
         userId: id,
         PendingHandover: shp1,
+        tripID:tripID
       })}}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -1526,6 +1528,7 @@ onPress={() =>
                                   Reverse: Reverse,
                                   Trip: tripValue,
                                   PendingHandover: shp1,
+                                  tripID:tripID
                                 })}}
                               >
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -1611,6 +1614,7 @@ onPress={() =>
                                   Trip: tripValue,
                                   userId: id,
                                   PendingHandover: shp1,
+                                  tripID:tripID
                                 })}}
                               >
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>

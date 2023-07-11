@@ -169,8 +169,8 @@ const NewSellerSelection = ({ route }) => {
         console.log(response.data);
         db.transaction((tx) => {
           tx.executeSql(
-            'UPDATE SyncSellerPickUp  SET otpSubmitted="true" WHERE stopId=? ',
-            [route.params.stopId],
+            'UPDATE SyncSellerPickUp  SET otpSubmitted="true" WHERE stopId=? AND FMtripId=?',
+            [route.params.stopId, route.params.FMtripId],
             (tx1, results) => {
               if (results.rowsAffected > 0) {
                 console.log("otp status updated  in seller table ");
@@ -182,13 +182,14 @@ const NewSellerSelection = ({ route }) => {
         });
         db.transaction((tx) => {
           tx.executeSql(
-            'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Pickup" AND status IS Null AND stopId=?',
+            'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Pickup" AND status IS Null AND stopId=? AND FMtripId=?',
             [
               rejectionCode,
               new Date().valueOf(),
               latitude,
               longitude,
               route.params.stopId,
+              route.params.FMtripId
             ],
             (tx1, results) => {
               let temp = [];
@@ -290,16 +291,16 @@ const NewSellerSelection = ({ route }) => {
     db.transaction((tx) => {
       db.transaction((tx) => {
         tx.executeSql(
-          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? ',
-          [route.params.stopId],
+          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND FMtripId=?',
+          [route.params.stopId, route.params.FMtripId],
           (tx1, results) => {
             setForward(results.rows.length);
           }
         );
       });
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=?  AND status="accepted"',
-        [route.params.stopId],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=?  AND status="accepted" AND FMtripId=?',
+        [route.params.stopId, route.params.FMtripId],
         (tx1, results) => {
           // let temp = [];
           // console.log(results.rows.length);
@@ -325,8 +326,8 @@ const NewSellerSelection = ({ route }) => {
 
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status="notPicked"',
-        [route.params.stopId],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status="notPicked" AND FMtripId=?',
+        [route.params.stopId,route.params.FMtripId],
         (tx1, results) => {
           setNotPicked11(results.rows.length);
         }
@@ -334,8 +335,8 @@ const NewSellerSelection = ({ route }) => {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status="rejected"',
-        [route.params.stopId],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status="rejected" AND FMtripId=?',
+        [route.params.stopId, route.params.FMtripId],
         (tx1, results) => {
           setRejectedOrder11(results.rows.length);
         }
@@ -343,8 +344,8 @@ const NewSellerSelection = ({ route }) => {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status IS NULL',
-        [route.params.stopId],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status IS NULL AND FMtripId=?',
+        [route.params.stopId, route.params.FMtripId],
         (tx1, results) => {
           setPending(results.rows.length);
           setLoading(false);

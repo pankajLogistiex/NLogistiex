@@ -126,8 +126,8 @@ const POD = ({ route }) => {
   const displayDataSPScan = async () => {
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=?  AND status="accepted"',
-        [route.params.stopId],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=?  AND status="accepted" AND FMtripId=?',
+        [route.params.stopId, route.params.tripId],
         (tx1, results) => {
           setnewAccepted(results.rows.length);
           let temp = [];
@@ -140,8 +140,8 @@ const POD = ({ route }) => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status is NULL',
-        [route.params.stopId],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND FMtripId=? AND status is NULL',
+        [route.params.stopId, route.params.tripId],
         (tx1, results) => {
           setNewNotPicked(results.rows.length);
           let temp = [];
@@ -155,8 +155,8 @@ const POD = ({ route }) => {
 
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status="rejected"',
-        [route.params.stopId],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status="rejected" AND FMtripId=?',
+        [route.params.stopId, route.params.tripId],
         (tx1, results) => {
           setnewRejected(results.rows.length);
           let temp = [];
@@ -222,8 +222,8 @@ const POD = ({ route }) => {
         .then(function (response) {
           db.transaction(tx => {
             tx.executeSql(
-              'UPDATE SyncSellerPickUp  SET otpSubmitted="true" WHERE stopId=? ',
-              [route.params.stopId],
+              'UPDATE SyncSellerPickUp  SET otpSubmitted="true" WHERE stopId=? AND FMtripId=? ',
+              [route.params.stopId, route.params.tripId],
               (tx1, results) => {
                 // console.log('Results', results.rowsAffected);
                 // console.log(results);
@@ -239,13 +239,14 @@ const POD = ({ route }) => {
 
           db.transaction(tx => {
             tx.executeSql(
-              'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Pickup" AND status IS Null And stopId=?',
+              'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Pickup" AND status IS Null And stopId=? AND FMtripId=?',
               [
                 route.params.DropDownValue,
                 new Date().valueOf(),
                 route.params.latitude,
                 route.params.longitude,
                 route.params.stopId,
+                route.params.tripId
               ],
               (tx1, results) => {
                 if (results.rowsAffected > 0) {
@@ -343,8 +344,8 @@ const POD = ({ route }) => {
   const displayData = async () => {
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=?',
-        [route.params.stopId],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND FMtripId=?',
+        [route.params.stopId, route.params.tripId],
         (tx1, results) => {
           // ToastAndroid.show("Loading...", ToastAndroid.SHORT);
           let temp = [];

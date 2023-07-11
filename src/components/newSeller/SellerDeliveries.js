@@ -72,7 +72,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
 
     const loadDetails = () => { // setIsLoading(!isLoading);
         db.transaction((tx) => {
-            tx.executeSql('SELECT * FROM SyncSellerPickUp ORDER BY  CAST(sellerIndex AS INTEGER) ASC', [], (tx1, results) => { // ToastAndroid.show("Loading...", ToastAndroid.SHORT);
+            tx.executeSql('SELECT * FROM SyncSellerPickUp WHERE FMtripId = ? ORDER BY CAST(sellerIndex AS INTEGER) ASC', [route.params.tripID], (tx1, results) => { // ToastAndroid.show("Loading...", ToastAndroid.SHORT);
                 let temp = [];
                 // console.log(results.rows.length);
                 for (let i = 0; i < results.rows.length; ++i) {
@@ -90,8 +90,8 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
         dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
-              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status IS NOT NULL',
-              [single.stopId],
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND FMtripId=? AND status IS NOT NULL',
+              [single.stopId, single.FMtripId],
               (tx1, results) => {
                 counts.push(results.rows.length);
                 if (counts.length === dataSeller.length) {
@@ -109,8 +109,8 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
           dataSeller.forEach((single) => {
             db.transaction((tx) => {
               tx.executeSql(
-                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status IS NOT NULL',
-                [single.stopId],
+                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND status IS NOT NULL',
+                [single.stopId, single.FMtripId],
                 (tx1, results) => {
                   counts.push(results.rows.length);
                   if (counts.length === dataSeller.length) {
@@ -128,8 +128,8 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
           dataSeller.forEach((single) => {
             db.transaction((tx) => {
               tx.executeSql(
-                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=?',
-                [single.stopId],
+                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND FMtripId=?',
+                [single.stopId, single.FMtripId],
                 (tx1, results) => {
                   counts.push(results.rows.length);
                   if (counts.length === dataSeller.length) {
@@ -147,8 +147,8 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
           dataSeller.forEach((single) => {
             db.transaction((tx) => {
               tx.executeSql(
-                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND handoverStatus="accepted"',
-                [single.stopId],
+                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND handoverStatus="accepted"',
+                [single.stopId, single.FMtripId],
                 (tx1, results) => {
                   counts.push(results.rows.length);
                   if (counts.length === dataSeller.length) {

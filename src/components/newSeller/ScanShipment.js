@@ -270,8 +270,8 @@ const ScanShipment = ({ route }) => {
   const displayDataSPScan = async () => {
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=?  AND status="accepted"',
-        [route.params.stopId],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND status="accepted"',
+        [route.params.stopId, route.params.tripId],
         (tx1, results) => {
           setnewAccepted(results.rows.length);
         },
@@ -279,8 +279,8 @@ const ScanShipment = ({ route }) => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status="notDelivered"',
-        [route.params.stopId],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND status="notDelivered"',
+        [route.params.stopId, route.params.tripId],
         (tx1, results) => {
           setnotDelivered(results.rows.length);
         },
@@ -288,8 +288,8 @@ const ScanShipment = ({ route }) => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status="rejected"',
-        [route.params.stopId],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND status="rejected"',
+        [route.params.stopId, route.params.tripId],
         (tx1, results) => {
           setnewRejected(results.rows.length);
         },
@@ -297,8 +297,8 @@ const ScanShipment = ({ route }) => {
     });
     db.transaction(tx => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status="tagged"',
-        [route.params.stopId],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND status="tagged"',
+        [route.params.stopId, route.params.tripId],
         (tx1, results) => {
           setnewTagged(results.rows.length);
         },
@@ -342,7 +342,7 @@ console.log("packagingId",packagingID)
     console.log(acceptedArray);
     db.transaction(tx => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="accepted", expectedPackagingId=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Delivery" AND stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
+        'UPDATE SellerMainScreenDetails SET status="accepted", expectedPackagingId=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Delivery" AND stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) AND FMtripId=?',
         [
           expectedPackagingId,
           new Date().valueOf(),
@@ -352,6 +352,7 @@ console.log("packagingId",packagingID)
           barcode,
           barcode,
           barcode,
+          route.params.tripId
         ],
         (tx1, results) => {
           let temp = [];
@@ -419,8 +420,8 @@ console.log("packagingId",packagingID)
       // setImageUrls([]);
       db.transaction(tx => {
         tx.executeSql(
-          'UPDATE SellerMainScreenDetails SET status="rejected" , eventTime=?, latitude=?, longitude=? , expectedPackagingId=?, rejectionReasonL1=?  WHERE  shipmentAction="Seller Delivery" AND stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-          [new Date().valueOf(), latitude, longitude, expectedPackagingId, reason, route.params.stopId, barcode, barcode, barcode],
+          'UPDATE SellerMainScreenDetails SET status="rejected" , eventTime=?, latitude=?, longitude=? , expectedPackagingId=?, rejectionReasonL1=?  WHERE  shipmentAction="Seller Delivery" AND stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) AND FMtripId=?',
+          [new Date().valueOf(), latitude, longitude, expectedPackagingId, reason, route.params.stopId, barcode, barcode, barcode, route.params.tripId],
           (tx1, results) => {
             let temp = [];
             console.log('Rejected Reason : ', reason);
@@ -487,8 +488,8 @@ console.log("packagingId",packagingID)
   
     db.transaction(tx => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="tagged", eventTime=?, latitude=?, longitude=? , expectedPackagingId=?, rejectionReasonL1=?  WHERE stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-        [new Date().valueOf(), latitude, longitude, expectedPackagingId, DropDownValue, route.params.stopId, barcode, barcode, barcode],
+        'UPDATE SellerMainScreenDetails SET status="tagged", eventTime=?, latitude=?, longitude=? , expectedPackagingId=?, rejectionReasonL1=?  WHERE stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) AND FMtripId=?',
+        [new Date().valueOf(), latitude, longitude, expectedPackagingId, DropDownValue, route.params.stopId, barcode, barcode, barcode, route.params.tripId],
         (tx1, results) => {
           let temp = [];
           console.log('Rejected Reason : ', DropDownValue);
@@ -522,16 +523,16 @@ console.log("packagingId",packagingID)
   const getCategories = data => {
     db.transaction(txn => {
       txn.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE status IS NULL AND shipmentAction="Seller Delivery" AND stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber = ?) ',
-        [route.params.stopId, data, data, data],
+        'SELECT * FROM SellerMainScreenDetails WHERE status IS NULL AND shipmentAction="Seller Delivery" AND stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber = ?) AND FMtripId=?',
+        [route.params.stopId, data, data, data, route.params.tripId],
         (sqlTxn, res) => {
           setLen(res.rows.length);
           setBarcode(data);
           if (!res.rows.length) {
             db.transaction(tx => {  
               tx.executeSql(
-                'Select * FROM SellerMainScreenDetails WHERE status IS NOT NULL And shipmentAction="Seller Delivery" And stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?)',
-                [route.params.stopId, data, data, data],
+                'Select * FROM SellerMainScreenDetails WHERE status IS NOT NULL And shipmentAction="Seller Delivery" And stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) AND FMtripId=?',
+                [route.params.stopId, data, data, data, route.params.tripId],
                 (tx1, results) => {
                   if (results.rows.length === 0) {
                     ToastAndroid.show(

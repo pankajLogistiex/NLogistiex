@@ -146,8 +146,8 @@ export default function MyTrip({ navigation, route }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="accepted"',
-        [],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="accepted" AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setCompletePickup(results.rows.length);
         }
@@ -155,8 +155,8 @@ export default function MyTrip({ navigation, route }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="notPicked"',
-        [],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="notPicked" AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           let temp = [];
           setNotPicked(results.rows.length);
@@ -165,8 +165,8 @@ export default function MyTrip({ navigation, route }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="rejected"',
-        [],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="rejected" AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setSpr(results.rows.length);
           setRejectedPickup(false);
@@ -175,8 +175,8 @@ export default function MyTrip({ navigation, route }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND status IS NULL',
-        [],
+        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND status IS NULL AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setPendingPickup(results.rows.length);
         }
@@ -185,8 +185,8 @@ export default function MyTrip({ navigation, route }) {
 
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL)',
-        [],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND FMtripId=? AND (handoverStatus="accepted" AND status IS NULL)',
+        [tripID],
         (tx1, results) => {
           setPendingDelivery(results.rows.length);
         }
@@ -194,8 +194,8 @@ export default function MyTrip({ navigation, route }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND handoverStatus IS NULL',
-        [],
+        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND handoverStatus IS NULL AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setPendingHandover(results.rows.length);
         }
@@ -203,8 +203,8 @@ export default function MyTrip({ navigation, route }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="accepted" OR  status="tagged"',
-        [],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND FMtripId=? AND (status="accepted" OR  status="tagged")',
+        [tripID],
         (tx1, results) => {
           let temp = [];
           setCompleteDelivery(results.rows.length);
@@ -213,8 +213,8 @@ export default function MyTrip({ navigation, route }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="notDelivered"',
-        [],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="notDelivered" AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           let temp = [];
           setNotDelivered(results.rows.length);
@@ -226,8 +226,8 @@ export default function MyTrip({ navigation, route }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="rejected"',
-        [],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="rejected" AND FMtripId=?',
+        [tripID],
         (tx1, results) => {
           setRejectedDelivery(results.rows.length);
         }
@@ -371,7 +371,7 @@ export default function MyTrip({ navigation, route }) {
           endkilometer: endkm,
           endVehicleImageUrl: endImageUrl,
           tripStatus: 200,
-          tripsummary: {
+          tripSummary: {
             acceptedPickup: completePickup,
             notPicked: notPicked,
             rejectedPickup: rejectedPickup,

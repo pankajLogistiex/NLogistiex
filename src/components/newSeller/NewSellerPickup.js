@@ -76,7 +76,7 @@ const NewSellerPickup = ({route}) => {
 
   const loadDetails = () => { // setIsLoading(!isLoading);
       db.transaction((tx) => {
-          tx.executeSql('SELECT * FROM SyncSellerPickUp ORDER BY  CAST(sellerIndex AS INTEGER) ASC' , [], (tx1, results) => {
+          tx.executeSql('SELECT * FROM SyncSellerPickUp WHERE FMtripId = ? ORDER BY CAST(sellerIndex AS INTEGER) ASC' , [route.params.tripID], (tx1, results) => {
               let temp = [];
               for (let i = 0; i < results.rows.length; ++i) {
                 // console.log(results.rows.item(i).sellerIndex);
@@ -109,8 +109,8 @@ const NewSellerPickup = ({route}) => {
         dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
-              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status IS NOT NULL',
-              [single.stopId],
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status IS NOT NULL AND FMtripId=?',
+              [single.stopId, single.FMtripId],
               (tx1, results) => {
                 counts.push(results.rows.length);
                 if (counts.length === dataSeller.length) {
@@ -129,8 +129,8 @@ const NewSellerPickup = ({route}) => {
         dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
-              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=?',
-              [single.stopId],
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND FMtripId=?',
+              [single.stopId, single.FMtripId],
               (tx1, results) => {
                 counts.push(results.rows.length);
                 if (counts.length === dataSeller.length) {
@@ -150,8 +150,8 @@ const NewSellerPickup = ({route}) => {
         dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
-              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND handoverStatus="accepted"',
-              [single.stopId],
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND handoverStatus="accepted" AND FMtripId=?',
+              [single.stopId, single.FMtripId],
               (tx1, results) => {
                 counts.push(results.rows.length);
                 if (counts.length === dataSeller.length) {
@@ -172,8 +172,8 @@ const NewSellerPickup = ({route}) => {
         dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
-              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status IS NOT NULL',
-              [single.stopId],
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status IS NOT NULL AND FMtripId=?',
+              [single.stopId, single.FMtripId],
               (tx1, results) => {
                 counts.push(results.rows.length);
                 if (counts.length === dataSeller.length) {
@@ -191,8 +191,8 @@ const NewSellerPickup = ({route}) => {
         dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
-              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status IS NOT NULL',
-              [single.stopId],
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status IS NOT NULL AND FMtripId=?',
+              [single.stopId, single.FMtripId],
               (tx1, results) => {
                 counts.push(results.rows.length);
                 if (counts.length === dataSeller.length) {
