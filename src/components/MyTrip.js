@@ -16,6 +16,8 @@ import {
   Item,
 } from "native-base";
 import MaterialIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import GetLocation from 'react-native-get-location';
+import { callApi } from "./ApiError";
 import {
   ActivityIndicator,
   PermissionsAndroid,
@@ -57,6 +59,8 @@ export default function MyTrip({ navigation, route }) {
   const [pendingPickup, setPendingPickup] = useState(0);
   const [completePickup, setCompletePickup] = useState(0);
   const [rejectedPickup, setRejectedPickup] = useState(0);
+  const [latitude, setLatitude] = useState(0);
+  const [longitude, setLongitude] = useState(0);
   const [notPicked, setNotPicked] = useState(0);
   const [pendingDelivery, setPendingDelivery] = useState(0);
   const [completeDelivery, setCompleteDelivery] = useState(0);
@@ -79,6 +83,37 @@ export default function MyTrip({ navigation, route }) {
       }
     }, 200);
   }, []);
+
+
+  useEffect(() => {
+    current_location();
+  }, []);
+
+  const current_location = () => {
+    GetLocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 10000,
+    })
+      .then(location => {
+        setLatitude(location.latitude);
+        setLongitude(location.longitude);
+      })
+      .catch(error => {
+        RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+          interval: 10000,
+          fastInterval: 5000,
+        })
+          .then(status => {
+            if (status) {
+              console.log('Location enabled');
+            }
+          })
+          .catch(err => {
+            console.log(err);
+          });
+        console.log('Location Lat long error', error);
+      });
+  };
 
   useEffect(() => {
     if (userId) {
@@ -316,6 +351,7 @@ export default function MyTrip({ navigation, route }) {
         .catch((error) => {
           console.log("upload error", error);
           setUploadStatus("error");
+          callApi(error,latitude,longitude,userId);
         });
     }
   };
@@ -358,6 +394,7 @@ export default function MyTrip({ navigation, route }) {
         .catch((error) => {
           console.log("upload error", error);
           setUploadStatus("error");
+          callApi(error,latitude,longitude,userId);
         });
     }
   };
