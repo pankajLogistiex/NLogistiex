@@ -45,6 +45,7 @@ import dingReject11 from '../../assets/rejected_sound.mp3';
 import dingAccept11 from '../../assets/beep_accepted.mp3';
 import Sound from 'react-native-sound';
 import {Console} from 'console';
+import { callApi } from "../ApiError";
 // import GetLocation from 'react-native-get-location';
 // import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
 import OTPTextInput from 'react-native-otp-textinput';
@@ -57,7 +58,7 @@ import { useDispatch, useSelector } from 'react-redux';
 const db = openDatabase({
   name: 'rn_sqlite',
 });
-
+ 
 const ScanShipment = ({ route }) => {
   const dispatch = useDispatch();
   const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
@@ -768,6 +769,12 @@ console.log("packagingId",packagingID)
       });
   };
 
+
+  const callErrorAPIFromScanner = (error) => {
+    console.log('Scanner Error API called');
+    callApi(error,latitude,longitude,route.params.userId);
+  }
+
   const submitForm = () => {
     axios
       .post('https://bked.logistiex.com/SellerMainScreen/postSPS', {
@@ -1210,6 +1217,9 @@ console.log("packagingId",packagingID)
                   alignSelf: 'center',
                   justifyContent: 'center',
                 }}
+                onError={(error) => {
+                  callErrorAPIFromScanner(error);
+                }}
               />
             {'\n'}
             <Input
@@ -1320,6 +1330,9 @@ console.log("packagingId",packagingID)
               width: '100%',
               alignSelf: 'center',
               backgroundColor: 'white',
+            }}
+            onError={(error) => {
+              callErrorAPIFromScanner(error);
             }}
             cameraStyle={{width: '90%', alignSelf: 'center'}}
             topContent={

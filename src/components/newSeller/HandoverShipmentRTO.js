@@ -34,7 +34,8 @@ import MaterialIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import NetInfo from "@react-native-community/netinfo";
 import RNBeep from "react-native-a-beep";
 import { Picker } from "@react-native-picker/picker";
-import GetLocation from "react-native-get-location";
+import GetLocation from 'react-native-get-location';
+import { callApi } from "../ApiError";
 import RNAndroidLocationEnabler from "react-native-android-location-enabler";
 import {
   backgroundColor,
@@ -637,6 +638,12 @@ const HandoverShipmentRTO = ({ route }) => {
     // displayConsignorDetails11();
   };
 
+
+  const callErrorAPIFromScanner = (error) => {
+    console.log('Scanner Error API called');
+    callApi(error,latitude,longitude,userId);
+  }
+
   const onSuccess11 = (e) => {
     Vibration.vibrate(100);
     // Vibration.vibrate(800);
@@ -739,6 +746,9 @@ const HandoverShipmentRTO = ({ route }) => {
                 width: 289,
                 alignSelf: "center",
                 justifyContent: "center",
+              }}
+              onError={(error) => {
+                callErrorAPIFromScanner(error);
               }}
               // cameraProps={{ ratio:'1:2' }}
               // containerStyle={{width: '100%', alignSelf: 'center', backgroundColor: 'white'}}
@@ -966,6 +976,9 @@ const HandoverShipmentRTO = ({ route }) => {
               width: "100%",
               alignSelf: "center",
               backgroundColor: "white",
+            }}
+            onError={(error) => {
+              callErrorAPIFromScanner(error);
             }}
             cameraStyle={{ width: "90%", alignSelf: "center" }}
             topContent={

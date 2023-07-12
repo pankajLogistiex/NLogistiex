@@ -39,7 +39,7 @@ import {Picker} from '@react-native-picker/picker';
 import GetLocation from 'react-native-get-location';
 import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
 import OTPTextInput from 'react-native-otp-textinput';
-
+import { callApi } from "../ApiError";
 import dingReject11 from '../../assets/rejected_sound.mp3';
 
 import dingAccept11 from '../../assets/beep_accepted.mp3';
@@ -49,7 +49,7 @@ import { useDispatch, useSelector } from 'react-redux';
 const db = openDatabase({
   name: 'rn_sqlite',
 });
-
+ 
 const ShipmentBarcode = ({ route }) => {
   const dispatch = useDispatch();
   const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
@@ -514,6 +514,12 @@ var dingAccept = new Sound(dingAccept11, error => {
   //       updateDetails2();
   //       console.log("fdfdd "+barcode);
   // });
+
+
+  const callErrorAPIFromScanner = (error) => {
+    console.log('Scanner Error API called');
+    callApi(error,latitude,longitude,route.params.userId);
+  }
 
   function CloseBagEndScan() {
     partialClose112();
@@ -1359,6 +1365,9 @@ var barcode11 = barcode;
                   alignSelf: 'center',
                   justifyContent: 'center',
                 }}
+                onError={(error) => {
+                  callErrorAPIFromScanner(error);
+                }}
               />
             )}
             {'\n'}
@@ -1416,6 +1425,9 @@ var barcode11 = barcode;
                   width: 289,
                   alignSelf: 'center',
                   justifyContent: 'center',
+                }}
+                onError={(error) => {
+                  callErrorAPIFromScanner(error);
                 }}
               />
             {'\n'}
@@ -1479,6 +1491,9 @@ var barcode11 = barcode;
                 width: 289,
                 alignSelf: 'center',
                 justifyContent: 'center',
+              }}
+              onError={(error) => {
+                callErrorAPIFromScanner(error);
               }}
             />
             {'\n'}
@@ -1688,6 +1703,9 @@ var barcode11 = barcode;
               width: '100%',
               alignSelf: 'center',
               backgroundColor: 'white',
+            }}
+            onError={(error) => {
+              callErrorAPIFromScanner(error);
             }}
             cameraStyle={{width: '90%', alignSelf: 'center'}}
             topContent={

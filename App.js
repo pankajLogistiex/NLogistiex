@@ -946,7 +946,7 @@ const getTimezoneWithCatch = async () => {
       })
       .catch((error) => {
         setIsLoading(false);
-        callApi(error,userId);
+        callApi(error,latitude,longitude,userId);
         console.log("sync error", { error });
       });
   }
