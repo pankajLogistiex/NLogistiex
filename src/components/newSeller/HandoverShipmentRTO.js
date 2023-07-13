@@ -483,7 +483,7 @@ const HandoverShipmentRTO = ({ route }) => {
     });
   };
 
-  function uploadDataToServer(data) {
+  function uploadDataToServer(data,dataUD) {
     console.log("===========BarCode===========", data.item(0));
     const row = data.item(0);
     try {
@@ -508,11 +508,17 @@ const HandoverShipmentRTO = ({ route }) => {
             "===========Return Handover Result===========",
             response.data
           );
+          updateDetails2(dataUD);
         })
         .catch((error) => {
           console.log(
             "===========Return Handover Error===========",
             error.response.data
+          );
+          console.log(error);
+          ToastAndroid.show(
+            "API Error",
+            ToastAndroid.SHORT
           );
         });
     } catch (e) {
@@ -611,9 +617,9 @@ const HandoverShipmentRTO = ({ route }) => {
             setBarcode(() => data);
             // Vibration.vibrate(100);
             // RNBeep.beep();
-            updateDetails2(data);
+            // updateDetails2(data);
             // loadDetails(data);
-            uploadDataToServer(res.rows);
+            uploadDataToServer(res.rows,data);
           }
         }, 
         (error) => {

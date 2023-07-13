@@ -280,7 +280,7 @@ const handleMapIconPress = (seller) => {
                 ? Object.keys(displayData11).map((stopId, i) =>
                     displayData11[stopId].expected > 0 ? displayData11[stopId].expected !== displayData11[stopId].scanned ? (
 
-         <View > 
+         <View key={stopId}> 
           <View
             style={{
               flexDirection: 'row',
@@ -327,7 +327,7 @@ const handleMapIconPress = (seller) => {
                       !acceptedItemData[stopId]
                        ? 
 
-<View>
+<View key={stopId}>
   <View
     style={{
       flexDirection: 'row',
@@ -397,7 +397,7 @@ const handleMapIconPress = (seller) => {
                       
                       :
 
-<View   >
+<View   key={stopId}>
           <View
             style={{
               flexDirection: 'row',
