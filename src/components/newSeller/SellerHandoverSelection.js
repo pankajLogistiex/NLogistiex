@@ -188,6 +188,10 @@ const SellerHandoverSelection = ({ route }) => {
         setMessage('Submission failed');
         navigation.goBack();
         setStatus('error');
+        ToastAndroid.show(
+          "API Error",
+          ToastAndroid.SHORT
+        );
       });
     setShowModal(true);
     // navigation.navigate('SellerDeliveries')

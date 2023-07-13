@@ -63,7 +63,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
       }, [reverseSeller,data])
       // console.log(data.length);
       // console.log(dataSeller.length," ",pending11Seller+" ",reverseSeller+" ",valueSeller);
-      console.log(data.length,"  ",pending11+" ",reverse+" ",value," ",pendingP);
+      // console.log(data.length,"  ",pending11+" ",reverse+" ",value," ",pendingP);
       const scannedSum  =  data.reduce((sum, seller, i) => sum + (reverse[i] > 0 && pending11[i]===reverse[i] && seller.otpSubmittedDelivery === "true" ? 1 : 0), 0);
       const expectedSum = reverse.reduce((accumulator, currentValue) => accumulator + (currentValue > 0 ? 1 : 0), 0);
   

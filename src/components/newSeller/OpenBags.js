@@ -270,18 +270,18 @@ const OpenBags = ({ route }) => {
         setLongitude(location.longitude);
       })
       .catch((error) => {
-        RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
-          interval: 10000,
-          fastInterval: 5000,
-        })
-          .then((status) => {
-            if (status) {
-              console.log("Location enabled");
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-          });
+        // RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+        //   interval: 10000,
+        //   fastInterval: 5000,
+        // })
+        //   .then((status) => {
+        //     if (status) {
+        //       console.log("Location enabled");
+        //     }
+        //   })
+        //   .catch((err) => {
+        //     console.log(err);
+        //   });
         console.log("Location Lat long error", error);
       });
   };
