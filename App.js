@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import "react-native-gesture-handler";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { store } from "./src/redux/store";
+import { useRoute } from '@react-navigation/native';
 import {
   NativeBaseProvider,
   Box,
@@ -17,6 +18,7 @@ import {
   Center,
   VStack,
   Modal,
+  HStack
 } from "native-base";
 import MaterialIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -57,6 +59,7 @@ import {
   ToastAndroid,
   PermissionsAndroid,
   Alert,
+  ScrollView,
 } from "react-native";
 import { Badge } from "react-native-paper";
 import Lottie from "lottie-react-native";
@@ -75,6 +78,7 @@ import HandoverShipmentRTO from "./src/components/newSeller/HandoverShipmentRTO"
 import { LogBox } from "react-native";
 import MyTrip from "./src/components/MyTrip";
 import TripHistory from "./src/components/TripHistory";
+import TripSummary from "./src/components/TripSummary"
 import { backendUrl } from "./src/utils/backendUrl";
 import messaging from "@react-native-firebase/messaging";
 import { setIsNewSync } from "./src/redux/slice/isNewSync";
@@ -106,7 +110,7 @@ const db = openDatabase({ name: "rn_sqlite" });
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
  
-function StackNavigators({ navigation }) {
+function StackNavigators({navigation}) {
   const dispatch = useDispatch();
 
   const userId = useSelector((state) => state.user.user_id);
@@ -129,6 +133,80 @@ function StackNavigators({ navigation }) {
   const [isMixPanelInit, setIsMixPanelInit] = useState(false);
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
+  const [tripID, setTripID] = useState('');
+  const [showModal11, setShowModal11] = useState(false);
+  const [dataN, setDataN] = useState([]);
+  const route = useRoute();
+  const currentScreen = route.name;
+  console.log('Current Screen:', currentScreen);
+  const DisplayData = () => {
+    if (userId) {
+      axios
+        .get(backendUrl + `SellerMainScreen/getadditionalwork/${userId}`)
+        .then((res) => {
+          console.log(res.data.data);
+          setDataN(res.data.data);
+          setShowModal11(res.data.data && res.data.data.length > 0);
+        })
+        .catch((error) => {
+          console.log("Error Msg1:", error);
+        });
+    }
+  };
+  
+  useEffect(() => {
+    DisplayData();
+  }, [userId]);
+  useEffect(() => {
+    setShowModal11(dataN && dataN.length > 0);
+  }, [dataN]);
+ 
+  console.log("Notification Data",dataN)
+  const AcceptHandler = async (consignorCodeAccept, stopId, tripId) => {
+    // console.log('df')
+    console.log({consignorCode: consignorCodeAccept,
+      feUserId: userId,
+      stopId: stopId,
+      tripID: tripId})
+    axios
+      .post(backendUrl + "SellerMainScreen/acceptWorkLoad", {
+        consignorCode: consignorCodeAccept,
+        feUserId: userId,
+        stopId: stopId,
+        tripID: tripId
+      })
+      .then((response) => {
+        console.log("Msg Accepted ", response.data,'',userId);
+        dispatch(setNotificationCount(notificationCount - 1));
+        dispatch(setForceSync(false));
+        const updatedData = dataN.filter(item => item.consignorCode !== consignorCodeAccept);
+        setDataN(updatedData);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }; 
+
+  const RejectHandler = async (consignorCodeReject, stopId, tripId) => {
+    console.log('REJECT ')
+    axios
+      .post(backendUrl + "SellerMainScreen/rejectWorkLoad", {
+        consignorCode: consignorCodeReject,
+        feUserId: userId,
+        stopId:stopId,
+        tripID:tripId
+      })
+      .then((response) => {
+        console.log("Msg Rejected ", response.data);
+        dispatch(setNotificationCount(notificationCount - 1));
+        const updatedData = dataN.filter(item => item.consignorCode !== consignorCodeReject);
+        setDataN(updatedData);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+ 
   let m = 0;
   // console.log(latitude," " ,longitude);
   useEffect(() => {
@@ -564,7 +642,7 @@ const getTimezoneWithCatch = async () => {
 
   useEffect(() => {
     pull_API_Data();
-  }, [userId]);
+  }, [userId, tripID]);
 
   useEffect(() => {
     requestPermissions();
@@ -803,7 +881,7 @@ const getTimezoneWithCatch = async () => {
         navigation.navigate("Login");
       }
     })();
-  }, [userId]);
+  }, [userId, tripID]);
 
   // Sync button function
   const note11 = () => {
@@ -1051,7 +1129,7 @@ const getTimezoneWithCatch = async () => {
             consignorName VARCHAR(200),sellerIndex INT(20),consignorAddress1 VARCHAR(200),consignorAddress2 VARCHAR(200),consignorCity VARCHAR(200),consignorPincode,consignorLatitude INT(20),consignorLongitude DECIMAL(20,10),consignorContact VARCHAR(200),ReverseDeliveries INT(20),runSheetNumber VARCHAR(200),ForwardPickups INT(20), BagOpenClose11 VARCHAR(200), ShipmentListArray VARCHAR(800),contactPersonName VARCHAR(100),otpSubmitted VARCHAR(50),otpSubmittedDelivery VARCHAR(50), stopId VARCHAR(200) PRIMARY KEY, FMtripId VARCHAR(200),date Text)`,
         [],
         (sqlTxn, res) => {
-          // console.log("table created successfully consignorList");
+          console.log("table created successfully consignorList");
           // loadAPI_Data();
         },
         (error) => {
@@ -1060,23 +1138,41 @@ const getTimezoneWithCatch = async () => {
       );
     });
   };
+  useEffect(() => {
+    const fetchTripInfo = async () => {
+      db.transaction((txn) => {
+        txn.executeSql(
+          "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ?",
+          [20, 50, userId],
+          (tx, result) => {
+            if (result.rows.length > 0) {
+              setTripID(result.rows.item(0).tripID);
+            } else {
+              txn.executeSql(
+                "SELECT * FROM TripDetails WHERE tripStatus = ? AND userID = ? ORDER BY tripID DESC LIMIT 1",
+                [200, userId],
+                (tx, result) => {
+                  if (result.rows.length > 0) {
+                    setTripID(result.rows.item(0).tripID);
+                  }
+                }
+              );
+            }
+          }
+        );
+      });
+    };
+    fetchTripInfo(); 
+  }, [userId]);
   const loadAPI_Data1 = () => {
     setIsLoading(!isLoading);
     createTables1();
-    db.transaction((txn) => {
-      txn.executeSql(
-        "SELECT tripID FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ?",
-        [20, 50, userId],
-        (tx, result) => {
-          if (result.rows.length > 0) {
-            var tripId = result.rows.item(0).tripID;
-          }
-          if(tripId){
+          if(tripID){
             (async () => {
               await axios
                 .get(backendUrl + `SellerMainScreen/consignorsList/${userId}`, {
                   params: {
-                    tripID: tripId,
+                    tripID: tripID,
                   },
                 })
                 .then(
@@ -1088,7 +1184,7 @@ const getTimezoneWithCatch = async () => {
                       db.transaction((txn) => {
                         txn.executeSql(
                           "SELECT * FROM SyncSellerPickUp WHERE stopId = ? AND FMtripId=?",
-                          [res.data.data[i].stopId, tripId],
+                          [res.data.data[i].stopId, tripID],
                           (tx, result) => {
                             if (result.rows.length <= 0) {
                               db.transaction((txn) => {
@@ -1166,9 +1262,6 @@ const getTimezoneWithCatch = async () => {
                 );
             })();
           }
-        }
-      );
-    });
   };
   const viewDetails1 = () => {
     db.transaction((tx) => {
@@ -1242,7 +1335,7 @@ const getTimezoneWithCatch = async () => {
           )`,
         [],
         (sqlTxn, res) => {
-          // console.log("table created successfully workload");
+          console.log("table created successfully workload");
           // loadAPI_Data();
         },
         (error) => {
@@ -1262,7 +1355,6 @@ const getTimezoneWithCatch = async () => {
         [20, 50, userId],
         (tx, result) => {
           if (result.rows.length > 0) {
-            var tripID = result.rows.item(0).tripID;
             var tripStatus = result.rows.item(0).tripStatus;
           }
           console.log("Trip id: ", tripID, tripStatus);
@@ -1425,7 +1517,7 @@ const getTimezoneWithCatch = async () => {
           )`,
         [],
         (sqlTxn, res) => {
-          // console.log("table created successfully TripDetails");
+          console.log("table created successfully TripDetails");
           // loadAPI_Data();
         },
         (error) => {
@@ -1492,7 +1584,7 @@ const getTimezoneWithCatch = async () => {
         )`,
         [],
         (tx, results) => {
-          // console.log("Table created successfully Notice");
+          console.log("Table created successfully Notice");
         },
         (error) => {
           console.log("Error creating table: ", error);
@@ -1505,7 +1597,7 @@ const getTimezoneWithCatch = async () => {
         "CREATE TABLE IF NOT EXISTS ShipmentFailure(_id VARCHAR(24) PRIMARY KEY,description VARCHAR(255),parentCode VARCHAR(20), short_code VARCHAR(20), consignor_failure BOOLEAN, fe_failure BOOLEAN, operational_failure BOOLEAN, system_failure BOOLEAN, enable_geo_fence BOOLEAN, enable_future_scheduling BOOLEAN, enable_otp BOOLEAN, enable_call_validation BOOLEAN, created_by VARCHAR(10), last_updated_by VARCHAR(10), applies_to VARCHAR(255),life_cycle_code INT(20), __v INT(10),date Text)",
         [],
         (sqlTxn, res) => {
-          // console.log("Table created successfully ShipmentFailure");
+          console.log("Table created successfully ShipmentFailure");
           // loadAPI_Data();
         },
         (error) => {
@@ -1580,7 +1672,7 @@ const getTimezoneWithCatch = async () => {
         "CREATE TABLE IF NOT EXISTS closeBag1 (bagSeal TEXT PRIMARY KEY, bagId TEXT, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode Text, stopId Text)",
         [],
         (tx, results) => {
-          // console.log("Table created successfully Pickup close bag");
+          console.log("Table created successfully Pickup close bag");
         },
         (error) => {
           console.log("Error occurred while creating the table:", error);
@@ -1594,7 +1686,7 @@ const getTimezoneWithCatch = async () => {
         "CREATE TABLE IF NOT EXISTS closeHandoverBag1 (bagSeal TEXT , bagId TEXT PRIMARY KEY, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode text,stopId Text,consignorName Text)",
         [],
         (tx, results) => {
-          // console.log("Table created successfully Handover Close Bag");
+          console.log("Table created successfully Handover Close Bag");
         },
         (error) => {
           console.log("Error occurred while creating the table:", error);
@@ -1628,6 +1720,157 @@ const getTimezoneWithCatch = async () => {
 
   return (
     <NativeBaseProvider>
+      {route.name !== 'ShipmentBarcode' && route.name !== 'ScanShipment' && <Modal isOpen={showModal11}>
+  <Modal.Content bg={'#eee'}>
+    <ScrollView>
+      <Modal.Header>Additional Workload</Modal.Header>
+      <Box flex={1} bg="coolGray.100" p={4}>
+        {dataN && dataN.length
+          ? dataN.map((d, i) => {
+              return (
+                <Box
+                  key={i}
+                  width="100%"
+                  marginBottom="5"
+                  alignItems="center"
+                >
+                  <Box
+                    width="100%"
+                    rounded="lg"
+                    overflow="hidden"
+                    borderColor="coolGray.100"
+                    borderWidth="1"
+                    _dark={{
+                      borderColor: "coolGray.600",
+                      backgroundColor: "white",
+                    }}
+                    _web={{
+                      shadow: 2,
+                      borderWidth: 0,
+                    }}
+                    _light={{
+                      backgroundColor: "white",
+                    }}
+                  >
+                    <View style={{ padding: 16 }}>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          marginBottom: 4,
+                        }}
+                      >
+                        <View style={{ alignItems: "center" }}>
+                          <Text
+                            color="black"
+                            _dark={{
+                              color: "gray.400",
+                            }}
+                            fontWeight="400"
+                          >
+                            {d.consignorName} {d.consignorCode}
+                          </Text>
+                        </View>
+                        <View style={{ alignItems: "center" }}>
+                          <Text
+                            color="black"
+                            _dark={{
+                              color: "gray.400",
+                            }}
+                            fontWeight="400"
+                          >
+                            {d.ForwardPickups}/{d.ReverseDeliveries}
+                          </Text>
+                        </View>
+                      </View>
+                      <View
+                        style={{
+                          backgroundColor: "#eee",
+                          height: 1,
+                          marginVertical: 8,
+                        }}
+                      />
+                      <View style={{ marginBottom: 4 }}>
+                        <Text
+                          fontSize="sm"
+                          _light={{
+                            color: "black",
+                          }}
+                          _dark={{
+                            color: "black",
+                          }}
+                          fontWeight="500"
+                          ml="-0.5"
+                          mt="-1"
+                        >
+                          {d.consignorAddress1} {d.consignorAddress2}
+                          {"\n"}
+                          {d.consignorCity} - {d.consignorPincode}
+                        </Text>
+                      </View>
+                      <View
+                        style={{
+                          backgroundColor: "#eee",
+                          height: 1,
+                          marginVertical: 8,
+                        }}
+                      />
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <View style={{ alignItems: "center" }}>
+                        <Button
+                          style={{ backgroundColor: "#FF2E2E" }}
+                          _dark={{
+                            color: "red.200",
+                          }}
+                          onPress={() =>
+                            RejectHandler(
+                              d.consignorCode,
+                              d.stopId,
+                              d.FMtripId
+                            )
+                          }
+                        >
+                        <Text style={{ color: 'white' }}>Reject</Text>
+                        </Button>
+                      </View>
+                      <View style={{ alignItems: "center" }}>
+                        <Button
+                          style={{ backgroundColor: "#004aad" }}
+                          _dark={{
+                            color: "blue.200",
+                          }}
+                          onPress={() =>
+                            AcceptHandler(
+                              d.consignorCode,
+                              d.stopId,
+                              d.FMtripId
+                            )
+                          }
+                        >
+                          <Text style={{ color: 'white' }}>Accept</Text>
+                        </Button>
+                      </View>
+                      </View>
+                    </View>
+                  </Box>
+                </Box>
+              );
+            })
+          : null}
+      </Box>
+    </ScrollView>
+  </Modal.Content>
+</Modal>
+}
+      
+
       <Stack.Navigator
         initialRouteName={"Main"}
         key={"Main"}
@@ -3108,7 +3351,35 @@ const getTimezoneWithCatch = async () => {
                     onPress={() => navigation.toggleDrawer()}
                   />
                   <Heading style={{ color: "white", marginLeft: 10 }} size="md">
-                    TripHistory
+                    Trip History
+                  </Heading>
+                </View>
+              </NativeBaseProvider>
+            ),
+            headerLeft: () => null,
+          }}
+        />
+
+        <Stack.Screen
+          name="TripSummary"
+          component={TripSummary}
+          options={{
+            headerTitle: (props) => (
+              <NativeBaseProvider>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginLeft: -15,
+                  }}
+                >
+                  <MaterialIcons
+                    name="menu"
+                    style={{ fontSize: 30, marginLeft: 10, color: "white" }}
+                    onPress={() => navigation.toggleDrawer()}
+                  />
+                  <Heading style={{ color: "white", marginLeft: 10 }} size="md">
+                    Trip Summary
                   </Heading>
                 </View>
               </NativeBaseProvider>

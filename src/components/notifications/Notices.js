@@ -51,18 +51,29 @@ const Notices = () => {
 
   return (
 <NativeBaseProvider>
-      <ScrollView>
-        <Box flex={1} bg="coolGray.100" p={4}>
-          {notificationData && notificationData.length>0
-            ? notificationData.map((d, i) => {
-                return (
-                  <Box
-                    key={i}
-                    width="100%"
-                    marginBottom="5"
-                    alignItems="center"
-                  >
-                    <Box
+<ScrollView>
+  <Box flex={1} bg="coolGray.100" p={4}>
+    {notificationData && notificationData.length > 0 ? (
+      <>
+        <Text
+          color="black"
+          _dark={{
+            color: "gray.400",
+          }}
+          fontWeight="500"
+          mb={4}
+        >
+          {notificationData[0].notificationTitle}
+        </Text>
+        {notificationData.map((d, i) => {
+          return (
+            <Box
+              key={i}
+              width="100%"
+              marginBottom="5"
+              alignItems="center"
+            >
+              <Box
                       width="100%"
                       rounded="lg"
                       overflow="hidden"
@@ -80,21 +91,24 @@ const Notices = () => {
                         backgroundColor: "white",
                       }}
                     >
-                      <Stack p="4" space={3}>
-                        <HStack
+                      <Stack p="4" space={2}>
+                      <HStack
                           alignItems="center"
-                          space={4}
+                          space={2}
                           justifyContent="space-between"
                         >
                           <HStack alignItems="center">
-                            <Text
-                              color="black"
-                              _dark={{
-                                color: "gray.400",
-                              }}
-                              fontWeight="500"
-                            >
-                              {d.notificationTitle}
+                          <Text
+                            fontSize="sm"
+                            _light={{
+                              color: "black",
+                            }}
+                            _dark={{
+                              color: "black",
+                            }}
+                            fontWeight="400"
+                          >
+                               {d.notificationBody}
                             </Text>
                           </HStack>
                           <HStack alignItems="center">
@@ -109,39 +123,15 @@ const Notices = () => {
                             </Text>
                           </HStack>
                         </HStack>
-                        <Divider
-                          my="1"
-                          _light={{
-                            bg: "muted.200",
-                          }}
-                          _dark={{
-                            bg: "muted.50",
-                          }}
-                        />
-                        <Stack space={2}>
-                          <Text
-                            fontSize="sm"
-                            _light={{
-                              color: "black",
-                            }}
-                            _dark={{
-                              color: "black",
-                            }}
-                            fontWeight="400"
-                            ml="-0.5"
-                            mt="-1"
-                          >
-                            {d.notificationBody}
-                          </Text>
-                        </Stack>
-                       
                       </Stack>
                     </Box>
-                  </Box>
-                );
-              })
-            : 
-            <Box
+            </Box>
+          );
+        })}
+      </>
+    ) : (
+      <>
+        <Box
             width="100%"
             rounded="lg"
             overflow="hidden"
@@ -219,21 +209,18 @@ const Notices = () => {
               </HStack>
             </Stack>
           </Box>
-                
-                           
-            
-            }
-
-          <Center>
-            <Image
-              style={{ width: 150, height: 100 }}
-              source={require("../../assets/image.png")}
-              alt={"Logo Image"}
-            />
-          </Center>
-        </Box>
-      </ScrollView>
-    </NativeBaseProvider>
+      </>
+    )}
+    <Center>
+      <Image
+        style={{ width: 150, height: 100 }}
+        source={require("../../assets/image.png")}
+        alt={"Logo Image"}
+      />
+    </Center>
+  </Box>
+</ScrollView>
+</NativeBaseProvider>
 
 
    
