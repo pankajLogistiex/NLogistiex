@@ -10,6 +10,7 @@ import {
   Stack,
   HStack,
   Divider,
+  Modal
 } from "native-base";
 import { Image } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -25,7 +26,6 @@ export default function Additional_workload() {
   const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   const navigation = useNavigation();
   const [data, setData] = useState([]);
-
   const DisplayData = () => {
     if (userId) {
       axios
@@ -171,7 +171,6 @@ export default function Additional_workload() {
                             ml="-0.5"
                             mt="-1"
                           >
-                            Address of seller {"\n"}
                             {d.consignorAddress1} {d.consignorAddress2}
                             {"\n"}
                             {d.consignorCity} - {d.consignorPincode}

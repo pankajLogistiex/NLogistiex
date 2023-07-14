@@ -125,8 +125,20 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
           (tx, result) => {
             if (result.rows.length > 0) {
               setTripID(result.rows.item(0).tripID);
+            } else {
+              txn.executeSql(
+                "SELECT * FROM TripDetails WHERE tripStatus = ? AND userID = ? ORDER BY tripID DESC LIMIT 1",
+                [200, id],
+                (tx, result) => {
+                  if (result.rows.length > 0) {
+                    setTripID(result.rows.item(0).tripID);
+                  }
+                }
+              );
             }
-          })})
+          }
+        );
+      });
     };
     fetchTripInfo(); 
   }, [id]);
@@ -170,7 +182,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
       loadtripdetails();
     });
     return unsubscribe;
-  }, [navigation, syncTimeFull]);
+  }, [navigation, syncTimeFull,tripID]);
 
   const getData = async () => {
     try {
@@ -191,7 +203,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     loadHanoverDetails();
     loadSellerDeliveryDetails();
     loadtripdetails();
-  }, [isNewSync, syncTimeFull]);
+  }, [isNewSync, syncTimeFull, tripID]);
 
   const loadtripdetails = async () => {
     setIsLoading(!isLoading);
@@ -211,141 +223,143 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     // setSpc(1);
     // setSpr(1);
     // await AsyncStorage.setItem('refresh11', 'notrefresh');
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND FMtripId=?',
-        [tripID],
-        (tx1, results) => {
-          setSpts(results.rows.item(0).count);
-          if (results.rows.item(0).count != 0) {
-            setIsData(true);
-          }
-        },
-      );
-    });
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND status IS NULL AND FMtripId=?',
-        [tripID],
-        (tx1, results) => {
-          setSpp(results.rows.length);
-        },
-      );
-    });
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND FMtripId=?',
-        [tripID],
-        (tx1, results) => {
-          setForward(results.rows.length);
-        },
-      );
-    });
-
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="accepted" AND FMtripId=?',
-        [tripID],
-        (tx1, results) => {
-          setSpc(results.rows.length);
-        },
-      );
-    });
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="accepted" OR status="rejected" AND FMtripId=?',
-        [tripID],
-        (tx1, results) => {
-          setSpARC(results.rows.length);
-        },
-      );
-    });
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="notPicked" AND FMtripId=?',
-        [tripID],
-        (tx1, results) => {
-          let temp = [];
-          setSpnp(results.rows.length);
-          for (let i = 0; i < results.rows.length; ++i) {
-            temp.push(results.rows.item(i));
-          }
-        },
-      );
-    });
-
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="rejected" AND FMtripId=?',
-        [tripID],
-        (tx1, results) => {
-          setSpr(results.rows.length);
-          setIsLoading(false);
-        },
-      );
-    });
+    if(tripID){
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND FMtripId=?',
+          [tripID],
+          (tx1, results) => {
+            setSpts(results.rows.item(0).count);
+            if (results.rows.item(0).count != 0) {
+              setIsData(true);
+            }
+          },
+        );
+      });
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND status IS NULL AND FMtripId=?',
+          [tripID],
+          (tx1, results) => {
+            setSpp(results.rows.length);
+          },
+        );
+      });
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND FMtripId=?',
+          [tripID],
+          (tx1, results) => {
+            setForward(results.rows.length);
+          },
+        );
+      });
+  
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="accepted" AND FMtripId=?',
+          [tripID],
+          (tx1, results) => {
+            setSpc(results.rows.length);
+          },
+        );
+      });
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="accepted" OR status="rejected" AND FMtripId=?',
+          [tripID],
+          (tx1, results) => {
+            setSpARC(results.rows.length);
+          },
+        );
+      });
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="notPicked" AND FMtripId=?',
+          [tripID],
+          (tx1, results) => {
+            let temp = [];
+            setSpnp(results.rows.length);
+            for (let i = 0; i < results.rows.length; ++i) {
+              temp.push(results.rows.item(i));
+            }
+          },
+        );
+      });
+  
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="rejected" AND FMtripId=?',
+          [tripID],
+          (tx1, results) => {
+            setSpr(results.rows.length);
+            setIsLoading(false);
+          },
+        );
+      });
+    }
     setLoading(false);
   };
 
   const loadHanoverDetails = async () => {
     setIsLoading(!isLoading);
+    await AsyncStorage.setItem('refresh11', 'notrefresh');
     // setSpp1(1);
     // setSpnp1(1);
     // setSpc1(1);
     // setSpr1(1);
-    await AsyncStorage.setItem('refresh11', 'notrefresh');
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND FMtripId=?',
-        [tripID],
-        (tx1, results) => {
-          setShts(results.rows.item(0).count);
-          if (results.rows.item(0).count != 0) {
-            setIsData(true);
-          }
-        },
-      );
-    });
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND handoverStatus IS NULL AND FMtripId=?',
-        [tripID],
-        (tx1, results) => {
-          setShp1(results.rows.length);
-        },
-      );
-    });
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND handoverStatus="pendingHandover" AND FMtripId=?',
-        [tripID],
-        (tx1, results) => {
-          setShnp1(results.rows.length);
-        },
-      );
-    });
-
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND handoverStatus="accepted" AND FMtripId=?',
-        [tripID],
-        (tx1, results) => {
-          let temp = [];
-          setShc1(results.rows.length);
-        },
-      );
-    });
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND  handoverStatus="rejected" AND FMtripId=?',
-        [tripID],
-        (tx1, results) => {
-          setShr1(results.rows.length);
-        },
-      );
-    });
-    
-
+    if(tripID){
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND FMtripId=?',
+          [tripID],
+          (tx1, results) => {
+            setShts(results.rows.item(0).count);
+            if (results.rows.item(0).count != 0) {
+              setIsData(true);
+            }
+          },
+        );
+      });
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND handoverStatus IS NULL AND FMtripId=?',
+          [tripID],
+          (tx1, results) => {
+            setShp1(results.rows.length);
+          },
+        );
+      });
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND handoverStatus="pendingHandover" AND FMtripId=?',
+          [tripID],
+          (tx1, results) => {
+            setShnp1(results.rows.length);
+          },
+        );
+      });
+  
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND handoverStatus="accepted" AND FMtripId=?',
+          [tripID],
+          (tx1, results) => {
+            let temp = [];
+            setShc1(results.rows.length);
+          },
+        );
+      });
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND  handoverStatus="rejected" AND FMtripId=?',
+          [tripID],
+          (tx1, results) => {
+            setShr1(results.rows.length);
+          },
+        );
+      });
+    }
     db.transaction((tx) => {
       tx.executeSql(
         `SELECT stopId, AcceptedList
@@ -376,77 +390,79 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     // setSpc1(1);
     // setSpr1(1);
     await AsyncStorage.setItem('refresh11', 'notrefresh');
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND FMtripId=?',
-        [tripID],
-        (tx1, results) => {
-          setSdts(results.rows.item(0).count);
-        },
-      );
-    });
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND FMtripId=?',
-        [tripID],
-        (tx1, results) => {
-          setSpp1(results.rows.length);
-        },
-      );
-    });
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND FMtripId=?',
-        [tripID],
-        (tx1, results) => {
-          setReverse(results.rows.length);
-        },
-      );
-    });
-
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND (status="accepted" OR  status="tagged") AND FMtripId=?',
-        [tripID],
-        (tx1, results) => {
-          let temp = [];
-          setSpc1(results.rows.length);
-        },
-      );
-    });
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND(status="accepted" OR status="rejected") AND FMtripId=?',
-        [tripID],
-        (tx1, results) => {
-          setSpARC1(results.rows.length);
-        },
-      );
-    });
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="notDelivered" AND FMtripId=?',
-        [tripID],
-        (tx1, results) => {
-          let temp = [];
-          setSpnp1(results.rows.length);
-          for (let i = 0; i < results.rows.length; ++i) {
-            temp.push(results.rows.item(i));
-          }
-        },
-      );
-    });
-
-    db.transaction(tx => {
-      tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="rejected" AND FMtripId=?',
-        [tripID],
-        (tx1, results) => {
-          setSpr1(results.rows.length);
-          setIsLoading(false);
-        },
-      );
-    });
+    if(tripID){
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND FMtripId=?',
+          [tripID],
+          (tx1, results) => {
+            setSdts(results.rows.item(0).count);
+          },
+        );
+      });
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND FMtripId=?',
+          [tripID],
+          (tx1, results) => {
+            setSpp1(results.rows.length);
+          },
+        );
+      });
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND FMtripId=?',
+          [tripID],
+          (tx1, results) => {
+            setReverse(results.rows.length);
+          },
+        );
+      });
+  
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND (status="accepted" OR  status="tagged") AND FMtripId=?',
+          [tripID],
+          (tx1, results) => {
+            let temp = [];
+            setSpc1(results.rows.length);
+          },
+        );
+      });
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND(status="accepted" OR status="rejected") AND FMtripId=?',
+          [tripID],
+          (tx1, results) => {
+            setSpARC1(results.rows.length);
+          },
+        );
+      });
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="notDelivered" AND FMtripId=?',
+          [tripID],
+          (tx1, results) => {
+            let temp = [];
+            setSpnp1(results.rows.length);
+            for (let i = 0; i < results.rows.length; ++i) {
+              temp.push(results.rows.item(i));
+            }
+          },
+        );
+      });
+  
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="rejected" AND FMtripId=?',
+          [tripID],
+          (tx1, results) => {
+            setSpr1(results.rows.length);
+            setIsLoading(false);
+          },
+        );
+      });
+    }
     setLoading(false);
   };
 
@@ -933,7 +949,9 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
 
                             paddingHorizontal: 10,
                           }}
-                          onPress={()=>{navigation.navigate('SellerHandover');}}
+                          onPress={()=>{navigation.navigate('SellerHandover', {
+                            tripID:tripID
+                          });}}
                         >
                           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                             <Image alt={'Icon Image'}
@@ -1401,7 +1419,9 @@ w="100%"
 
         paddingHorizontal: 10,
       }}
-      onPress={()=>{navigation.navigate('SellerHandover');}}
+      onPress={()=>{navigation.navigate('SellerHandover', {
+        tripID:tripID
+      });}}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <Image alt={'Icon Image'}

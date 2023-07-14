@@ -456,8 +456,14 @@ useEffect(() => {
                   {data.endkilometer}
                 </Text>
               </View>
-              <Button
-                w="100%"
+              <View style={{
+                width: '90%',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignSelf: 'center',
+              }}>
+                <Button
+                w="45%"
                 rounded="md"
                 style={{
                   height: 'auto',
@@ -470,6 +476,21 @@ useEffect(() => {
               >
                 View Details
               </Button>
+              <Button
+                w="45%"
+                rounded="md"
+                style={{
+                  height: 'auto',
+                  backgroundColor: '#004aad',
+                  elevation: 10,
+                }}
+                onPress={() => {
+                  navigation.navigate('TripSummary', { tripID: data.tripID });
+                }}
+              >
+                View Summary
+              </Button>
+              </View>
             </VStack>
           </ScrollView>
         </Box>

@@ -73,7 +73,7 @@ return unsubscribe;
 // console.log(loading);
   const loadDetails = () => {
     db.transaction(tx => {
-      tx.executeSql('SELECT * FROM SyncSellerPickUp ORDER BY  CAST(sellerIndex AS INTEGER) ASC', [], (tx1, results) => {
+      tx.executeSql('SELECT * FROM SyncSellerPickUp WHERE FMtripId = ? ORDER BY CAST(sellerIndex AS INTEGER) ASC', [route.params.tripID], (tx1, results) => {
         let temp = [];
         var m = 0;
         for (let i = 0; i < results.rows.length; ++i) {
@@ -88,14 +88,14 @@ return unsubscribe;
           db.transaction(tx => {
             db.transaction(tx => {
               tx.executeSql(
-                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? ',
-                [results.rows.item(i).stopId],
+                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=?',
+                [results.rows.item(i).stopId, results.rows.item(i).FMtripId],
                 (tx1, results11) => {
                   //    console.log(results11,'1',results11.rows.length);
                   //    var expected=results11.rows.length;
                   tx.executeSql(
-                    'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND handoverStatus IS NOT NULL',
-                    [results.rows.item(i).stopId],
+                    'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND handoverStatus IS NOT NULL',
+                    [results.rows.item(i).stopId, results.rows.item(i).FMtripId],
                     (tx1, results22) => {
                       setMM(MM + results22.rows.length);
                       // console.log(results22,'2',results22.rows.length);
