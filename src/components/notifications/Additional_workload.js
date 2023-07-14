@@ -286,7 +286,7 @@ export default function Additional_workload() {
                 justifyContent="center" 
               >
                 <HStack alignItems="center">
-                  <TouchableOpacity onPress={() => navigation.popToTop()}>
+                  <TouchableOpacity onPress={() => navigation.navigate('Main')}>
                     <Button
                       style={{ backgroundColor: "#004aad" }}
                       _dark={{
