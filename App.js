@@ -136,30 +136,26 @@ function StackNavigators({navigation}) {
   const [tripID, setTripID] = useState('');
   const [showModal11, setShowModal11] = useState(false);
   const [dataN, setDataN] = useState([]);
-  const route = useRoute();
-  const currentScreen = route.name;
-  console.log('Current Screen:', currentScreen);
-  const DisplayData = () => {
-    if (userId) {
-      axios
-        .get(backendUrl + `SellerMainScreen/getadditionalwork/${userId}`)
-        .then((res) => {
-          console.log(res.data.data);
-          setDataN(res.data.data);
-          setShowModal11(res.data.data && res.data.data.length > 0);
-        })
-        .catch((error) => {
-          console.log("Error Msg1:", error);
-        });
-    }
-  };
-  
   useEffect(() => {
+    const DisplayData = () => {
+      if (userId) {
+        axios
+          .get(backendUrl + `SellerMainScreen/getadditionalwork/${userId}`)
+          .then((res) => {
+            console.log(res.data.data);
+            setDataN(res.data.data);
+            setShowModal11(res.data.data && res.data.data.length > 0);
+          })
+          .catch((error) => {
+            console.log("Error Msg1:", error);
+          });
+      }
+    };
     DisplayData();
   }, [userId]);
   useEffect(() => {
     setShowModal11(dataN && dataN.length > 0);
-  }, [dataN]);
+  }, [userId]);
  
   console.log("Notification Data",dataN)
   const AcceptHandler = async (consignorCodeAccept, stopId, tripId) => {
@@ -181,6 +177,9 @@ function StackNavigators({navigation}) {
         dispatch(setForceSync(false));
         const updatedData = dataN.filter(item => item.consignorCode !== consignorCodeAccept);
         setDataN(updatedData);
+        if(dataN.length==0){
+          setShowModal11(false);
+        }
       })
       .catch((error) => {
         console.log(error);
@@ -201,6 +200,9 @@ function StackNavigators({navigation}) {
         dispatch(setNotificationCount(notificationCount - 1));
         const updatedData = dataN.filter(item => item.consignorCode !== consignorCodeReject);
         setDataN(updatedData);
+        if(dataN.length==0){
+          setShowModal11(false);
+        }
       })
       .catch((error) => {
         console.log(error);
@@ -1720,7 +1722,7 @@ const getTimezoneWithCatch = async () => {
 
   return (
     <NativeBaseProvider>
-      {route.name !== 'ShipmentBarcode' && route.name !== 'ScanShipment' && <Modal isOpen={showModal11}>
+      {isAutoSyncEnable && <Modal isOpen={showModal11}>
   <Modal.Content bg={'#eee'}>
     <ScrollView>
       <Modal.Header>Additional Workload</Modal.Header>

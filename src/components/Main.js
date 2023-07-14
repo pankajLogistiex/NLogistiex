@@ -203,7 +203,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     loadHanoverDetails();
     loadSellerDeliveryDetails();
     loadtripdetails();
-  }, [isNewSync, syncTimeFull, tripID]);
+  }, [isNewSync, syncTimeFull, tripID, loadSellerPickupDetails, loadHanoverDetails, loadSellerDeliveryDetails, loadtripdetails]);
+  
 
   const loadtripdetails = async () => {
     setIsLoading(!isLoading);
