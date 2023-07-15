@@ -17,10 +17,12 @@ import {
   Divider,
 } from "native-base";
 import { Image } from "react-native";
+import { setForceSync } from "../../redux/slice/autoSyncSlice";
+import { useSelector, useDispatch } from "react-redux";
 
 const Notices = () => {
   const [notificationData, setNotificationData] = useState([]);
-  
+  const dispatch = useDispatch();
   const navigation = useNavigation();
 // console.log(notificationData);
   useEffect(() => {
@@ -39,7 +41,7 @@ const Notices = () => {
               const row = results.rows.item(i);
               notificationData.push(row);
             }
-
+            dispatch(setForceSync(true));
             setNotificationData(notificationData);
           }
         );
