@@ -273,7 +273,7 @@ const SellerHandoverSelection = ({ route }) => {
       db.transaction(tx => {
         tx.executeSql(
           'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND handoverStatus="accepted"',
-          [route.params.stopId, route.route.tripId],
+          [route.params.stopId, route.params.tripId],
           (tx1, results) => {
             setForward(results.rows.length);
           },

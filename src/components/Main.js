@@ -40,7 +40,7 @@ import {convertAbsoluteToRem} from 'native-base/lib/typescript/theme/tools';
 import {useSelector, useDispatch} from 'react-redux';
 import {setUserEmail, setUserId, setUserName} from '../redux/slice/userSlice';
 import {setTripStatus} from '../redux/slice/tripSlice';
-import { setAutoSync } from '../redux/slice/autoSyncSlice';
+import { setAutoSync, setForceSync } from "../redux/slice/autoSyncSlice";
 
 export default function Main({navigation, route}) {
   const dispatch = useDispatch();
@@ -116,32 +116,32 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
       });
     
   }
-  useEffect(() => {
-    const fetchTripInfo = async () => {
-      db.transaction((txn) => {
-        txn.executeSql(
-          "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ?",
-          [20, 50, id],
-          (tx, result) => {
-            if (result.rows.length > 0) {
-              setTripID(result.rows.item(0).tripID);
-            } else {
-              txn.executeSql(
-                "SELECT * FROM TripDetails WHERE tripStatus = ? AND userID = ? ORDER BY tripID DESC LIMIT 1",
-                [200, id],
-                (tx, result) => {
-                  if (result.rows.length > 0) {
-                    setTripID(result.rows.item(0).tripID);
-                  }
+  const fetchTripInfo = async () => {
+    db.transaction((txn) => {
+      txn.executeSql(
+        "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ?",
+        [20, 50, id],
+        (tx, result) => {
+          if (result.rows.length > 0) {
+            setTripID(result.rows.item(0).tripID);
+          } else {
+            txn.executeSql(
+              "SELECT * FROM TripDetails WHERE tripStatus = ? AND userID = ? ORDER BY tripID DESC LIMIT 1",
+              [200, id],
+              (tx, result) => {
+                if (result.rows.length > 0) {
+                  setTripID(result.rows.item(0).tripID);
                 }
-              );
-            }
+              }
+            );
           }
-        );
-      });
-    };
+        }
+      );
+    });
+  };
+  useEffect(() => {
     fetchTripInfo(); 
-  }, [id]);
+  }, [id, tripID]);
   function getTripDetails() {
     axios
       .get(backendUrl + 'UserTripInfo/getUserTripInfo', {
@@ -176,10 +176,12 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       dispatch(setAutoSync(true));
+      dispatch(setForceSync(true));
       loadSellerPickupDetails();
       loadHanoverDetails();
       loadSellerDeliveryDetails();
       loadtripdetails();
+      fetchTripInfo(); 
     });
     return unsubscribe;
   }, [navigation, syncTimeFull,tripID]);
@@ -199,12 +201,14 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   };
 
   useEffect(() => {
-    loadSellerPickupDetails();
-    loadHanoverDetails();
-    loadSellerDeliveryDetails();
+    if (tripID) {
+      loadSellerPickupDetails();
+      loadHanoverDetails();
+      loadSellerDeliveryDetails();
+    }  
     loadtripdetails();
-  }, [isNewSync, syncTimeFull, tripID, loadSellerPickupDetails, loadHanoverDetails, loadSellerDeliveryDetails, loadtripdetails]);
-  
+    fetchTripInfo();
+  }, [isNewSync, syncTimeFull, tripID]);
 
   const loadtripdetails = async () => {
     setIsLoading(!isLoading);
@@ -224,7 +228,6 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     // setSpc(1);
     // setSpr(1);
     // await AsyncStorage.setItem('refresh11', 'notrefresh');
-    if(tripID){
       db.transaction(tx => {
         tx.executeSql(
           'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND FMtripId=?',
@@ -298,7 +301,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
           },
         );
       });
-    }
+    
     setLoading(false);
   };
 
@@ -309,7 +312,6 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     // setSpnp1(1);
     // setSpc1(1);
     // setSpr1(1);
-    if(tripID){
       db.transaction(tx => {
         tx.executeSql(
           'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND FMtripId=?',
@@ -360,7 +362,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
           },
         );
       });
-    }
+    
     db.transaction((tx) => {
       tx.executeSql(
         `SELECT stopId, AcceptedList
@@ -391,7 +393,6 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     // setSpc1(1);
     // setSpr1(1);
     await AsyncStorage.setItem('refresh11', 'notrefresh');
-    if(tripID){
       db.transaction(tx => {
         tx.executeSql(
           'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND FMtripId=?',
@@ -463,10 +464,9 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
           },
         );
       });
-    }
     setLoading(false);
   };
-
+console.log("Pending",spp)
   const value = {
     Accepted: 0,
     Rejected: 0,
