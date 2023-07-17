@@ -9,7 +9,7 @@ import {
   ScrollView,
   Stack,
   HStack,
-  Divider,
+  Divider, 
   Modal
 } from "native-base";
 import { Image } from "react-native";
@@ -19,6 +19,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setNotificationCount } from "../../redux/slice/notificationSlice";
 import {useNavigation} from '@react-navigation/native';
 import { setForceSync } from "../../redux/slice/autoSyncSlice";
+import { setAdditionalWorkloadData } from "../../redux/slice/additionalWorkloadSlice";
 export default function Additional_workload() {
   const dispatch = useDispatch();
   const userId = useSelector((state) => state.user.user_id);
@@ -26,22 +27,34 @@ export default function Additional_workload() {
   const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   const navigation = useNavigation();
   const [data, setData] = useState([]);
-  const DisplayData = () => {
-    if (userId) {
-      axios
+  const additionalWorkloadInfo11= useSelector((state) => state.additionalWorkloadInfo.currentAdditionalWorkloadInfo);
+  // console.log(userId);
+  console.log(additionalWorkloadInfo11.length);
+  const DisplayData = async() => {
+    if (userId && additionalWorkloadInfo11 && additionalWorkloadInfo11.length ===0 ) {
+      await axios
         .get(backendUrl + `SellerMainScreen/getadditionalwork/${userId}`)
         .then((res) => {
-          console.log(res.data.data);
-          setData(res.data.data);
+          // console.log("API DATA",res.data.data);
+          // setData(res.data.data);
+          if(res.data.data && res.data.data.length >0){
+            setData(res.data.data);
+          dispatch(setAdditionalWorkloadData(res.data.data));
+          }
         })
         .catch((error) => {
           console.log("Error Msg1:", error);
         });
+    }else{
+      setData(additionalWorkloadInfo11);
     }
   };
   useEffect(() => {
     DisplayData();
   }, []);
+  useEffect(() => {
+    setData(additionalWorkloadInfo11);
+  }, [additionalWorkloadInfo11]);
 
   const AcceptHandler = async (consignorCodeAccept, stopId, tripId) => {
     // console.log('df')
@@ -62,6 +75,7 @@ export default function Additional_workload() {
         dispatch(setForceSync(false));
         const updatedData = data.filter(item => item.consignorCode !== consignorCodeAccept);
         setData(updatedData);
+        dispatch(setAdditionalWorkloadData(updatedData));
         console.log("Data ", data.length + " ", consignorCodeAccept);
       })
       .catch((error) => {
@@ -83,6 +97,8 @@ export default function Additional_workload() {
         dispatch(setNotificationCount(notificationCount - 1));
         const updatedData = data.filter(item => item.consignorCode !== consignorCodeReject);
         setData(updatedData);
+        dispatch(setAdditionalWorkloadData(updatedData));
+
       })
       .catch((error) => {
         console.log(error);

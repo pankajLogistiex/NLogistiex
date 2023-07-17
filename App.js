@@ -90,6 +90,7 @@ import {
   setUserName,
 } from "./src/redux/slice/userSlice";
 import { setCurrentDateValue } from "./src/redux/slice/currentDateSlice";
+import { setAdditionalWorkloadData } from "./src/redux/slice/additionalWorkloadSlice";
 import { setTripStatus } from "./src/redux/slice/tripSlice";
 import { logout } from "react-native-app-auth";
 import PushNotification from "react-native-push-notification";
@@ -125,7 +126,7 @@ function StackNavigators({navigation}) {
 
   const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
   const deviceInfo= useSelector((state) => state.deviceInfo.currentDeviceInfo);
-
+  const additionalWorkloadInfo11= useSelector((state) => state.additionalWorkloadInfo.currentAdditionalWorkloadInfo);
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState([]);
   const [isLogin, setIsLogin] = useState(false);
@@ -136,13 +137,21 @@ function StackNavigators({navigation}) {
   const [tripID, setTripID] = useState('');
   const [showModal11, setShowModal11] = useState(false);
   const [dataN, setDataN] = useState([]);
+  // console.log(additionalWorkloadInfo11);
+  // console.log(userId);
   const DisplayData = async () => {
     if (userId) {
       try {
-        const response = await axios.get(`${backendUrl}SellerMainScreen/getadditionalwork/${userId}`);
+        console.log(userId);
+ await axios.get(`${backendUrl}SellerMainScreen/getadditionalwork/${userId}`).then((response) => {
         const responseData = response?.data?.data;
         setDataN(responseData);
+        dispatch(setAdditionalWorkloadData(response?.data?.data));
+        console.log('API Msg1:', response.data);
         setShowModal11(responseData && responseData.length > 0);
+ }).catch((error) => {
+  console.log("Error Msg11:", error);
+});
       } catch (error) {
         console.log('Error Msg1:', error);
       }
@@ -174,6 +183,7 @@ function StackNavigators({navigation}) {
         dispatch(setForceSync(false));
         const updatedData = dataN.filter(item => item.consignorCode !== consignorCodeAccept);
         setDataN(updatedData);
+        dispatch(setAdditionalWorkloadData(updatedData));
         if (updatedData.length == 0) {
           setShowModal11(false);
         }
@@ -197,6 +207,7 @@ function StackNavigators({navigation}) {
         dispatch(setNotificationCount(notificationCount - 1));
         const updatedData = dataN.filter(item => item.consignorCode !== consignorCodeReject);
         setDataN(updatedData);
+        dispatch(setAdditionalWorkloadData(updatedData));
         if (updatedData.length == 0) {
           setShowModal11(false);
         }
@@ -1835,7 +1846,7 @@ const getTimezoneWithCatch = async () => {
                               d.stopId,
                               d.FMtripId
                             )
-                          }
+                          } 
                         >
                         <Text style={{ color: 'white' }}>Reject</Text>
                         </Button>
@@ -3596,6 +3607,7 @@ function CustomDrawerContent({ navigation }) {
       dispatch(setNotificationCount(0));
       dispatch(setCurrentDateValue(0));
       dispatch(setCurrentDeviceInfo(""));
+      dispatch(setAdditionalWorkloadData(""));
     } catch (e) {
       console.log(e);
     }
