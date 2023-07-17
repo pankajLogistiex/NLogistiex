@@ -842,6 +842,7 @@ console.log("packagingId",packagingID)
         runsheetno: route.params.PRSNumber,
         latitude: latitude,
         longitude: longitude,
+        DropDownValue: DropDownValue11,
       });
     } else {
       setDropDownValue11('');

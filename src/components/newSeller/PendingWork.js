@@ -19,7 +19,8 @@ const db = openDatabase({ name: "rn_sqlite" });
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { setAutoSync } from "../../redux/slice/autoSyncSlice";
-
+import Lottie from 'lottie-react-native';
+import {ProgressBar} from '@react-native-community/progress-bar-android';
 const PendingWork = ({ route }) => {
   const dispatch = useDispatch();
   const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
@@ -30,19 +31,13 @@ const PendingWork = ({ route }) => {
   const [pendingDelivery, setPendingDelivery] = useState(0);
   const [data, setData] = useState([]);
   const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
-  const [DropDownValue, setDropDownValue] = useState(null);
-  const [DropDownValue1, setDropDownValue1] = useState(null);
-  const [rejectStage, setRejectStage] = useState(null);
   const [CloseData, setCloseData] = useState([]);
   const [CloseDataD, setCloseDataD] = useState([]);
   const [NotAttemptData, setNotAttemptData] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalVisible2, setModalVisible2] = useState(false);
-  const [modalVisible3, setModalVisible3] = useState(false);
-  const [modalVisible4, setModalVisible4] = useState(false);
   const [displayData, setDisplayData] = useState({});
   const [keyword, setKeyword] = useState("");
   const [MM, setMM] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const DisplayData = async () => {
     closePickup11();
@@ -158,6 +153,7 @@ const PendingWork = ({ route }) => {
           });
         }
         setData(temp);
+        setLoading(false);
       });
     });
     db.transaction((tx) => {
@@ -196,6 +192,28 @@ const PendingWork = ({ route }) => {
 console.log(displayData11)
   return (
     <NativeBaseProvider>
+      {loading ? 
+        <View
+              style={[
+                StyleSheet.absoluteFillObject,
+                {
+                  flex: 1,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  zIndex: 1,
+                  backgroundColor: 'rgba(0,0,0,0.65)',
+                },
+              ]}>
+              <Text style={{color: 'white'}}>Loading...</Text>
+              <Lottie
+                source={require('../../assets/loading11.json')}
+                autoPlay
+                loop
+                speed={1}
+              />
+              <ProgressBar width={70} />
+            </View>
+      :
       <Box flex={1} bg="#fff" width="auto" maxWidth="100%">
         <ScrollView
           style={styles.homepage}
@@ -345,41 +363,6 @@ console.log(displayData11)
                             Close Delivery
                           </Button>
                         )}
-                        {/* {displayData11[consignorCode].forward >0 && displayData11[consignorCode].consignorName >0 &&
-      <View style={{flexDirection: 'row', justifyContent: 'space-between', alignSelf: 'center', marginTop: 10 }}>
-        <Button
-          leftIcon={
-            <Icon
-              color="white"
-              as={<MaterialIcons name="close-circle-outline" />}
-              size="sm"
-            />
-          }
-          onPress={() => {
-            setModalVisible(true); 
-          }}
-          style={{backgroundColor: '#004aad', width: '48%', marginTop: -10, marginLeft: 20}}
-        >
-          Close Pickup
-        </Button>
-        <Button
-          leftIcon={
-            <Icon
-              color="white"
-              as={<MaterialIcons name="close-circle-outline" />}
-              size="sm"
-            />
-          }
-          onPress={() => {
-            setModalVisible3(true); 
-          }}
-          style={{backgroundColor: '#004aad', width: '48%', marginTop: -10, marginLeft: 20}}
-        >
-          Close Delivery
-        </Button>
-      </View>
-        
-      } */}
                       </View>
                     )
                 )}
@@ -436,6 +419,8 @@ console.log(displayData11)
           />
         </Center>
       </Box>
+            }
+      
     </NativeBaseProvider>
   );
 };
