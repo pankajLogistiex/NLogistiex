@@ -41,7 +41,6 @@ const Notices = () => {
               const row = results.rows.item(i);
               notificationData.push(row);
             }
-            dispatch(setForceSync(true));
             setNotificationData(notificationData);
           }
         );

@@ -120,7 +120,7 @@ const NewSellerPickup = ({route}) => {
         dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
-              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status IS NOT NULL AND FMtripId=?',
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND FMtripId=? AND status IS NOT NULL',
               [single.stopId, single.FMtripId],
               (tx1, results) => {
                 counts.push(results.rows.length);
@@ -161,7 +161,7 @@ const NewSellerPickup = ({route}) => {
         dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
-              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND handoverStatus="accepted" AND FMtripId=?',
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND handoverStatus="accepted"',
               [single.stopId, single.FMtripId],
               (tx1, results) => {
                 counts.push(results.rows.length);
@@ -183,7 +183,7 @@ const NewSellerPickup = ({route}) => {
         dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
-              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status IS NOT NULL AND FMtripId=?',
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND status IS NOT NULL',
               [single.stopId, single.FMtripId],
               (tx1, results) => {
                 counts.push(results.rows.length);
@@ -196,26 +196,7 @@ const NewSellerPickup = ({route}) => {
         });
       }
     }, [dataSeller, db]);
-    useEffect(() => {
-      if (dataSeller.length > 0) {
-        const counts = [];
-        dataSeller.forEach((single) => {
-          db.transaction((tx) => {
-            tx.executeSql(
-              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND status IS NOT NULL AND FMtripId=?',
-              [single.stopId, single.FMtripId],
-              (tx1, results) => {
-                counts.push(results.rows.length);
-                if (counts.length === dataSeller.length) {
-                  setPendingR(counts);
-                  setLoading(false);
-                }
-              },
-            );
-          });
-        });
-      }
-    }, [dataSeller, db]);
+    
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
         // setData11([]);
