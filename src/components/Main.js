@@ -176,7 +176,6 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       dispatch(setAutoSync(true));
-      dispatch(setForceSync(true));
       loadSellerPickupDetails();
       loadHanoverDetails();
       loadSellerDeliveryDetails();
