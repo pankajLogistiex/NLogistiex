@@ -6,6 +6,7 @@ import newNotificationSlice from "./slice/notificationSlice";
 import autoSyncSlice from "./slice/autoSyncSlice";
 import currentDateSlice from "./slice/currentDateSlice";
 import deviceInfoSlice from "./slice/deviceInfoSlice";
+import additionalWorkloadSlice from "./slice/additionalWorkloadSlice";
 export const store = configureStore({
   reducer: {
     trip: tripSlice,
@@ -15,5 +16,6 @@ export const store = configureStore({
     autoSync: autoSyncSlice,
     currentDate:currentDateSlice,
     deviceInfo:deviceInfoSlice,
+    additionalWorkloadInfo:additionalWorkloadSlice,
   },
 });

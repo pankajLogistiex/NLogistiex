@@ -189,6 +189,7 @@ const NewSellerPickup = ({route}) => {
                 counts.push(results.rows.length);
                 if (counts.length === dataSeller.length) {
                   setPendingR(counts);
+                  setLoading(false);
                 }
               },
             );
