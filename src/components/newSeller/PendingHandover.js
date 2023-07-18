@@ -100,7 +100,7 @@ const PendingHandover = ({ route }) => {
 
   const loadDetails = () => {
     db.transaction((tx) => {
-      tx.executeSql("SELECT * FROM SyncSellerPickUp", [], (tx1, results) => {
+      tx.executeSql("SELECT * FROM SyncSellerPickUp WHERE FMtripId = ? ", [route.params.tripID], (tx1, results) => {
         let temp = [];
         var m = 0;
         for (let i = 0; i < results.rows.length; ++i) {
@@ -112,14 +112,14 @@ const PendingHandover = ({ route }) => {
           db.transaction((tx) => {
             db.transaction((tx) => {
               tx.executeSql(
-                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? ',
-                [results.rows.item(i).stopId],
+                'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND stopId=? ',
+                [route.params.tripID,results.rows.item(i).stopId],
                 (tx1, results11) => {
                   //    console.log(results11,'1',results11.rows.length);
                   //    var expected=results11.rows.length;
                   tx.executeSql(
-                    'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND handoverStatus IS  NULL',
-                    [results.rows.item(i).stopId],
+                    'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND stopId=? AND handoverStatus IS  NULL',
+                    [route.params.tripID,results.rows.item(i).stopId],
                     (tx1, results22) => {
                       // console.log(results22,'2',results22.rows.length);
                       // var scanned=results.rows.length;
@@ -182,8 +182,8 @@ const PendingHandover = ({ route }) => {
     const DropDownValue112 = DropDownValue;
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? ',
-        [stopId],
+        'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND stopId=? ',
+        [route.params.tripID,stopId],
         (tx1, results111) => {
           const consignorData = {
             expected: expected11,
@@ -225,8 +225,8 @@ const PendingHandover = ({ route }) => {
   const loadDetails112 = () => {
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery"  AND handoverStatus IS NULL',
-        [],
+        'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery"  AND handoverStatus IS NULL',
+        [route.params.tripID],
         (tx1, results) => {
           setTotalPending(results.rows.length);
         }
@@ -237,13 +237,14 @@ const PendingHandover = ({ route }) => {
   function updateQueryLocal(eventTime, rejectReason, stopId) {
     db.transaction((tx) => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET handoverStatus=?, rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Delivery" AND handoverStatus IS Null And stopId=?',
+        'UPDATE SellerMainScreenDetails SET handoverStatus=?, rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE  FMtripId = ? AND shipmentAction="Seller Delivery" AND handoverStatus IS Null And stopId=?',
         [
           "pendingHandover",
           rejectReason,
           eventTime,
           latitude,
           longitude,
+          route.params.tripID,
           stopId,
         ],
         (tx1, results) => {
@@ -268,7 +269,9 @@ const PendingHandover = ({ route }) => {
     } catch (error) {
       console.log("==err====", error);
     }
-    navigation.navigate("HandOverSummary");
+    navigation.navigate("HandOverSummary",{
+      tripID:route.params.tripID,
+    });
   }
  
   function closeHandover() {
@@ -485,7 +488,9 @@ const PendingHandover = ({ route }) => {
               w="48%"
               size="lg"
               bg="#004aad"
-              onPress={() => navigation.navigate("HandoverShipmentRTO")}
+              onPress={() => navigation.navigate("HandoverShipmentRTO",{
+                tripID:route.params.tripID,
+              })}
             >
               Resume Scanning
             </Button>

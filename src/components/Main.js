@@ -86,6 +86,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   const [showModal1, setShowModal1] = useState(false);
   const [message1, setMessage1] = useState(0);
   const [myArray, setMyArray] = useState([]);
+  const [closeHandoverStatus11, setCloseHandoverStatus11]=useState(0);
   const [acceptedItemData, setAcceptedItemData] = useState(0);
 
   const focus = useIsFocused();
@@ -465,7 +466,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
       });
     setLoading(false);
   };
-console.log("Pending",spp)
+// console.log("Pending",spp)
   const value = {
     Accepted: 0,
     Rejected: 0,
@@ -491,16 +492,36 @@ console.log("Pending",spp)
     }
   };
   
+
+  const fetchCloseHandoverStatus = async () => {
+    if (id) {
+      try {
+        console.log(id);
+ await axios.get(`${backendUrl}/SellerMainScreen/handoverStatus?feUserID=${id}`).then((response) => {
+        const responseData = response?.data?.data;
+        setCloseHandoverStatus11(response?.data?.data?.handoverStatus);
+        console.log('closeHandoverStatus :', response.data.data);
+ }).catch((error) => {
+  console.log("Error Msg:", error);
+});
+      } catch (error) {
+        console.log('Error Msg1:', error);
+      }
+    }
+  };
+// console.log(closeHandoverStatus11);
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       dispatch(setAutoSync(true));
       loadAcceptedItemData12();
+      fetchCloseHandoverStatus();
     });
     return unsubscribe;
   }, [navigation, syncTimeFull]);
 
   useEffect(() => {
     loadAcceptedItemData12();
+    fetchCloseHandoverStatus();
   }, []);
   // const createTables = () => {
   //     db.transaction(txn => {
@@ -715,7 +736,7 @@ console.log("Pending",spp)
                   it.notPicked !== 0 ||
                   it.rejectedOrder !== 0
                 ) {
-                  if (shp1 === 0 && acceptedItemData==0) {
+                  if (shp1 === 0 && acceptedItemData===0 && closeHandoverStatus11===1) {
                     return it.title === 'Seller Pickups' ||
                       it.title === 'Seller Deliveries' ? (
                       <Box pt={4} mb="6" rounded="md" bg="white" key={index}>
