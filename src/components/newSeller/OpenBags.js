@@ -309,7 +309,7 @@ const OpenBags = ({ route }) => {
               }
             }
           }
-          if (exp == acc) {
+          if (exp == acc && exp !==0) {
             const consignorData = {
               expected: exp,
               accepted: acc,
@@ -333,7 +333,7 @@ const OpenBags = ({ route }) => {
       );
     });
   }
- 
+//  console.log(acceptedHandoverStatus);
   function getAllConsignors() {
     db.transaction((tx) => {
       tx.executeSql("SELECT * FROM SyncSellerPickUp WHERE FMtripId = ?", [route.params.tripID], (tx1, results) => {
