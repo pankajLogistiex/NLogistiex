@@ -201,7 +201,19 @@ useEffect(() => {
         elevation: 10,
       }}
     >
-      <Text style={{ color: '#fff' }}>{route.params.tripValue}</Text>
+       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Image alt={'Icon Image'}
+                    source={require('../assets/icons11/1685612829193.png')}
+                    style={{
+                      width: 25,
+                      height: 25,
+                      tintColor: 'white',
+                      marginRight: 5,
+                    }}
+                  />
+                  <Text style={{ color: 'white',fontWeight:'bold' }}>{route.params.tripValue}</Text>
+                  </View>
+      {/* <Text style={{ color: '#fff' }}>{route.params.tripValue}</Text> */}
     </Button>
     </View>
 ) : (
@@ -321,7 +333,18 @@ useEffect(() => {
                   handleTrip(data.userID)
                 }}
               >
-                End Trip
+                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Image alt={'Icon Image'}
+                    source={require('../assets/icons11/1685612829193.png')}
+                    style={{
+                      width: 25,
+                      height: 25,
+                      tintColor: 'white',
+                      marginRight: 5,
+                    }}
+                  />
+                  <Text style={{ color: 'white',fontWeight:'bold' }}>End Trip</Text>
+                  </View>
               </Button>
             </VStack>
           </ScrollView>
@@ -457,13 +480,13 @@ useEffect(() => {
                 </Text>
               </View>
               <View style={{
-                width: '90%',
+                width: '100%',
                 flexDirection: 'row',
                 justifyContent: 'space-between',
                 alignSelf: 'center',
               }}>
                 <Button
-                w="45%"
+                w="48%"
                 rounded="md"
                 style={{
                   height: 'auto',
@@ -474,10 +497,23 @@ useEffect(() => {
                   navigation.navigate('StartEndDetails', { tripID: data.tripID });
                 }}
               >
-                View Details
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Image alt={'Icon Image'}
+                    source={require('../assets/icons11/1689753851989.png')}
+                    style={{
+                      width: 25,
+                      height: 25,
+                      tintColor: 'white',
+                      marginRight: 5,
+                    }}
+                  />
+                  <Text style={{ color: 'white',fontWeight:'bold' }}>
+                  View Details</Text>
+                  </View>
               </Button>
+              <Text>   </Text>
               <Button
-                w="45%"
+                w="48%"
                 rounded="md"
                 style={{
                   height: 'auto',
@@ -488,7 +524,19 @@ useEffect(() => {
                   navigation.navigate('TripSummary', { tripID: data.tripID });
                 }}
               >
-                View Summary
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Image alt={'Icon Image'}
+                    source={require('../assets/icons11/summary1.png')}
+                    style={{
+                      width: 25,
+                      height: 25,
+                      tintColor: 'white',
+                      marginRight: 5,
+                    }}
+                  />
+                  <Text style={{ color: 'white',fontWeight:'bold' }}>
+                View Summary</Text>
+                  </View>
               </Button>
               </View>
             </VStack>
