@@ -224,7 +224,7 @@ const HandoverShipmentRTO = ({ route }) => {
       ? "#004aad"
       : "gray.300";
   // let serialNo = 0;
-
+  console.log(route.params.tripID);
   useEffect(() => {
     if (data && data.length > 0) {
       const fetchData = async () => {
@@ -370,8 +370,8 @@ const HandoverShipmentRTO = ({ route }) => {
 
     db.transaction((tx) => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails  SET handoverStatus="accepted" WHERE shipmentAction="Seller Delivery" AND (awbNo = ? OR clientShipmentReferenceNumber = ? OR clientRefId = ? )',
-        [data, data, data],
+        'UPDATE SellerMainScreenDetails  SET handoverStatus="accepted" WHERE FMtripId = ? AND shipmentAction="Seller Delivery" AND (awbNo = ? OR clientShipmentReferenceNumber = ? OR clientRefId = ? )',
+        [route.params.tripID,data, data, data],
         (tx1, results) => {
           let temp = [];
           console.log("Results", results.rowsAffected);
@@ -391,8 +391,8 @@ const HandoverShipmentRTO = ({ route }) => {
             });
             db.transaction((tx) => {
               tx.executeSql(
-                'SELECT stopId FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND (awbNo = ? OR clientShipmentReferenceNumber = ? OR clientRefId = ? )  AND handoverStatus="accepted"',
-                [data, data, data],
+                'SELECT stopId FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND (awbNo = ? OR clientShipmentReferenceNumber = ? OR clientRefId = ? )  AND handoverStatus="accepted"',
+                [route.params.tripID, data, data, data],
                 (tx2, results122) => {
                   console.log(results122.rows.item(0));
                   loadDetails(
@@ -435,8 +435,8 @@ const HandoverShipmentRTO = ({ route }) => {
         : null
       : db.transaction((tx) => {
           tx.executeSql(
-            "SELECT BagOpenClose11 FROM SyncSellerPickUp where  stopId=? ",
-            [data333],
+            "SELECT BagOpenClose11 FROM SyncSellerPickUp WHERE FMtripId = ? AND   stopId=? ",
+            [route.params.tripID,data333],
             (tx1, results) => {
               if (results.rows.item(0).BagOpenClose11 === "true" && !check) {
                 setModalVisible(true);
@@ -449,8 +449,8 @@ const HandoverShipmentRTO = ({ route }) => {
 
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM SyncSellerPickUp WHERE stopId=?",
-        [data333],
+        "SELECT * FROM SyncSellerPickUp WHERE FMtripId = ? AND  stopId=?",
+        [route.params.tripID, data333],
         (tx1, results) => {
           let temp = [];
           for (let i = 0; i < results.rows.length; ++i) {
@@ -462,8 +462,8 @@ const HandoverShipmentRTO = ({ route }) => {
 
       db.transaction((tx) => {
         tx.executeSql(
-          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=?  AND handoverStatus="accepted"',
-          [data333],
+          'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND stopId=?  AND handoverStatus="accepted"',
+          [route.params.tripID,data333],
           (tx1, results) => {
             setScanProgressRD(results.rows.length);
           }
@@ -472,8 +472,8 @@ const HandoverShipmentRTO = ({ route }) => {
 
       db.transaction((tx) => {
         tx.executeSql(
-          'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=?  ',
-          [data333],
+          'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND stopId=?  ',
+          [route.params.tripID, data333],
           (tx1, results) => {
             setSellerNoOfShipment(results.rows.length);
             setSellerNoOfShipment11(results.rows.length);
@@ -529,8 +529,8 @@ const HandoverShipmentRTO = ({ route }) => {
   const getCategories = (data) => {
     db.transaction((txn) => {
       txn.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND (awbNo = ? OR clientShipmentReferenceNumber = ? OR clientRefId = ? )AND handoverStatus IS NULL ',
-        [data, data, data],
+        'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND (awbNo = ? OR clientShipmentReferenceNumber = ? OR clientRefId = ? )AND handoverStatus IS NULL ',
+        [route.params.tripID, data, data, data],
         (sqlTxn, res) => {
           console.log("categories retrieved successfully", res.rows.length);
 
@@ -539,8 +539,8 @@ const HandoverShipmentRTO = ({ route }) => {
               console.log("ok3333", data);
 
               tx.executeSql(
-                'Select * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND handoverStatus IS NOT NULL  AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?)',
-                [data, data, data],
+                'Select * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND handoverStatus IS NOT NULL  AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?)',
+                [route.params.tripID, data, data, data],
                 (tx1, results) => {
                   console.log("Results121", results.rows.length);
                   console.log("ok4444", data);
@@ -579,8 +579,8 @@ const HandoverShipmentRTO = ({ route }) => {
                     setBarcode(() => data);
                     db.transaction((tx) => {
                       tx.executeSql(
-                        'SELECT stopId FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND (awbNo = ? OR clientShipmentReferenceNumber = ? OR clientRefId = ? )  AND handoverStatus="accepted"',
-                        [data, data, data],
+                        'SELECT stopId FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND (awbNo = ? OR clientShipmentReferenceNumber = ? OR clientRefId = ? )  AND handoverStatus="accepted"',
+                        [route.params.tripID,data, data, data],
                         (tx2, results122) => {
                           console.log(results122.rows.item(0));
                           //  if (acceptedItemData[results122.rows.item(0).stopId] !== null)
@@ -669,8 +669,8 @@ const HandoverShipmentRTO = ({ route }) => {
   const updateBagStatus11 = (conscode12) => {
     db.transaction((txn) => {
       txn.executeSql(
-        'UPDATE SyncSellerPickUp SET BagOpenClose11="false" WHERE stopId=?',
-        [conscode12],
+        'UPDATE SyncSellerPickUp SET BagOpenClose11="false" WHERE stopId=? AND FMtripId = ? ',
+        [conscode12,route.params.tripID],
         (sqlTxn, _res) => {
           setModalVisible(false);
           console.log("bag status updated to false");
@@ -703,10 +703,10 @@ const HandoverShipmentRTO = ({ route }) => {
   // useEffect(() => {
   //   `displayConsignorDetails11`();
   // }, []);
-
+ 
   //   const displayConsignorDetails11 = () => {
   //     db.transaction(tx => {
-  //         tx.executeSql('SELECT * FROM SyncSellerPickUp where stopId= ?', [barcode], (tx1, results) => {
+  //         tx.executeSql('SELECT * FROM SyncSellerPickUp WHERE FMtripId = ? AND  stopId= ?', [barcode], (tx1, results) => {
   //             // let temp = [];
   //             console.log(results.rows.length);
   //             for (let i = 0; i < results.rows.length; ++i) {
@@ -926,7 +926,7 @@ const HandoverShipmentRTO = ({ route }) => {
               ) : (
                 <ProgressBar width={70} />
               )}
-            </Text>
+            </Text> 
             <View
               style={{
                 width: "90%",
@@ -1190,6 +1190,7 @@ const HandoverShipmentRTO = ({ route }) => {
                 onPress={() =>
                   navigation.navigate("OpenBags", {
                     allCloseBAgData: acceptedItemData,
+                    tripID:route.params.tripID,
                   })
                 }
               >

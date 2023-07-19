@@ -40,22 +40,22 @@ const HandOverSummary = ({ route }) => {
 
   const loadDetails = () => {
     db.transaction(tx => {
-      tx.executeSql('SELECT * FROM SyncSellerPickUp', [], (tx1, results) => {
+      tx.executeSql('SELECT * FROM SyncSellerPickUp  WHERE FMtripId = ? ', [route.params.tripID], (tx1, results) => {
         let temp = [];
         var m = 0;
         for (let i = 0; i < results.rows.length; ++i) {
           const newData = {};
           temp.push(results.rows.item(i));
-
+ 
           db.transaction(tx => {
             db.transaction(tx => {
               tx.executeSql(
-                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? ',
-                [results.rows.item(i).stopId],
+                'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND stopId=? ',
+                [route.params.tripID, results.rows.item(i).stopId],
                 (tx1, results11) => {
                   tx.executeSql(
-                    'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND handoverStatus ="accepted"',
-                    [results.rows.item(i).stopId],
+                    'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND stopId=? AND handoverStatus ="accepted"',
+                    [route.params.tripID, results.rows.item(i).stopId],
                     (tx1, results22) => {
                       db.transaction(tx => {
                         tx.executeSql(

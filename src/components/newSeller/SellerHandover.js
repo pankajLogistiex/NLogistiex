@@ -454,6 +454,7 @@ const handleMapIconPress = (seller) => {
             style={{backgroundColor: '#004aad', color: '#fff',marginBottom:30}}
             onPress={() => navigation.navigate('HandoverShipmentRTO', {
               allCloseBAgData: acceptedItemData,
+              tripID:route.params.tripID,
             })}>
             Start Scanning
           </Button>

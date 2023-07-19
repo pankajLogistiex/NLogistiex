@@ -61,7 +61,7 @@ const OpenBags = ({ route }) => {
   const currentDate = new Date().toISOString().slice(0, 10);
   const loadDetails = () => {
     db.transaction((tx) => {
-      tx.executeSql("SELECT * FROM SyncSellerPickUp", [], (tx1, results) => {
+      tx.executeSql("SELECT * FROM SyncSellerPickUp WHERE FMtripId = ?", [route.params.tripID], (tx1, results) => {
         let temp = [];
         console.log(results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
@@ -156,12 +156,12 @@ const OpenBags = ({ route }) => {
     loadDetails112();
     // loadAcceptedItemData12();
   }, []);
-
+ 
   const loadDetails112 = () => {
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery"  AND handoverStatus IS NOT NULL',
-        [],
+        'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery"  AND handoverStatus IS NOT NULL',
+        [route.params.tripID],
         (tx1, results) => {
           setTotalAccepted(results.rows.length);
         }
@@ -170,8 +170,8 @@ const OpenBags = ({ route }) => {
 
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" ',
-        [],
+        'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" ',
+        [route.params.tripID],
         (tx1, results) => {
           setTotalShipment(results.rows.length);
         }
@@ -185,7 +185,7 @@ const OpenBags = ({ route }) => {
     // console.log(acceptedArray);
     db.transaction((tx) => {
 
-      tx.executeSql("SELECT * FROM SyncSellerPickUp Where stopId=?  ", [consCode], (tx1, resultsCC) => {        
+      tx.executeSql("SELECT * FROM SyncSellerPickUp WHERE FMtripId = ? AND stopId=?  ", [route.params.tripID,consCode], (tx1, resultsCC) => {        
         console.log(resultsCC.rows.item(0).consignorCode);
       tx.executeSql(
         "SELECT * FROM closeHandoverBag1 Where stopId=? AND bagDate=? ",
@@ -293,8 +293,8 @@ const OpenBags = ({ route }) => {
   function getAllAcceptedHandovers(stopId) {
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" And stopId=?',
-        [stopId],
+        'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" And stopId=?',
+        [route.params.tripID,stopId],
         (tx1, results) => {
           let exp = results.rows.length;
           let acc = 0;
@@ -333,10 +333,10 @@ const OpenBags = ({ route }) => {
       );
     });
   }
-
+ 
   function getAllConsignors() {
     db.transaction((tx) => {
-      tx.executeSql("SELECT * FROM SyncSellerPickUp", [], (tx1, results) => {
+      tx.executeSql("SELECT * FROM SyncSellerPickUp WHERE FMtripId = ?", [route.params.tripID], (tx1, results) => {
         for (var i = 0; i < results.rows.length; i++) {
           getAllAcceptedHandovers(results.rows.item(i).stopId);
         }
@@ -364,7 +364,9 @@ const OpenBags = ({ route }) => {
         longitude: parseFloat(longitude),
       })
       .then((response) => {
-        navigation.navigate("HandOverSummary");
+        navigation.navigate("HandOverSummary",{
+          tripID:route.params.tripID,
+        });
         ToastAndroid.show("Successfully Handover Closed", ToastAndroid.SHORT);
       })
       .catch((error) => {
@@ -693,6 +695,7 @@ const OpenBags = ({ route }) => {
                         consignorName: "consignorName",
                         expected: "0",
                         acceptedHandoverStatus: acceptedHandoverStatus,
+                        tripID:route.params.tripID,
                       });
                     }
                   : () =>
