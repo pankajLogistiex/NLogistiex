@@ -224,10 +224,9 @@ const CollectPOD = ({ route }) => {
             },
           );
         });
-
         db.transaction(tx => {
           tx.executeSql(
-            'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND stopId=? AND FMtripId=?',
+            'UPDATE SellerMainScreenDetails SET status="notDelivered", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND stopId=? AND FMtripId=?',
             [
               route.params.DropDownValue,
               new Date().valueOf(),
@@ -256,7 +255,6 @@ const CollectPOD = ({ route }) => {
         console.log(error.response.data);
       });
   };
-
   const sendSmsOtp = async () => {
     const response = await axios
     .post(backendUrl + 'SMS_new/sendOTP', {
