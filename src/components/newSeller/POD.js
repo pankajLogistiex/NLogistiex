@@ -259,6 +259,7 @@ const POD = ({ route }) => {
           });
           console.log('POST RD Data Submitted', response.data);
           alert('Pickup Successfully completed');
+          postRDStatus();
           navigation.navigate('Main');
         })
         .catch(function (error) {

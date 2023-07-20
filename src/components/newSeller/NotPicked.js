@@ -134,7 +134,7 @@ const NotPicked = ({route}) => {
           });
           db.transaction(tx => {
             tx.executeSql(
-              'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Pickup" AND status IS Null And stopId=?',
+              'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=?, postRDStatus="true" WHERE shipmentAction="Seller Pickup" AND status IS Null And stopId=?',
               [
                 rejectionCode,
                 new Date().valueOf(),
