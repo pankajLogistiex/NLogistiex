@@ -5,6 +5,8 @@ import "react-native-gesture-handler";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { store } from "./src/redux/store";
 import { useRoute } from '@react-navigation/native';
+import RNAndroidLocationEnabler from "react-native-android-location-enabler";
+
 import {
   NativeBaseProvider,
   Box,
@@ -233,18 +235,18 @@ function StackNavigators({navigation}) {
         setLongitude(location.longitude);
       })
       .catch(error => {
-        RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
-          interval: 10000,
-          fastInterval: 5000,
-        })
-          .then(status => {
-            if (status) {
-              console.log('Location enabled');
-            }
-          })
-          .catch(err => {
-            console.log(err);
-          });
+        // RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+        //   interval: 10000,
+        //   fastInterval: 5000,
+        // })
+        //   .then(status => {
+        //     if (status) {
+        //       console.log('Location enabled');
+        //     }
+        //   })
+        //   .catch(err => {
+        //     console.log(err);
+        //   });
         console.log('Location Lat long error', error);
       });
   };
@@ -722,7 +724,7 @@ const getTimezoneWithCatch = async () => {
   function NotificationCountIncrease() {
     // dispatch(setNotificationCount(5));
     // dispatch(setNotificationCount(useSelector((state) => state.notification.count) + 1));
-  }
+  }  
 
   const handleIncomingMessage = async (message) => {
     console.log(message);
@@ -736,25 +738,41 @@ const getTimezoneWithCatch = async () => {
     console.log(formattedTime, notification);
 
     db.transaction((tx) => {
-      tx.executeSql(
-        "INSERT INTO noticeMessages (messageId, notificationTitle, notificationBody, date, sentTime) VALUES (?, ?, ?, ?, ?)",
-        [
-          messageId,
-          notification.title,
-          notification.body,
-          sendDate,
-          formattedTime.toString(),
-        ],
-        (tx, results) => {
-          console.log(results);
-          if (results.rowsAffected > 0) {
-            console.log(
-              "Message stored in the local database ",
-              notification.body
-            );
-          }
-        }
+
+const messageRegex = /.*?- (.+?) \(/;
+const messageMatch = notification.body.match(messageRegex);
+const message = messageMatch ? messageMatch[1] : null;
+
+const sellerNameRegex = /- (.+?) \(/;
+const sellerNameMatch = notification.body.match(sellerNameRegex);
+const sellerName = sellerNameMatch ? sellerNameMatch[1] : null;
+
+const sellerCodeRegex = /\( (.+?) \)/;
+const sellerCodeMatch = notification.body.match(sellerCodeRegex);
+const sellerCode = sellerCodeMatch ? sellerCodeMatch[1] : null;
+console.log(message,  " ",sellerName, " ", " ", sellerCode );
+tx.executeSql(
+  "INSERT INTO noticeMessages (messageId, notificationTitle, notificationBody, date, sentTime, message, sellerName, sellerCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+  [
+    messageId,
+    notification.title,
+    notification.body,
+    sendDate,
+    formattedTime.toString(),
+    message,
+    sellerName,
+    sellerCode,
+  ],
+  (tx, results) => {
+    console.log(results);
+    if (results.rowsAffected > 0) {
+      console.log(
+        "Message stored in the local database ",
+        notification.body
       );
+    }
+  }
+);
     });
   };
 
@@ -1591,7 +1609,10 @@ const getTimezoneWithCatch = async () => {
           notificationTitle TEXT,
           notificationBody TEXT,
           date TEXT,
-          sentTime TEXT
+          sentTime TEXT,
+          message TEXT,
+          sellerName TEXT,
+          sellerCode TEXT
         )`,
         [],
         (tx, results) => {

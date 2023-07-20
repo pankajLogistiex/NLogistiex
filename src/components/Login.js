@@ -24,6 +24,7 @@ import { backendUrl } from "../utils/backendUrl";
 import { BackHandler } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import messaging from "@react-native-firebase/messaging";
+import RNAndroidLocationEnabler from "react-native-android-location-enabler";
 import {
   setUserEmail,
   setUserId,
@@ -163,18 +164,18 @@ export default function Login() {
         setLongitude(location.longitude);
       })
       .catch(error => {
-        RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
-          interval: 10000,
-          fastInterval: 5000,
-        })
-          .then(status => {
-            if (status) {
-              console.log('Location enabled');
-            }
-          })
-          .catch(err => {
-            console.log(err);
-          });
+        // RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+        //   interval: 10000,
+        //   fastInterval: 5000,
+        // })
+        //   .then(status => {
+        //     if (status) {
+        //       console.log('Location enabled');
+        //     }
+        //   })
+        //   .catch(err => {
+        //     console.log(err);
+        //   });
         console.log('Location Lat long error', error);
       });
   };

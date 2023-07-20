@@ -39,6 +39,7 @@ const db = openDatabase({
   name: "rn_sqlite",
 });
 import MaterialIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import RNAndroidLocationEnabler from "react-native-android-location-enabler";
 import PieChart from "react-native-pie-chart";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import GetLocation from "react-native-get-location";
@@ -102,9 +103,10 @@ const NewSellerSelection = ({ route }) => {
   }, [timer]);
 
   useEffect(() => {
-    current_location();
-  }, []);
-
+    if(!loading){
+    current_location();}
+  }, [loading]);
+// console.log(latitude);
   const current_location = () => {
     GetLocation.getCurrentPosition({
       enableHighAccuracy: true,
@@ -139,6 +141,7 @@ const NewSellerSelection = ({ route }) => {
     AsyncStorage.setItem("refresh11", "refresh");
     const deviceId= await DeviceInfo.getUniqueId();
     const IpAddress= await DeviceInfo.getIpAddress();
+    console.log(latitude);
     console.log("***Attempt Failed")
     console.log({consignorCode: route.params.consignorCode,
       rejectionReason: rejectionCode,
@@ -174,7 +177,8 @@ const NewSellerSelection = ({ route }) => {
             (tx1, results) => {
               if (results.rowsAffected > 0) {
                 console.log("otp status updated  in seller table ");
-                navigation.goBack();
+                // navigation.goBack();
+                loadSellerPickupDetails();
               } else {
                 console.log("opt status not updated in local table");
               }
@@ -207,7 +211,7 @@ const NewSellerSelection = ({ route }) => {
       .catch(function (error) {
         console.log(error);
         setMessage("Submission failed");
-        navigation.goBack();
+        // navigation.goBack();
         setStatus("error");
       });
     // navigation.goBack();
@@ -274,10 +278,10 @@ const NewSellerSelection = ({ route }) => {
     return () => clearInterval(StartValue);
   }, []);
   //   useEffect(() => {
-  //     (async () => {
-  //         loadSellerPickupDetails();
-  //     })();
-  // }, []);
+  //     if(!modalVisible){
+  //       loadSellerPickupDetails();
+  //     }
+  // }, [modalVisible]);
 
   const sync11 = () => {
     loadSellerPickupDetails();
@@ -1104,7 +1108,20 @@ const NewSellerSelection = ({ route }) => {
                           size="sm"
                         />
                       }
-                      onPress={() => setModalVisible(true)}
+                      onPress={() => {setModalVisible(true);
+                        GetLocation.getCurrentPosition({
+                          enableHighAccuracy: true,
+                          timeout: 10000,
+                        })
+                          .then((location) => {
+                            setLatitude(location.latitude);
+                            setLongitude(location.longitude);
+                          })
+                          .catch((error) => {
+                            ToastAndroid.show("Plz enable location",ToastAndroid.SHORT);
+                            console.log("Location Lat long error", error);
+                          });
+                        }}
                       style={[
                         { backgroundColor: "#004aad", width: "48%" },
                         pending !== route.params.Forward && {
