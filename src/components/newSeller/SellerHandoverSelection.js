@@ -35,6 +35,7 @@ import {useNavigation} from '@react-navigation/native';
 import axios from 'axios';
 import Pie from 'react-native-pie';
 import {openDatabase} from 'react-native-sqlite-storage';
+import RNAndroidLocationEnabler from "react-native-android-location-enabler";
 const db = openDatabase({
   name: 'rn_sqlite',
 });
@@ -101,8 +102,9 @@ const SellerHandoverSelection = ({ route }) => {
     };
   }, [timer]);
   useEffect(() => {
-    current_location();
-  }, []);
+    if(!loading){
+      current_location();}
+    }, [loading]);
 
   const current_location = () => {
     GetLocation.getCurrentPosition({
@@ -173,7 +175,8 @@ const SellerHandoverSelection = ({ route }) => {
             (tx1, results) => {
               if (results.rowsAffected > 0) {
                 console.log('otp status updated seller delivery in seller table ');
-                navigation.goBack();
+                // navigation.goBack();
+                loadSellerPickupDetails();
               } else {
                 console.log('opt status not updated in seller delivery in local table');
               }
@@ -186,7 +189,7 @@ const SellerHandoverSelection = ({ route }) => {
       .catch(function (error) {
         console.log(error);
         setMessage('Submission failed');
-        navigation.goBack();
+        // navigation.goBack();
         setStatus('error');
         ToastAndroid.show(
           "API Error",
@@ -475,7 +478,7 @@ const SellerHandoverSelection = ({ route }) => {
         console.log(error);
       });
   }
-
+ 
   return (
     <NativeBaseProvider>
       {loading ? 
@@ -983,7 +986,19 @@ const SellerHandoverSelection = ({ route }) => {
           size="sm"
         />
       }
-      onPress={() => setModalVisible(true)}
+      onPress={() => {setModalVisible(true);
+        GetLocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 10000,
+      })
+        .then((location) => {
+          setLatitude(location.latitude);
+          setLongitude(location.longitude);
+        })
+        .catch((error) => {
+          ToastAndroid.show("Plz enable location",ToastAndroid.SHORT);
+          console.log("Location Lat long error", error);
+        });}}
       style={[{ backgroundColor: '#004aad', width: '48%' }, pending !== route.params.Reverse && { backgroundColor: 'gray' }  ]}
       disabled={pending !== route.params.Reverse}
       disabledStyle={{ backgroundColor: 'gray' }}>
