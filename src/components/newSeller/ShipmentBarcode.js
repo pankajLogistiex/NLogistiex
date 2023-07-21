@@ -758,7 +758,7 @@ var dingAccept = new Sound(dingAccept11, error => {
     console.log(acceptedArray);
     db.transaction(tx => {
       tx.executeSql(
-        'UPDATE SellerMainScreenDetails SET status="accepted", packagingId=?, expectedPackagingId=?, eventTime=?, latitude=?, longitude=?, stopId=?, rejectionReasonL1="", postRDStatus="false" WHERE (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) AND FMtripId=?',
+        'UPDATE SellerMainScreenDetails SET status="accepted", packagingId=?, expectedPackagingId=?, eventTime=?, latitude=?, longitude=?, stopId=?, rejectionReasonL1="", postRDStatus="false", syncStatus="",rejectionStage="" WHERE (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) AND FMtripId=?',
         [
           packagingID,
           expectedPackagingId,
