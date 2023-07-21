@@ -145,15 +145,26 @@ function StackNavigators({navigation}) {
     if (userId) {
       try {
         console.log(userId);
- await axios.get(`${backendUrl}SellerMainScreen/getadditionalwork/${userId}`).then((response) => {
-        const responseData = response?.data?.data;
-        setDataN(responseData);
-        dispatch(setAdditionalWorkloadData(response?.data?.data));
-        console.log('API Msg1:', response.data);
-        setShowModal11(responseData && responseData.length > 0);
- }).catch((error) => {
-  console.log("Error Msg11:", error);
-});
+        const fetchData = async () => {
+          try {
+            const response = await axios.get(`${backendUrl}SellerMainScreen/getadditionalwork/${userId}`);
+            const responseData = response?.data?.data;
+            setDataN(responseData);
+            dispatch(setAdditionalWorkloadData(responseData));
+            console.log('Additional Workload API Data:', response.data.data.length);
+            setShowModal11(responseData && responseData.length > 0);
+          } catch (error) {
+            console.log("Error Msg11:", error);
+          }
+        };
+        fetchData(); 
+
+        const pollingInterval = 20000;
+        const intervalId = setInterval(fetchData, pollingInterval);
+        return () => {
+          clearInterval(intervalId);
+        };
+
       } catch (error) {
         console.log('Error Msg1:', error);
       }
@@ -759,7 +770,7 @@ tx.executeSql(
     notification.body,
     sendDate,
     formattedTime.toString(),
-    message,
+    notification.body.match(/^(.*?) -/)?.[1] || null,
     sellerName,
     sellerCode,
   ],

@@ -25,131 +25,121 @@ const Notices = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
 // console.log(notificationData);
-  useEffect(() => {
-    const fetchNotificationData = () => {
-      const db = openDatabase({ name: "rn_sqlite" });
-      db.transaction((tx) => {
-        tx.executeSql(
-          `SELECT notificationTitle, notificationBody, sentTime, messageId, message, sellerName, sellerCode FROM noticeMessages ORDER BY sentTime DESC`,
-          [],
-          (tx, results) => {
-            const len = results.rows.length;
-            const notificationDataBySeller = {};
-      
-            for (let i = 0; i < len; i++) {
-              const row = results.rows.item(i);
-              const { sellerCode } = row;
-      
-              if (!notificationDataBySeller.hasOwnProperty(sellerCode)) {
-                notificationDataBySeller[sellerCode] = [];
-              }
-      
-              notificationDataBySeller[sellerCode].push(row);
+useEffect(() => {
+  const fetchNotificationData = () => {
+    const db = openDatabase({ name: "rn_sqlite" });
+    db.transaction((tx) => {
+      tx.executeSql(
+        `SELECT notificationTitle, notificationBody, sentTime, messageId, message, sellerName, sellerCode FROM noticeMessages ORDER BY sentTime DESC`,
+        [],
+        (tx, results) => {
+          const len = results.rows.length;
+          const notificationDataBySeller = {};
+    
+          for (let i = 0; i < len; i++) {
+            const row = results.rows.item(i);
+            const { sellerCode } = row;
+    
+            if (!notificationDataBySeller.hasOwnProperty(sellerCode)) {
+              notificationDataBySeller[sellerCode] = {
+                count: 0,
+                data: [],
+              };
             }
-      
-            const notificationDataArray = Object.values(notificationDataBySeller);
-            setNotificationData(notificationDataArray);
-            // console.log(notificationDataArray);
+
+            // Increment the count and push the data
+            notificationDataBySeller[sellerCode].count++;
+            notificationDataBySeller[sellerCode].data.push(row);
           }
-        );
-      });
-      
-    };
+    
+          const notificationDataArray = Object.values(notificationDataBySeller);
+          setNotificationData(notificationDataArray);
+        }
+      );
+    });
+    
+  };
 
-    fetchNotificationData();
-  }, [notificationData]);
+  fetchNotificationData();
+}, []);
 
-  // console.log(notificationData);
+  console.log(notificationData);
   return (
 <NativeBaseProvider>
 <ScrollView>
   <Box flex={1} bg="coolGray.100" p={4}>
     {notificationData && notificationData.length > 0 ? (
       <>
-      {notificationData.map((sellerNotifications, index) => {
+      {notificationData.map((sellerNotifications, i) => {
         return (
-          <React.Fragment key={index}>
-            <Text
-              color="black"
-              _dark={{
-                color: "gray.400",
-              }}
-              fontWeight="500"
-              mb={4}
+          <React.Fragment key={i}> 
+             <Box
+        key={i}
+        width="100%"
+        marginBottom="0"
+        alignItems="center"
+      >
+        <Box
+          width="100%"
+          rounded="lg"
+          overflow="hidden"
+          borderColor="coolGray.100"
+          borderWidth="1"
+          _dark={{
+            borderColor: "coolGray.600",
+            backgroundColor: "white",
+          }}
+          _web={{
+            shadow: 2,
+            borderWidth: 0,
+          }}
+          _light={{
+            backgroundColor: "white",
+          }}
+        >
+          <Stack p="4" space={0}>
+            <HStack
+              alignItems="center"
+              space={2}
+              justifyContent="space-between"
             >
-              {sellerNotifications[0].notificationTitle}
-            </Text>
-            {sellerNotifications.map((notification, i) => (
-              <Box
-                key={i}
-                width="100%"
-                marginBottom="0"
-                alignItems="center"
-              >
-                <Box
-                  width="100%"
-                  rounded="lg"
-                  overflow="hidden"
-                  borderColor="coolGray.100"
-                  borderWidth="1"
-                  _dark={{
-                    borderColor: "coolGray.600",
-                    backgroundColor: "white",
-                  }}
-                  _web={{
-                    shadow: 2,
-                    borderWidth: 0,
-                  }}
-                  _light={{
-                    backgroundColor: "white",
-                  }}
-                >
-                  <Stack p="4" space={2}>
-                    <HStack
-                      alignItems="center"
-                      space={2}
-                      justifyContent="space-between"
-                    >
-                      <HStack alignItems="center">
-                        <Text
-                          fontSize="sm"
-                          _light={{
-                            color: "black",
-                          }}
-                          _dark={{
-                            color: "black",
-                          }}
-                          fontWeight="400"
-                        >
-                          {notification.notificationBody.match(/^(.*?) -/)?.[1] || null}
-                        </Text>
-                      </HStack>
-                      <HStack alignItems="center">
-                        <Text
-                          color="black"
-                          _dark={{
-                            color: "gray.400",
-                          }}
-                          fontWeight="400"
-                        >
-                          {notification.sentTime}
-                        </Text>
-                      </HStack>
-                    </HStack>
-                  </Stack>
-                </Box>
+              <Box flex={1}>
+                <HStack alignItems="center">
+                  <Text
+                    fontSize="sm"
+                    _light={{
+                      color: "black",
+                    }}
+                    _dark={{
+                      color: "black",
+                    }}
+                    fontWeight="400"
+                  >
+                    {sellerNotifications.data[0].notificationTitle} ({sellerNotifications.count})
+                  </Text>
+                </HStack>
               </Box>
-            ))}
+              <HStack alignItems="center">
+                <Text
+                  color="black"
+                  _dark={{
+                    color: "gray.400",
+                  }}
+                  fontWeight="400"
+                >
+                  {sellerNotifications.data[0].sentTime}
+                </Text>
+              </HStack>
+            </HStack>
+          </Stack>
+        </Box>
+      </Box>
             <Box
                 width="100%"
-                marginBottom="4"
+                marginBottom="2"
                 alignItems="center"
               >
                 </Box>
-            {/* {index < notificationData.length - 1 && (
-              // Add a separator between different sellers' notifications
-              <Box width="100%" height="10px" />
-            )} */}
           </React.Fragment>
         );
       })}
