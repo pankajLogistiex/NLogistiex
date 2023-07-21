@@ -138,13 +138,21 @@ const SellerHandoverSelection = ({ route }) => {
     AsyncStorage.setItem('refresh11', 'refresh');
     const deviceId= await DeviceInfo.getUniqueId();
     const IpAddress= await DeviceInfo.getIpAddress();
+    GetLocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 10000,
+    })
+      .then((location) => {
+        setLatitude(location.latitude);
+        setLongitude(location.longitude);
+
     axios
       .post(backendUrl + 'SellerMainScreen/attemptFailed', {
         consignorCode: route.params.consignorCode,
         rejectionReason: rejectionCode,
         feUserID: route.params.userId,
-        latitude: parseFloat(latitude),
-        longitude: parseFloat(longitude),
+        latitude: parseFloat(location.latitude),
+        longitude: parseFloat(location.longitude),
         eventTime: new Date().valueOf(),
         rejectionStage: "SLDF",
         stopId: route.params.stopId,
@@ -157,7 +165,7 @@ const SellerHandoverSelection = ({ route }) => {
         db.transaction(tx => {
           tx.executeSql(
             'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND stopId=? AND FMtripId=?',
-            [new Date().valueOf(), latitude, longitude, rejectionCode, route.params.stopId, route.params.tripId],
+            [new Date().valueOf(), location.latitude, location.longitude, rejectionCode, route.params.stopId, route.params.tripId],
             (tx1, results) => {
               let temp = [];
               console.log(results.rows.length);
@@ -175,8 +183,8 @@ const SellerHandoverSelection = ({ route }) => {
             (tx1, results) => {
               if (results.rowsAffected > 0) {
                 console.log('otp status updated seller delivery in seller table ');
-                // navigation.goBack();
-                loadSellerPickupDetails();
+                navigation.goBack();
+                // loadSellerPickupDetails();
               } else {
                 console.log('opt status not updated in seller delivery in local table');
               }
@@ -197,6 +205,13 @@ const SellerHandoverSelection = ({ route }) => {
         );
       });
     setShowModal(true);
+  })
+    .catch((error) => {
+      ToastAndroid.show("Turn on device location",ToastAndroid.SHORT);
+      console.log("Location Lat long error", error);
+      setDropDownValue('');
+      setDropDownValue1('');
+    });
     // navigation.navigate('SellerDeliveries')
   };
   const closePickup11 = () => {
@@ -986,19 +1001,7 @@ const SellerHandoverSelection = ({ route }) => {
           size="sm"
         />
       }
-      onPress={() => {setModalVisible(true);
-        GetLocation.getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 10000,
-      })
-        .then((location) => {
-          setLatitude(location.latitude);
-          setLongitude(location.longitude);
-        })
-        .catch((error) => {
-          ToastAndroid.show("Plz enable location",ToastAndroid.SHORT);
-          console.log("Location Lat long error", error);
-        });}}
+      onPress={() => setModalVisible(true)}
       style={[{ backgroundColor: '#004aad', width: '48%' }, pending !== route.params.Reverse && { backgroundColor: 'gray' }  ]}
       disabled={pending !== route.params.Reverse}
       disabledStyle={{ backgroundColor: 'gray' }}>

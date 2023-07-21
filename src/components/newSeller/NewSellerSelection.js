@@ -141,26 +141,37 @@ const NewSellerSelection = ({ route }) => {
     AsyncStorage.setItem("refresh11", "refresh");
     const deviceId= await DeviceInfo.getUniqueId();
     const IpAddress= await DeviceInfo.getIpAddress();
-    console.log(latitude);
+    // console.log(latitude);
     console.log("***Attempt Failed")
-    console.log({consignorCode: route.params.consignorCode,
-      rejectionReason: rejectionCode,
-      feUserID: route.params.userId,
-      latitude: parseFloat(latitude),
-      longitude: parseFloat(longitude),
-      eventTime: new Date().valueOf(),
-      rejectionStage: "SLPF",
-      stopId:route.params.stopId,
-    tripId:route.params.FMtripId,
-    deviceId: deviceId,
-    deviceIPaddress: IpAddress,})
+
+    GetLocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 10000,
+    })
+      .then((location) => {
+        setLatitude(location.latitude);
+        setLongitude(location.longitude);
+        
+        console.log({consignorCode: route.params.consignorCode,
+          rejectionReason: rejectionCode,
+          feUserID: route.params.userId,
+          latitude: parseFloat(location.latitude),
+          longitude: parseFloat(location.longitude),
+          eventTime: new Date().valueOf(),
+          rejectionStage: "SLPF",
+          stopId:route.params.stopId,
+        tripId:route.params.FMtripId,
+        deviceId: deviceId,
+        deviceIPaddress: IpAddress,});
+
+
     axios
       .post(backendUrl + "SellerMainScreen/attemptFailed", {
         consignorCode: route.params.consignorCode,
         rejectionReason: rejectionCode,
         feUserID: route.params.userId,
-        latitude: parseFloat(latitude),
-        longitude: parseFloat(longitude),
+        latitude: parseFloat(location.latitude),
+        longitude: parseFloat(location.longitude),
         eventTime: new Date().valueOf(),
         rejectionStage: "SLPF",
         stopId:route.params.stopId,
@@ -177,8 +188,8 @@ const NewSellerSelection = ({ route }) => {
             (tx1, results) => {
               if (results.rowsAffected > 0) {
                 console.log("otp status updated  in seller table ");
-                // navigation.goBack();
-                loadSellerPickupDetails();
+                navigation.goBack();
+                // loadSellerPickupDetails();
               } else {
                 console.log("opt status not updated in local table");
               }
@@ -191,8 +202,8 @@ const NewSellerSelection = ({ route }) => {
             [
               rejectionCode,
               new Date().valueOf(),
-              latitude,
-              longitude,
+              location.latitude,
+              location.longitude,
               route.params.stopId,
               route.params.FMtripId
             ],
@@ -214,6 +225,14 @@ const NewSellerSelection = ({ route }) => {
         // navigation.goBack();
         setStatus("error");
       });
+
+    })
+    .catch((error) => {
+      ToastAndroid.show("Turn on device location ",ToastAndroid.SHORT);
+      console.log("Location Lat long error", error);
+      setDropDownValue('');
+      setDropDownValue1('');
+    });
     // navigation.goBack();
   };
   const closePickup11 = () => {
@@ -286,7 +305,7 @@ const NewSellerSelection = ({ route }) => {
   const sync11 = () => {
     loadSellerPickupDetails();
   };
-
+ 
   const loadSellerPickupDetails = async () => {
     // setAcc(1);
     //     setPending(1);
@@ -1108,20 +1127,7 @@ const NewSellerSelection = ({ route }) => {
                           size="sm"
                         />
                       }
-                      onPress={() => {setModalVisible(true);
-                        GetLocation.getCurrentPosition({
-                          enableHighAccuracy: true,
-                          timeout: 10000,
-                        })
-                          .then((location) => {
-                            setLatitude(location.latitude);
-                            setLongitude(location.longitude);
-                          })
-                          .catch((error) => {
-                            ToastAndroid.show("Plz enable location",ToastAndroid.SHORT);
-                            console.log("Location Lat long error", error);
-                          });
-                        }}
+                      onPress={() => setModalVisible(true)}
                       style={[
                         { backgroundColor: "#004aad", width: "48%" },
                         pending !== route.params.Forward && {
