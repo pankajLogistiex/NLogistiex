@@ -188,7 +188,7 @@ const NewSellerSelection = ({ route }) => {
             (tx1, results) => {
               if (results.rowsAffected > 0) {
                 console.log("otp status updated  in seller table ");
-                navigation.goBack();
+                navigation.navigate(NewSellerPickup);
                 // loadSellerPickupDetails();
               } else {
                 console.log("opt status not updated in local table");

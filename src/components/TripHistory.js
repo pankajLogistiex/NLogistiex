@@ -343,7 +343,7 @@ useEffect(() => {
                       marginRight: 5,
                     }}
                   />
-                  <Text style={{ color: 'white',fontWeight:'bold' }}>End Trip</Text>
+                  <Text style={{ color: 'white',fontWeight:'bold' }}>{route.params.tripValue}</Text>
                   </View>
               </Button>
             </VStack>

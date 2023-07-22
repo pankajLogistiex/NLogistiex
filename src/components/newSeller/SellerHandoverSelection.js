@@ -183,7 +183,7 @@ const SellerHandoverSelection = ({ route }) => {
             (tx1, results) => {
               if (results.rowsAffected > 0) {
                 console.log('otp status updated seller delivery in seller table ');
-                navigation.goBack();
+                navigation.navigate(SellerDeliveries);
                 // loadSellerPickupDetails();
               } else {
                 console.log('opt status not updated in seller delivery in local table');
