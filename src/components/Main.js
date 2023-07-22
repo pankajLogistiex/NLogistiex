@@ -201,11 +201,9 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   };
 
   useEffect(() => {
-    if (tripID) {
-      loadSellerPickupDetails();
-      loadHanoverDetails();
-      loadSellerDeliveryDetails();
-    }  
+    loadSellerPickupDetails();
+    loadHanoverDetails();
+    loadSellerDeliveryDetails();
     loadtripdetails();
     fetchTripInfo();
   }, [isNewSync, syncTimeFull, tripID]);
