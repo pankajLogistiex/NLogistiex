@@ -79,7 +79,86 @@ const NotPicked = ({route}) => {
           console.log('Location Lat long error', error);
         });
     };
+    const notPicked = async () => {
+      AsyncStorage.setItem("refresh11", "refresh");
+      const deviceId= await DeviceInfo.getUniqueId();
+      const IpAddress= await DeviceInfo.getIpAddress();
+      // console.log(latitude);
+      console.log("***Attempt Failed")
   
+      GetLocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 10000,
+      })
+        .then((location) => {
+          setLatitude(location.latitude);
+          setLongitude(location.longitude);
+  
+      axios
+        .post(backendUrl + "SellerMainScreen/attemptFailed", {
+          consignorCode: route.params.consignorCode,
+          rejectionReason: rejectionCode,
+          feUserID: route.params.userId,
+          latitude: parseFloat(location.latitude),
+          longitude: parseFloat(location.longitude),
+          eventTime: new Date().valueOf(),
+          rejectionStage: "SLPF",
+          stopId:route.params.stopId,
+          tripID:route.params.tripId,
+          deviceId: deviceId,
+          deviceIPaddress: IpAddress,
+        })
+        .then(function (response) {
+          console.log(response.data);
+          db.transaction((tx) => {
+            tx.executeSql(
+              'UPDATE SyncSellerPickUp  SET otpSubmitted="true" WHERE stopId=? AND FMtripId=?',
+              [route.params.stopId, route.params.tripId],
+              (tx1, results) => {
+                if (results.rowsAffected > 0) {
+                  console.log("otp status updated  in seller table ");
+                  navigation.navigate('PendingWork')
+                } else {
+                  console.log("opt status not updated in local table");
+                }
+              }
+            );
+          });
+          db.transaction((tx) => {
+            tx.executeSql(
+              'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=?, postRDStatus="true"  WHERE shipmentAction="Seller Pickup" AND status IS Null AND stopId=? AND FMtripId=?',
+              [
+                rejectionCode,
+                new Date().valueOf(),
+                location.latitude,
+                location.longitude,
+                route.params.stopId,
+                route.params.tripId
+              ],
+              (tx1, results) => {
+                let temp = [];
+                console.log(results.rows.length);
+                for (let i = 0; i < results.rows.length; ++i) {
+                  temp.push(results.rows.item(i));
+                }
+              }
+            );
+          });
+        })
+        .catch(function (error) {
+          console.log(error);
+          // navigation.goBack();
+        });
+  
+      })
+      .catch((error) => {
+        ToastAndroid.show("Turn on device location ",ToastAndroid.SHORT);
+        console.log("Location Lat long error", error);
+        setDropDownValue('');
+        setDropDownValue1('');
+      });
+      // navigation.goBack();
+    };
     const DisplayData = async () => {
       closePickup11();
     };
@@ -99,67 +178,6 @@ const NotPicked = ({route}) => {
       NotAttemptReasons11();
     };
     
-    const notPicked = async () => {
-      AsyncStorage.setItem('refresh11', 'refresh');
-      const deviceId= await DeviceInfo.getUniqueId();
-      const IpAddress= await DeviceInfo.getIpAddress();
-      axios
-        .post(backendUrl + 'SellerMainScreen/attemptFailed', {
-          consignorCode: route.params.consignorCode,
-          rejectionReason: rejectionCode,
-          feUserID: route.params.userId,
-          latitude: parseFloat(latitude),
-          longitude: parseFloat(longitude),
-          eventTime: new Date().valueOf(),
-          rejectionStage: "SLPF",
-          stopId:route.params.stopId,
-          tripID:route.params.tripId,
-          deviceId: deviceId,
-          deviceIPaddress: IpAddress,
-        })
-        .then(function (response) {
-          console.log(response.data);
-          db.transaction(tx => {
-            tx.executeSql(
-              'UPDATE SyncSellerPickUp  SET otpSubmitted="true" WHERE stopId=? ',
-              [route.params.stopId],
-              (tx1, results) => {
-                if (results.rowsAffected > 0) {
-                  console.log('otp status updated  in seller table ');
-                } else {
-                  console.log('opt status not updated in local table');
-                }
-              },
-            );
-          });
-          db.transaction(tx => {
-            tx.executeSql(
-              'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=?, postRDStatus="true" WHERE shipmentAction="Seller Pickup" AND status IS Null And stopId=?',
-              [
-                rejectionCode,
-                new Date().valueOf(),
-                latitude,
-                longitude,
-                route.params.stopId,
-              ],
-              (tx1, results) => {
-                let temp = [];
-                console.log(results.rows.length);
-                for (let i = 0; i < results.rows.length; ++i) {
-                  temp.push(results.rows.item(i));
-                }
-              },
-            );
-          });
-          setMessage('Successfully submitted');
-          setStatus('success');
-        })
-        .catch(function (error) {
-          console.log(error);
-          setMessage('Submission failed');
-          setStatus('error');
-        });
-    };
     const NotAttemptReasons11 = () => {
       db.transaction(tx => {
         tx.executeSql('SELECT * FROM NotAttemptReasons', [], (tx1, results) => {
@@ -223,7 +241,6 @@ const NotPicked = ({route}) => {
             if (response.data.return) {
               setInputOtp('');
               notPicked();
-              navigation.navigate('PendingWork');
               setModalVisible3(false);
               setShowModal11(false)
           }
@@ -287,7 +304,6 @@ return (
                         setModalVisible(false);
                       }else{
                         notPicked();
-                        navigation.navigate('PendingWork');
                       }
                     }
                   }}>
@@ -342,7 +358,7 @@ return (
                         setModalVisible3(true);
                         setModalVisible2(false);
                       }else{ notPicked();
-                        navigation.navigate('PendingWork');}
+                        }
                     }
                   }}>
                   Submit

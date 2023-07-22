@@ -193,7 +193,7 @@ function StackNavigators({navigation}) {
       .then((response) => {
         console.log("Msg Accepted ", response.data,'',userId);
         dispatch(setNotificationCount(notificationCount - 1));
-        dispatch(setForceSync(false));
+        dispatch(setForceSync(true));
         const updatedData = dataN.filter(item => item.consignorCode !== consignorCodeAccept);
         setDataN(updatedData);
         dispatch(setAdditionalWorkloadData(updatedData));

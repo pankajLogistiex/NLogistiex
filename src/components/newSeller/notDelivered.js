@@ -87,58 +87,75 @@ const NotDelivered = ({route}) => {
       closeDelivery();
     };
     const NotDelivered = async () => {
-      AsyncStorage.setItem('refresh11', 'refresh');
-      const deviceId= await DeviceInfo.getUniqueId();
-    const IpAddress=  await DeviceInfo.getIpAddress();
-      
-      axios
-        .post(backendUrl + 'SellerMainScreen/attemptFailed', {
-          consignorCode: route.params.consignorCode,
-          rejectionReason: rejectionCode,
-          feUserID: route.params.userId,
-          latitude: parseFloat(latitude),
-          longitude: parseFloat(longitude),
-          eventTime: new Date().valueOf(),
-          rejectionStage: "SLDF",
-          stopId:route.params.stopId,
-          tripID: route.params.tripId,
-          deviceId: deviceId,
-          deviceIPaddress: IpAddress,
-        })
-        .then(function (response) {
-          console.log(response.data);
-          db.transaction(tx => {
-            tx.executeSql(
-              'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND stopId=?',
-              [new Date().valueOf(), latitude, longitude, rejectionCode, route.params.stopId],
-              (tx1, results) => {
-                let temp = [];
-                console.log(results.rows.length);
-                for (let i = 0; i < results.rows.length; ++i) {
-                  temp.push(results.rows.item(i));
-                }
-              },
-            );
-          });
-    
-          db.transaction(tx => {
-            tx.executeSql(
-              'UPDATE SyncSellerPickUp  SET otpSubmittedDelivery="true" WHERE stopId=? ',
-              [route.params.stopId],
-              (tx1, results) => {
-                if (results.rowsAffected > 0) {
-                  console.log('otp status updated seller delivery in seller table ');
-                } else {
-                  console.log('opt status not updated in seller delivery in local table');
-                }
-              },
-            );
-          });
-      
-        })
-        .catch(function (error) {
-          console.log(error);
+    AsyncStorage.setItem('refresh11', 'refresh');
+    const deviceId= await DeviceInfo.getUniqueId();
+    const IpAddress= await DeviceInfo.getIpAddress();
+    GetLocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 10000,
+    })
+      .then((location) => {
+        setLatitude(location.latitude);
+        setLongitude(location.longitude);
+
+    axios
+      .post(backendUrl + 'SellerMainScreen/attemptFailed', {
+        consignorCode: route.params.consignorCode,
+        rejectionReason: rejectionCode,
+        feUserID: route.params.userId,
+        latitude: parseFloat(location.latitude),
+        longitude: parseFloat(location.longitude),
+        eventTime: new Date().valueOf(),
+        rejectionStage: "SLDF",
+        stopId: route.params.stopId,
+        tripID: route.params.tripId,
+        deviceId: deviceId,
+        deviceIPaddress: IpAddress,
+      })
+      .then(function (response) {
+        console.log(response.data);
+        db.transaction(tx => {
+          tx.executeSql(
+            'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND stopId=? AND FMtripId=?',
+            [new Date().valueOf(), location.latitude, location.longitude, rejectionCode, route.params.stopId, route.params.tripId],
+            (tx1, results) => {
+              let temp = [];
+              console.log(results.rows.length);
+              for (let i = 0; i < results.rows.length; ++i) {
+                temp.push(results.rows.item(i));
+              }
+            },
+          );
         });
+        
+        db.transaction(tx => {
+          tx.executeSql(
+            'UPDATE SyncSellerPickUp  SET otpSubmittedDelivery="true" WHERE stopId=? AND FMtripId=? ',
+            [route.params.stopId, route.params.tripId],
+            (tx1, results) => {
+              if (results.rowsAffected > 0) {
+                console.log('otp status updated seller delivery in seller table ');
+                navigation.navigate('PendingWork');
+                // loadSellerPickupDetails();
+              } else {
+                console.log('opt status not updated in seller delivery in local table');
+              }
+            },
+          );
+        });
+        setMessage('Successfully submitted');
+        setStatus('success');
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  })
+    .catch((error) => {
+      ToastAndroid.show("Turn on device location",ToastAndroid.SHORT);
+      console.log("Location Lat long error", error);
+      setDropDownValue('');
+      setDropDownValue1('');
+    });
       };
     const closeDelivery = () => {
       db.transaction(tx => {
@@ -284,7 +301,7 @@ return (
                         setModalVisible3(true);
                         setModalVisible(false);
                       }else{ NotDelivered();
-                        navigation.navigate('PendingWork');}
+                        }
                     }
                   }}>
                   Submit
@@ -340,7 +357,6 @@ return (
                       }
                       else{
                         NotDelivered();
-                        navigation.navigate('PendingWork');
                       }
                     }
                   }}>

@@ -72,7 +72,7 @@ export default function Additional_workload() {
       .then((response) => {
         console.log("Msg Accepted ", response.data,'',userId);
         dispatch(setNotificationCount(notificationCount - 1));
-        dispatch(setForceSync(false));
+        dispatch(setForceSync(true));
         const updatedData = data.filter(item => item.consignorCode !== consignorCodeAccept);
         setData(updatedData);
         dispatch(setAdditionalWorkloadData(updatedData));
