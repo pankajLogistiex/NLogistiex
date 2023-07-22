@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import "react-native-gesture-handler";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { store } from "./src/redux/store";
-import { useRoute } from '@react-navigation/native';
+import { useRoute } from "@react-navigation/native";
 import RNAndroidLocationEnabler from "react-native-android-location-enabler";
 
 import {
@@ -20,7 +20,7 @@ import {
   Center,
   VStack,
   Modal,
-  HStack
+  HStack,
 } from "native-base";
 import MaterialIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import Icon from "react-native-vector-icons/FontAwesome";
@@ -80,7 +80,7 @@ import HandoverShipmentRTO from "./src/components/newSeller/HandoverShipmentRTO"
 import { LogBox } from "react-native";
 import MyTrip from "./src/components/MyTrip";
 import TripHistory from "./src/components/TripHistory";
-import TripSummary from "./src/components/TripSummary"
+import TripSummary from "./src/components/TripSummary";
 import { backendUrl } from "./src/utils/backendUrl";
 import messaging from "@react-native-firebase/messaging";
 import { setIsNewSync } from "./src/redux/slice/isNewSync";
@@ -103,17 +103,17 @@ import {
   setSyncTime,
   setSyncTimeFull,
 } from "./src/redux/slice/autoSyncSlice";
-import DeviceInfo from 'react-native-device-info';
-import * as RNLocalize from 'react-native-localize';
+import DeviceInfo from "react-native-device-info";
+import * as RNLocalize from "react-native-localize";
 import Mixpanel from "react-native-mixpanel";
-import GetLocation from 'react-native-get-location';
+import GetLocation from "react-native-get-location";
 import { callApi } from "./src/components/ApiError";
 const db = openDatabase({ name: "rn_sqlite" });
 
 const Stack = createStackNavigator();
 const Drawer = createDrawerNavigator();
- 
-function StackNavigators({navigation}) {
+
+function StackNavigators({ navigation }) {
   const dispatch = useDispatch();
 
   const userId = useSelector((state) => state.user.user_id);
@@ -126,9 +126,13 @@ function StackNavigators({navigation}) {
     (state) => state.autoSync.isAutoSyncEnable
   );
 
-  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
-  const deviceInfo= useSelector((state) => state.deviceInfo.currentDeviceInfo);
-  const additionalWorkloadInfo11= useSelector((state) => state.additionalWorkloadInfo.currentAdditionalWorkloadInfo);
+  const currentDateValue =
+    useSelector((state) => state.currentDate.currentDateValue) ||
+    new Date().toISOString().split("T")[0];
+  const deviceInfo = useSelector((state) => state.deviceInfo.currentDeviceInfo);
+  const additionalWorkloadInfo11 = useSelector(
+    (state) => state.additionalWorkloadInfo.currentAdditionalWorkloadInfo
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState([]);
   const [isLogin, setIsLogin] = useState(false);
@@ -136,7 +140,7 @@ function StackNavigators({navigation}) {
   const [isMixPanelInit, setIsMixPanelInit] = useState(false);
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
-  const [tripID, setTripID] = useState('');
+  const [tripID, setTripID] = useState("");
   const [showModal11, setShowModal11] = useState(false);
   const [dataN, setDataN] = useState([]);
   // console.log(additionalWorkloadInfo11);
@@ -147,26 +151,29 @@ function StackNavigators({navigation}) {
         console.log(userId);
         const fetchData = async () => {
           try {
-            const response = await axios.get(`${backendUrl}SellerMainScreen/getadditionalwork/${userId}`);
+            const response = await axios.get(
+              `${backendUrl}SellerMainScreen/getadditionalwork/${userId}`
+            );
             const responseData = response?.data?.data;
             setDataN(responseData);
             dispatch(setAdditionalWorkloadData(responseData));
-            console.log('Additional Workload API Data:', response.data.data.length);
+            console.log(
+              "Additional Workload API Data:",
+              response.data.data.length
+            );
             setShowModal11(responseData && responseData.length > 0);
           } catch (error) {
             console.log("Error Msg11:", error);
           }
         };
-        fetchData(); 
-
-        const pollingInterval = 20000;
-        const intervalId = setInterval(fetchData, pollingInterval);
-        return () => {
-          clearInterval(intervalId);
-        };
-
+        fetchData();
+        // const pollingInterval = 20000;
+        // const intervalId = setInterval(fetchData, pollingInterval);
+        // return () => {
+        //   clearInterval(intervalId);
+        // };
       } catch (error) {
-        console.log('Error Msg1:', error);
+        console.log("Error Msg1:", error);
       }
     }
   };
@@ -176,49 +183,29 @@ function StackNavigators({navigation}) {
   useEffect(() => {
     setShowModal11(dataN && dataN.length > 0);
   }, [userId, setShowModal11]);
- 
+
   const AcceptHandler = async (consignorCodeAccept, stopId, tripId) => {
     // console.log('df')
-    console.log({consignorCode: consignorCodeAccept,
+    console.log({
+      consignorCode: consignorCodeAccept,
       feUserId: userId,
       stopId: stopId,
-      tripID: tripId})
+      tripID: tripId,
+    });
     axios
       .post(backendUrl + "SellerMainScreen/acceptWorkLoad", {
         consignorCode: consignorCodeAccept,
         feUserId: userId,
         stopId: stopId,
-        tripID: tripId
+        tripID: tripId,
       })
       .then((response) => {
-        console.log("Msg Accepted ", response.data,'',userId);
+        console.log("Msg Accepted ", response.data, "", userId);
         dispatch(setNotificationCount(notificationCount - 1));
         dispatch(setForceSync(true));
-        const updatedData = dataN.filter(item => item.consignorCode !== consignorCodeAccept);
-        setDataN(updatedData);
-        dispatch(setAdditionalWorkloadData(updatedData));
-        if (updatedData.length == 0) {
-          setShowModal11(false);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }; 
-
-  const RejectHandler = async (consignorCodeReject, stopId, tripId) => {
-    console.log('REJECT ')
-    axios
-      .post(backendUrl + "SellerMainScreen/rejectWorkLoad", {
-        consignorCode: consignorCodeReject,
-        feUserId: userId,
-        stopId:stopId,
-        tripID:tripId
-      })
-      .then((response) => {
-        console.log("Msg Rejected ", response.data);
-        dispatch(setNotificationCount(notificationCount - 1));
-        const updatedData = dataN.filter(item => item.consignorCode !== consignorCodeReject);
+        const updatedData = dataN.filter(
+          (item) => item.consignorCode !== consignorCodeAccept
+        );
         setDataN(updatedData);
         dispatch(setAdditionalWorkloadData(updatedData));
         if (updatedData.length == 0) {
@@ -229,7 +216,33 @@ function StackNavigators({navigation}) {
         console.log(error);
       });
   };
- 
+
+  const RejectHandler = async (consignorCodeReject, stopId, tripId) => {
+    console.log("REJECT ");
+    axios
+      .post(backendUrl + "SellerMainScreen/rejectWorkLoad", {
+        consignorCode: consignorCodeReject,
+        feUserId: userId,
+        stopId: stopId,
+        tripID: tripId,
+      })
+      .then((response) => {
+        console.log("Msg Rejected ", response.data);
+        dispatch(setNotificationCount(notificationCount - 1));
+        const updatedData = dataN.filter(
+          (item) => item.consignorCode !== consignorCodeReject
+        );
+        setDataN(updatedData);
+        dispatch(setAdditionalWorkloadData(updatedData));
+        if (updatedData.length == 0) {
+          setShowModal11(false);
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   let m = 0;
   // console.log(latitude," " ,longitude);
   useEffect(() => {
@@ -241,11 +254,11 @@ function StackNavigators({navigation}) {
       enableHighAccuracy: true,
       timeout: 10000,
     })
-      .then(location => {
+      .then((location) => {
         setLatitude(location.latitude);
         setLongitude(location.longitude);
       })
-      .catch(error => {
+      .catch((error) => {
         // RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
         //   interval: 10000,
         //   fastInterval: 5000,
@@ -258,7 +271,7 @@ function StackNavigators({navigation}) {
         //   .catch(err => {
         //     console.log(err);
         //   });
-        console.log('Location Lat long error', error);
+        console.log("Location Lat long error", error);
       });
   };
   useEffect(() => {
@@ -339,287 +352,279 @@ function StackNavigators({navigation}) {
     });
   };
 
+  // console.log("Redux deviceInfo Value ",deviceInfo);
+  useEffect(() => {
+    fetchDeviceInfo();
+  }, []);
 
-// console.log("Redux deviceInfo Value ",deviceInfo);
-useEffect(() => {
-  fetchDeviceInfo();
-}, []);
+  const fetchDeviceInfo = async () => {
+    try {
+      const uniqueId = await getUniqueIdWithCatch();
+      const manufacturer = await getManufacturerWithCatch();
+      const modelName = await getModelWithCatch();
+      const brand = await getBrandWithCatch();
+      const systemName = await getSystemNameWithCatch();
+      const systemVersion = await getSystemVersionWithCatch();
+      const bundleId = await getBundleIdWithCatch();
+      const buildNumber = await getBuildNumberWithCatch();
+      const version = await getVersionWithCatch();
+      // const buildNumberIOS = await getBuildNumberIOSWithCatch();
+      const installReferrer = await getInstallReferrerWithCatch();
+      const ipAddress = await getIpAddressWithCatch();
+      const macAddress = await getMacAddressWithCatch();
+      const locale = await getLocaleWithCatch();
+      const country = await getCountryWithCatch();
+      const timezone = await getTimezoneWithCatch();
+      const RamUsage = await getRAMUsagePercentage();
+      const DiskUsage = await getDiskUtilizationPercentage();
+      const SignalStrength = await getSignalStrength();
+      const deviceType = await getDeviceType();
+      // const device= await fetchDeviceType();
+      const deviceInfoData = {
+        uniqueId,
+        manufacturer,
+        modelName,
+        brand,
+        systemName,
+        systemVersion,
+        bundleId,
+        buildNumber,
+        version,
+        // buildNumberIOS,
+        installReferrer,
+        ipAddress,
+        macAddress,
+        locale,
+        country,
+        timezone,
+        RamUsage,
+        DiskUsage,
+        SignalStrength,
+        deviceType,
+        // device,
+      };
 
-const fetchDeviceInfo = async () => {
-  try {
-    const uniqueId = await getUniqueIdWithCatch();
-    const manufacturer = await getManufacturerWithCatch();
-    const modelName = await getModelWithCatch();
-    const brand = await getBrandWithCatch();
-    const systemName = await getSystemNameWithCatch();
-    const systemVersion = await getSystemVersionWithCatch();
-    const bundleId = await getBundleIdWithCatch();
-    const buildNumber = await getBuildNumberWithCatch();
-    const version = await getVersionWithCatch();
-    // const buildNumberIOS = await getBuildNumberIOSWithCatch();
-    const installReferrer = await getInstallReferrerWithCatch();
-    const ipAddress = await getIpAddressWithCatch();
-    const macAddress = await getMacAddressWithCatch();
-    const locale = await getLocaleWithCatch();
-    const country = await getCountryWithCatch();
-    const timezone = await getTimezoneWithCatch();
-    const RamUsage=await getRAMUsagePercentage();
-    const DiskUsage =await getDiskUtilizationPercentage();
-    const SignalStrength= await getSignalStrength();
-    const deviceType =await getDeviceType();
-    // const device= await fetchDeviceType();
-    const deviceInfoData = {
-      uniqueId,
-      manufacturer,
-      modelName,
-      brand,
-      systemName,
-      systemVersion,
-      bundleId,
-      buildNumber,
-      version,
-      // buildNumberIOS,
-      installReferrer,
-      ipAddress,
-      macAddress,
-      locale,
-      country,
-      timezone,
-      RamUsage,
-      DiskUsage,
-      SignalStrength,
-      deviceType,
-      // device,
-    };
-
-    // setDeviceInfo(deviceInfoData);
-    console.log(deviceInfoData);
-    dispatch(setCurrentDeviceInfo(deviceInfoData));
-  } catch (error) {
-    console.error('Error fetching device information:', error);
-  }
-};
-
-const getUniqueIdWithCatch = async () => {
-  try {
-    return await DeviceInfo.getUniqueId();
-  } catch (error) {
-    console.error('Error getting unique ID:', error);
-    return null;
-  }
-};
-
-// const fetchDeviceType = async () => {
-//   const isTablet = await DeviceInfo.isTablet();
-//   const isMobile = !isTablet;
-
-//   if (isTablet) {
-//     return 'Tablet';
-//   } else if (isMobile) {
-//     return 'Mobile';
-//   } 
-// };
-
-const getDeviceType = async () => {
-  try {
-    return await DeviceInfo.getDeviceType();
-  } catch (error) {
-    console.error('Error getting Device Type:', error);
-    return null;
-  }
-};
-
-
-const getManufacturerWithCatch = async () => {
-  try {
-    return await DeviceInfo.getManufacturer();
-  } catch (error) {
-    console.error('Error getting manufacturer:', error);
-    return null;
-  }
-};
-
-const getModelWithCatch = async () => {
-  try {
-    return await DeviceInfo.getModel();
-  } catch (error) {
-    console.error('Error getting model:', error);
-    return null;
-  }
-};
-
-const getBrandWithCatch = async () => {
-  try {
-    return await DeviceInfo.getBrand();
-  } catch (error) {
-    console.error('Error getting brand:', error);
-    return null;
-  }
-};
-
-const getSystemNameWithCatch = async () => {
-  try {
-    return await DeviceInfo.getSystemName();
-  } catch (error) {
-    console.error('Error getting system name:', error);
-    return null;
-  }
-};
-
-const getSystemVersionWithCatch = async () => {
-  try {
-    return await DeviceInfo.getSystemVersion();
-  } catch (error) {
-    console.error('Error getting system version:', error);
-    return null;
-  }
-};
-
-const getBundleIdWithCatch = async () => {
-  try {
-    return await DeviceInfo.getBundleId();
-  } catch (error) {
-    console.error('Error getting bundle ID:', error);
-    return null;
-  }
-};
-
-const getBuildNumberWithCatch = async () => {
-  try {
-    return await DeviceInfo.getBuildNumber();
-  } catch (error) {
-    console.error('Error getting build number:', error);
-    return null;
-  }
-};
-
-const getVersionWithCatch = async () => {
-  try {
-    return await DeviceInfo.getVersion();
-  } catch (error) {
-    console.error('Error getting version:', error);
-    return null;
-  }
-};
-
-const getBuildNumberIOSWithCatch = async () => {
-  try {
-    return await DeviceInfo.getBuildNumber();
-  } catch (error) {
-    console.error('Error getting iOS build number:', error);
-    return null;
-  }
-};
-
-const getInstallReferrerWithCatch = async () => {
-  try {
-    return await DeviceInfo.getInstallReferrer();
-  } catch (error) {
-    console.error('Error getting install referrer:', error);
-    return null;
-  }
-};
-
-const getIpAddressWithCatch = async () => {
-  try {
-    return await DeviceInfo.getIpAddress();
-  } catch (error) {
-    console.error('Error getting IP address:', error);
-    return null;
-  }
-};
-
-
-const getRAMUsagePercentage= async () =>  {
-  try {
-    const totalMemory = await DeviceInfo.getTotalMemory();
-    const usedMemory = await DeviceInfo.getUsedMemory();
-
-    if (totalMemory === 0) {
-      throw new Error('Invalid total memory value');
+      // setDeviceInfo(deviceInfoData);
+      console.log(deviceInfoData);
+      dispatch(setCurrentDeviceInfo(deviceInfoData));
+    } catch (error) {
+      console.error("Error fetching device information:", error);
     }
+  };
 
-    const ramUsagePercentage = Math.floor((usedMemory / totalMemory) * 100);
-
-    if (isNaN(ramUsagePercentage)) {
-      throw new Error('Invalid RAM usage calculation');
+  const getUniqueIdWithCatch = async () => {
+    try {
+      return await DeviceInfo.getUniqueId();
+    } catch (error) {
+      console.error("Error getting unique ID:", error);
+      return null;
     }
+  };
 
-    return ramUsagePercentage;
-  } catch (error) {
-    console.log('Error occurred while calculating RAM usage:', error);
-    return 0; // Default value or error handling logic
-  }
-}
+  // const fetchDeviceType = async () => {
+  //   const isTablet = await DeviceInfo.isTablet();
+  //   const isMobile = !isTablet;
 
-const getDiskUtilizationPercentage= async () => {
-  try {
-    const diskSpace = await DeviceInfo.getFreeDiskStorage();
-const totalSpace=await DeviceInfo.getTotalDiskCapacity();
-    const diskUsagePercentage =  Math.floor(
-      ((totalSpace-diskSpace) / totalSpace) * 100
-    );
+  //   if (isTablet) {
+  //     return 'Tablet';
+  //   } else if (isMobile) {
+  //     return 'Mobile';
+  //   }
+  // };
 
-    if (isNaN(diskUsagePercentage)) {
-      throw new Error('Invalid disk utilization calculation');
+  const getDeviceType = async () => {
+    try {
+      return await DeviceInfo.getDeviceType();
+    } catch (error) {
+      console.error("Error getting Device Type:", error);
+      return null;
     }
+  };
 
-    return diskUsagePercentage;
-  } catch (error) {
-    console.log('Error occurred while calculating disk utilization:', error);
-    return 0; // Default value or error handling logic
-  }
-}
+  const getManufacturerWithCatch = async () => {
+    try {
+      return await DeviceInfo.getManufacturer();
+    } catch (error) {
+      console.error("Error getting manufacturer:", error);
+      return null;
+    }
+  };
 
-const getSignalStrength = async () => {
-  try {
-    return (await NetInfo.fetch()).details?.strength;
-  } catch (error) {
-    console.log('Error getting Signal Strength:', error);
-    return null;
-  }
-};
+  const getModelWithCatch = async () => {
+    try {
+      return await DeviceInfo.getModel();
+    } catch (error) {
+      console.error("Error getting model:", error);
+      return null;
+    }
+  };
 
-const getMacAddressWithCatch = async () => {
-  try {
-    return await DeviceInfo.getMacAddress();
-  } catch (error) {
-    console.log('Error getting MAC address:', error);
-    return null;
-  }
-};
+  const getBrandWithCatch = async () => {
+    try {
+      return await DeviceInfo.getBrand();
+    } catch (error) {
+      console.error("Error getting brand:", error);
+      return null;
+    }
+  };
 
-const getLocaleWithCatch = async () => {
-  try {
-    return await RNLocalize.getLocales()[0].languageCode;
-  } catch (error) {
-    console.error('Error getting locale:', error);
-    return null;
-  }
-};
+  const getSystemNameWithCatch = async () => {
+    try {
+      return await DeviceInfo.getSystemName();
+    } catch (error) {
+      console.error("Error getting system name:", error);
+      return null;
+    }
+  };
 
-const getCountryWithCatch = async () => {
-  try {
-    return await RNLocalize.getLocales()[0].countryCode;
-  } catch (error) {
-    console.error('Error getting country:', error);
-    return null;
-  }
-};
+  const getSystemVersionWithCatch = async () => {
+    try {
+      return await DeviceInfo.getSystemVersion();
+    } catch (error) {
+      console.error("Error getting system version:", error);
+      return null;
+    }
+  };
 
+  const getBundleIdWithCatch = async () => {
+    try {
+      return await DeviceInfo.getBundleId();
+    } catch (error) {
+      console.error("Error getting bundle ID:", error);
+      return null;
+    }
+  };
 
-const getTimezoneWithCatch = async () => {
-  try {
-    return await RNLocalize.getTimeZone();
-  } catch (error) {
-    console.error('Error getting timezone:', error);
-    return null;
-  }
-};
+  const getBuildNumberWithCatch = async () => {
+    try {
+      return await DeviceInfo.getBuildNumber();
+    } catch (error) {
+      console.error("Error getting build number:", error);
+      return null;
+    }
+  };
 
+  const getVersionWithCatch = async () => {
+    try {
+      return await DeviceInfo.getVersion();
+    } catch (error) {
+      console.error("Error getting version:", error);
+      return null;
+    }
+  };
 
+  const getBuildNumberIOSWithCatch = async () => {
+    try {
+      return await DeviceInfo.getBuildNumber();
+    } catch (error) {
+      console.error("Error getting iOS build number:", error);
+      return null;
+    }
+  };
 
+  const getInstallReferrerWithCatch = async () => {
+    try {
+      return await DeviceInfo.getInstallReferrer();
+    } catch (error) {
+      console.error("Error getting install referrer:", error);
+      return null;
+    }
+  };
 
+  const getIpAddressWithCatch = async () => {
+    try {
+      return await DeviceInfo.getIpAddress();
+    } catch (error) {
+      console.error("Error getting IP address:", error);
+      return null;
+    }
+  };
+
+  const getRAMUsagePercentage = async () => {
+    try {
+      const totalMemory = await DeviceInfo.getTotalMemory();
+      const usedMemory = await DeviceInfo.getUsedMemory();
+
+      if (totalMemory === 0) {
+        throw new Error("Invalid total memory value");
+      }
+
+      const ramUsagePercentage = Math.floor((usedMemory / totalMemory) * 100);
+
+      if (isNaN(ramUsagePercentage)) {
+        throw new Error("Invalid RAM usage calculation");
+      }
+
+      return ramUsagePercentage;
+    } catch (error) {
+      console.log("Error occurred while calculating RAM usage:", error);
+      return 0; // Default value or error handling logic
+    }
+  };
+
+  const getDiskUtilizationPercentage = async () => {
+    try {
+      const diskSpace = await DeviceInfo.getFreeDiskStorage();
+      const totalSpace = await DeviceInfo.getTotalDiskCapacity();
+      const diskUsagePercentage = Math.floor(
+        ((totalSpace - diskSpace) / totalSpace) * 100
+      );
+
+      if (isNaN(diskUsagePercentage)) {
+        throw new Error("Invalid disk utilization calculation");
+      }
+
+      return diskUsagePercentage;
+    } catch (error) {
+      console.log("Error occurred while calculating disk utilization:", error);
+      return 0; // Default value or error handling logic
+    }
+  };
+
+  const getSignalStrength = async () => {
+    try {
+      return (await NetInfo.fetch()).details?.strength;
+    } catch (error) {
+      console.log("Error getting Signal Strength:", error);
+      return null;
+    }
+  };
+
+  const getMacAddressWithCatch = async () => {
+    try {
+      return await DeviceInfo.getMacAddress();
+    } catch (error) {
+      console.log("Error getting MAC address:", error);
+      return null;
+    }
+  };
+
+  const getLocaleWithCatch = async () => {
+    try {
+      return await RNLocalize.getLocales()[0].languageCode;
+    } catch (error) {
+      console.error("Error getting locale:", error);
+      return null;
+    }
+  };
+
+  const getCountryWithCatch = async () => {
+    try {
+      return await RNLocalize.getLocales()[0].countryCode;
+    } catch (error) {
+      console.error("Error getting country:", error);
+      return null;
+    }
+  };
+
+  const getTimezoneWithCatch = async () => {
+    try {
+      return await RNLocalize.getTimeZone();
+    } catch (error) {
+      console.error("Error getting timezone:", error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     if (userId) {
@@ -633,6 +638,7 @@ const getTimezoneWithCatch = async () => {
 
       const timer = BackgroundTimer.runBackgroundTimer(() => {
         if (isAutoSyncEnable) {
+          loadAPI_3();
           push_Data();
           if (isMixPanelInit) {
             Mixpanel.trackWithProperties("Auto sync called", {
@@ -652,6 +658,7 @@ const getTimezoneWithCatch = async () => {
 
   useEffect(() => {
     if (forceSync) {
+      loadAPI_3();
       push_Data();
       if (isMixPanelInit) {
         Mixpanel.trackWithProperties("Force sync called", {
@@ -664,6 +671,7 @@ const getTimezoneWithCatch = async () => {
   }, [forceSync]);
 
   useEffect(() => {
+    loadAPI_3();
     pull_API_Data();
   }, [userId, tripID]);
 
@@ -735,7 +743,7 @@ const getTimezoneWithCatch = async () => {
   function NotificationCountIncrease() {
     // dispatch(setNotificationCount(5));
     // dispatch(setNotificationCount(useSelector((state) => state.notification.count) + 1));
-  }  
+  }
 
   const handleIncomingMessage = async (message) => {
     console.log(message);
@@ -749,41 +757,40 @@ const getTimezoneWithCatch = async () => {
     console.log(formattedTime, notification);
 
     db.transaction((tx) => {
+      const messageRegex = /.*?- (.+?) \(/;
+      const messageMatch = notification.body.match(messageRegex);
+      const message = messageMatch ? messageMatch[1] : null;
 
-const messageRegex = /.*?- (.+?) \(/;
-const messageMatch = notification.body.match(messageRegex);
-const message = messageMatch ? messageMatch[1] : null;
+      const sellerNameRegex = /- (.+?) \(/;
+      const sellerNameMatch = notification.body.match(sellerNameRegex);
+      const sellerName = sellerNameMatch ? sellerNameMatch[1] : null;
 
-const sellerNameRegex = /- (.+?) \(/;
-const sellerNameMatch = notification.body.match(sellerNameRegex);
-const sellerName = sellerNameMatch ? sellerNameMatch[1] : null;
-
-const sellerCodeRegex = /\( (.+?) \)/;
-const sellerCodeMatch = notification.body.match(sellerCodeRegex);
-const sellerCode = sellerCodeMatch ? sellerCodeMatch[1] : null;
-console.log(message,  " ",sellerName, " ", " ", sellerCode );
-tx.executeSql(
-  "INSERT INTO noticeMessages (messageId, notificationTitle, notificationBody, date, sentTime, message, sellerName, sellerCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-  [
-    messageId,
-    notification.title,
-    notification.body,
-    sendDate,
-    formattedTime.toString(),
-    notification.body.match(/^(.*?) -/)?.[1] || null,
-    sellerName,
-    sellerCode,
-  ],
-  (tx, results) => {
-    console.log(results);
-    if (results.rowsAffected > 0) {
-      console.log(
-        "Message stored in the local database ",
-        notification.body
+      const sellerCodeRegex = /\( (.+?) \)/;
+      const sellerCodeMatch = notification.body.match(sellerCodeRegex);
+      const sellerCode = sellerCodeMatch ? sellerCodeMatch[1] : null;
+      console.log(message, " ", sellerName, " ", " ", sellerCode);
+      tx.executeSql(
+        "INSERT INTO noticeMessages (messageId, notificationTitle, notificationBody, date, sentTime, message, sellerName, sellerCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        [
+          messageId,
+          notification.title,
+          notification.body,
+          sendDate,
+          formattedTime.toString(),
+          notification.body.match(/^(.*?) -/)?.[1] || null,
+          sellerName,
+          sellerCode,
+        ],
+        (tx, results) => {
+          console.log(results);
+          if (results.rowsAffected > 0) {
+            console.log(
+              "Message stored in the local database ",
+              notification.body
+            );
+          }
+        }
       );
-    }
-  }
-);
     });
   };
 
@@ -800,6 +807,8 @@ tx.executeSql(
         message: remoteMessage.notification.body,
         channelId: "AdditionalWork_1",
       });
+      pull_API_Data();
+      DisplayData();
     });
 
     return unsubscribe;
@@ -898,10 +907,9 @@ tx.executeSql(
 
   const handleButtonClick = async (APIerror1) => {
     try {
-      console.log("API EROOR","userid");
+      console.log("API EROOR", "userid");
       // await callApi("APIerror1", "userid");
-    } catch (error) {
-    }
+    } catch (error) {}
   };
   useEffect(() => {
     // This useEffect  is use to hide warnings in mobile screen .
@@ -911,6 +919,7 @@ tx.executeSql(
   useEffect(() => {
     (async () => {
       if (userId) {
+        loadAPI_3();
         pull_API_Data();
         setTimeout(() => {
           loadAPI_Data1();
@@ -979,8 +988,8 @@ tx.executeSql(
   };
   // console.log(userId);
   async function postSPSCalling(row) {
-    const deviceId= await DeviceInfo.getUniqueId();
-    const IpAddress=await DeviceInfo.getIpAddress();
+    const deviceId = await DeviceInfo.getUniqueId();
+    const IpAddress = await DeviceInfo.getIpAddress();
     console.log("===========row=========", {
       clientShipmentReferenceNumber: row.clientShipmentReferenceNumber,
       awbNo: row.awbNo,
@@ -1064,7 +1073,7 @@ tx.executeSql(
       })
       .catch((error) => {
         setIsLoading(false);
-        callApi(error,latitude,longitude,userId);
+        callApi(error, latitude, longitude, userId);
         console.log("sync error", { error });
       });
   }
@@ -1202,106 +1211,102 @@ tx.executeSql(
         );
       });
     };
-    fetchTripInfo(); 
+    fetchTripInfo();
   }, [userId, tripID]);
   const loadAPI_Data1 = () => {
     setIsLoading(!isLoading);
     createTables1();
-          if(tripID){
-            (async () => {
-              await axios
-                .get(backendUrl + `SellerMainScreen/consignorsList/${userId}`, {
-                  params: {
-                    tripID: tripID,
-                  },
-                })
-                .then(
-                  (res) => {
-                    console.log("API 1 OK: " + res.data.data.length);
-                    // console.log(res);
-                    for (let i = 0; i < res.data.data.length; i++) {
-                      // let m21 = JSON.stringify(res.data[i].consignorAddress, null, 4);
-                      db.transaction((txn) => {
-                        txn.executeSql(
-                          "SELECT * FROM SyncSellerPickUp WHERE stopId = ? AND FMtripId=?",
-                          [res.data.data[i].stopId, tripID],
-                          (tx, result) => {
-                            if (result.rows.length <= 0) {
-                              db.transaction((txn) => {
-                                txn.executeSql(
-                                  "INSERT OR REPLACE INTO SyncSellerPickUp( contactPersonName,consignorCode ,userId ,consignorName,sellerIndex ,consignorAddress1,consignorAddress2,consignorCity,consignorPincode,consignorLatitude,consignorLongitude,consignorContact,ReverseDeliveries,runSheetNumber,ForwardPickups,BagOpenClose11, ShipmentListArray,otpSubmitted,otpSubmittedDelivery,stopId, FMtripId,date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                                  [
-                                    res.data.data[i].contactPersonName,
-                                    res.data.data[i].consignorCode,
-                                    userId,
-                                    res.data.data[i].consignorName,
-                                    res.data.data[i].sequenceNumber,
-                                    res.data.data[i].consignorAddress1,
-                                    res.data.data[i].consignorState,
-                                    res.data.data[i].consignorCity,
-                                    res.data.data[i].consignorPincode,
-                                    res.data.data[i].consignorLatitude,
-                                    res.data.data[i].consignorLongitude,
-                                    res.data.data[i].consignorContact,
-                                    res.data.data[i].ReverseDeliveries,
-                                    res.data.data[i].runsheetNo,
-                                    res.data.data[i].ForwardPickups,
-                                    "true",
-                                    " ",
-                                    "false",
-                                    "false",
-                                    res.data.data[i].stopId,
-                                    res.data.data[i].FMtripId,
-                                    currentDateValue,
-                                  ],
-                                  (sqlTxn, _res) => {
-                                    // console.log(
-                                    // "\n Data Added to local db successfully1212"
-                                    // );
-                                    // console.log(res);
-                                  },
-                                  (error) => {
-                                    console.log(
-                                      "error on loading  data from api SellerMainScreen/consignorslist/" +
-                                        error.message
-                                    );
-                                  }
-                                );
-                              });
+    if (tripID) {
+      (async () => {
+        await axios
+          .get(backendUrl + `SellerMainScreen/consignorsList/${userId}`, {
+            params: {
+              tripID: tripID,
+            },
+          })
+          .then(
+            (res) => {
+              console.log("API 1 OK: " + res.data.data.length);
+              // console.log(res);
+              for (let i = 0; i < res.data.data.length; i++) {
+                // let m21 = JSON.stringify(res.data[i].consignorAddress, null, 4);
+                db.transaction((txn) => {
+                  txn.executeSql(
+                    "SELECT * FROM SyncSellerPickUp WHERE stopId = ? AND FMtripId=?",
+                    [res.data.data[i].stopId, tripID],
+                    (tx, result) => {
+                      if (result.rows.length <= 0) {
+                        db.transaction((txn) => {
+                          txn.executeSql(
+                            "INSERT OR REPLACE INTO SyncSellerPickUp( contactPersonName,consignorCode ,userId ,consignorName,sellerIndex ,consignorAddress1,consignorAddress2,consignorCity,consignorPincode,consignorLatitude,consignorLongitude,consignorContact,ReverseDeliveries,runSheetNumber,ForwardPickups,BagOpenClose11, ShipmentListArray,otpSubmitted,otpSubmittedDelivery,stopId, FMtripId,date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                            [
+                              res.data.data[i].contactPersonName,
+                              res.data.data[i].consignorCode,
+                              userId,
+                              res.data.data[i].consignorName,
+                              res.data.data[i].sequenceNumber,
+                              res.data.data[i].consignorAddress1,
+                              res.data.data[i].consignorState,
+                              res.data.data[i].consignorCity,
+                              res.data.data[i].consignorPincode,
+                              res.data.data[i].consignorLatitude,
+                              res.data.data[i].consignorLongitude,
+                              res.data.data[i].consignorContact,
+                              res.data.data[i].ReverseDeliveries,
+                              res.data.data[i].runsheetNo,
+                              res.data.data[i].ForwardPickups,
+                              "true",
+                              " ",
+                              "false",
+                              "false",
+                              res.data.data[i].stopId,
+                              res.data.data[i].FMtripId,
+                              currentDateValue,
+                            ],
+                            (sqlTxn, _res) => {
+                              // console.log(
+                              // "\n Data Added to local db successfully1212"
+                              // );
+                              // console.log(res);
+                            },
+                            (error) => {
+                              console.log(
+                                "error on loading  data from api SellerMainScreen/consignorslist/" +
+                                  error.message
+                              );
                             }
-                          }
-                        );
-                      });
+                          );
+                        });
+                      }
                     }
-                    viewDetails1();
-                    m++;
-                    // console.log('value of m1 '+m);
-                    var date = new Date();
-                    var hours = date.getHours();
-                    var minutes = date.getMinutes();
-                    var seconds = date.getSeconds();
-                    var miliseconds = date.getMilliseconds();
-                    var ampm = hours >= 12 ? "PM" : "AM";
-                    hours = hours % 12;
-                    hours = hours ? hours : 12;
-                    minutes = minutes < 10 ? "0" + minutes : minutes;
-                    var datetime =
-                      "Last Sync\n" + hours + ":" + minutes + " " + ampm;
-                    dispatch(setSyncTime(datetime));
-                    dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
-                    AsyncStorage.setItem("lastSyncTime112", datetime);
-                    AsyncStorage.setItem("load11", "notload");
-                    setIsLoading(false);
-                  },
-                  (error) => {
-                    console.log(
-                      "error api SellerMainScreen/consignorslist/",
-                      error
-                    );
-                  }
-                );
-            })();
-          }
+                  );
+                });
+              }
+              viewDetails1();
+              m++;
+              // console.log('value of m1 '+m);
+              var date = new Date();
+              var hours = date.getHours();
+              var minutes = date.getMinutes();
+              var seconds = date.getSeconds();
+              var miliseconds = date.getMilliseconds();
+              var ampm = hours >= 12 ? "PM" : "AM";
+              hours = hours % 12;
+              hours = hours ? hours : 12;
+              minutes = minutes < 10 ? "0" + minutes : minutes;
+              var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
+              dispatch(setSyncTime(datetime));
+              dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
+              AsyncStorage.setItem("lastSyncTime112", datetime);
+              AsyncStorage.setItem("load11", "notload");
+              setIsLoading(false);
+            },
+            (error) => {
+              console.log("error api SellerMainScreen/consignorslist/", error);
+            }
+          );
+      })();
+    }
   };
   const viewDetails1 = () => {
     db.transaction((tx) => {
@@ -1412,11 +1417,17 @@ tx.executeSql(
                   for (let i = 0; i < res.data.data.length; i++) {
                     const shipmentStatus = res.data.data[i].shipmentStatus;
 
-                    if (!(tripStatus == 50 && shipmentStatus === "WFP") && tripID) {
+                    if (
+                      !(tripStatus == 50 && shipmentStatus === "WFP") &&
+                      tripID
+                    ) {
                       db.transaction((txn) => {
                         txn.executeSql(
                           "SELECT * FROM SellerMainScreenDetails where clientShipmentReferenceNumber = ? AND FMtripId=?",
-                          [res.data.data[i].clientShipmentReferenceNumber, tripID],
+                          [
+                            res.data.data[i].clientShipmentReferenceNumber,
+                            tripID,
+                          ],
                           (tx, result) => {
                             if (result.rows.length <= 0) {
                               db.transaction((txn) => {
@@ -1763,156 +1774,160 @@ tx.executeSql(
 
   return (
     <NativeBaseProvider>
-      {isAutoSyncEnable && <Modal isOpen={showModal11}>
-  <Modal.Content bg={'#eee'}>
-    <ScrollView>
-      <Modal.Header>Additional Workload</Modal.Header>
-      <Box flex={1} bg="coolGray.100" p={4}>
-        {dataN && dataN.length
-          ? dataN.map((d, i) => {
-              return (
-                <Box
-                  key={i}
-                  width="100%"
-                  marginBottom="5"
-                  alignItems="center"
-                >
-                  <Box
-                    width="100%"
-                    rounded="lg"
-                    overflow="hidden"
-                    borderColor="coolGray.100"
-                    borderWidth="1"
-                    _dark={{
-                      borderColor: "coolGray.600",
-                      backgroundColor: "white",
-                    }}
-                    _web={{
-                      shadow: 2,
-                      borderWidth: 0,
-                    }}
-                    _light={{
-                      backgroundColor: "white",
-                    }}
-                  >
-                    <View style={{ padding: 16 }}>
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          marginBottom: 4,
-                        }}
-                      >
-                        <View style={{ alignItems: "center" }}>
-                          <Text
-                            color="black"
+      {isAutoSyncEnable && (
+        <Modal isOpen={showModal11}>
+          <Modal.Content bg={"#eee"}>
+            <ScrollView>
+              <Modal.Header>Additional Workload</Modal.Header>
+              <Box flex={1} bg="coolGray.100" p={4}>
+                {dataN && dataN.length
+                  ? dataN.map((d, i) => {
+                      return (
+                        <Box
+                          key={i}
+                          width="100%"
+                          marginBottom="5"
+                          alignItems="center"
+                        >
+                          <Box
+                            width="100%"
+                            rounded="lg"
+                            overflow="hidden"
+                            borderColor="coolGray.100"
+                            borderWidth="1"
                             _dark={{
-                              color: "gray.400",
+                              borderColor: "coolGray.600",
+                              backgroundColor: "white",
                             }}
-                            fontWeight="400"
-                          >
-                            {d.consignorName} {d.consignorCode}
-                          </Text>
-                        </View>
-                        <View style={{ alignItems: "center" }}>
-                          <Text
-                            color="black"
-                            _dark={{
-                              color: "gray.400",
+                            _web={{
+                              shadow: 2,
+                              borderWidth: 0,
                             }}
-                            fontWeight="400"
+                            _light={{
+                              backgroundColor: "white",
+                            }}
                           >
-                            {d.ForwardPickups}/{d.ReverseDeliveries}
-                          </Text>
-                        </View>
-                      </View>
-                      <View
-                        style={{
-                          backgroundColor: "#eee",
-                          height: 1,
-                          marginVertical: 8,
-                        }}
-                      />
-                      <View style={{ marginBottom: 4 }}>
-                        <Text
-                          fontSize="sm"
-                          _light={{
-                            color: "black",
-                          }}
-                          _dark={{
-                            color: "black",
-                          }}
-                          fontWeight="500"
-                          ml="-0.5"
-                          mt="-1"
-                        >
-                          {d.consignorAddress1} {d.consignorAddress2}
-                          {"\n"}
-                          {d.consignorCity} - {d.consignorPincode}
-                        </Text>
-                      </View>
-                      <View
-                        style={{
-                          backgroundColor: "#eee",
-                          height: 1,
-                          marginVertical: 8,
-                        }}
-                      />
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <View style={{ alignItems: "center" }}>
-                        <Button
-                          style={{ backgroundColor: "#FF2E2E" }}
-                          _dark={{
-                            color: "red.200",
-                          }}
-                          onPress={() =>
-                            RejectHandler(
-                              d.consignorCode,
-                              d.stopId,
-                              d.FMtripId
-                            )
-                          } 
-                        >
-                        <Text style={{ color: 'white' }}>Reject</Text>
-                        </Button>
-                      </View>
-                      <View style={{ alignItems: "center" }}>
-                        <Button
-                          style={{ backgroundColor: "#004aad" }}
-                          _dark={{
-                            color: "blue.200",
-                          }}
-                          onPress={() =>
-                            AcceptHandler(
-                              d.consignorCode,
-                              d.stopId,
-                              d.FMtripId
-                            )
-                          }
-                        >
-                          <Text style={{ color: 'white' }}>Accept</Text>
-                        </Button>
-                      </View>
-                      </View>
-                    </View>
-                  </Box>
-                </Box>
-              );
-            })
-          : null}
-      </Box>
-    </ScrollView>
-  </Modal.Content>
-</Modal>
-}
-      
+                            <View style={{ padding: 16 }}>
+                              <View
+                                style={{
+                                  flexDirection: "row",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
+                                  marginBottom: 4,
+                                }}
+                              >
+                                <View style={{ alignItems: "center" }}>
+                                  <Text
+                                    color="black"
+                                    _dark={{
+                                      color: "gray.400",
+                                    }}
+                                    fontWeight="400"
+                                  >
+                                    {d.consignorName} {d.consignorCode}
+                                  </Text>
+                                </View>
+                                <View style={{ alignItems: "center" }}>
+                                  <Text
+                                    color="black"
+                                    _dark={{
+                                      color: "gray.400",
+                                    }}
+                                    fontWeight="400"
+                                  >
+                                    {d.ForwardPickups}/{d.ReverseDeliveries}
+                                  </Text>
+                                </View>
+                              </View>
+                              <View
+                                style={{
+                                  backgroundColor: "#eee",
+                                  height: 1,
+                                  marginVertical: 8,
+                                }}
+                              />
+                              <View style={{ marginBottom: 4 }}>
+                                <Text
+                                  fontSize="sm"
+                                  _light={{
+                                    color: "black",
+                                  }}
+                                  _dark={{
+                                    color: "black",
+                                  }}
+                                  fontWeight="500"
+                                  ml="-0.5"
+                                  mt="-1"
+                                >
+                                  {d.consignorAddress1} {d.consignorAddress2}
+                                  {"\n"}
+                                  {d.consignorCity} - {d.consignorPincode}
+                                </Text>
+                              </View>
+                              <View
+                                style={{
+                                  backgroundColor: "#eee",
+                                  height: 1,
+                                  marginVertical: 8,
+                                }}
+                              />
+                              <View
+                                style={{
+                                  flexDirection: "row",
+                                  alignItems: "center",
+                                  justifyContent: "space-between",
+                                }}
+                              >
+                                <View style={{ alignItems: "center" }}>
+                                  <Button
+                                    style={{ backgroundColor: "#FF2E2E" }}
+                                    _dark={{
+                                      color: "red.200",
+                                    }}
+                                    onPress={() =>
+                                      RejectHandler(
+                                        d.consignorCode,
+                                        d.stopId,
+                                        d.FMtripId
+                                      )
+                                    }
+                                  >
+                                    <Text style={{ color: "white" }}>
+                                      Reject
+                                    </Text>
+                                  </Button>
+                                </View>
+                                <View style={{ alignItems: "center" }}>
+                                  <Button
+                                    style={{ backgroundColor: "#004aad" }}
+                                    _dark={{
+                                      color: "blue.200",
+                                    }}
+                                    onPress={() =>
+                                      AcceptHandler(
+                                        d.consignorCode,
+                                        d.stopId,
+                                        d.FMtripId
+                                      )
+                                    }
+                                  >
+                                    <Text style={{ color: "white" }}>
+                                      Accept
+                                    </Text>
+                                  </Button>
+                                </View>
+                              </View>
+                            </View>
+                          </Box>
+                        </Box>
+                      );
+                    })
+                  : null}
+              </Box>
+            </ScrollView>
+          </Modal.Content>
+        </Modal>
+      )}
 
       <Stack.Navigator
         initialRouteName={"Main"}
