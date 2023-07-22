@@ -138,6 +138,7 @@ const NewSellerSelection = ({ route }) => {
   };
 
   const notPicked = async () => {
+    setLoading(true);
     AsyncStorage.setItem("refresh11", "refresh");
     const deviceId= await DeviceInfo.getUniqueId();
     const IpAddress= await DeviceInfo.getIpAddress();
@@ -188,7 +189,9 @@ const NewSellerSelection = ({ route }) => {
             (tx1, results) => {
               if (results.rowsAffected > 0) {
                 console.log("otp status updated  in seller table ");
-                navigation.navigate(NewSellerPickup);
+                // navigation.navigate(NewSellerPickup);
+                navigation.goBack();
+                setLoading(false);
                 // loadSellerPickupDetails();
               } else {
                 console.log("opt status not updated in local table");
@@ -223,6 +226,7 @@ const NewSellerSelection = ({ route }) => {
         console.log(error);
         setMessage("Submission failed");
         // navigation.goBack();
+        setLoading(false);
         setStatus("error");
       });
 
@@ -231,6 +235,7 @@ const NewSellerSelection = ({ route }) => {
       ToastAndroid.show("Turn on device location ",ToastAndroid.SHORT);
       console.log("Location Lat long error", error);
       setDropDownValue('');
+      setLoading(false);
       setDropDownValue1('');
     });
     // navigation.goBack();
