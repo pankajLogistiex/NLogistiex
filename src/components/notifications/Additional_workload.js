@@ -51,6 +51,7 @@ export default function Additional_workload() {
   };
   useEffect(() => {
     DisplayData();
+    dispatch(setNotificationCount(0));
   }, []);
   useEffect(() => {
     setData(additionalWorkloadInfo11);

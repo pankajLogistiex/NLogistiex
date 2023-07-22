@@ -136,6 +136,7 @@ const SellerHandoverSelection = ({ route }) => {
   };
   const notPicked = async () => {
     AsyncStorage.setItem('refresh11', 'refresh');
+    setLoading(true);
     const deviceId= await DeviceInfo.getUniqueId();
     const IpAddress= await DeviceInfo.getIpAddress();
     GetLocation.getCurrentPosition({
@@ -183,7 +184,9 @@ const SellerHandoverSelection = ({ route }) => {
             (tx1, results) => {
               if (results.rowsAffected > 0) {
                 console.log('otp status updated seller delivery in seller table ');
-                navigation.navigate(SellerDeliveries);
+                // navigation.navigate(SellerDeliveries);
+                navigation.goBack();
+                setLoading(false);
                 // loadSellerPickupDetails();
               } else {
                 console.log('opt status not updated in seller delivery in local table');
@@ -199,6 +202,7 @@ const SellerHandoverSelection = ({ route }) => {
         setMessage('Submission failed');
         // navigation.goBack();
         setStatus('error');
+        setLoading(false);
         ToastAndroid.show(
           "API Error",
           ToastAndroid.SHORT
@@ -211,6 +215,7 @@ const SellerHandoverSelection = ({ route }) => {
       console.log("Location Lat long error", error);
       setDropDownValue('');
       setDropDownValue1('');
+      setLoading(false);
     });
     // navigation.navigate('SellerDeliveries')
   };
