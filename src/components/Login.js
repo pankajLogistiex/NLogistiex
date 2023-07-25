@@ -18,7 +18,8 @@ import {
 } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import MaterialIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { Pressable, Linking } from "react-native";
+import { Pressable, Linking,
+  PermissionsAndroid, } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { backendUrl } from "../utils/backendUrl";
 import { BackHandler } from "react-native";
@@ -151,9 +152,28 @@ export default function Login() {
       });
   }
   useEffect(() => {
-    current_location();
+    current_location1();
   }, []);
 
+  const current_location1 = async() => {
+  const locationPermission = await PermissionsAndroid.request(
+    PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+    {
+      title: "Location Permission",
+      message: "This app needs access to your location.",
+      buttonNeutral: "Ask Me Later",
+      buttonNegative: "Cancel",
+      buttonPositive: "OK",
+    }
+  );
+  if (locationPermission !== PermissionsAndroid.RESULTS.GRANTED) {
+    console.log("Location permission denied");
+  }else{
+    current_location();
+  }
+}
+
+console.log(latitude);
   const current_location = () => {
     GetLocation.getCurrentPosition({
       enableHighAccuracy: true,
@@ -164,19 +184,27 @@ export default function Login() {
         setLongitude(location.longitude);
       })
       .catch(error => {
-        // RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
-        //   interval: 10000,
-        //   fastInterval: 5000,
-        // })
-        //   .then(status => {
-        //     if (status) {
-        //       console.log('Location enabled');
-        //     }
-        //   })
-        //   .catch(err => {
-        //     console.log(err);
-        //   });
-        console.log('Location Lat long error', error);
+        RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+          interval: 10000,
+          fastInterval: 5000,
+        })
+          .then(status => {
+            if (status) {
+              console.log('Location enabled');
+              GetLocation.getCurrentPosition({
+                enableHighAccuracy: true,
+                timeout: 10000,
+              })
+                .then(location => {
+                  setLatitude(location.latitude);
+                  setLongitude(location.longitude);
+                })
+            }
+          })
+          .catch(err => {
+            console.log(err);
+          });
+        console.log('Location Lat long error2', error);
       });
   };
   async function handleLogin() {
