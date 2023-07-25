@@ -459,7 +459,7 @@ position: 'relative',
         height: 150,
         opacity: 0.55,
         marginLeft:'31%',
-        tintColor: '#FFBF00',
+        tintColor: '#90ee90',
         resizeMode: 'cover',
       }}
     /> :null}
