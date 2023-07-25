@@ -164,6 +164,7 @@ const CollectPOD = ({ route }) => {
   const submitForm11 = async () => {
     const deviceId= await DeviceInfo.getUniqueId();
     const IpAddress= await DeviceInfo.getIpAddress();
+    const eventTime= new Date().valueOf();
     console.log('=======post rd delivery====', {
       runsheetNo: runsheetNo,
       expected: route.params.Forward,
@@ -171,7 +172,7 @@ const CollectPOD = ({ route }) => {
       rejected: newrejected,
       nothandedOver: newNotDelivered,
       feUserID: route.params.userId,
-      receivingTime: new Date().valueOf(),
+      receivingTime: eventTime,
       latitude: route.params.latitude,
       longitude: route.params.longitude,
       receiverMobileNo: mobileNumber,
@@ -192,7 +193,7 @@ const CollectPOD = ({ route }) => {
         rejected: newrejected,
         nothandedOver: newNotDelivered,
         feUserID: route.params.userId,
-        receivingTime: new Date().valueOf(),
+        receivingTime: eventTime,
         latitude: route.params.latitude,
         longitude: route.params.longitude,
         receiverMobileNo: mobileNumber,
@@ -229,7 +230,7 @@ const CollectPOD = ({ route }) => {
             'UPDATE SellerMainScreenDetails SET status="notDelivered", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND stopId=? AND FMtripId=?',
             [
               route.params.DropDownValue,
-              new Date().valueOf(),
+              eventTime,
               route.params.latitude,
               route.params.longitude,
               route.params.stopId,

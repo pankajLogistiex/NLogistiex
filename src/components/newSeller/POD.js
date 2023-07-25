@@ -172,6 +172,7 @@ const POD = ({ route }) => {
   const submitForm11 = async () =>{
     const deviceId= await DeviceInfo.getUniqueId();
     const IpAddress= await DeviceInfo.getIpAddress();
+    const eventTime=new Date().valueOf();
     console.log('========postRD Data==========', {
       runsheetNo: runsheetNo,
       expected: route.params.Forward,
@@ -179,7 +180,7 @@ const POD = ({ route }) => {
       rejected: newrejected,
       nothandedOver: newNotPicked,
       feUserID: route.params.userId,
-      receivingTime: new Date().valueOf(),
+      receivingTime: eventTime,
       latitude: route.params.latitude,
       longitude: route.params.longitude,
       receiverMobileNo: mobileNumber,
@@ -204,7 +205,7 @@ const POD = ({ route }) => {
           rejected: route.params.rejected,
           nothandedOver: newNotPicked,
           feUserID: route.params.userId,
-          receivingTime: new Date().valueOf(),
+          receivingTime: eventTime,
           latitude: route.params.latitude,
           longitude: route.params.longitude,
           receiverMobileNo: mobileNumber,
@@ -242,7 +243,7 @@ const POD = ({ route }) => {
               'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Pickup" AND status IS Null And stopId=? AND FMtripId=?',
               [
                 route.params.DropDownValue,
-                new Date().valueOf(),
+                eventTime,
                 route.params.latitude,
                 route.params.longitude,
                 route.params.stopId,

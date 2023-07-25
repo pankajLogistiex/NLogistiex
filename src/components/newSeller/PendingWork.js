@@ -124,7 +124,7 @@ const PendingWork = ({ route }) => {
                     [results.rows.item(i).stopId, results.rows.item(i).FMtripId],
                     (tx1, results22) => {
                       setMM(MM + results22.rows.length);
-                      newData[results.rows.item(i).consignorCode] = {
+                      newData[results.rows.item(i).stopId] = {
                         consignorName: results.rows.item(i).consignorName,
                         consignorLatitude:
                           results.rows.item(i).consignorLatitude,
@@ -134,7 +134,7 @@ const PendingWork = ({ route }) => {
                           phone: results.rows.item(i).consignorContact,
                         forward: results11.rows.length,
                         reverse: results22.rows.length,
-                        stopId:results.rows.item(i).stopId,
+                        consignorCode:results.rows.item(i).consignorCode,
                         tripId:results.rows.item(i).FMtripId
                       };
                       console.log(newData);
@@ -188,7 +188,6 @@ const PendingWork = ({ route }) => {
       obj[key] = displayData[key];
       return obj;
     }, {});
-console.log(displayData11)
   return (
     <NativeBaseProvider>
       {loading ? 
@@ -248,9 +247,9 @@ console.log(displayData11)
               {displayData &&
                 data.length > 0 &&
                 Object.keys(displayData11).map(
-                  (consignorCode, index) =>
-                    (displayData11[consignorCode].forward > 0 ||
-                      displayData11[consignorCode].reverse > 0) && (
+                  (stopId, index) =>
+                    (displayData11[stopId].forward > 0 ||
+                      displayData11[stopId].reverse > 0) && (
                       <View>
                         <DataTable.Row
                           style={{
@@ -263,30 +262,30 @@ console.log(displayData11)
                         >
                           <DataTable.Cell
                             style={{ flex: 1.7 }}
-                            key={consignorCode}
+                            key={stopId}
                           >
                             <Text style={styles.fontvalue}>
-                              {displayData11[consignorCode].consignorName}
+                              {displayData11[stopId].consignorName}
                             </Text>
                           </DataTable.Cell>
                           <DataTable.Cell
                             style={{ flex: 1, marginRight: 50 }}
-                            key={consignorCode}
+                            key={stopId}
                           >
                             <Text style={styles.fontvalue}>
-                              {displayData11[consignorCode].forward}
+                              {displayData11[stopId].forward}
                             </Text>
                           </DataTable.Cell>
                           <DataTable.Cell
                             style={{ flex: 1, marginRight: -70 }}
-                            key={consignorCode}
+                            key={stopId}
                           >
                             <Text style={styles.fontvalue}>
-                              {displayData11[consignorCode].reverse}
+                              {displayData11[stopId].reverse}
                             </Text>
                           </DataTable.Cell>
                         </DataTable.Row>
-                        {displayData11[consignorCode].forward > 0 && (
+                        {displayData11[stopId].forward > 0 && (
                           <Button
                             leftIcon={
                               <Icon
@@ -299,19 +298,19 @@ console.log(displayData11)
                             }
                             onPress={() =>
                               navigation.navigate("NotPicked", {
-                                consignorCode: consignorCode,
+                                consignorCode: displayData11[stopId].consignorCode,
                                 consignorLatitude:
-                                  displayData11[consignorCode]
+                                  displayData11[stopId]
                                     .consignorLatitude,
                                 consignorLongitude:
-                                  displayData11[consignorCode]
+                                  displayData11[stopId]
                                     .consignorLongitude,
                                 userId: userId,
-                                stopId:displayData11[consignorCode].stopId,
-                                tripId:displayData11[consignorCode].tripId,
-                                contactPersonName:displayData11[consignorCode].contactPersonName,
-                                phone:displayData11[consignorCode].phone,
-                                pending:displayData11[consignorCode].forward
+                                stopId:stopId,
+                                tripId:displayData11[stopId].tripId,
+                                contactPersonName:displayData11[stopId].contactPersonName,
+                                phone:displayData11[stopId].phone,
+                                pending:displayData11[stopId].forward
                               })
                             }
                             style={{
@@ -324,7 +323,7 @@ console.log(displayData11)
                             Close Pickup
                           </Button>
                         )}
-                        {displayData11[consignorCode].reverse > 0 && (
+                        {displayData11[stopId].reverse > 0 && (
                           <Button
                             leftIcon={
                               <Icon
@@ -337,19 +336,19 @@ console.log(displayData11)
                             }
                             onPress={() =>
                               navigation.navigate("NotDelivered", {
-                                consignorCode: consignorCode,
+                                consignorCode:displayData11[stopId].consignorCode,
                                 consignorLatitude:
-                                  displayData11[consignorCode]
+                                  displayData11[stopId]
                                     .consignorLatitude,
                                 consignorLongitude:
-                                  displayData11[consignorCode]
+                                  displayData11[stopId]
                                     .consignorLongitude,
                                 userId: userId,
-                                stopId:displayData11[consignorCode].stopId,
-                                tripId:displayData11[consignorCode].tripId,
-                                contactPersonName:displayData11[consignorCode].contactPersonName,
-                                phone:displayData11[consignorCode].phone,
-                                pending:displayData11[consignorCode].reverse
+                                stopId:stopId,
+                                tripId:displayData11[stopId].tripId,
+                                contactPersonName:displayData11[stopId].contactPersonName,
+                                phone:displayData11[stopId].phone,
+                                pending:displayData11[stopId].reverse
                               })
                             }
                             style={{

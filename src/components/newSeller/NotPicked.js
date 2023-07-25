@@ -50,35 +50,35 @@ const NotPicked = ({route}) => {
     };
   }, [timer]);
   
-    useEffect(() => {
-      current_location();
-    }, []);
+    // useEffect(() => {
+    //   current_location();
+    // }, []);
   
-    const current_location = () => {
-      GetLocation.getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 10000,
-      })
-        .then(location => {
-          setLatitude(location.latitude);
-          setLongitude(location.longitude);
-        })
-        .catch(error => {
-          RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
-            interval: 10000,
-            fastInterval: 5000,
-          })
-            .then(status => {
-              if (status) {
-                console.log('Location enabled');
-              }
-            })
-            .catch(err => {
-              console.log(err);
-            });
-          console.log('Location Lat long error', error);
-        });
-    };
+    // const current_location = () => {
+    //   GetLocation.getCurrentPosition({
+    //     enableHighAccuracy: true,
+    //     timeout: 10000,
+    //   })
+    //     .then(location => {
+    //       setLatitude(location.latitude);
+    //       setLongitude(location.longitude);
+    //     })
+    //     .catch(error => {
+    //       RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+    //         interval: 10000,
+    //         fastInterval: 5000,
+    //       })
+    //         .then(status => {
+    //           if (status) {
+    //             console.log('Location enabled');
+    //           }
+    //         })
+    //         .catch(err => {
+    //           console.log(err);
+    //         });
+    //       console.log('Location Lat long error', error);
+    //     });
+    // };
     const notPicked = async () => {
       AsyncStorage.setItem("refresh11", "refresh");
       const deviceId= await DeviceInfo.getUniqueId();
@@ -86,17 +86,7 @@ const NotPicked = ({route}) => {
       const eventTime=new Date().valueOf();
       // console.log(latitude);
       console.log("***Attempt Failed")
-  console.log({consignorCode: route.params.consignorCode,
-    rejectionReason: rejectionCode,
-    feUserID: route.params.userId,
-    latitude: parseFloat(location.latitude),
-    longitude: parseFloat(location.longitude),
-    eventTime: eventTime,
-    rejectionStage: "SLPF",
-    stopId:route.params.stopId,
-    tripID:route.params.tripId,
-    deviceId: deviceId,
-    deviceIPaddress: IpAddress,})
+  
       GetLocation.getCurrentPosition({
         enableHighAccuracy: true,
         timeout: 10000,
@@ -104,7 +94,17 @@ const NotPicked = ({route}) => {
         .then((location) => {
           setLatitude(location.latitude);
           setLongitude(location.longitude);
-  
+          console.log({consignorCode: route.params.consignorCode,
+            rejectionReason: rejectionCode,
+            feUserID: route.params.userId,
+            latitude: parseFloat(location.latitude),
+            longitude: parseFloat(location.longitude),
+            eventTime: eventTime,
+            rejectionStage: "SLPF",
+            stopId:route.params.stopId,
+            tripID:route.params.tripId,
+            deviceId: deviceId,
+            deviceIPaddress: IpAddress,})
       axios
         .post(backendUrl + "SellerMainScreen/attemptFailed", {
           consignorCode: route.params.consignorCode,
@@ -128,7 +128,8 @@ const NotPicked = ({route}) => {
               (tx1, results) => {
                 if (results.rowsAffected > 0) {
                   console.log("otp status updated  in seller table ");
-                  navigation.navigate('PendingWork')
+                  navigation.navigate('PendingWork');
+                  setModalVisible3(false);
                 } else {
                   console.log("opt status not updated in local table");
                 }
@@ -160,6 +161,7 @@ const NotPicked = ({route}) => {
         .catch(function (error) {
           console.log(error);
           // navigation.goBack();
+          ToastAndroid.show("Something Went Wrong", ToastAndroid.SHORT)
         });
   
       })
@@ -253,7 +255,6 @@ const NotPicked = ({route}) => {
             if (response.data.return) {
               setInputOtp('');
               notPicked();
-              setModalVisible3(false);
               setShowModal11(false)
           }
           else {
@@ -494,103 +495,6 @@ return (
               </Modal.Body>
             </Modal.Content>
           </Modal>
-    <Box flex={1} bg="#fff"  width="auto" maxWidth="100%">
-      <ScrollView style={styles.homepage} showsVerticalScrollIndicator={true} showsHorizontalScrollIndicator={false}>
-        <Card>
-          {/* <DataTable>
-            <DataTable.Header style={{height:'auto', backgroundColor: '#004aad', borderTopLeftRadius: 5, borderTopRightRadius: 5}} >
-              <DataTable.Title style={{flex: 1.2}}><Text style={{ textAlign: 'center', color:'white'}}>Seller Name</Text></DataTable.Title>
-              <DataTable.Title style={{flex: 1.2}}><Text style={{ textAlign: 'center', color:'white'}}>Pending Pickups</Text></DataTable.Title>
-              <DataTable.Title style={{flex: 1.2}}><Text style={{ textAlign: 'center', color:'white'}}>Pending Deliveries</Text></DataTable.Title>
-            </DataTable.Header> */}
-            {/* {displayData && data.length > 0 && Object.keys(displayData11).map((consignorCode, index) => (
-    (displayData11[consignorCode].forward > 0 || displayData11[consignorCode].reverse > 0) &&
-    <View>
-      <DataTable.Row style={{ height: 'auto', backgroundColor: '#eeeeee', borderBottomWidth: 1, borderWidth: 2, borderColor: 'white'}}>
-        <DataTable.Cell style={{ flex: 1.7 }} key={consignorCode}><Text style={styles.fontvalue}>{displayData11[consignorCode].consignorName}</Text></DataTable.Cell>
-        <DataTable.Cell style={{ flex: 1, marginRight: 50 }} key={consignorCode}><Text style={styles.fontvalue}>{displayData11[consignorCode].forward}</Text></DataTable.Cell>
-        <DataTable.Cell style={{ flex: 1, marginRight: -70 }} key={consignorCode}><Text style={styles.fontvalue}>{displayData11[consignorCode].reverse}</Text></DataTable.Cell>
-      </DataTable.Row>
-      {displayData11[consignorCode].forward>0  && 
-        <Button
-          leftIcon={
-            <Icon
-              color="white"
-              as={<MaterialIcons name="close-circle-outline" />}
-              size="sm"
-            />
-          }
-          onPress={() => setModalVisible(true)}
-          style={{backgroundColor: '#004aad', width: '90%', marginTop: 10, marginLeft: 20}}
-        >
-          Close Pickup
-        </Button>
-      }
-      { displayData11[consignorCode].reverse>0 &&
-        <Button
-          leftIcon={
-            <Icon
-              color="white"
-              as={<MaterialIcons name="close-circle-outline" />}
-              size="sm"
-            />
-          }
-          onPress={() => {
-            setModalVisible3(true); 
-          }}
-          style={{backgroundColor: '#004aad', width: '90%', marginTop: 10, marginLeft: 20}}
-        >
-          Close Delivery
-        </Button>
-      } */}
-      {/* {displayData11[consignorCode].forward >0 && displayData11[consignorCode].consignorName >0 &&
-      <View style={{flexDirection: 'row', justifyContent: 'space-between', alignSelf: 'center', marginTop: 10 }}>
-        <Button
-          leftIcon={
-            <Icon
-              color="white"
-              as={<MaterialIcons name="close-circle-outline" />}
-              size="sm"
-            />
-          }
-          onPress={() => {
-            setModalVisible(true); 
-          }}
-          style={{backgroundColor: '#004aad', width: '48%', marginTop: -10, marginLeft: 20}}
-        >
-          Close Pickup
-        </Button>
-        <Button
-          leftIcon={
-            <Icon
-              color="white"
-              as={<MaterialIcons name="close-circle-outline" />}
-              size="sm"
-            />
-          }
-          onPress={() => {
-            setModalVisible3(true); 
-          }}
-          style={{backgroundColor: '#004aad', width: '48%', marginTop: -10, marginLeft: 20}}
-        >
-          Close Delivery
-        </Button>
-      </View>
-        
-      } */}
-    {/* </View>
-  ))} */}
-          {/* </DataTable> */}
-        </Card>
-      </ScrollView>
-      {/* <View style={{width: '90%', flexDirection: 'row', justifyContent: 'space-between', alignSelf: 'center', marginTop: 10 }}>
-            <Button w="48%" size="lg" bg="#004aad" onPress={()=>navigation.navigate('Main')}>Dashboard</Button>
-            <Button w="48%" size="lg" bg="#004aad" onPress={()=>navigation.navigate('MyTrip')} >Close Trip</Button>
-          </View>
-      <Center>
-          <Image style={{ width:150, height:150}} source={require('../../assets/image.png')} alt={'Logo Image'} />
-      </Center> */}
-    </Box>
     </NativeBaseProvider>
   );
 };
