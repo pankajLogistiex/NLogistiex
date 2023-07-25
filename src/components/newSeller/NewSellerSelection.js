@@ -102,36 +102,36 @@ const NewSellerSelection = ({ route }) => {
     };
   }, [timer]);
 
-  useEffect(() => {
-    if(!loading){
-    current_location();}
-  }, [loading]);
+  // useEffect(() => {
+  //   if(!loading){
+  //   current_location();}
+  // }, [loading]);
 // console.log(latitude);
-  const current_location = () => {
-    GetLocation.getCurrentPosition({
-      enableHighAccuracy: true,
-      timeout: 10000,
-    })
-      .then((location) => {
-        setLatitude(location.latitude);
-        setLongitude(location.longitude);
-      })
-      .catch((error) => {
-        RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
-          interval: 10000,
-          fastInterval: 5000,
-        })
-          .then((status) => {
-            if (status) {
-              console.log("Location enabled");
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-        console.log("Location Lat long error", error);
-      });
-  };
+  // const current_location = () => {
+  //   GetLocation.getCurrentPosition({
+  //     enableHighAccuracy: true,
+  //     timeout: 10000,
+  //   })
+  //     .then((location) => {
+  //       setLatitude(location.latitude);
+  //       setLongitude(location.longitude);
+  //     })
+  //     .catch((error) => {
+  //       RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
+  //         interval: 10000,
+  //         fastInterval: 5000,
+  //       })
+  //         .then((status) => {
+  //           if (status) {
+  //             console.log("Location enabled");
+  //           }
+  //         })
+  //         .catch((err) => {
+  //           console.log(err);
+  //         });
+  //       console.log("Location Lat long error", error);
+  //     });
+  // };
 
   const DisplayData = async () => {
     closePickup11();
