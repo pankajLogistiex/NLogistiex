@@ -5,6 +5,9 @@ import axios from "axios";
 import {useNavigation} from '@react-navigation/native';
 
 import { TouchableOpacity } from "react-native-gesture-handler";
+
+import Lottie from 'lottie-react-native';
+import {ProgressBar} from '@react-native-community/progress-bar-android';
 import {
   NativeBaseProvider,
   Box,
@@ -16,18 +19,20 @@ import {
   HStack,
   Divider,
 } from "native-base";
-import { Image } from "react-native";
+import { Image,View,StyleSheet,ActivityIndicator } from "react-native";
 import { setForceSync } from "../../redux/slice/autoSyncSlice";
 import { useSelector, useDispatch } from "react-redux";
 
 const Notices = () => {
   const [notificationData, setNotificationData] = useState([]);
+  const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   const navigation = useNavigation();
 // console.log(notificationData);
 useEffect(() => {
   const fetchNotificationData = () => {
     const db = openDatabase({ name: "rn_sqlite" });
+    setLoading(true);
     db.transaction((tx) => {
       tx.executeSql(
         `SELECT notificationTitle, notificationBody, sentTime, messageId, message, sellerName, sellerCode FROM noticeMessages ORDER BY sentTime DESC`,
@@ -35,7 +40,9 @@ useEffect(() => {
         (tx, results) => {
           const len = results.rows.length;
           const notificationDataBySeller = {};
-    
+          if(len===0){
+            setLoading(false);
+          }
           for (let i = 0; i < len; i++) {
             const row = results.rows.item(i);
             const { sellerCode } = row;
@@ -50,6 +57,9 @@ useEffect(() => {
             // Increment the count and push the data
             notificationDataBySeller[sellerCode].count++;
             notificationDataBySeller[sellerCode].data.push(row);
+            if(i===len-1){
+              setLoading(false);
+            }
           }
     
           const notificationDataArray = Object.values(notificationDataBySeller);
@@ -66,6 +76,30 @@ useEffect(() => {
   console.log(notificationData);
   return (
 <NativeBaseProvider>
+{loading ? 
+        <ActivityIndicator size="large" color="blue" style={{marginTop: 44}} />
+        // <View
+        //       style={[
+        //         StyleSheet.absoluteFillObject,
+        //         {
+        //           flex: 1,
+        //           justifyContent: 'center',
+        //           alignItems: 'center',
+        //           zIndex: 1,
+        //           backgroundColor: 'rgba(0,0,0,0.65)',
+        //         },
+        //       ]}>
+        //       <Text style={{color: 'white'}}>Loading...</Text>
+        //       <Lottie
+        //         source={require('../../assets/loading11.json')}
+        //         autoPlay
+        //         loop
+        //         speed={1}
+        //         //   progress={animationProgress.current}
+        //       />
+        //       <ProgressBar width={70} />
+        //     </View>
+      :
 <ScrollView>
   <Box flex={1} bg="coolGray.100" p={4}>
     {notificationData && notificationData.length > 0 ? (
@@ -236,6 +270,7 @@ useEffect(() => {
     </Center>
   </Box>
 </ScrollView>
+}
 </NativeBaseProvider>
 
 
