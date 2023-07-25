@@ -142,7 +142,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   };
   useEffect(() => {
     fetchTripInfo(); 
-  }, [id, tripID]);
+  }, [id]);
+  // console.log("####TripId###",tripID)
   function getTripDetails() {
     axios
       .get(backendUrl + 'UserTripInfo/getUserTripInfo', {
@@ -184,7 +185,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
       fetchTripInfo(); 
     });
     return unsubscribe;
-  }, [navigation, syncTimeFull,tripID]);
+  }, [navigation, syncTimeFull]);
 
   const getData = async () => {
     try {
@@ -205,8 +206,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     loadHanoverDetails();
     loadSellerDeliveryDetails();
     loadtripdetails();
-    fetchTripInfo();
-  }, [isNewSync, syncTimeFull, tripID]);
+  }, [isNewSync, syncTimeFull]);
 
   const loadtripdetails = async () => {
     setIsLoading(!isLoading);

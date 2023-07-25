@@ -111,18 +111,17 @@ const PendingWork = ({ route }) => {
         for (let i = 0; i < results.rows.length; ++i) {
           const newData = {};
           temp.push(results.rows.item(i));
-          // var consignorcode=results.rows.item(i).consignorCode;
           var consignorLatitude = results.rows.item(i).consignorLatitude;
           console.log(consignorLatitude);
           db.transaction((tx) => {
             db.transaction((tx) => {
               tx.executeSql(
-                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND consignorCode=? AND status IS NULL',
-                [results.rows.item(i).consignorCode],
+                'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND FMtripId=? AND status IS NULL',
+                [results.rows.item(i).stopId, results.rows.item(i).FMtripId],
                 (tx1, results11) => {
                   tx.executeSql(
-                    'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND consignorCode=? AND ( handoverStatus="accepted" AND status IS NULL)',
-                    [results.rows.item(i).consignorCode],
+                    'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND ( handoverStatus="accepted" AND status IS NULL)',
+                    [results.rows.item(i).stopId, results.rows.item(i).FMtripId],
                     (tx1, results22) => {
                       setMM(MM + results22.rows.length);
                       newData[results.rows.item(i).consignorCode] = {

@@ -83,9 +83,20 @@ const NotPicked = ({route}) => {
       AsyncStorage.setItem("refresh11", "refresh");
       const deviceId= await DeviceInfo.getUniqueId();
       const IpAddress= await DeviceInfo.getIpAddress();
+      const eventTime=new Date().valueOf();
       // console.log(latitude);
       console.log("***Attempt Failed")
-  
+  console.log({consignorCode: route.params.consignorCode,
+    rejectionReason: rejectionCode,
+    feUserID: route.params.userId,
+    latitude: parseFloat(location.latitude),
+    longitude: parseFloat(location.longitude),
+    eventTime: eventTime,
+    rejectionStage: "SLPF",
+    stopId:route.params.stopId,
+    tripID:route.params.tripId,
+    deviceId: deviceId,
+    deviceIPaddress: IpAddress,})
       GetLocation.getCurrentPosition({
         enableHighAccuracy: true,
         timeout: 10000,
@@ -101,7 +112,7 @@ const NotPicked = ({route}) => {
           feUserID: route.params.userId,
           latitude: parseFloat(location.latitude),
           longitude: parseFloat(location.longitude),
-          eventTime: new Date().valueOf(),
+          eventTime: eventTime,
           rejectionStage: "SLPF",
           stopId:route.params.stopId,
           tripID:route.params.tripId,
@@ -124,12 +135,13 @@ const NotPicked = ({route}) => {
               }
             );
           });
+          console.log("###eventtime###", eventTime)
           db.transaction((tx) => {
             tx.executeSql(
               'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=?, postRDStatus="true"  WHERE shipmentAction="Seller Pickup" AND status IS Null AND stopId=? AND FMtripId=?',
               [
                 rejectionCode,
-                new Date().valueOf(),
+                eventTime,
                 location.latitude,
                 location.longitude,
                 route.params.stopId,
