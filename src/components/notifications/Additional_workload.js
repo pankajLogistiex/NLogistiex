@@ -162,7 +162,7 @@ export default function Additional_workload() {
                               }}
                               fontWeight="400"
                             >
-                              {d.ForwardPickups}/{d.ReverseDeliveries}
+                              {d.ForwardPickups}
                             </Text>
                           </HStack>
                         </HStack>

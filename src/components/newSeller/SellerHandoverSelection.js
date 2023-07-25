@@ -139,6 +139,7 @@ const SellerHandoverSelection = ({ route }) => {
     setLoading(true);
     const deviceId= await DeviceInfo.getUniqueId();
     const IpAddress= await DeviceInfo.getIpAddress();
+    const eventTime=new Date().valueOf();
     GetLocation.getCurrentPosition({
       enableHighAccuracy: true,
       timeout: 10000,
@@ -154,7 +155,7 @@ const SellerHandoverSelection = ({ route }) => {
         feUserID: route.params.userId,
         latitude: parseFloat(location.latitude),
         longitude: parseFloat(location.longitude),
-        eventTime: new Date().valueOf(),
+        eventTime: eventTime,
         rejectionStage: "SLDF",
         stopId: route.params.stopId,
         tripID: route.params.tripId,
@@ -166,7 +167,7 @@ const SellerHandoverSelection = ({ route }) => {
         db.transaction(tx => {
           tx.executeSql(
             'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND stopId=? AND FMtripId=?',
-            [new Date().valueOf(), location.latitude, location.longitude, rejectionCode, route.params.stopId, route.params.tripId],
+            [eventTime, location.latitude, location.longitude, rejectionCode, route.params.stopId, route.params.tripId],
             (tx1, results) => {
               let temp = [];
               console.log(results.rows.length);

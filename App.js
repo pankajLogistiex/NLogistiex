@@ -671,13 +671,13 @@ function StackNavigators({ navigation }) {
   }, [forceSync]);
 
   useEffect(() => {
-    loadAPI_3();
+    // loadAPI_3();
     pull_API_Data();
-  }, [userId, tripID]);
+  }, [userId]);
 
-  useEffect(() => {
-    requestPermissions();
-  }, []);
+  // useEffect(() => {
+  //   requestPermissions();
+  // }, []);
 
   const requestPermissions = async () => {
     try {
@@ -1187,32 +1187,34 @@ function StackNavigators({ navigation }) {
       );
     });
   };
-  useEffect(() => {
-    const fetchTripInfo = async () => {
-      db.transaction((txn) => {
-        txn.executeSql(
-          "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ?",
-          [20, 50, userId],
-          (tx, result) => {
-            if (result.rows.length > 0) {
-              setTripID(result.rows.item(0).tripID);
-            } else {
-              txn.executeSql(
-                "SELECT * FROM TripDetails WHERE tripStatus = ? AND userID = ? ORDER BY tripID DESC LIMIT 1",
-                [200, userId],
-                (tx, result) => {
-                  if (result.rows.length > 0) {
-                    setTripID(result.rows.item(0).tripID);
-                  }
+
+  const fetchTripInfo = async () => {
+    db.transaction((txn) => {
+      txn.executeSql(
+        "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ?",
+        [20, 50, userId],
+        (tx, result) => {
+          if (result.rows.length > 0) {
+            setTripID(result.rows.item(0).tripID);
+          } else {
+            txn.executeSql(
+              "SELECT * FROM TripDetails WHERE tripStatus = ? AND userID = ? ORDER BY tripID DESC LIMIT 1",
+              [200, userId],
+              (tx, result) => {
+                if (result.rows.length > 0) {
+                  setTripID(result.rows.item(0).tripID);
                 }
-              );
-            }
+              }
+            );
           }
-        );
-      });
-    };
+        }
+      );
+    });
+  };
+  
+  useEffect(() => {
     fetchTripInfo();
-  }, [userId, tripID]);
+  }, [userId]);
   const loadAPI_Data1 = () => {
     setIsLoading(!isLoading);
     createTables1();
@@ -1310,7 +1312,7 @@ function StackNavigators({ navigation }) {
   };
   const viewDetails1 = () => {
     db.transaction((tx) => {
-      tx.executeSql("SELECT * FROM SyncSellerPickup", [], (tx1, results) => {
+      tx.executeSql("SELECT * FROM TripDetails", [], (tx1, results) => {
         let temp = [];
         // console.log(results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
@@ -1604,7 +1606,10 @@ function StackNavigators({ navigation }) {
                     res.data.res_data[i].updatedAt,
                     currentDateValue,
                   ],
-                  (sqlTxn, _res) => {},
+                  (sqlTxn, _res) => {
+                    m++;
+                  fetchTripInfo();
+                  },
                   (error) => {
                     console.log(
                       "error on adding data in tripdetails " + error.message
@@ -1613,7 +1618,6 @@ function StackNavigators({ navigation }) {
                 );
               });
             }
-            m++;
           },
           (error) => {
             console.log("tripdetailserror", error);
