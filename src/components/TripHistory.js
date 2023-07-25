@@ -298,29 +298,31 @@ useEffect(() => {
                   {data.vehicleNumber}
                 </Text>
               </View>
+              {data.tripStatus!=20 ?
               <View flexDirection="row">
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight: '500',
-                    color: 'gray',
-                    marginRight: 8,
-                  }}
-                  mb={1}
-                >
-                  Start KMs:
-                </Text>
-                <Text
-                  style={{
-                    fontSize: 16,
-                    fontWeight: '500',
-                    color: 'gray',
-                  }}
-                  mb={1}
-                >
-                  {data.startKilometer}
-                </Text>
-              </View>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: '500',
+                  color: 'gray',
+                  marginRight: 8,
+                }}
+                mb={1}
+              >
+                Start KMs:
+              </Text>
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: '500',
+                  color: 'gray',
+                }}
+                mb={1}
+              >
+                {data.startKilometer}
+              </Text>
+            </View>
+              :null } 
               <Button
                 w="100%"
                 rounded="md"
