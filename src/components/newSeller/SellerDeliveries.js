@@ -64,7 +64,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
       // console.log(data.length);
       // console.log(dataSeller.length," ",pending11Seller+" ",reverseSeller+" ",valueSeller);
       // console.log(data.length,"  ",pending11+" ",reverse+" ",value," ",pendingP);
-      const scannedSum  =  data.reduce((sum, seller, i) => sum + (reverse[i] > 0 && pending11[i]===reverse[i] && seller.otpSubmittedDelivery === "true" ? 1 : 0), 0);
+      const scannedSum  =  data.reduce((sum, seller, i) => sum + (reverse[i] > 0 && pending11[i]===reverse[i] ? 1 : 0), 0);
       const expectedSum = reverse.reduce((accumulator, currentValue) => accumulator + (currentValue > 0 ? 1 : 0), 0);
   
       useEffect(() => {
@@ -197,7 +197,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
 
     const searched = (keyword1) => (c) => {
         let f = c.consignorName;
-        return (f.includes(keyword1));
+        return f.toLowerCase().includes(keyword1.toLowerCase());
     };
     
     const handleTrip=()=>{
@@ -304,12 +304,12 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
         
            {route.params.Trip !== 'Start Trip' && data && data.length > 0
                 ? data.filter(searched(keyword)).map((single, i) =>
-                    reverse[i] > 0 ? (pending11[i]==reverse[i]) && single.otpSubmittedDelivery === "true"? (
+                    reverse[data.findIndex((item) => item.stopId === single.stopId)] > 0 ? (pending11[data.findIndex((item) => item.stopId === single.stopId)]==reverse[data.findIndex((item) => item.stopId === single.stopId)]) && single.otpSubmittedDelivery === "true"? (
 
                       <TouchableOpacity key={single.stopId} onPress={() => {
                                   navigation.navigate('SellerHandoverSelection', {
                                  paramKey: single.stopId,
-                                 Forward: value[i],
+                                 Forward: value[data.findIndex((item) => item.stopId === single.stopId)],
                                  consignorAddress1: single.consignorAddress1,
                                  consignorAddress2: single.consignorAddress2,
                                  consignorCity: single.consignorCity,
@@ -324,7 +324,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
                                  tripId:single.FMtripId,
                                  userId: single.userId,
                                  phone: single.consignorContact,
-                                 Reverse: reverse[i],
+                                 Reverse: reverse[data.findIndex((item) => item.stopId === single.stopId)],
                                  otpSubmittedDelivery: single.otpSubmittedDelivery,
                                  });
                          }}>
@@ -366,7 +366,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
               
                             <Text style={{ marginBottom: 4 , color: 'black'}}>{single.consignorAddress1}</Text>
                             <Text style={{ marginBottom: 4 , color: 'black'}}>{single.consignorCity}, {single.consignorAddress2}, {single.consignorPincode}</Text>
-                            <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Deliveries({pending11[i]}/{reverse[i]}) </Text>
+                            <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Deliveries({pending11[data.findIndex((item) => item.stopId === single.stopId)]}/{reverse[data.findIndex((item) => item.stopId === single.stopId)]}) </Text>
                           </View>
                           <View style={{ alignItems: 'flex-end' }}>
                             <TouchableOpacity onPress={() => handlePhoneIconPress(single.consignorContact)}>
@@ -375,7 +375,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
                             <TouchableOpacity onPress={() => handleMapIconPress(single)}>
                               <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
                             </TouchableOpacity>
-                            <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Pickups({pendingP[i]}/{value[i]}) </Text>
+                            <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Pickups({pendingP[data.findIndex((item) => item.stopId === single.stopId)]}/{value[data.findIndex((item) => item.stopId === single.stopId)]}) </Text>
                           </View>
                         </View>
                       </TouchableOpacity>
@@ -389,7 +389,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
                      <TouchableOpacity key={single.stopId} onPress={() => {
                           navigation.navigate('SellerHandoverSelection', {
                          paramKey: single.stopId,
-                         Forward: value[i],
+                         Forward: value[data.findIndex((item) => item.stopId === single.stopId)],
                          consignorAddress1: single.consignorAddress1,
                          consignorAddress2: single.consignorAddress2,
                          consignorCity: single.consignorCity,
@@ -404,7 +404,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
                          tripId:single.FMtripId,
                          userId: single.userId,
                          phone: single.consignorContact,
-                         Reverse: reverse[i],
+                         Reverse: reverse[data.findIndex((item) => item.stopId === single.stopId)],
                          otpSubmittedDelivery: single.otpSubmittedDelivery,
                          });
                  }}>
@@ -431,7 +431,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
               
                             <Text style={{ marginBottom: 4 , color: 'black'}}>{single.consignorAddress1}</Text>
                             <Text style={{ marginBottom: 4 , color: 'black'}}>{single.consignorCity}, {single.consignorAddress2}, {single.consignorPincode}</Text>
-                            <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Deliveries({pending11[i]}/{reverse[i]}) </Text>
+                            <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Deliveries({pending11[data.findIndex((item) => item.stopId === single.stopId)]}/{reverse[data.findIndex((item) => item.stopId === single.stopId)]}) </Text>
                           </View>
                           <View style={{ alignItems: 'flex-end' }}>
                             <TouchableOpacity onPress={() => handlePhoneIconPress(single.consignorContact)}>
@@ -440,7 +440,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
                             <TouchableOpacity onPress={() => handleMapIconPress(single)}>
                               <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
                             </TouchableOpacity>
-                            <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad',}}>Pickups({pendingP[i]}/{value[i]}) </Text>
+                            <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad',}}>Pickups({pendingP[data.findIndex((item) => item.stopId === single.stopId)]}/{value[data.findIndex((item) => item.stopId === single.stopId)]}) </Text>
                           </View>
                         </View>
                       </TouchableOpacity>
@@ -453,7 +453,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
                 
                 {route.params.Trip === 'Start Trip' && data && data.length > 0
                 ? data.filter(searched(keyword)).map((single, i) =>
-                    reverse[i] > 0 ? (pending11[i]!==reverse[i])? (
+                    reverse[data.findIndex((item) => item.stopId === single.stopId)] > 0 ? (pending11[data.findIndex((item) => item.stopId === single.stopId)]!==reverse[data.findIndex((item) => item.stopId === single.stopId)])? (
 
                    <TouchableOpacity key={single.stopId} onPress={() => {
                         handleTrip()
@@ -481,7 +481,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
               
                             <Text style={{ marginBottom: 4 , color: 'black'}}>{single.consignorAddress1}</Text>
                             <Text style={{ marginBottom: 4 , color: 'black'}}>{single.consignorCity}, {single.consignorAddress2}, {single.consignorPincode}</Text>
-                            <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Deliveries({pending11[i]}/{reverse[i]}) </Text>
+                            <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Deliveries({pending11[data.findIndex((item) => item.stopId === single.stopId)]}/{reverse[data.findIndex((item) => item.stopId === single.stopId)]}) </Text>
                           </View>
                           <View style={{ alignItems: 'flex-end' }}>
                             <TouchableOpacity onPress={() => handlePhoneIconPress(single.consignorContact)}>
@@ -490,7 +490,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
                             <TouchableOpacity onPress={() => handleMapIconPress(single)}>
                               <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
                             </TouchableOpacity>
-                            <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Pickups({pendingP[i]}/{value[i]}) </Text>
+                            <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Pickups({pendingP[data.findIndex((item) => item.stopId === single.stopId)]}/{value[data.findIndex((item) => item.stopId === single.stopId)]}) </Text>
                           </View>
                         </View>
                       </TouchableOpacity>
@@ -539,7 +539,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
               
                             <Text style={{ marginBottom: 4 , color: 'black'}}>{single.consignorAddress1}</Text>
                             <Text style={{ marginBottom: 4 , color: 'black'}}>{single.consignorCity}, {single.consignorAddress2}, {single.consignorPincode}</Text>
-                            <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Deliveries({pending11[i]}/{reverse[i]}) </Text>
+                            <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Deliveries({pending11[data.findIndex((item) => item.stopId === single.stopId)]}/{reverse[data.findIndex((item) => item.stopId === single.stopId)]}) </Text>
                           </View>
                           <View style={{ alignItems: 'flex-end' }}>
                             <TouchableOpacity onPress={() => handlePhoneIconPress(single.consignorContact)}>
@@ -548,7 +548,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
                             <TouchableOpacity onPress={() => handleMapIconPress(single)}>
                               <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
                             </TouchableOpacity>
-                            <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Pickups({pendingP[i]}/{value[i]}) </Text>
+                            <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Pickups({pendingP[data.findIndex((item) => item.stopId === single.stopId)]}/{value[data.findIndex((item) => item.stopId === single.stopId)]}) </Text>
                           </View>
                         </View>
                       </TouchableOpacity>
