@@ -3613,7 +3613,7 @@ function CustomDrawerContent({ navigation }) {
   const [language, setLanguage] = useState("");
   const [pendingPickup, setPendingPickup] = useState(0);
   const [pendingDelivery, setPendingDelivery] = useState(0);
-
+  const [detailsLoaded, setDetailsLoaded] = useState(false);
   const email = useSelector((state) => state.user.user_email);
   const id = useSelector((state) => state.user.user_id);
   const name = useSelector((state) => state.user.user_name);
@@ -3642,16 +3642,19 @@ function CustomDrawerContent({ navigation }) {
           }
         );
       });
+      setDetailsLoaded(true);
     };
     loadDetails();
-  }, [pendingPickup, pendingDelivery]);
+  }, []);
   const handleStartTrip = () => {
-    if ((pendingPickup != 0 || pendingDelivery != 0) && tripStatus == 1) {
-      navigation.navigate("PendingWork");
-    } else {
-      navigation.navigate("MyTrip", { userId: id });
+    if(detailsLoaded){
+      if ((pendingPickup != 0 || pendingDelivery != 0) && tripStatus == 1 ) {
+        navigation.navigate("PendingWork");
+      } else {
+        navigation.navigate("MyTrip", { userId: id });
+      }
+      navigation.closeDrawer();
     }
-    navigation.closeDrawer();
   };
   const LogoutHandle = async () => {
     try {
