@@ -206,8 +206,7 @@ export default function MyTrip({ navigation, route }) {
           'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="rejected" AND FMtripId=?',
           [tripID],
           (tx1, results) => {
-            setSpr(results.rows.length);
-            setRejectedPickup(false);
+            setRejectedPickup(results.rows.length);
           }
         );
       });

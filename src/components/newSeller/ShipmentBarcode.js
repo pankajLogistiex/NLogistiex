@@ -378,7 +378,6 @@ var dingAccept = new Sound(dingAccept11, error => {
       );
     });
   };
-
   const partialClose112 = () => {
     console.log('partialClose popup shown11');
 
@@ -755,7 +754,6 @@ var dingAccept = new Sound(dingAccept11, error => {
     }
     else{
       setAcceptedArray([...acceptedArray, barcode.toString()]);
-    console.log(acceptedArray);
     db.transaction(tx => {
       tx.executeSql(
         'UPDATE SellerMainScreenDetails SET status="accepted", packagingId=?, expectedPackagingId=?, eventTime=?, latitude=?, longitude=?, stopId=?, rejectionReasonL1="", postRDStatus="false", syncStatus="",rejectionStage="" WHERE (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) AND FMtripId=?',
@@ -814,6 +812,10 @@ var barcode11 = barcode;
               ToastAndroid.show(barcode11 + ' Rejected', ToastAndroid.SHORT);
               setCheck11(0);
               Vibration.vibrate(200);
+              const filteredAcceptedArray = acceptedArray.filter(
+                (acceptedBarcode) => acceptedBarcode !== barcode11.toString()
+              );
+              setAcceptedArray(filteredAcceptedArray);
               dingAccept.play(success => {
                 if (success) {
                   // Vibration.vibrate(800);
