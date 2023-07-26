@@ -51,7 +51,7 @@ const NewSellerPickup = ({route}) => {
   // dataSeller.forEach(item => {console.log(`consignorName: ${item.consignorName}, otpSubmitted: ${item.otpSubmitted}`)});
   // data.forEach(item => console.log(`consignorName: ${item.consignorName}, otpSubmitted: ${item.otpSubmitted}`));
   const progress = 
-  (data.reduce((sum, seller, i) => sum + (value[i] > 0 && value[i] === pending11[i] && seller.otpSubmitted === "true" ? 1 : 0), 0)/value.reduce((accumulator, currentValue) => accumulator + (currentValue > 0 ? 1 : 0), 0)) * 100;
+  (data.reduce((sum, seller, i) => sum + (value[i] > 0 && value[i] === pending11[i]  ? 1 : 0), 0)/value.reduce((accumulator, currentValue) => accumulator + (currentValue > 0 ? 1 : 0), 0)) * 100;
   useEffect(() => {
   
     if(value && value.length>0 && data && data.length===0){
@@ -208,7 +208,7 @@ const NewSellerPickup = ({route}) => {
   }, [navigation]);
   const searched = (keyword1) => (c) => {
       let f = c.consignorName;
-      return (f.includes(keyword1));
+      return f.toLowerCase().includes(keyword1.toLowerCase());
   };
 
 
@@ -305,7 +305,7 @@ return (
           fontWeight: 'bold',
         }}
       >
-       Sellers Attempted ({data.reduce((sum, seller, i) => sum + (value[i] > 0 && value[i] === pending11[i] && seller.otpSubmitted === "true" ? 1 : 0), 0)}/{value.reduce((accumulator, currentValue) => accumulator + (currentValue > 0 ? 1 : 0), 0)})
+       Sellers Attempted ({data.reduce((sum, seller, i) => sum + (value[i] > 0 && value[i] === pending11[i]  ? 1 : 0), 0)}/{value.reduce((accumulator, currentValue) => accumulator + (currentValue > 0 ? 1 : 0), 0)})
       </Text>
     </View>
     </View>
@@ -323,11 +323,11 @@ return (
        
           {route.params.Trip !== 'Start Trip' && data && data.length > 0
                 ? data.filter(searched(keyword)).map((seller, i) =>
-                    value[i] > 0 ? (value[i] == pending11[i]) && seller.otpSubmitted === "true" ? 
+                    value[data.findIndex((item) => item.stopId === seller.stopId)] > 0 ? (value[data.findIndex((item) => item.stopId === seller.stopId)] == pending11[data.findIndex((item) => item.stopId === seller.stopId)]) && seller.otpSubmitted === "true" ? 
                     (
         <TouchableOpacity key={seller.stopId} onPress={() => {navigation.navigate('NewSellerSelection', {
           paramKey: seller.stopId,
-          Forward: value[i],
+          Forward: value[data.findIndex((item) => item.stopId === seller.stopId)],
           consignorAddress1: seller.consignorAddress1,
           consignorAddress2: seller.consignorAddress2,
           consignorCity: seller.consignorCity,
@@ -384,7 +384,7 @@ position: 'relative',
 
               <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorAddress1}</Text>
               <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorCity}, {seller.consignorAddress2}, {seller.consignorPincode}</Text>
-              <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Pickup({pending11[i]}/{value[i]}) </Text>
+              <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Pickup({pending11[data.findIndex((item) => item.stopId === seller.stopId)]}/{value[data.findIndex((item) => item.stopId === seller.stopId)]}) </Text>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
               <TouchableOpacity onPress={() => handlePhoneIconPress(seller.consignorContact)}>
@@ -393,7 +393,7 @@ position: 'relative',
               <TouchableOpacity onPress={() => handleMapIconPress(seller)}>
                 <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
               </TouchableOpacity>
-              <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Delivery({pendingR[i]}/{reverse[i]}) </Text>
+              <Text style={{fontWeight: 'bold',marginTop: 8,  color: '#004aad'}}>Delivery({pendingR[data.findIndex((item) => item.stopId === seller.stopId)]}/{reverse[data.findIndex((item) => item.stopId === seller.stopId)]}) </Text>
             </View>
           </View>
 
@@ -404,7 +404,7 @@ position: 'relative',
                (
                   <TouchableOpacity key={seller.stopId} onPress={() => {navigation.navigate('NewSellerSelection', {
                     paramKey: seller.stopId,
-                    Forward: value[i],
+                    Forward: value[data.findIndex((item) => item.stopId === seller.stopId)],
                     consignorAddress1: seller.consignorAddress1,
                     consignorAddress2: seller.consignorAddress2,
                     consignorCity: seller.consignorCity,
@@ -447,7 +447,7 @@ position: 'relative',
                     position: 'relative',
     }}
   >
-    {value[i] === pending11[i] && seller.otpSubmitted== 'false'
+    {value[data.findIndex((item) => item.stopId === seller.stopId)] === pending11[data.findIndex((item) => item.stopId === seller.stopId)] && seller.otpSubmitted== 'false'
                           ? 
     <Image alt={'Completed Icon'}
       source={require('../../assets/complete/IMG_complete.png')}
@@ -470,7 +470,7 @@ position: 'relative',
           
                         <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorAddress1}</Text>
                         <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorCity}, {seller.consignorAddress2}, {seller.consignorPincode}</Text>
-                        <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Pickup({pending11[i]}/{value[i]}) </Text>
+                        <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Pickup({pending11[data.findIndex((item) => item.stopId === seller.stopId)]}/{value[data.findIndex((item) => item.stopId === seller.stopId)]}) </Text>
                       </View>
                       <View style={{ alignItems: 'flex-end' }}>
                         <TouchableOpacity onPress={() => handlePhoneIconPress(seller.consignorContact)}>
@@ -479,7 +479,7 @@ position: 'relative',
                         <TouchableOpacity onPress={() => handleMapIconPress(seller)}>
                           <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="orange"  />
                         </TouchableOpacity>
-                        <Text style={{fontWeight: 'bold',marginTop: 8, color: '#004aad' }}>Delivery({pendingR[i]}/{reverse[i]}) </Text>
+                        <Text style={{fontWeight: 'bold',marginTop: 8, color: '#004aad' }}>Delivery({pendingR[data.findIndex((item) => item.stopId === seller.stopId)]}/{reverse[data.findIndex((item) => item.stopId === seller.stopId)]}) </Text>
                       </View>
                     </View>
                   </TouchableOpacity>
@@ -490,7 +490,7 @@ position: 'relative',
 
             {route.params.Trip === 'Start Trip' && data && data.length > 0
                 ? data.filter(searched(keyword)).map((seller, i) =>
-                    value[i] > 0 ? (value[i] != pending11[i])? 
+                    value[data.findIndex((item) => item.stopId === seller.stopId)] > 0 ? (value[data.findIndex((item) => item.stopId === seller.stopId)] != pending11[data.findIndex((item) => item.stopId === seller.stopId)])? 
                     (
         <TouchableOpacity key={seller.stopId} onPress={() => {handleTrip()}}>
           <View
@@ -517,7 +517,7 @@ position: 'relative',
 
               <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorAddress1}</Text>
               <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorCity}, {seller.consignorAddress2}, {seller.consignorPincode}</Text>
-              <Text style={{fontWeight: 'bold', marginTop: 8,  color: '#004aad'}}>Pickup({pending11[i]}/{value[i]}) </Text>
+              <Text style={{fontWeight: 'bold', marginTop: 8,  color: '#004aad'}}>Pickup({pending11[data.findIndex((item) => item.stopId === seller.stopId)]}/{value[data.findIndex((item) => item.stopId === seller.stopId)]}) </Text>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
               <TouchableOpacity onPress={() => handlePhoneIconPress(seller.consignorContact)}>
@@ -526,7 +526,7 @@ position: 'relative',
               <TouchableOpacity onPress={() => handleMapIconPress(seller)}>
                 <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
               </TouchableOpacity>
-              <Text style={{fontWeight: 'bold',marginTop: 8, color: '#004aad' }}>Delivery({pendingR[i]}/{reverse[i]}) </Text>
+              <Text style={{fontWeight: 'bold',marginTop: 8, color: '#004aad' }}>Delivery({pendingR[data.findIndex((item) => item.stopId === seller.stopId)]}/{reverse[data.findIndex((item) => item.stopId === seller.stopId)]}) </Text>
             </View>
           </View>
         </TouchableOpacity>
@@ -572,7 +572,7 @@ position: 'relative',
       
                     <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorAddress1}</Text>
                     <Text style={{ marginBottom: 4 , color: 'black'}}>{seller.consignorCity}, {seller.consignorAddress2}, {seller.consignorPincode}</Text>
-                    <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Pickup({pending11[i]}/{value[i]}) </Text>
+                    <Text style={{fontWeight: 'bold', marginTop: 8, color: '#004aad' }}>Pickup({pending11[data.findIndex((item) => item.stopId === seller.stopId)]}/{value[data.findIndex((item) => item.stopId === seller.stopId)]}) </Text>
                   </View>
                   <View style={{ alignItems: 'flex-end' }}>
                     <TouchableOpacity onPress={() => handlePhoneIconPress(seller.consignorContact)}>
@@ -581,7 +581,7 @@ position: 'relative',
                     <TouchableOpacity onPress={() => handleMapIconPress(seller)}>
                       <MaterialIcons name="map-marker-account-outline" size={28} style={{ marginBottom: 12 , }} color="#FFBF00"  />
                     </TouchableOpacity>
-                    <Text style={{fontWeight: 'bold',marginTop: 8, color: '#004aad' }}>Delivery({pendingR[i]}/{reverse[i]}) </Text>
+                    <Text style={{fontWeight: 'bold',marginTop: 8, color: '#004aad' }}>Delivery({pendingR[data.findIndex((item) => item.stopId === seller.stopId)]}/{reverse[data.findIndex((item) => item.stopId === seller.stopId)]}) </Text>
                   </View>
                 </View>
                
