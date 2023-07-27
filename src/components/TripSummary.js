@@ -54,11 +54,11 @@ export default function TripSummary({ navigation, route }) {
         setTripDetails(response?.data?.res_data?.tripSummary);
       })
       .catch(error => {
-        console.log(error, 'error');
+        console.log(error, 'TripSummary/useEffect/error');
       });
     setLoading(false);
   }, []);
-  console.log(tripDetails);
+//   console.log(tripDetails);
   const dashboardData = [
     {
       title: 'Seller Pickups',

@@ -77,11 +77,11 @@ useEffect(() => {
         setTripDetails(response.data.res_data);
         setLoading(false);
       } catch (error) {
-        console.log(error, 'error');
+        console.log(error, 'TripDeatils/useEffect/error');
         setLoading(false);
       }
     };
-  console.log(tripDetails);
+  // console.log(tripDetails);
     if (userId) {
       fetchData();
     }

@@ -29,7 +29,7 @@ export default function Additional_workload() {
   const [data, setData] = useState([]);
   const additionalWorkloadInfo11= useSelector((state) => state.additionalWorkloadInfo.currentAdditionalWorkloadInfo);
   // console.log(userId);
-  console.log(additionalWorkloadInfo11.length);
+  // console.log(additionalWorkloadInfo11.length);
   const DisplayData = async() => {
     if (userId && additionalWorkloadInfo11 && additionalWorkloadInfo11.length ===0 ) {
       await axios
@@ -43,7 +43,7 @@ export default function Additional_workload() {
           }
         })
         .catch((error) => {
-          console.log("Error Msg1:", error);
+          console.log("Additional_Workload/DisplayData/Error Msg1:", error);
         });
     }else{
       setData(additionalWorkloadInfo11);
@@ -59,7 +59,7 @@ export default function Additional_workload() {
 
   const AcceptHandler = async (consignorCodeAccept, stopId, tripId) => {
     // console.log('df')
-    console.log({consignorCode: consignorCodeAccept,
+    console.log("Additional_Workload/AcceptHandler",{consignorCode: consignorCodeAccept,
       feUserId: userId,
       stopId: stopId,
       tripID: tripId})
@@ -71,16 +71,16 @@ export default function Additional_workload() {
         tripID: tripId
       })
       .then((response) => {
-        console.log("Msg Accepted ", response.data,'',userId);
+        console.log("Additional_Workload/AcceptHandler/Msg Accepted ", response.data,'',userId);
         dispatch(setNotificationCount(notificationCount - 1));
         dispatch(setForceSync(true));
         const updatedData = data.filter(item => item.consignorCode !== consignorCodeAccept);
         setData(updatedData);
         dispatch(setAdditionalWorkloadData(updatedData));
-        console.log("Data ", data.length + " ", consignorCodeAccept);
+        console.log("Additional_Workload/AcceptHandler/Data ", data.length + " ", consignorCodeAccept);
       })
       .catch((error) => {
-        console.log(error);
+        console.log("Additional_Workload/AcceptHandler/",error);
       });
   }; 
 
@@ -94,7 +94,7 @@ export default function Additional_workload() {
         tripID:tripId
       })
       .then((response) => {
-        console.log("Msg Rejected ", response.data);
+        console.log("Additional_Workload/RejectHandler/Msg Rejected ", response.data);
         dispatch(setNotificationCount(notificationCount - 1));
         const updatedData = data.filter(item => item.consignorCode !== consignorCodeReject);
         setData(updatedData);
@@ -102,7 +102,7 @@ export default function Additional_workload() {
 
       })
       .catch((error) => {
-        console.log(error);
+        console.log("Additional_Workload/RejectHandler/",error);
       });
   };
  

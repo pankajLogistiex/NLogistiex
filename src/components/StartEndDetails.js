@@ -17,15 +17,15 @@ export default function StartEndDetails({navigation,route}) {
             },
           })
           .then(response => {
-            console.log('data', response.data);
+            console.log('StartEndDetails/useEffect/data', response.data);
             setData(response.data);
             setPrintData(response.data.res_data);
           })
           .catch(error => {
-            console.log(error, 'error');
+            console.log(error, 'StartEndDetails/useEffect/error');
           });
     }, []);
-    console.log(printData);
+    console.log("StartEndDetails/printData/",printData);
     return (
       printData ?
       (

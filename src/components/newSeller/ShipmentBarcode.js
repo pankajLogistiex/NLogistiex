@@ -129,7 +129,7 @@ const [text12,setText12] = useState('');
         Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const d = R * c * 1000;
-    console.log('Distance between seller and pickup is ' + d + ' meters and ' + d / 1000 + ' Km' ); // distance in meters
+    console.log('ShipmentBarcode/CalculateDistance/Distance between seller and pickup is ' + d + ' meters and ' + d / 1000 + ' Km' ); // distance in meters
     return d;
   };
 
@@ -171,7 +171,7 @@ const [text12,setText12] = useState('');
                 {
                   text: 'Cancel reject',
                   onPress: () => {
-                    console.log('Cancel Pressed');
+                    // console.log('Cancel Pressed');
                     setEnableGeoFence(0);
                     setDropDownValue('');
                     setExpectedPackaging('');
@@ -195,13 +195,13 @@ const [text12,setText12] = useState('');
         })
           .then(status => {
             if (status) {
-              console.log('Location enabled');
+              console.log('ShipmentBarcode/handleRejection/Location enabled');
             }
           })
           .catch(err => {
-            console.log(err);
+            console.log("ShipmentBarcode/handleRejection",err);
           });
-        console.log('Location Lat long error', error);
+        console.log('ShipmentBarcode/handleRejection/Location Lat long error', error);
       });
   };
   const vibrateDevice = (type) => {
@@ -237,7 +237,7 @@ const [text12,setText12] = useState('');
 
 var dingAccept = new Sound(dingAccept11, error => {
   if (error) {
-    console.log('failed to load the sound', error);
+    console.log('ShipmentBarcode/dingAccept/failed to load the sound', error);
     return;
   }
   // if loaded successfully
@@ -258,7 +258,7 @@ var dingAccept = new Sound(dingAccept11, error => {
 
   var dingReject = new Sound(dingReject11, error => {
     if (error) {
-      console.log('failed to load the sound', error);
+      console.log('ShipmentBarcode/dingReject/failed to load the sound', error);
       return;
     }
     // if loaded successfully
@@ -379,10 +379,10 @@ var dingAccept = new Sound(dingAccept11, error => {
     });
   };
   const partialClose112 = () => {
-    console.log('partialClose popup shown11');
+    console.log('ShipmentBarcode/partialClose112/partialClose popup shown11');
 
     if (newaccepted + newrejected === Forward) {
-      console.log(newaccepted);
+      console.log("ShipmentBarcode/partialClose112/",newaccepted);
       // sendSmsOtp();
       navigation.navigate('POD', {
         Forward: Forward,
@@ -449,29 +449,29 @@ var dingAccept = new Sound(dingAccept11, error => {
         })
           .then(status => {
             if (status) {
-              console.log('Location enabled');
+              console.log('ShipmentBarcode/current_location/Location enabled');
             }
           })
           .catch(err => {
-            console.log(err);
+            console.log("ShipmentBarcode/current_location",err);
           });
-        console.log('Location Lat long error', error);
+        console.log('ShipmentBarcode/current_location/Location Lat long error', error);
       });
   };
 
   const sendSmsOtp = async () => {
-    console.log(mobileNumber);
+    console.log("ShipmentBarcode/sendSmsOtp",mobileNumber);
     const response = await axios
       .post(backendUrl + 'SMS/msg', {
         mobileNumber: mobileNumber,
       })
       .then(setShowModal11(true))
-      .catch(err => console.log('OTP not send'));
+      .catch(err => console.log('ShipmentBarcode/sendSmsOtp/OTP not send'));
     
   };
 
   function handleButtonPress11(item) {
-    console.log('partial button 121' + item);
+    console.log('ShipmentBarcode/handleButtonPress11/partial button 121' + item);
     if (item == 'PDF') {
       setDropDownValue11('');
       setModalVisible11(false);
@@ -511,7 +511,7 @@ var dingAccept = new Sound(dingAccept11, error => {
       })
       .catch(error => {
         alert('Invalid OTP, please try again !!');
-        console.log(error);
+        console.log("ShipmentBarcode/validateOtp/",error);
       });
   }
 
@@ -526,14 +526,14 @@ var dingAccept = new Sound(dingAccept11, error => {
 
 
   const callErrorAPIFromScanner = (error) => {
-    console.log('Scanner Error API called');
+    console.log('ShipmentBarcode/callErrorAPIFromScanner/Scanner Error API called');
     callApi(error,latitude,longitude,route.params.userId);
   }
 
   function CloseBagEndScan() {
     partialClose112();
-    console.log(bagSeal);
-    console.log(acceptedArray);
+    console.log("ShipmentBarcode/CloseBagEndScan/",bagSeal);
+    console.log("ShipmentBarcode/CloseBagEndScan/",acceptedArray);
     let date = new Date().getDate();
     let month = new Date().getMonth() + 1;
     let year = new Date().getFullYear();
@@ -541,19 +541,17 @@ var dingAccept = new Sound(dingAccept11, error => {
     // console.log(route.params.userId + date11 + bagIdNo);
     let bagId11 = route.params.userId + date11 + bagIdNo;
     setBagId(route.params.userId + date11 + bagIdNo);
-    console.log(bagId);
+    console.log("ShipmentBarcode/CloseBagScan/",bagId);
 
     db.transaction(tx => {
       tx.executeSql(
         'SELECT * FROM closeBag1 ',
         [],
         (tx, results) => {
-          console.log(results.rows.length);
+          // console.log(results.rows.length);
           serialNo = results.rows.length + 1;
           const bagID =
             route.params.userId + currentDate + (results.rows.length + 1);
-          console.log(bagID);
-          console.log(results);
           tx.executeSql(
             'INSERT INTO closeBag1 (bagSeal, bagId, bagDate, AcceptedList,status,consignorCode, stopId) VALUES (?, ?, ?, ?,?,?,?)',
             [
@@ -570,13 +568,13 @@ var dingAccept = new Sound(dingAccept11, error => {
               route.params.stopId
             ],
             (tx, results11) => {
-              console.log('Row inserted successfully');
+              // console.log('Row inserted successfully');
               setBagIdNo(bagIdNo + 1);
               setAcceptedArray([]);
               setBagSeal('');
-              console.log('\n Data Added to local db successfully closeBag');
+              console.log('\n ShipmentBarcode/CloseBagEndScan/Data Added to local db successfully closeBag');
               ToastAndroid.show('Bag closed successfully', ToastAndroid.SHORT);
-              console.log(results11);
+              console.log("ShipmentBarcode/CloseBagEndScan/",results11);
               setBarcode('');
               setPDCheck(true);
               setCheck11(0);
@@ -584,13 +582,13 @@ var dingAccept = new Sound(dingAccept11, error => {
               viewDetailBag();
             },
             error => {
-              console.log('Error occurred while inserting a row:', error);
+              console.log('ShipmentBarcode/CloseBagEndScan/Error occurred while inserting a row:', error);
             },
           );
         },
         error => {
           console.log(
-            'Error occurred while generating a unique bag ID:',
+            'ShipmentBarcode/CloseBagEndScan/Error occurred while generating a unique bag ID:',
             error,
           );
         },
@@ -599,8 +597,7 @@ var dingAccept = new Sound(dingAccept11, error => {
   }
 
   function CloseBag() {
-    console.log(bagSeal);
-    console.log(acceptedArray);
+    console.log("ShipmentBarcode/CloseBag/",bagSeal);
     let date = new Date().getDate();
     let month = new Date().getMonth() + 1;
     let year = new Date().getFullYear();
@@ -608,19 +605,19 @@ var dingAccept = new Sound(dingAccept11, error => {
     // console.log(route.params.userId + date11 + bagIdNo);
     let bagId11 = route.params.userId + date11 + bagIdNo;
     setBagId(route.params.userId + date11 + bagIdNo);
-    console.log(bagId);
+    console.log("ShipmentBarcode/CloseBag/",bagId);
 
     db.transaction(tx => {
       tx.executeSql(
         'SELECT * FROM closeBag1 ',
         [],
         (tx, results) => {
-          console.log(results.rows.length);
+          console.log("ShipmentBarcode/CloseBag/",results.rows.length);
           serialNo = results.rows.length + 1;
           const bagID =
             route.params.userId + currentDate + (results.rows.length + 1);
-          console.log(bagID);
-          console.log(results);
+          console.log("ShipmentBarcode/CloseBag/",bagID);
+          console.log("ShipmentBarcode/CloseBag",results);
 
           tx.executeSql(
             'INSERT INTO closeBag1 (bagSeal, bagId, bagDate, AcceptedList,status,consignorCode,stopId) VALUES (?,?, ?, ?, ?,?,?)',
@@ -638,13 +635,13 @@ var dingAccept = new Sound(dingAccept11, error => {
               route.params.stopId
             ],
             (tx, results11) => {
-              console.log('Row inserted successfully');
+              console.log('ShipmentBarcode/CloseBag/Row inserted successfully');
               setBagIdNo(bagIdNo + 1);
               setAcceptedArray([]);
               setBagSeal('');
-              console.log('\n Data Added to local db successfully closeBag');
+              console.log('\n ShipmentBarcode/CloseBag/Data Added to local db successfully closeBag');
               ToastAndroid.show('Bag closed successfully', ToastAndroid.SHORT);
-              console.log(results11);
+              console.log("ShipmentBarcode/CloseBag/",results11);
               setBarcode('');
               setPDCheck(true);
                 setText11('');
@@ -652,13 +649,13 @@ var dingAccept = new Sound(dingAccept11, error => {
               viewDetailBag();
             },
             error => {
-              console.log('Error occurred while inserting a row:', error);
+              console.log('ShipmentBarcode/CloseBag/Error occurred while inserting a row:', error);
             },
           );
         },
         error => {
           console.log(
-            'Error occurred while generating a unique bag ID:',
+            'ShipmentBarcode/CloseBag/Error occurred while generating a unique bag ID:',
             error,
           );
         },
@@ -669,13 +666,13 @@ var dingAccept = new Sound(dingAccept11, error => {
     db.transaction(tx => {
       tx.executeSql('SELECT * FROM closeBag1', [], (tx1, results) => {
         let temp = [];
-        console.log(results.rows.length);
+        console.log("ShipmentBarcode/viewDetailBag/",results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
         }
         // ToastAndroid.show("Sync Successful",ToastAndroid.SHORT);
         console.log(
-          'Data from Local Database : \n ',
+          'ShipmentBarcode/viewDeatilsBag/Data from Local Database : \n ',
           JSON.stringify(temp, null, 4),
         );
         // console.log('Table1 DB OK:', temp.length);
@@ -692,21 +689,20 @@ var dingAccept = new Sound(dingAccept11, error => {
         'CREATE TABLE IF NOT EXISTS closeBag1 (bagSeal TEXT PRIMARY KEY, bagId TEXT, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode Text, stopId Text)',
         [],
         (tx, results) => {
-          console.log('Table created successfully');
+          console.log('ShipmentBarcode/createTableBag1/Table created successfully');
         },
         error => {
-          console.log('Error occurred while creating the table:', error);
+          console.log('ShipmentBarcode/createTableBag1/Error occurred while creating the table:', error);
         },
       );
     });
   };
-  console.log("Stopid",route.params.stopId == stopId, stopId)
   const updateDetails2 = (expectedPackagingId, stopId) => {
-    console.log('scan ' + barcode.toString());
+    console.log('ShipmentBarcode/updateDetails2/scan ' + barcode.toString());
     if(route.params.stopId == stopId){
-      console.log("updatedetails when stopid same")
+      console.log("ShipmentBarcode/updateDetails2/updatedetails when stopid same")
       setAcceptedArray([...acceptedArray, barcode.toString()]);
-      console.log(acceptedArray);
+      console.log("ShipmentBarcode/updateDetails2/",acceptedArray);
       db.transaction(tx => {
         tx.executeSql(
           'UPDATE SellerMainScreenDetails SET status="accepted", packagingId=?, expectedPackagingId=?, eventTime=?, latitude=?, longitude=? WHERE  stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) AND FMtripId=?',
@@ -725,22 +721,22 @@ var dingAccept = new Sound(dingAccept11, error => {
           (tx1, results) => {
             let temp = [];
             if (results.rowsAffected > 0) {
-              console.log(barcode + 'accepted');
-              console.log('accepted at pa 1', expectedPackagingId)
+              console.log(barcode + 'ShipmentBarcode/updateDetails2/accepted');
+              // console.log('accepted at pa 1', expectedPackagingId)
               Vibration.vibrate(200);
               dingAccept.play(success => {
                 if (success) {
-                  console.log('successfully finished playing');
+                  console.log('ShipmentBarcode/updateDetails2/successfully finished playing');
                 } else {
-                  console.log('playback failed due to audio decoding errors');
+                  console.log('ShipmentBarcode/updateDetails2/playback failed due to audio decoding errors');
                 }
               });
               displayDataSPScan();
               
             } else {
-              console.log(barcode + 'not accepted');
+              console.log(barcode + 'ShipmentBarcode/updateDetails2/not accepted');
             }
-            console.log(results.rows.length);
+            console.log("ShipmentBarcode/updateDetails2/",results.rows.length);
             for (let i = 0; i < results.rows.length; ++i) {
               temp.push(results.rows.item(i));
             }
@@ -772,22 +768,22 @@ var dingAccept = new Sound(dingAccept11, error => {
         (tx1, results) => {
           let temp = [];
           if (results.rowsAffected > 0) {
-            console.log(barcode + 'accepted');
-            console.log('accepted at pa 1', expectedPackagingId)
+            console.log(barcode + 'ShipmentBarcode/updateDetails2/accepted');
+            // console.log('accepted at pa 1', expectedPackagingId)
             Vibration.vibrate(200);
             dingAccept.play(success => {
               if (success) {
-                console.log('successfully finished playing');
+                console.log('ShipmentBarcode/updateDetails2/successfully finished playing');
               } else {
-                console.log('playback failed due to audio decoding errors');
+                console.log('ShipmentBarcode/updateDetails2/playback failed due to audio decoding errors');
               }
             });
             displayDataSPScan();
             
           } else {
-            console.log(barcode + 'not accepted');
+            console.log(barcode + 'ShipmentBarcode/updateDetails2/not accepted');
           }
-          console.log(results.rows.length);
+          console.log("ShipmentBarcode/updateDetails2",results.rows.length);
           for (let i = 0; i < results.rows.length; ++i) {
             temp.push(results.rows.item(i));
           }
@@ -819,9 +815,9 @@ var barcode11 = barcode;
               dingAccept.play(success => {
                 if (success) {
                   // Vibration.vibrate(800);
-                  console.log('successfully finished playing');
+                  console.log('ShipmentBarcode/rejectDetails2/successfully finished playing');
                 } else {
-                  console.log('playback failed due to audio decoding errors');
+                  console.log('ShipmentBarcode/rejectDetails2/playback failed due to audio decoding errors');
                 }
               });
               setDropDownValue('');
@@ -847,16 +843,16 @@ var barcode11 = barcode;
         [],
         (tx1, results) => {
           let temp = [];
-          console.log(results.rows.length);
+          // console.log(results.rows.length);
           for (let i = 0; i < results.rows.length; ++i) {
             temp.push(results.rows.item(i));
-            console.log('barcode ' + results.rows.item(i).awbNo);
+            // console.log('barcode ' + results.rows.item(i).awbNo);
           }
           // ToastAndroid.show('Sync Successful',ToastAndroid.SHORT);
-          console.log(
-            'Data from Local Database : \n ',
-            JSON.stringify(temp, null, 4),
-          );
+          // console.log(
+          //   'Data from Local Database : \n ',
+          //   JSON.stringify(temp, null, 4),
+          // );
         },
       );
     });
@@ -868,17 +864,12 @@ var barcode11 = barcode;
         [],
         (tx1, results) => {
           let temp = [];
-          console.log(results.rows.length);
+          // console.log(results.rows.length);
           // setnewRejected(results.rows.length);
           for (let i = 0; i < results.rows.length; ++i) {
             temp.push(results.rows.item(i));
-            console.log('barcode ' + results.rows.item(i).awbNo);
           }
           // ToastAndroid.show('Sync Successful',ToastAndroid.SHORT);
-          console.log(
-            'Data from Local Database : \n ',
-            JSON.stringify(temp, null, 4),
-          );
         },
       );
     });
@@ -888,7 +879,6 @@ var barcode11 = barcode;
   };
 
   const getCategories = (data,stopId) => {
-    console.log("In Category fun",route.params.stopId == stopId)
     if(route.params.stopId == stopId){
       db.transaction(txn => {
         txn.executeSql(
@@ -912,9 +902,9 @@ var barcode11 = barcode;
                       Vibration.vibrate(800);
                       dingReject.play(success => {
                         if (success) {
-                          console.log('successfully finished playing');
+                          console.log('ShipmentBarcode/getCategories/successfully finished playing');
                         } else {
-                          console.log('playback failed due to audio decoding errors');
+                          console.log('ShipmentBarcode/getCategories/playback failed due to audio decoding errors');
                         }
                       });
                       setBarcode('');
@@ -924,9 +914,9 @@ var barcode11 = barcode;
                       setCheck11(0);
                       dingReject.play(success => {
                         if (success) {
-                          console.log('successfully finished playing');
+                          console.log('ShipmentBarcode/getCategoies/successfully finished playing');
                         } else {
-                          console.log('playback failed due to audio decoding errors');
+                          console.log('ShipmentBarcode/getCategories/playback failed due to audio decoding errors');
                         }
                       });
                       setBarcode('');
@@ -938,7 +928,7 @@ var barcode11 = barcode;
             } 
           },
           error => {
-            console.log('error on getting categories ' + error.message);
+            console.log('ShipmentBarcode/getCategories/error on getting categories ' + error.message);
           },
         );
       });
@@ -966,9 +956,9 @@ var barcode11 = barcode;
                       Vibration.vibrate(800);
                       dingReject.play(success => {
                         if (success) {
-                          console.log('successfully finished playing');
+                          console.log('ShipmentBarcode/getCategories/successfully finished playing');
                         } else {
-                          console.log('playback failed due to audio decoding errors');
+                          console.log('ShipmentBarcode/getCategoies/playback failed due to audio decoding errors');
                         }
                       });
                       setBarcode('');
@@ -978,9 +968,9 @@ var barcode11 = barcode;
                       setCheck11(0);
                       dingReject.play(success => {
                         if (success) {
-                          console.log('successfully finished playing');
+                          console.log('ShipmentBarcode/getCategories/successfully finished playing');
                         } else {
-                          console.log('playback failed due to audio decoding errors');
+                          console.log('ShipmentBarcode/getCategories/playback failed due to audio decoding errors');
                         }
                       });
                       setBarcode('');
@@ -992,7 +982,7 @@ var barcode11 = barcode;
             } 
           },
           error => {
-            console.log('error on getting categories ' + error.message);
+            console.log('ShipmentBarcode/getCategories/error on getting categories ' + error.message);
           },
         );
       });
@@ -1063,7 +1053,7 @@ var barcode11 = barcode;
           setModal1(true);
         }
       } else {
-        console.log(packagingID, "is not equal to", value)
+        console.log(packagingID, "ShipmentBarcode/handlePackaging/is not equal to", value)
       }
       setShowCloseBagModal12(false);
       setShowOuterScanner(true);
@@ -1080,17 +1070,16 @@ var barcode11 = barcode;
         setLen(0);
       } else {
         setModal1(true);
-        console.log("values not matched ")
+        console.log("ShipmentBarcode/handleReScan/values not matched ")
       }
     }
     
     const onSuccess = (e) => {
-      console.log(e.data, 'barcode');
+      console.log(e.data, 'ShipmentBarcode/onSuccess/barcode');
       setBarcode(e.data);
       setText11(e.data);
       displayData(e.data, (stopId) => {
         if (stopId) {
-          console.log("category function called");
           getCategories(e.data, stopId);
         } else{
           handleInvalidScan();
@@ -1099,15 +1088,15 @@ var barcode11 = barcode;
     };
     
     const handleInvalidScan = () => {
-      console.log("Wrong Product")
+      console.log("ShipmentBarcode/handleInvalidScan/Wrong Product")
       ToastAndroid.show('Scanning wrong product', ToastAndroid.SHORT);
       setCheck11(0);
       Vibration.vibrate(800);
       dingReject.play(success => {
         if (success) {
-          console.log('successfully finished playing');
+          console.log('ShipmentBarcode/handleInvidScan/successfully finished playing');
         } else {
-          console.log('playback failed due to audio decoding errors');
+          console.log('ShipmentBarcode/handleInvidScan/playback failed due to audio decoding errors');
         }
       });
       setBarcode('');
@@ -1121,12 +1110,12 @@ var barcode11 = barcode;
       dingAccept.play(success => {
         if (success) {
 
-          console.log('successfully finished playing');
+          console.log('ShipmentBarcode/onSuccess11/successfully finished playing');
         } else {
-          console.log('playback failed due to audio decoding errors');
+          console.log('ShipmentBarcode/onSuccess11/playback failed due to audio decoding errors');
         }
       });
-      console.log(e.data, 'sealID');
+      console.log(e.data, 'ShipmentBarcode/onSuccess11/sealID');
       // getCategories(e.data);
       setBagSeal(e.data);
     };
@@ -1137,23 +1126,22 @@ var barcode11 = barcode;
       dingAccept.play(success => {
         if (success) {
 
-          console.log('successfully finished playing');
+          console.log('ShipmentBarcode/onSuccess12/successfully finished playing');
         } else {
-          console.log('playback failed due to audio decoding errors');
+          console.log('ShipmentBarcode/onSuccess12/playback failed due to audio decoding errors');
         }
       });
-      console.log(e.data, 'ExpectedPackagingID');
+      console.log(e.data, 'ShipmentBarcode/onSucess12/ExpectedPackagingID');
       // getCategories(e.data);
       setExpectedPackaging(e.data);
       handlepackaging(e.data, stopId);
     };
     const onSucessThroughButton = (data21)=>{
-        console.log(data21, 'barcode');
+        console.log(data21, 'ShipmentBarcode/onSucessThroughButton/barcode');
         setBarcode(data21);
         setText11(data21);
         displayData(data21, (stopId) => {
           if (stopId) {
-            console.log("category function called");
             getCategories(data21,stopId);
           }
           else{

@@ -105,13 +105,13 @@ export default function MyTrip({ navigation, route }) {
         })
           .then(status => {
             if (status) {
-              console.log('Location enabled');
+              console.log('MyTrip/current_location/Location enabled');
             }
           })
           .catch(err => {
-            console.log(err);
+            console.log("MyTrip/current_location",err);
           });
-        console.log('Location Lat long error', error);
+        console.log('MyTrip/current_location/Location Lat long error', error);
       });
   };
 
@@ -140,7 +140,7 @@ export default function MyTrip({ navigation, route }) {
         setLoading(false);
       })
       .catch((error) => {
-        console.log(error, "error");
+        console.log(error, "MyTrip/getTripDetails/error");
         setLoading(false);
       });
   }
@@ -156,7 +156,7 @@ export default function MyTrip({ navigation, route }) {
         setLoading(false);
       })
       .catch((error) => {
-        console.log(error, "error");
+        console.log(error, "MyTrip/getTripData/error");
         setLoading(false);
       });
   }
@@ -354,7 +354,7 @@ export default function MyTrip({ navigation, route }) {
           setUploadStatus("done");
         })
         .catch((error) => {
-          console.log("upload error", error);
+          console.log("MyTrip/takeStartPhoto/upload error", error);
           setUploadStatus("error");
           callApi(error,latitude,longitude,userId);
         });
@@ -397,7 +397,7 @@ export default function MyTrip({ navigation, route }) {
           setUploadStatus("done");
         })
         .catch((error) => {
-          console.log("upload error", error);
+          console.log("MyTrip/takeEndPhoto/upload error", error);
           setUploadStatus("error");
           callApi(error,latitude,longitude,userId);
         });
@@ -433,14 +433,14 @@ export default function MyTrip({ navigation, route }) {
               [200, tripID],
               (tx1, results) => {
                 if (results.rowsAffected > 0) {
-                  console.log("tripStatus updated");
+                  console.log("MyTrip/submitEndTrip/tripStatus updated");
                 }
               }
             );
           });
         })
         .catch(function (error) {
-          console.log(error);
+          console.log("MyTrip/submitEndTrip/",error);
         });
     })();
   };
@@ -481,7 +481,7 @@ export default function MyTrip({ navigation, route }) {
                 [50, tripID],
                 (tx1, results) => {
                   if (results.rowsAffected > 0) {
-                    console.log("tripStatus updated");
+                    console.log("MyTrip/submitStartTrip/tripStatus updated");
                   }
                 }
               );
@@ -494,7 +494,7 @@ export default function MyTrip({ navigation, route }) {
           setShowModal(true);
         })
         .catch(function (error) {
-          console.log(error);
+          console.log("MyTrip/submitStartTrip",error);
         });
     })();
   };
