@@ -53,7 +53,7 @@ import Sound from "react-native-sound";
 import { backendUrl } from "../../utils/backendUrl";
 import { useDispatch, useSelector } from "react-redux";
 import { setAutoSync } from "../../redux/slice/autoSyncSlice";
-
+ 
 const db = openDatabase({
   name: "rn_sqlite",
 });
@@ -93,7 +93,7 @@ const HandoverShipmentRTO = ({ route }) => {
 
   var dingAccept = new Sound(dingAccept11, (error) => {
     if (error) {
-      console.log("failed to load the sound", error);
+      // console.log("failed to load the sound", error);
       return;
     }
     // if loaded successfully
@@ -124,7 +124,7 @@ const HandoverShipmentRTO = ({ route }) => {
   //   });
 
   useEffect(() => {
-    console.log(acceptedItemData);
+    // console.log(acceptedItemData);
     if (Object.keys(acceptedItemData).length > 0) {
       try {
         AsyncStorage.setItem(
@@ -154,7 +154,7 @@ const HandoverShipmentRTO = ({ route }) => {
 
   var dingReject = new Sound(dingReject11, (error) => {
     if (error) {
-      console.log("failed to load the sound", error);
+      // console.log("failed to load the sound", error);
       return;
     }
     // if loaded successfully
@@ -193,13 +193,13 @@ const HandoverShipmentRTO = ({ route }) => {
         })
           .then((status) => {
             if (status) {
-              console.log("Location enabled");
+              console.log("HandoverShipmentsRTO.js/currentLocation Location enabled");
             }
           })
           .catch((err) => {
             console.log(err);
           });
-        console.log("Location Lat long error", error);
+        console.log("HandoverShipmentsRTO.js/currentLocation Location Lat long error", error);
       });
   };
 
@@ -224,7 +224,7 @@ const HandoverShipmentRTO = ({ route }) => {
       ? "#004aad"
       : "gray.300";
   // let serialNo = 0;
-  console.log(route.params.tripID);
+  // console.log(route.params.tripID);
   useEffect(() => {
     if (data && data.length > 0) {
       const fetchData = async () => {
@@ -251,7 +251,7 @@ const HandoverShipmentRTO = ({ route }) => {
         setAcceptedItemData(parsedData);
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
   };
 
@@ -294,15 +294,15 @@ const HandoverShipmentRTO = ({ route }) => {
   // };
 
   function CloseBag(consCode, consName,consignorCodeRTO) {
-    console.log(bagSeal);
-    console.log(acceptedArray);
+    // console.log(bagSeal);
+    // console.log(acceptedArray);
     db.transaction((tx) => {
       tx.executeSql(
         "SELECT * FROM closeHandoverBag1 Where stopId=? AND bagDate=? ",
         [consCode, currentDate],
         (tx, results) => {
-          console.log(results.rows.length);
-          console.log(results);
+          // console.log(results.rows.length);
+          // console.log(results);
           tx.executeSql(
             "INSERT INTO closeHandoverBag1 (bagSeal, bagId, bagDate, AcceptedList,status,consignorCode,stopId,consignorName) VALUES (?, ?, ?, ?,?,?,?,?)",
             [
@@ -318,7 +318,7 @@ const HandoverShipmentRTO = ({ route }) => {
               consName,
             ],
             (tx, results11) => {
-              console.log("Row inserted successfully");
+              console.log("HandoverShipmentsRTO.js/closeBag Row inserted successfully");
               setAcceptedArray([]);
               setBagSeal("");
               // acceptedItemData[consCode] = null;
@@ -330,18 +330,18 @@ const HandoverShipmentRTO = ({ route }) => {
                 )
               );
 
-              ToastAndroid.show("Bag closed successfully", ToastAndroid.SHORT);
-              console.log(results11);
+              ToastAndroid.show("HandoverShipmentsRTO/closeBag Bag closed successfully", ToastAndroid.SHORT);
+              // console.log(results11);
               viewDetailBag();
             },
             (error) => {
-              console.log("Error occurred while inserting a row:", error);
+              console.log("HandoverShipmentsRTO.js/closeBag Error occurred while inserting a row:", error);
             }
           );
         },
         (error) => {
           console.log(
-            "Error occurred while generating a unique bag ID:",
+            "HandoverShipmentsRTO/closeBag Error occurred while generating a unique bag ID:",
             error
           );
         }
@@ -353,20 +353,20 @@ const HandoverShipmentRTO = ({ route }) => {
     db.transaction((tx) => {
       tx.executeSql("SELECT * FROM closeHandoverBag1", [], (tx1, results) => {
         let temp = [];
-        console.log(results.rows.length);
+        // console.log(results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
         }
-        console.log(
-          "Data from Local Database Handover Bag: \n ",
-          JSON.stringify(temp, null, 4)
-        );
+        // console.log(
+          // "Data from Local Database Handover Bag: \n ",
+          // JSON.stringify(temp, null, 4)
+        // );
       });
     });
   };
 
   const updateDetails2 = (data) => {
-    console.log("scan 4545454");
+    console.log("HandoverShipmentsRTO.js/updateDetails2 scan 4545454");
 
     db.transaction((tx) => {
       tx.executeSql(
@@ -374,19 +374,19 @@ const HandoverShipmentRTO = ({ route }) => {
         [route.params.tripID,data, data, data],
         (tx1, results) => {
           let temp = [];
-          console.log("Results", results.rowsAffected);
-          console.log(results);
+          console.log("HandoverShipmentsRTO.js/updateDetails2 Results", results.rowsAffected);
+          // console.log(results);
 
           if (results.rowsAffected > 0) {
-            console.log(data + "accepted");
+            // console.log(data + "accepted");
             ToastAndroid.show(data + " Accepted", ToastAndroid.SHORT);
             Vibration.vibrate(200);
             dingAccept.play((success) => {
               if (success) {
                 // Vibration.vibrate(800);
-                console.log("successfully finished playing");
+                console.log("HandoverShipmentsRTO.js/updateDetails2 successfully finished playing");
               } else {
-                console.log("playback failed due to audio decoding errors");
+                console.log("HandoverShipmentsRTO.js/updateDetails2 playback failed due to audio decoding errors");
               }
             });
             db.transaction((tx) => {
@@ -394,7 +394,7 @@ const HandoverShipmentRTO = ({ route }) => {
                 'SELECT stopId FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND (awbNo = ? OR clientShipmentReferenceNumber = ? OR clientRefId = ? )  AND handoverStatus="accepted"',
                 [route.params.tripID, data, data, data],
                 (tx2, results122) => {
-                  console.log(results122.rows.item(0));
+                  // console.log(results122.rows.item(0));
                   loadDetails(
                     results122.rows.item(0).stopId,
                     data,
@@ -405,9 +405,9 @@ const HandoverShipmentRTO = ({ route }) => {
               );
             });
           } else {
-            console.log(barcode + "not accepted");
+            console.log(barcode + "HandoverShipmentsRTO/updateDetails2 not accepted");
           }
-          console.log(results.rows.length);
+          // console.log(results.rows.length);
           // for (let i = 0; i < results.rows.length; ++i) {
           //     temp.push(results.rows.item(i));
           // }
@@ -484,7 +484,7 @@ const HandoverShipmentRTO = ({ route }) => {
   };
 
   function uploadDataToServer(data,dataUD) {
-    console.log("===========BarCode===========", data.item(0));
+    // console.log("===========BarCode===========", data.item(0));
     const row = data.item(0);
     try {
       axios
@@ -505,24 +505,24 @@ const HandoverShipmentRTO = ({ route }) => {
         })
         .then((response) => {
           console.log(
-            "===========Return Handover Result===========",
+            "HandoverShipmentsRTO/updateDataToServer ===========Return Handover Result===========",
             response.data
           );
           updateDetails2(dataUD);
         })
         .catch((error) => {
           console.log(
-            "===========Return Handover Error===========",
+            "HandoverShipmentsRTO/updateDataToServer ===========Return Handover Error===========",
             error.response.data
           );
-          console.log(error);
+          // console.log(error);
           ToastAndroid.show(
             "API Error",
             ToastAndroid.SHORT
           );
         });
     } catch (e) {
-      console.log("++++++++++++++++Catch Error++++++++++++++++", e);
+      console.log("HandoverShipmentsRTO.js/updateDataToServer ++++++++++++++++Catch Error++++++++++++++++", e);
     }
   }
 
@@ -532,20 +532,20 @@ const HandoverShipmentRTO = ({ route }) => {
         'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND (awbNo = ? OR clientShipmentReferenceNumber = ? OR clientRefId = ? )AND handoverStatus IS NULL ',
         [route.params.tripID, data, data, data],
         (sqlTxn, res) => {
-          console.log("categories retrieved successfully", res.rows.length);
+          console.log("HandoverShipmentsRTO.js/getCategories categories retrieved successfully", res.rows.length);
 
           if (!res.rows.length) {
             db.transaction((tx) => {
-              console.log("ok3333", data);
+              console.log("HandoverShipmentsRTO.js/getCategories ok3333", data);
 
               tx.executeSql(
                 'Select * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND handoverStatus IS NOT NULL  AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?)',
                 [route.params.tripID, data, data, data],
                 (tx1, results) => {
-                  console.log("Results121", results.rows.length);
-                  console.log("ok4444", data);
+                  console.log("HandoverShipmentsRTO.js/getCategories Results121", results.rows.length);
+                  console.log("HandoverShipmentsRTO.js/getCategories ok4444", data);
 
-                  console.log(data);
+                  // console.log(data);
                   if (results.rows.length === 0) {
                     ToastAndroid.show(
                       "Scanning wrong product",
@@ -554,10 +554,10 @@ const HandoverShipmentRTO = ({ route }) => {
                     Vibration.vibrate(800);
                     dingReject.play((success) => {
                       if (success) {
-                        console.log("successfully finished playing");
+                        console.log("HandoverShipmentsRTO.js/getCategories successfully finished playing");
                       } else {
                         console.log(
-                          "playback failed due to audio decoding errors"
+                          "HandoverShipmentsRTO/getCategories playback failed due to audio decoding errors"
                         );
                       }
                     });
@@ -569,10 +569,10 @@ const HandoverShipmentRTO = ({ route }) => {
                     Vibration.vibrate(800);
                     dingReject.play((success) => {
                       if (success) {
-                        console.log("successfully finished playing");
+                        console.log("HandoverShipmentsRTO.js/getCategories successfully finished playing");
                       } else {
                         console.log(
-                          "playback failed due to audio decoding errors"
+                          "HandoverShipmentsRTO/getCategories playback failed due to audio decoding errors"
                         );
                       }
                     });
@@ -582,7 +582,7 @@ const HandoverShipmentRTO = ({ route }) => {
                         'SELECT stopId FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND (awbNo = ? OR clientShipmentReferenceNumber = ? OR clientRefId = ? )  AND handoverStatus="accepted"',
                         [route.params.tripID,data, data, data],
                         (tx2, results122) => {
-                          console.log(results122.rows.item(0));
+                          // console.log(results122.rows.item(0));
                           //  if (acceptedItemData[results122.rows.item(0).stopId] !== null)
                           //  {
 
@@ -623,14 +623,14 @@ const HandoverShipmentRTO = ({ route }) => {
           }
         }, 
         (error) => {
-          console.log("error on getting categories " + error.message);
+          console.log("HandoverShipmentsRTO.js/getCategories error on getting categories " + error.message);
         }
       );
     });
   };
 
   const onSuccess = (e) => {
-    console.log(e.data, "barcode");
+    // console.log(e.data, "barcode");
     setBarcode(e.data);
     // Vibration.vibrate(100);
     // RNBeep.beep();
@@ -646,7 +646,7 @@ const HandoverShipmentRTO = ({ route }) => {
 
 
   const callErrorAPIFromScanner = (error) => {
-    console.log('Scanner Error API called');
+    console.log('HandoverShipmentsRTO/callErrorAPIFromScanner Scanner Error API called');
     callApi(error,latitude,longitude,userId);
   }
 
@@ -655,9 +655,9 @@ const HandoverShipmentRTO = ({ route }) => {
     // Vibration.vibrate(800);
     dingAccept.play((success) => {
       if (success) {
-        console.log("successfully finished playing");
+        console.log("HandoverShipmentsRTO.js/Sound successfully finished playing");
       } else {
-        console.log("playback failed due to audio decoding errors");
+        console.log("HandoverShipmentsRTO.js/Sound playback failed due to audio decoding errors");
       }
     });
     // RNBeep.beep();
@@ -673,17 +673,17 @@ const HandoverShipmentRTO = ({ route }) => {
         [conscode12,route.params.tripID],
         (sqlTxn, _res) => {
           setModalVisible(false);
-          console.log("bag status updated to false");
+          console.log(" HandoverShipmentsRTO/updateBagStatus bag status updated to false");
         },
         (error) => {
-          console.log("error on adding data " + error.message);
+          console.log("HandoverShipmentsRTO.js/updateBagStatus error on adding data " + error.message);
         }
       );
     });
   };
 
   const onSucessThroughButton = (data21) => {
-    console.log(data21, "barcode");
+    // console.log(data21, "barcode");
     setBarcode(data21);
 
     // barcode === data21 ? getCategories(data21) : setBarcode(data21);

@@ -63,12 +63,12 @@ const OpenBags = ({ route }) => {
     db.transaction((tx) => {
       tx.executeSql("SELECT * FROM SyncSellerPickUp WHERE FMtripId = ?", [route.params.tripID], (tx1, results) => {
         let temp = [];
-        console.log(results.rows.length);
+        // console.log(results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
         }
         setData(temp);
-        console.log(data[0].ShipmentListArray.split().length, "data");
+        // console.log(data[0].ShipmentListArray.split().length, "data");
       });
     });
   };
@@ -85,8 +85,8 @@ const OpenBags = ({ route }) => {
   };
 
   function CloseBag() {
-    console.log(bagId);
-    console.log(bagSeal);
+    console.log("OpenBags.jsCloseBag",bagId);
+    console.log("OpenBags.jsCloseBag",bagSeal);
     setBagId("");
     setBagIdNo(bagIdNo + 1);
   }
@@ -94,7 +94,7 @@ const OpenBags = ({ route }) => {
   const onSuccess11 = (e) => {
     Vibration.vibrate(100);
     RNBeep.beep();
-    console.log(e.data, "sealID");
+    // console.log(e.data, "sealID");
     // getCategories(e.data);
     setBagSeal(e.data);
   };
@@ -135,14 +135,14 @@ const OpenBags = ({ route }) => {
             bagId11: results.rows.item(i).bagId,
           });
         }
-        console.log(JSON.stringify(rows11, null, 4));
+        // console.log(JSON.stringify(rows11, null, 4));
         setTableData(rows11);
       });
     });
   };
   useEffect(() => {
     fetchTableData();
-    console.log("fdfdd11 ", acceptedItemData);
+    // console.log("fdfdd11 ", acceptedItemData);
   }, []);
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
@@ -181,18 +181,18 @@ const OpenBags = ({ route }) => {
 
   function CloseBag(consCode) {
     var consName = acceptedItemData[stopId].consignorName;
-    console.log(bagSeal);
+    // console.log(bagSeal);
     // console.log(acceptedArray);
     db.transaction((tx) => {
 
       tx.executeSql("SELECT * FROM SyncSellerPickUp WHERE FMtripId = ? AND stopId=?  ", [route.params.tripID,consCode], (tx1, resultsCC) => {        
-        console.log(resultsCC.rows.item(0).consignorCode);
+        // console.log(resultsCC.rows.item(0).consignorCode);
       tx.executeSql(
         "SELECT * FROM closeHandoverBag1 Where stopId=? AND bagDate=? ",
         [consCode, currentDate],
         (tx, results) => {
-          console.log(results.rows.length);
-          console.log(results);
+          // console.log(results.rows.length);
+          // console.log(results);
           tx.executeSql(
             "INSERT INTO closeHandoverBag1 (bagSeal, bagId, bagDate, AcceptedList,status,consignorCode,stopId,consignorName) VALUES (?, ?, ?,?, ?,?,?,?)",
             [
@@ -206,7 +206,7 @@ const OpenBags = ({ route }) => {
               consName,
             ],
             (tx, results11) => {
-              console.log("Row inserted successfully");
+              // console.log("Row inserted successfully");
               // setAcceptedArray([]);
               // acceptedItemData[consCode] = null;
               setAcceptedItemData(
@@ -218,20 +218,20 @@ const OpenBags = ({ route }) => {
               );
               setBagSeal("");
               console.log(
-                " Data Added to local db successfully Handover closeBag"
+                " OpenBags.jsCloseBags Data Added to local db successfully Handover closeBag"
               );
               ToastAndroid.show("Bag closed successfully", ToastAndroid.SHORT);
-              console.log(results11);
+              // console.log(results11);
               viewDetailBag();
             },
             (error) => {
-              console.log("Error occurred while inserting a row:", error);
+              console.log("OpenBags.jsCloseBags Error occurred while inserting a row:", error);
             }
           );
         },
         (error) => {
           console.log(
-            "Error occurred while generating a unique bag ID:",
+            "OpenBags.jsCloseBags Error occurred while generating a unique bag ID:",
             error
           );
         }
@@ -244,12 +244,12 @@ const OpenBags = ({ route }) => {
     db.transaction((tx) => {
       tx.executeSql("SELECT * FROM closeHandoverBag1", [], (tx1, results) => {
         let temp = [];
-        console.log(results.rows.length);
+        // console.log(results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
         }
         console.log(
-          "Data from Local Database Handover Bag: \n ",
+          "OpenBags.jsViewBagsDetails Data from Local Database Handover Bag: \n ",
           JSON.stringify(temp, null, 4)
         );
       });
@@ -282,7 +282,7 @@ const OpenBags = ({ route }) => {
         //   .catch((err) => {
         //     console.log(err);
         //   });
-        console.log("Location Lat long error", error);
+        console.log("OpenBags.jsCurrentLocation Location Lat long error", error);
       });
   };
 
@@ -333,7 +333,7 @@ const OpenBags = ({ route }) => {
       );
     });
   }
-//  console.log(acceptedHandoverStatus);
+//  console.log(acceptedHandoverStatus); 
   function getAllConsignors() {
     db.transaction((tx) => {
       tx.executeSql("SELECT * FROM SyncSellerPickUp WHERE FMtripId = ?", [route.params.tripID], (tx1, results) => {
@@ -346,7 +346,7 @@ const OpenBags = ({ route }) => {
 
   function closeHandover() {
     let time11 = new Date().valueOf();
-    console.log("===handover close data===", {
+    console.log("OpenBags.jscloseHandover ===handover close data===", {
       handoverStatus: acceptedHandoverStatus,
       runsheets: runSheetNumbers,
       feUserID: userId,

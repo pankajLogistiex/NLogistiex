@@ -122,13 +122,13 @@ const SellerHandoverSelection = ({ route }) => {
   //       })
   //         .then(status => {
   //           if (status) {
-  //             console.log('Location enabled');
+  //             console.log('SellerHandoverSelection.js/ ','Location enabled');
   //           }
   //         })
   //         .catch(err => {
-  //           console.log(err);
+  //           console.log('SellerHandoverSelection.js/ ',err);
   //         });
-  //       console.log('Location Lat long error', error);
+  //       console.log('SellerHandoverSelection.js/ ','Location Lat long error', error);
   //     });
   // };
   const DisplayData = async () => {
@@ -163,14 +163,14 @@ const SellerHandoverSelection = ({ route }) => {
         deviceIPaddress: IpAddress,
       })
       .then(function (response) {
-        console.log(response.data);
+        console.log('SellerHandoverSelection.js/notPicked ',response.data);
         db.transaction(tx => {
           tx.executeSql(
             'UPDATE SellerMainScreenDetails SET status="notDelivered", eventTime=?, latitude=?, longitude=?, rejectionReasonL1=? WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND stopId=? AND FMtripId=?',
             [eventTime, location.latitude, location.longitude, rejectionCode, route.params.stopId, route.params.tripId],
             (tx1, results) => {
               let temp = [];
-              console.log(results.rows.length);
+              console.log('SellerHandoverSelection.js/notPicked ',results.rows.length);
               for (let i = 0; i < results.rows.length; ++i) {
                 temp.push(results.rows.item(i));
               }
@@ -184,13 +184,13 @@ const SellerHandoverSelection = ({ route }) => {
             [route.params.stopId, route.params.tripId],
             (tx1, results) => {
               if (results.rowsAffected > 0) {
-                console.log('otp status updated seller delivery in seller table ');
+                console.log('SellerHandoverSelection.js/notPicked ','otp status updated seller delivery in seller table ');
                 // navigation.navigate(SellerDeliveries);
                 navigation.goBack();
                 setLoading(false);
                 // loadSellerPickupDetails();
               } else {
-                console.log('opt status not updated in seller delivery in local table');
+                console.log('SellerHandoverSelection.js/notPicked ','opt status not updated in seller delivery in local table');
               }
             },
           );
@@ -199,7 +199,7 @@ const SellerHandoverSelection = ({ route }) => {
         setStatus('success');
       })
       .catch(function (error) {
-        console.log(error);
+        console.log('SellerHandoverSelection.js/notPicked ',error);
         setMessage('Submission failed');
         // navigation.goBack();
         setStatus('error');
@@ -213,7 +213,7 @@ const SellerHandoverSelection = ({ route }) => {
   })
     .catch((error) => {
       ToastAndroid.show("Turn on device location",ToastAndroid.SHORT);
-      console.log("Location Lat long error", error);
+      console.log('SellerHandoverSelection.js/notPicked ',"Location Lat long error", error);
       setDropDownValue('');
       setDropDownValue1('');
       setLoading(false);
@@ -227,7 +227,7 @@ const SellerHandoverSelection = ({ route }) => {
         [],
         (tx1, results) => {
           let temp = [];
-          console.log(results.rows.length);
+          console.log('SellerHandoverSelection.js/closePickup11 ',results.rows.length);
           for (let i = 0; i < results.rows.length; ++i) {
             temp.push(results.rows.item(i));
           }
@@ -244,7 +244,7 @@ const SellerHandoverSelection = ({ route }) => {
     db.transaction(tx => {
       tx.executeSql('SELECT * FROM NotAttemptReasons', [], (tx1, results) => {
         let temp = [];
-        // console.log(results.rows.length);
+        // console.log('SellerHandoverSelection.js/ ',results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
         }
@@ -276,7 +276,7 @@ const SellerHandoverSelection = ({ route }) => {
         loadSellerPickupDetails();
       }
     } catch (e) {
-      console.log(e);
+      console.log('SellerHandoverSelection.js/getData ',e);
     }
   };
 
@@ -308,7 +308,7 @@ const SellerHandoverSelection = ({ route }) => {
         [route.params.stopId, route.params.tripId],
         (tx1, results) => {
           // let temp = [];
-          // console.log(results.rows.length);
+          // console.log('SellerHandoverSelection.js/ ',results.rows.length);
           setAcc(results.rows.length);
           if (results.rows.length === 0) {
             tx.executeSql('DROP TABLE IF EXISTS closeBag1', []);
@@ -369,15 +369,15 @@ const SellerHandoverSelection = ({ route }) => {
       tx.executeSql('SELECT * FROM SellerDetails11', [], (tx1, results) => {
         // ToastAndroid.show("Loading...", ToastAndroid.SHORT);
         let temp = [];
-        console.log(results.rows.length);
+        // console.log('SellerHandoverSelection.js/ ',results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
-          console.log(results.rows.item(i).consignorName);
+          // console.log('SellerHandoverSelection.js/ ',results.rows.item(i).consignorName);
         }
-        console.log(
-          'Data from Local Database : \n ',
-          JSON.stringify(temp, null, 4),
-        );
+        // console.log('SellerHandoverSelection.js/ ',
+          // 'Data from Local Database : \n ',
+          // JSON.stringify(temp, null, 4),
+        // );
         setData(temp);
         //   setIsLoading(false);
       });
@@ -404,7 +404,7 @@ const SellerHandoverSelection = ({ route }) => {
   };
 
   const triggerCall = () => {
-    console.log(phone);
+    console.log('SellerHandoverSelection.js/triggerCall ',phone);
     Linking.openURL('tel:' + phone);
   };
 
@@ -474,10 +474,10 @@ const SellerHandoverSelection = ({ route }) => {
         }
       })
       .then(setShowModal11(true))
-      .catch(err => console.log('OTP not send'));
+      .catch(err => console.log('SellerHandoverSelection.js/sendSmsOtp ','OTP not send'));
   };
   function validateOTP() {
-    console.log(inputOtp,phone)
+    console.log('SellerHandoverSelection.js/validateOTP ',inputOtp,phone)
     var otp11=inputOtp;
     axios
       .post(backendUrl + 'SMS_new/OTPValidate', {
@@ -496,7 +496,7 @@ const SellerHandoverSelection = ({ route }) => {
         alert('Invalid OTP, please try again !!');
       }})
       .catch(error => {
-        console.log(error);
+        console.log('SellerHandoverSelection.js/validateOTP ',error);
       });
   }
  
@@ -770,7 +770,7 @@ const SellerHandoverSelection = ({ route }) => {
           padding: 10,
         }}
         keyboardType="number-pad"
-        onBackspace={() => console.log('back')}
+        onBackspace={() => console.log('SellerHandoverSelection.js/ ','back')}
       />
       </View>
       </Center>

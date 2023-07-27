@@ -143,12 +143,12 @@ function StackNavigators({ navigation }) {
   const [tripID, setTripID] = useState("");
   const [showModal11, setShowModal11] = useState(false);
   const [dataN, setDataN] = useState([]);
-  // console.log(additionalWorkloadInfo11);
-  // console.log(userId);
+  // console.log('App.js/ ',additionalWorkloadInfo11);
+  // console.log('App.js/ ',userId);
   const DisplayData = async () => {
     if (userId) {
       try {
-        // console.log("UserId",userId);
+        // console.log('App.js/ ',"UserId",userId);
         const fetchData = async () => {
           try {
             const response = await axios.get(
@@ -156,15 +156,15 @@ function StackNavigators({ navigation }) {
             );
             const responseData = response?.data?.data;
             setDataN(responseData);
-            console.log('AdditionalWorkload API data=============================================>>>>>>>>>>>>');
+            // console.log('App.js/ ','AdditionalWorkload API data=============================================>>>>>>>>>>>>');
             dispatch(setAdditionalWorkloadData(responseData));
-            console.log(
+            console.log('App.js/DisplayData ',
               "Additional Workload API Data:",
               response.data.data.length
             );
             setShowModal11(responseData && responseData.length > 0);
           } catch (error) {
-            console.log("Error Msg11:", error);
+            console.log('App.js/DisplayData ',"Error Msg11:", error);
           }
         };
         fetchData();
@@ -174,7 +174,7 @@ function StackNavigators({ navigation }) {
         //   clearInterval(intervalId);
         // };
       } catch (error) {
-        console.log("Error Msg1:", error);
+        console.log('App.js/DisplayData ',"Error Msg1:", error);
       }
     }
   };
@@ -186,8 +186,8 @@ function StackNavigators({ navigation }) {
   }, [userId, setShowModal11]);
 
   const AcceptHandler = async (consignorCodeAccept, stopId, tripId) => {
-    // console.log('df')
-    console.log({
+    // console.log('App.js/ ','df')
+    console.log('App.js/AcceptHandler ',{
       consignorCode: consignorCodeAccept,
       feUserId: userId,
       stopId: stopId,
@@ -201,7 +201,7 @@ function StackNavigators({ navigation }) {
         tripID: tripId,
       })
       .then((response) => {
-        console.log("Msg Accepted ", response.data, "", userId);
+        console.log('App.js/AcceptHandler ',"Msg Accepted ", response.data, "", userId);
         dispatch(setNotificationCount(notificationCount - 1));
         dispatch(setForceSync(true));
         const updatedData = dataN.filter(
@@ -214,12 +214,12 @@ function StackNavigators({ navigation }) {
         }
       })
       .catch((error) => {
-        console.log(error);
+        console.log('App.js/AcceptHandler ',error);
       });
   };
 
   const RejectHandler = async (consignorCodeReject, stopId, tripId) => {
-    console.log("REJECT ");
+    console.log('App.js/RejectHandler ',"REJECT ");
     axios
       .post(backendUrl + "SellerMainScreen/rejectWorkLoad", {
         consignorCode: consignorCodeReject,
@@ -228,7 +228,7 @@ function StackNavigators({ navigation }) {
         tripID: tripId,
       })
       .then((response) => {
-        console.log("Msg Rejected ", response.data);
+        console.log('App.js/RejectHandler ',"Msg Rejected ", response.data);
         dispatch(setNotificationCount(notificationCount - 1));
         const updatedData = dataN.filter(
           (item) => item.consignorCode !== consignorCodeReject
@@ -240,12 +240,12 @@ function StackNavigators({ navigation }) {
         }
       })
       .catch((error) => {
-        console.log(error);
+        console.log('App.js/RejectHandler ',error);
       });
   };
 
   let m = 0;
-  // console.log(latitude," " ,longitude);
+  // console.log('App.js/ ',latitude," " ,longitude);
   useEffect(() => {
     if(userId){
     current_location();
@@ -268,35 +268,35 @@ function StackNavigators({ navigation }) {
         // })
         //   .then(status => {
         //     if (status) {
-        //       console.log('Location enabled');
+        //       console.log('App.js/ ','Location enabled');
         //     }
         //   })
         //   .catch(err => {
-        //     console.log(err);
+        //     console.log('App.js/ ',err);
         //   });
-        console.log("Location Lat long error", error);
+        console.log('App.js/current_location ',"Location Lat long error", error);
       });
   };
   useEffect(() => {
     Mixpanel.sharedInstanceWithToken("c8b2a1b9ad65958a04d82787add43a72")
       .then(() => {
         setIsMixPanelInit(true);
-        console.log("Mixpanel is initialized");
+        console.log('App.js/Mixpanel ',"Mixpanel is initialized");
       })
       .catch((error) => {
-        console.log("Mixpanel initialization error:", error);
+        console.log('App.js/Mixpanel ',"Mixpanel initialization error:", error);
       });
   }, []);
-  // console.log("CurrentDate :",currentDateValue);
+  // console.log('App.js/ ',"CurrentDate :",currentDateValue);
 
   useEffect(() => {
-    console.log("CurrentDate :", currentDateValue);
+    // console.log('App.js/ ',"CurrentDate :", currentDateValue);
     const updateDateAtMidnight = () => {
       const currentDate = new Date();
       const currentDay = currentDate.toISOString().split("T")[0];
       // const temp=currentDateValue;
       if (currentDay !== currentDateValue) {
-        console.log("New Date :", currentDay);
+        // console.log('App.js/ ',"New Date :", currentDay);
         dispatch(setCurrentDateValue(currentDay));
 
         deleteRowsByDate("SellerMainScreenDetails");
@@ -327,10 +327,10 @@ function StackNavigators({ navigation }) {
         `DELETE FROM ${tableName} WHERE date <= ?`,
         [yesterdayDateString],
         (_, { rowsAffected }) => {
-          console.log(`${rowsAffected} rows deleted from ${tableName}`);
+          console.log('App.js/deleteRowsByDate ',`${rowsAffected} rows deleted from ${tableName}`);
         },
         (error) => {
-          console.log(`Error deleting rows from ${tableName}:`, error);
+          console.log('App.js/deleteRowsByDate ',`Error deleting rows from ${tableName}:`, error);
         }
       );
     });
@@ -340,22 +340,22 @@ function StackNavigators({ navigation }) {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 3);
     const yesterdayDateString = yesterday.toISOString().split("T")[0];
-    console.log(yesterdayDateString);
+    console.log('App.js/deleteRowsByDateBag ',yesterdayDateString);
     db.transaction((tx) => {
       tx.executeSql(
         `DELETE FROM ${tableName} WHERE bagDate <= ?`,
         [yesterdayDateString],
         (_, { rowsAffected }) => {
-          console.log(`${rowsAffected} rows deleted from ${tableName}`);
+          console.log('App.js/deleteRowsByDateBag ',`${rowsAffected} rows deleted from ${tableName}`);
         },
         (error) => {
-          console.log(`Error deleting rows from ${tableName}:`, error);
+          console.log('App.js/deleteRowsByDateBag ',`Error deleting rows from ${tableName}:`, error);
         }
       );
     });
   };
 
-  // console.log("Redux deviceInfo Value ",deviceInfo);
+  // console.log('App.js/ ',"Redux deviceInfo Value ",deviceInfo);
   useEffect(() => {
     fetchDeviceInfo();
   }, []);
@@ -408,7 +408,7 @@ function StackNavigators({ navigation }) {
       };
 
       // setDeviceInfo(deviceInfoData);
-      console.log(deviceInfoData);
+      // console.log('App.js/ ',deviceInfoData);
       dispatch(setCurrentDeviceInfo(deviceInfoData));
     } catch (error) {
       console.error("Error fetching device information:", error);
@@ -560,7 +560,7 @@ function StackNavigators({ navigation }) {
 
       return ramUsagePercentage;
     } catch (error) {
-      console.log("Error occurred while calculating RAM usage:", error);
+      console.log('App.js/ ',"Error occurred while calculating RAM usage:", error);
       return 0; // Default value or error handling logic
     }
   };
@@ -579,7 +579,7 @@ function StackNavigators({ navigation }) {
 
       return diskUsagePercentage;
     } catch (error) {
-      console.log("Error occurred while calculating disk utilization:", error);
+      console.log('App.js/ ',"Error occurred while calculating disk utilization:", error);
       return 0; // Default value or error handling logic
     }
   };
@@ -588,7 +588,7 @@ function StackNavigators({ navigation }) {
     try {
       return (await NetInfo.fetch()).details?.strength;
     } catch (error) {
-      console.log("Error getting Signal Strength:", error);
+      console.log('App.js/ ',"Error getting Signal Strength:", error);
       return null;
     }
   };
@@ -597,7 +597,7 @@ function StackNavigators({ navigation }) {
     try {
       return await DeviceInfo.getMacAddress();
     } catch (error) {
-      console.log("Error getting MAC address:", error);
+      console.log('App.js/ ',"Error getting MAC address:", error);
       return null;
     }
   };
@@ -631,7 +631,7 @@ function StackNavigators({ navigation }) {
 
   useEffect(() => {
     if (userId) {
-      console.log("===Background Task Run UseEffect Called===");
+      console.log('App.js/Mixpanel ',"===Background Task Run UseEffect Called===");
       if (isMixPanelInit) {
         Mixpanel.trackWithProperties("Background Task Run UseEffect Called", {
           userId: userId,
@@ -649,7 +649,7 @@ function StackNavigators({ navigation }) {
               userEmail: userEmail,
             });
           }
-          console.log("===Auto sync called===");
+          console.log('App.js/Mixpanel ',"===Auto sync called===");
         }
       }, 180000);
 
@@ -669,7 +669,7 @@ function StackNavigators({ navigation }) {
           userEmail: userEmail,
         });
       }
-      console.log("===Force sync called===");
+      console.log('App.js/forceSync ',"===Force sync called===");
     }
   }, [forceSync]);
 
@@ -684,7 +684,7 @@ function StackNavigators({ navigation }) {
         requestPermissions();
     },3000);
 
-  console.log('Request permission',userId);}
+  console.log('App.js/requestPermissions ','Request permission',userId);}
   }, [userId]);
 
   const requestPermissions = async () => {
@@ -700,7 +700,7 @@ function StackNavigators({ navigation }) {
         }
       );
       if (cameraPermission !== PermissionsAndroid.RESULTS.GRANTED) {
-        console.log("Camera permission denied");
+        console.log('App.js/requestPermissions ',"Camera permission denied");
       }
 
       const storagePermission = await PermissionsAndroid.request(
@@ -714,19 +714,19 @@ function StackNavigators({ navigation }) {
         }
       );
       if (storagePermission !== PermissionsAndroid.RESULTS.GRANTED) {
-        console.log("Storage permission denied");
+        console.log('App.js/requestPermissions ',"Storage permission denied");
       }
 
       messaging()
         .requestPermission()
         .then((permission) => {
           if (permission) {
-            console.log("Notification permission granted");
+            console.log('App.js/requestPermissions ',"Notification permission granted");
             // messaging().getToken().then((token) => {
-            // console.log('FCM Token:', token);
+            // console.log('App.js/ ','FCM Token:', token);
             // });
           } else {
-            console.log("Notification permission denied");
+            console.log('App.js/requestPermissions ',"Notification permission denied");
           }
         });
 
@@ -741,7 +741,7 @@ function StackNavigators({ navigation }) {
         }
       );
       if (locationPermission !== PermissionsAndroid.RESULTS.GRANTED) {
-        console.log("Location permission denied");
+        console.log('App.js/requestPermissions ',"Location permission denied");
       }
     } catch (error) {
       console.warn(error);
@@ -754,7 +754,7 @@ function StackNavigators({ navigation }) {
   }
 
   const handleIncomingMessage = async (message) => {
-    console.log(message);
+    console.log('App.js/handleIncomingMessage ',message);
     const { messageId, notification, sentTime } = message;
     const sendDate = new Date().toISOString().slice(0, 10);
     const date = new Date(sentTime);
@@ -762,7 +762,7 @@ function StackNavigators({ navigation }) {
     const options = { hour: "numeric", minute: "numeric", hour12: true };
     const formattedTime = date.toLocaleTimeString("en-US", options);
 
-    console.log(formattedTime, notification);
+    console.log('App.js/handleIncomingMessage ',formattedTime, notification);
 
     db.transaction((tx) => {
       const messageRegex = /.*?- (.+?) \(/;
@@ -776,7 +776,7 @@ function StackNavigators({ navigation }) {
       const sellerCodeRegex = /\( (.+?) \)/;
       const sellerCodeMatch = notification.body.match(sellerCodeRegex);
       const sellerCode = sellerCodeMatch ? sellerCodeMatch[1] : null;
-      console.log(message, " ", sellerName, " ", " ", sellerCode);
+      console.log('App.js/handleIncomingMessage ',message, " ", sellerName, " ", " ", sellerCode);
       tx.executeSql(
         "INSERT INTO noticeMessages (messageId, notificationTitle, notificationBody, date, sentTime, message, sellerName, sellerCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         [
@@ -790,9 +790,9 @@ function StackNavigators({ navigation }) {
           sellerCode,
         ],
         (tx, results) => {
-          console.log(results);
+          console.log('App.js/handleIncomingMessage ',results);
           if (results.rowsAffected > 0) {
-            console.log(
+            console.log('App.js/handleIncomingMessage ',
               "Message stored in the local database ",
               notification.body
             );
@@ -802,14 +802,14 @@ function StackNavigators({ navigation }) {
     });
   };
 
-  // console.log("Notification Count",notificationCount," ",useSelector((state) => state.notification.count));
+  // console.log('App.js/ ',"Notification Count",notificationCount," ",useSelector((state) => state.notification.count));
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-      console.log(remoteMessage.notification);
+      console.log('App.js/onMessage ',remoteMessage.notification);
       const newvalue = notificationCount + 1;
       dispatch(setNotificationCount(newvalue));
       DisplayData();
-      console.log('Notification Arrived');
+      console.log('App.js/onMessage ','Notification Arrived');
       handleIncomingMessage(remoteMessage);
       PushNotification.localNotification({
         title: remoteMessage.notification.title,
@@ -830,11 +830,11 @@ function StackNavigators({ navigation }) {
     });
     PushNotification.configure({
       onRegister: function (token) {
-        console.log("TOKEN:", token);
+        console.log('App.js/PushNotification ',"TOKEN:", token);
       },
 
       onNotification: function (notification) {
-        console.log("NOTIFICATION:", notification);
+        console.log('App.js/PushNotification ',"NOTIFICATION:", notification);
 
         navigation.navigate("NewSellerAdditionNotification");
       },
@@ -857,7 +857,7 @@ function StackNavigators({ navigation }) {
 
   //   const unsubscribeNotification = messaging().onNotificationOpenedApp(
   //     (notificationOpen) => {
-  //       console.log(
+  //       console.log('App.js/ ',
   //         "Opened via notification11:",
   //         notificationOpen.notification
   //       );
@@ -870,14 +870,14 @@ function StackNavigators({ navigation }) {
   //     .getInitialNotification()
   //     .then((notificationOpen) => {
   //       if (notificationOpen) {
-  //         console.log(
+  //         console.log('App.js/ ',
   //           "Opened via notification:",
   //           notificationOpen.notification
   //         );
   //         note11();
   //         // navigation.navigate('NewSellerAdditionNotification');
   //       } else {
-  //         console.log("Opened normally");
+  //         console.log('App.js/ ',"Opened normally");
   //       }
   //     });
 
@@ -902,7 +902,7 @@ function StackNavigators({ navigation }) {
       dispatch(setSyncTime(datetime));
       dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
       AsyncStorage.setItem("lastSyncTime112", datetime);
-      console.log("api pull");
+      console.log('App.js/pull_API_Data ',"api pull");
       loadAPI_Data1();
       loadAPI_Data2();
       loadAPI_3();
@@ -916,7 +916,7 @@ function StackNavigators({ navigation }) {
 
   const handleButtonClick = async (APIerror1) => {
     try {
-      console.log("API EROOR", "userid");
+      // console.log('App.js/ ',"API EROOR", "userid");
       // await callApi("APIerror1", "userid");
     } catch (error) {}
   };
@@ -934,7 +934,7 @@ function StackNavigators({ navigation }) {
           loadAPI_Data1();
           loadAPI_Data2();
         }, 2000);
-        // console.log('Pull Data from Api');
+        // console.log('App.js/ ','Pull Data from Api');
       } else {
         navigation.navigate("Login");
       }
@@ -944,7 +944,7 @@ function StackNavigators({ navigation }) {
   // Sync button function
   const note11 = () => {
     if (!isLoading) {
-      console.log("call notification");
+      // console.log('App.js/ ',"call notification");
       navigation.navigate("NewSellerAdditionNotification");
     }
   };
@@ -965,26 +965,26 @@ function StackNavigators({ navigation }) {
           dispatch(setSyncTimeFull(data11));
         })
         .catch((e) => {
-          console.log(e);
+          console.log('App.js/useEffect ',e);
         });
     }
   }, [userId]);
 
   const Login_Data_load = () => {
-    // console.log('Login Data Load called');
+    // console.log('App.js/ ','Login Data Load called');
     AsyncStorage.getItem("apiDataLoaded")
       .then((data11) => {
-        // console.log( 'Api Data Loaded value : ',data11);
+        // console.log('App.js/ ', 'Api Data Loaded value : ',data11);
         setIsLogin(data11);
         if (data11 === "false") {
-          console.log("1st time call");
+          // console.log('App.js/ ',"1st time call");
           pull_API_Data();
           AsyncStorage.setItem("apiDataLoaded", "true");
           // return;
         }
       })
       .catch((e) => {
-        console.log(e);
+        // console.log('App.js/ ',e);
       });
     AsyncStorage.getItem("lastSyncTime112")
       .then((data11) => {
@@ -992,14 +992,14 @@ function StackNavigators({ navigation }) {
         dispatch(setSyncTimeFull(data11));
       })
       .catch((e) => {
-        console.log(e);
+        // console.log('App.js/ ',e);
       });
   };
-  // console.log(userId);
+  // console.log('App.js/ ',userId);
   async function postSPSCalling(row) {
     const deviceId = await DeviceInfo.getUniqueId();
     const IpAddress = await DeviceInfo.getIpAddress();
-    console.log("===========row=========", {
+    console.log('App.js/postSPSCalling ',"===========row=========", {
       clientShipmentReferenceNumber: row.clientShipmentReferenceNumber,
       awbNo: row.awbNo,
       clientRefId: row.clientRefId,
@@ -1057,22 +1057,22 @@ function StackNavigators({ navigation }) {
         deviceIPaddress: IpAddress,
       })
       .then((response) => {
-        console.log("sync Successfully pushed");
-        console.log(response);
+        console.log('App.js/postSPSCalling ',"sync Successfully pushed");
+        console.log('App.js/postSPSCalling ',response);
         db.transaction((tx) => {
           tx.executeSql(
             'UPDATE SellerMainScreenDetails SET syncStatus="done" WHERE clientShipmentReferenceNumber = ?',
             [row.clientShipmentReferenceNumber],
             (tx1, results) => {
               let temp = [];
-              console.log(
+              console.log('App.js/postSPSCalling ',
                 "===========Local Sync Status Results==========",
                 results.rowsAffected
               );
               if (results.rowsAffected > 0) {
-                console.log("Sync status done in localDB");
+                console.log('App.js/postSPSCalling ',"Sync status done in localDB");
               } else {
-                console.log(
+                console.log('App.js/postSPSCalling ',
                   "Sync Status not changed in localDB or already synced"
                 );
               }
@@ -1083,7 +1083,7 @@ function StackNavigators({ navigation }) {
       .catch((error) => {
         setIsLoading(false);
         callApi(error, latitude, longitude, userId);
-        console.log("sync error", { error });
+        console.log('App.js/postSPSCalling ',"sync error", { error });
       });
   }
 
@@ -1109,7 +1109,7 @@ function StackNavigators({ navigation }) {
   }
 
   const push_Data = () => {
-    console.log(
+    console.log('App.js/push_Data ',
       "push data function",
       new Date().toJSON().slice(0, 10).replace(/-/g, "/")
     );
@@ -1158,7 +1158,7 @@ function StackNavigators({ navigation }) {
               ToastAndroid.SHORT
             );
           } else {
-            console.log("Only Pulling Data.No data to push...");
+            console.log('App.js/push_Data ',"Only Pulling Data.No data to push...");
             pull_API_Data();
           }
         }
@@ -1187,11 +1187,11 @@ function StackNavigators({ navigation }) {
             consignorName VARCHAR(200),sellerIndex INT(20),consignorAddress1 VARCHAR(200),consignorAddress2 VARCHAR(200),consignorCity VARCHAR(200),consignorPincode,consignorLatitude INT(20),consignorLongitude DECIMAL(20,10),consignorContact VARCHAR(200),ReverseDeliveries INT(20),runSheetNumber VARCHAR(200),ForwardPickups INT(20), BagOpenClose11 VARCHAR(200), ShipmentListArray VARCHAR(800),contactPersonName VARCHAR(100),otpSubmitted VARCHAR(50),otpSubmittedDelivery VARCHAR(50), stopId VARCHAR(200) PRIMARY KEY, FMtripId VARCHAR(200),date Text)`,
         [],
         (sqlTxn, res) => {
-          // console.log("table created successfully consignorList");
+          // console.log('App.js/ ',"table created successfully consignorList");
           // loadAPI_Data();
         },
         (error) => {
-          console.log("error on creating table " + error.message);
+          console.log('App.js/createTables1 ',"error on creating table " + error.message);
         }
       );
     });
@@ -1237,8 +1237,8 @@ function StackNavigators({ navigation }) {
           })
           .then(
             (res) => {
-              console.log("API 1 OK: " + res.data.data.length);
-              // console.log(res);
+              console.log('App.js/loadAPI_Data1 ',"API 1 OK: " + res.data.data.length);
+              // console.log('App.js/ ',res);
               for (let i = 0; i < res.data.data.length; i++) {
                 // let m21 = JSON.stringify(res.data[i].consignorAddress, null, 4);
                 db.transaction((txn) => {
@@ -1275,13 +1275,13 @@ function StackNavigators({ navigation }) {
                               currentDateValue,
                             ],
                             (sqlTxn, _res) => {
-                              // console.log(
+                              // console.log('App.js/ ',
                               // "\n Data Added to local db successfully1212"
                               // );
-                              // console.log(res);
+                              // console.log('App.js/ ',res);
                             },
                             (error) => {
-                              console.log(
+                              console.log('App.js/loadAPI_Data1 ',
                                 "error on loading  data from api SellerMainScreen/consignorslist/" +
                                   error.message
                               );
@@ -1295,7 +1295,7 @@ function StackNavigators({ navigation }) {
               }
               viewDetails1();
               m++;
-              // console.log('value of m1 '+m);
+              // console.log('App.js/ ','value of m1 '+m);
               var date = new Date();
               var hours = date.getHours();
               var minutes = date.getMinutes();
@@ -1313,7 +1313,7 @@ function StackNavigators({ navigation }) {
               setIsLoading(false);
             },
             (error) => {
-              console.log("error api SellerMainScreen/consignorslist/", error);
+              console.log('App.js/loadAPI_Data1 ',"error api SellerMainScreen/consignorslist/", error);
             }
           );
       })();
@@ -1323,15 +1323,15 @@ function StackNavigators({ navigation }) {
     db.transaction((tx) => {
       tx.executeSql("SELECT * FROM TripDetails", [], (tx1, results) => {
         let temp = [];
-        // console.log(results.rows.length);
+        // console.log('App.js/ ',results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
 
-          // console.log("SellerMainScreenDetails",results.rows.item(i));
+          // console.log('App.js/ ',"SellerMainScreenDetails",results.rows.item(i));
           // var address121 = results.rows.item(i).consignorAddress;
           // var address_json = JSON.parse(address121);
-          // console.log(typeof (address_json));
-          // console.log("Address from local db : " + address_json.consignorAddress1 + " " + address_json.consignorAddress2);
+          // console.log('App.js/ ',typeof (address_json));
+          // console.log('App.js/ ',"Address from local db : " + address_json.consignorAddress1 + " " + address_json.consignorAddress2);
           // ToastAndroid.show('consignorName:' + results.rows.item(i).consignorName + "\n" + 'PRSNumber : ' + results.rows.item(i).PRSNumber, ToastAndroid.SHORT);
         }
         if (m === 4) {
@@ -1339,18 +1339,18 @@ function StackNavigators({ navigation }) {
           setIsLoading(false);
           setIsLogin(true);
           AsyncStorage.setItem("apiDataLoaded", "true");
-          console.log("All " + 4 + " APIs loaded successfully ");
+          console.log('App.js/viewDetails1 ',"All " + 4 + " APIs loaded successfully ");
           m = 0;
 
           AsyncStorage.setItem("refresh11", "refresh");
         } else {
-          console.log("Only " + m + " APIs loaded out of 4 ");
+          console.log('App.js/viewDetails1 ',"Only " + m + " APIs loaded out of 4 ");
         }
         // m++;
         // ToastAndroid.show("Sync Successful",ToastAndroid.SHORT);
-        // console.log('Data from Local Database : \n ', JSON.stringify(temp, null, 4));
-        // console.log('data loaded API 1',temp);
-        // console.log('Table1 DB OK:', temp.length);
+        // console.log('App.js/ ','Data from Local Database : \n ', JSON.stringify(temp, null, 4));
+        // console.log('App.js/ ','data loaded API 1',temp);
+        // console.log('App.js/ ','Table1 DB OK:', temp.length);
       });
     });
   };
@@ -1391,11 +1391,11 @@ function StackNavigators({ navigation }) {
           )`,
         [],
         (sqlTxn, res) => {
-          // console.log("table created successfully workload");
+          // console.log('App.js/ ',"table created successfully workload");
           // loadAPI_Data();
         },
         (error) => {
-          console.log(
+          console.log('App.js/createTables2 ',
             "error on creating table SellerMainScreenDetails" + error.message
           );
         }
@@ -1413,7 +1413,7 @@ function StackNavigators({ navigation }) {
           if (result.rows.length > 0) {
             var tripStatus = result.rows.item(0).tripStatus;
           }
-          console.log("Trip id: ", tripID, tripStatus);
+          console.log('App.js/loadAPI_Data2 ',"Trip id: ", tripID, tripStatus);
           (async () => {
             await axios
               .get(backendUrl + `SellerMainScreen/workload/${userId}`, {
@@ -1424,7 +1424,7 @@ function StackNavigators({ navigation }) {
               .then(
                 (res) => {
                   createTables2();
-                  console.log("API 2 OK: " + res.data.data.length);
+                  console.log('App.js/loadAPI_Data2 ',"API 2 OK: " + res.data.data.length);
                   for (let i = 0; i < res.data.data.length; i++) {
                     const shipmentStatus = res.data.data[i].shipmentStatus;
 
@@ -1522,11 +1522,11 @@ function StackNavigators({ navigation }) {
                                     currentDateValue,
                                   ],
                                   (sqlTxn, _res) => {
-                                    // console.log(`\n Data Added to local db successfully`);
-                                    // console.log(res);
+                                    // console.log('App.js/ ',`\n Data Added to local db successfully`);
+                                    // console.log('App.js/ ',res);
                                   },
                                   (error) => {
-                                    console.log(
+                                    console.log('App.js/loadAPI_Data2 ',
                                       "error on adding data " + error.message
                                     );
                                   }
@@ -1553,11 +1553,11 @@ function StackNavigators({ navigation }) {
                   dispatch(setSyncTime(datetime));
                   dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
                   AsyncStorage.setItem("lastSyncTime112", datetime);
-                  // console.log('value of m2 '+m);
+                  // console.log('App.js/ ','value of m2 '+m);
                   setIsLoading(false);
                 },
                 (error) => {
-                  console.log(error);
+                  console.log('App.js/loadAPI_Data2 ',error);
                 }
               );
           })();
@@ -1579,11 +1579,11 @@ function StackNavigators({ navigation }) {
           )`,
         [],
         (sqlTxn, res) => {
-          // console.log("table created successfully TripDetails");
+          // console.log('App.js/ ',"table created successfully TripDetails");
           // loadAPI_Data();
         },
         (error) => {
-          console.log("error on creating table " + error.message);
+          console.log('App.js/createTables3 ',"error on creating table " + error.message);
         }
       );
     });
@@ -1620,7 +1620,7 @@ function StackNavigators({ navigation }) {
                   fetchTripInfo();
                   },
                   (error) => {
-                    console.log(
+                    console.log('App.js/ ',
                       "error on adding data in tripdetails " + error.message
                     );
                   }
@@ -1629,7 +1629,7 @@ function StackNavigators({ navigation }) {
             }
           },
           (error) => {
-            console.log("tripdetailserror", error);
+            console.log('App.js/ ',"tripdetailserror", error);
           }
         );
     })();
@@ -1651,10 +1651,10 @@ function StackNavigators({ navigation }) {
         )`,
         [],
         (tx, results) => {
-          // console.log("Table created successfully Notice");
+          // console.log('App.js/ ',"Table created successfully Notice");
         },
         (error) => {
-          console.log("Error creating table: ", error);
+          console.log('App.js/createTablesSF ',"Error creating table: ", error);
         }
       );
     });
@@ -1664,11 +1664,11 @@ function StackNavigators({ navigation }) {
         "CREATE TABLE IF NOT EXISTS ShipmentFailure(_id VARCHAR(24) PRIMARY KEY,description VARCHAR(255),parentCode VARCHAR(20), short_code VARCHAR(20), consignor_failure BOOLEAN, fe_failure BOOLEAN, operational_failure BOOLEAN, system_failure BOOLEAN, enable_geo_fence BOOLEAN, enable_future_scheduling BOOLEAN, enable_otp BOOLEAN, enable_call_validation BOOLEAN, created_by VARCHAR(10), last_updated_by VARCHAR(10), applies_to VARCHAR(255),life_cycle_code INT(20), __v INT(10),date Text)",
         [],
         (sqlTxn, res) => {
-          // console.log("Table created successfully ShipmentFailure");
+          // console.log('App.js/ ',"Table created successfully ShipmentFailure");
           // loadAPI_Data();
         },
         (error) => {
-          console.log("error on creating table " + error.message);
+          console.log('App.js/createTablesSF ',"error on creating table " + error.message);
         }
       );
     });
@@ -1679,8 +1679,8 @@ function StackNavigators({ navigation }) {
     (async () => {
       await axios.get(backendUrl + "ADshipmentFailure/getList").then(
         (res) => {
-          // console.log('Table6 API OK: ' + res.data.data.length);
-          // console.log(res.data);
+          // console.log('App.js/ ','Table6 API OK: ' + res.data.data.length);
+          // console.log('App.js/ ',res.data);
           for (let i = 0; i < res.data.data.length; i++) {
             // const appliesto=JSON.parse(JSON.stringify(res.data.data[i].appliesTo))
             const appliesto = String(res.data.data[i].appliesTo.slice());
@@ -1709,23 +1709,23 @@ function StackNavigators({ navigation }) {
                   currentDateValue,
                 ],
                 (sqlTxn, _res) => {
-                  // console.log('\n Data Added to local db 6 ');
-                  // console.log(res);
+                  // console.log('App.js/ ','\n Data Added to local db 6 ');
+                  // console.log('App.js/ ',res);
                 },
                 (error) => {
-                  console.log("error on adding data " + error.message);
+                  console.log('App.js/loadAPI_DataSF ',"error on adding data " + error.message);
                 }
               );
             });
           }
           m++;
-          // console.log('value of m6 '+m);
+          // console.log('App.js/ ','value of m6 '+m);
 
           // viewDetailsSF();
           // setIsLoading(false);
         },
         (error) => {
-          console.log(error);
+          console.log('App.js/loadAPI_DataSF ',error);
         }
       );
     })();
@@ -1739,10 +1739,10 @@ function StackNavigators({ navigation }) {
         "CREATE TABLE IF NOT EXISTS closeBag1 (bagSeal TEXT PRIMARY KEY, bagId TEXT, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode Text, stopId Text)",
         [],
         (tx, results) => {
-          // console.log("Table created successfully Pickup close bag");
+          // console.log('App.js/ ',"Table created successfully Pickup close bag");
         },
         (error) => {
-          console.log("Error occurred while creating the table:", error);
+          console.log('App.js/createTableBag1 ',"Error occurred while creating the table:", error);
         }
       );
     });
@@ -1753,10 +1753,10 @@ function StackNavigators({ navigation }) {
         "CREATE TABLE IF NOT EXISTS closeHandoverBag1 (bagSeal TEXT , bagId TEXT PRIMARY KEY, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode text,stopId Text,consignorName Text)",
         [],
         (tx, results) => {
-          // console.log("Table created successfully Handover Close Bag");
+          // console.log('App.js/ ',"Table created successfully Handover Close Bag");
         },
         (error) => {
-          console.log("Error occurred while creating the table:", error);
+          console.log('App.js/createTableBag1 ',"Error occurred while creating the table:", error);
         }
       );
     });
@@ -1766,21 +1766,21 @@ function StackNavigators({ navigation }) {
     db.transaction((tx) => {
       tx.executeSql("SELECT * FROM ShipmentFailure", [], (tx1, results) => {
         let temp = [];
-        // console.log(results.rows.length);
+        // console.log('App.js/ ',results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
         }
-        console.log("1173", temp);
+        // console.log('App.js/ ',"1173", temp);
         // if (m <= 6){
         //   // ToastAndroid.show('Sync Successful',ToastAndroid.SHORT);
-        //   console.log('Waiting for ' + ( 7 - m ) + ' API to load. Plz wait...');
+        //   console.log('App.js/ ','Waiting for ' + ( 7 - m ) + ' API to load. Plz wait...');
         //   // m = 0;
         // }
         //  else {
-        //   console.log('Only ' + m + ' APIs loaded out of 6 ');
+        //   console.log('App.js/ ','Only ' + m + ' APIs loaded out of 6 ');
         // }
-        // console.log('Data from Local Database 6 : \n ', temp);
-        // console.log('TableSF DB OK:', temp.length);
+        // console.log('App.js/ ','Data from Local Database 6 : \n ', temp);
+        // console.log('App.js/ ','TableSF DB OK:', temp.length);
       });
     });
   };
@@ -3672,11 +3672,11 @@ function CustomDrawerContent({ navigation }) {
       dispatch(setCurrentDeviceInfo(""));
       dispatch(setAdditionalWorkloadData(""));
     } catch (e) {
-      console.log(e);
+      console.log('App.js/LogoutHandle ',e);
     }
     try {
       await AsyncStorage.multiRemove(await AsyncStorage.getAllKeys());
-      console.log("AsyncStorage cleared successfully!");
+      console.log('App.js/LogoutHandle ',"AsyncStorage cleared successfully!");
     } catch (error) {
       console.error("Error clearing AsyncStorage:", error);
     }
@@ -3686,15 +3686,15 @@ function CustomDrawerContent({ navigation }) {
         "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
         [],
         (tx1, result) => {
-          console.log(result);
+          console.log('App.js/LogoutHandle ',result);
           let i = 0;
           for (i = 0; i < result.rows.length; i++) {
             const tableName = result.rows.item(i).name;
-            console.log(tableName);
+            console.log('App.js/LogoutHandle ',tableName);
             tx.executeSql(`DROP TABLE IF EXISTS ${tableName}`);
           }
           if (i === result.rows.length) {
-            console.log("SQlite DB cleared successfully!");
+            console.log('App.js/LogoutHandle ',"SQlite DB cleared successfully!");
           }
         }
       );
@@ -3708,10 +3708,10 @@ function CustomDrawerContent({ navigation }) {
       }
     )
       .then((result) => {
-        console.log(result);
+        console.log('App.js/LogoutHandle ',result);
       })
       .catch((err) => {
-        console.log("Logout Error", err);
+        console.log('App.js/LogoutHandle ',"Logout Error", err);
       });
   };
 

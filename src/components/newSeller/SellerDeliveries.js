@@ -176,7 +176,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
     }, []);
 
     const handlePhoneIconPress = (phone) => {
-      console.log(`Calling ${phone}`);
+      // console.log(`Calling ${phone}`);
       Linking.openURL('tel:' + phone);
     };
     

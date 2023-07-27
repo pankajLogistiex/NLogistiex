@@ -58,14 +58,14 @@ useEffect(() => {
   .then((data) => {
     if (data !== null) {
       const acceptedItemData123 = JSON.parse(data);
-      console.log(acceptedItemData123);
+      console.log("SellerHandover.js/AsyncStorage ",acceptedItemData123);
       setAcceptedItemData(acceptedItemData123);
     } else {
-      console.log("Data is null ",data);
+      console.log(" SellerHandover.js/AsyncStorage Data is null ",data);
     }
   })
   .catch((error) => {
-    console.log(error);
+    console.log("SellerHandover.js/AsyncStorage",error);
   });
 });
 return unsubscribe;
@@ -162,7 +162,7 @@ return unsubscribe;
           });
                
           setResults(updatedResults);
-          console.log("Seller Closed Bags Count : ",updatedResults);
+          // console.log("Seller Closed Bags Count : ",updatedResults);
         }
       );
     });
@@ -172,7 +172,7 @@ return unsubscribe;
 //     loadDetails()
 //   }, [])
 const handlePhoneIconPress = (phone) => {
-  console.log(`Calling ${phone}`);
+  console.log(`SellerHandover.js/handlePhoneIconPress Calling ${phone}`);
   Linking.openURL('tel:' + phone);
 };
 
@@ -202,7 +202,7 @@ const handleMapIconPress = (seller) => {
   //     let f = c.consignorName;
   //     return (f.includes(keyword1));
   // };
-  
+   
   return (
     <NativeBaseProvider>
       {loading ? 

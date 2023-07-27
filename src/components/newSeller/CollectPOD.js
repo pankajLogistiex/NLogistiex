@@ -79,13 +79,13 @@ const CollectPOD = ({ route }) => {
     db.transaction(tx => {
       tx.executeSql('SELECT * FROM PartialCloseReasons', [], (tx1, results) => {
         let temp = [];
-        // console.log(results.rows.length);
+        // console.log('CollectPOD.js/ ',results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
         }
-        // console.log('Data from Local Database partialClosure : \n ', temp);
+        // console.log('CollectPOD.js/ ','Data from Local Database partialClosure : \n ', temp);
         setPartialCloseData(temp);
-        // console.log('Table6 DB OK:', temp.length);
+        // console.log('CollectPOD.js/ ','Table6 DB OK:', temp.length);
       });
     });
     // await fetch(PartialClose)
@@ -165,7 +165,7 @@ const CollectPOD = ({ route }) => {
     const deviceId= await DeviceInfo.getUniqueId();
     const IpAddress= await DeviceInfo.getIpAddress();
     const eventTime= new Date().valueOf();
-    console.log('=======post rd delivery====', {
+    console.log('CollectPOD.js/submitForm11 ','=======post rd delivery====', {
       runsheetNo: runsheetNo,
       expected: route.params.Forward,
       accepted: newaccepted,
@@ -214,14 +214,14 @@ const CollectPOD = ({ route }) => {
             'UPDATE SyncSellerPickUp  SET otpSubmittedDelivery="true" WHERE stopId=? AND FMtripId=? ',
             [route.params.stopId, route.params.tripId],
             (tx1, results) => {
-              // console.log('Results', results.rowsAffected);
-              // console.log(results);
+              // console.log('CollectPOD.js/ ','Results', results.rowsAffected);
+              // console.log('CollectPOD.js/ ',results);
               if (results.rowsAffected > 0) {
-                console.log('otp status updated seller delivery in seller table ');
+                console.log('CollectPOD.js/submitForm11 ','otp status updated seller delivery in seller table ');
               } else {
-                console.log('opt status not updated in seller delivery in local table');
+                console.log('CollectPOD.js/submitForm11 ','opt status not updated in seller delivery in local table');
               }
-              // console.log(results.rows.length);
+              // console.log('CollectPOD.js/ ',results.rows.length);
             },
           );
         });
@@ -243,17 +243,17 @@ const CollectPOD = ({ route }) => {
                   ToastAndroid.SHORT,
                 );
               } else {
-                console.log('failed to add notPicked item locally');
+                console.log('CollectPOD.js/submitForm11 ','failed to add notPicked item locally');
               }
             },
           );
         });
-        console.log('POST RD Data Submitted', response.data);
+        console.log('CollectPOD.js/submitForm11 ','POST RD Data Submitted', response.data);
         alert('Delivery Successfully completed');
         navigation.navigate('Main');
       })
       .catch(function (error) {
-        console.log(error.response.data);
+        console.log('CollectPOD.js/submitForm11 ',error.response.data);
       });
   };
   const sendSmsOtp = async () => {
@@ -267,7 +267,7 @@ const CollectPOD = ({ route }) => {
       }
     })
       .then(setShowModal11(true))
-      .catch(err => console.log('OTP not send'));
+      .catch(err => console.log('CollectPOD.js/sendSmsOtp ','OTP not send'));
   };
 
   function handleButtonPress11(item) {
@@ -300,7 +300,7 @@ const CollectPOD = ({ route }) => {
       .catch(error => {
         // alert('Invalid OTP, please try again !!');
         setMessage(2);
-        console.log(error);
+        console.log('CollectPOD.js/validateOTP ',error);
       });
   }
   const displayData = async () => {
@@ -311,7 +311,7 @@ const CollectPOD = ({ route }) => {
         (tx1, results) => {
           // ToastAndroid.show("Loading...", ToastAndroid.SHORT);
           let temp = [];
-          console.log(results.rows.length);
+          console.log('CollectPOD.js/displayData ',results.rows.length);
           for (let i = 0; i < results.rows.length; ++i) {
             temp.push(results.rows.item(i));
           }
@@ -546,7 +546,7 @@ const CollectPOD = ({ route }) => {
         }}
         // secureTextEntry={!showPassword}
         keyboardType="number-pad"
-        onBackspace={() => console.log('back')}
+        onBackspace={() => console.log('CollectPOD.js/ ','back')}
       />
 
 </View>

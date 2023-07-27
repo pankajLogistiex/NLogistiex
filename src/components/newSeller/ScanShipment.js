@@ -153,7 +153,7 @@ const ScanShipment = ({ route }) => {
     let result = null;
     if (isGranted) {
       result = await launchCamera(options);
-      console.log(result);
+      console.log('ScanShipment.js/takePicture ',result);
     }
     if (result.assets !== undefined) {
       const newImage = result.assets[0];
@@ -173,17 +173,17 @@ const ScanShipment = ({ route }) => {
         .then(res => {
           setImageUrl(res.publicURL);
           setUploadStatus('done');
-          console.log('upload success', res);
+          console.log('ScanShipment.js/takePicture ','upload success', res);
           setImageUrls(prevImageUrls => [...prevImageUrls, res.publicURL]);
           setUploadStatus('idle');
         })
         .catch(error => {
-          console.log('upload error', error);
+          console.log('ScanShipment.js/takePicture ','upload error', error);
           setUploadStatus('error');
         });
     }
   };
-  console.log('length', imageUrls.length);
+  console.log('ScanShipment.js/takePicture ','length', imageUrls.length);
   const scannerRef = useRef(null);
 
   const reloadScanner = () => {
@@ -200,11 +200,11 @@ const ScanShipment = ({ route }) => {
 
   var dingAccept = new Sound(dingAccept11, error => {
     if (error) {
-      console.log('failed to load the sound', error);
+      console.log('ScanShipment.js/dingAccept ','failed to load the sound', error);
       return;
     }
     // if loaded successfully
-    // console.log(
+    // console.log('ScanShipment.js/ ',
     //   'duration in seconds: ' +
     //     dingAccept.getDuration() +
     //     'number of channels: ' +
@@ -221,11 +221,11 @@ const ScanShipment = ({ route }) => {
   
     var dingReject = new Sound(dingReject11, error => {
       if (error) {
-        console.log('failed to load the sound', error);
+        console.log('ScanShipment.js/dingReject ','failed to load the sound', error);
         return;
       }
       // if loaded successfully
-      // console.log(
+      // console.log('ScanShipment.js/ ',
       //   'duration in seconds: ' +
       //   dingReject.getDuration() +
       //     'number of channels: ' +
@@ -322,7 +322,7 @@ const ScanShipment = ({ route }) => {
       );
     });
   };
-console.log("packagingId",packagingID)
+// console.log('ScanShipment.js/ ',"packagingId",packagingID)
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       dispatch(setAutoSync(false));
@@ -338,9 +338,9 @@ console.log("packagingId",packagingID)
   
 
   const updateDetails2 = (expectedPackagingId) => {
-    console.log('scan ' + barcode.toString());
+    console.log('ScanShipment.js/updateDetails2 ','scan ' + barcode.toString());
     setAcceptedArray([...acceptedArray, barcode.toString()]);
-    console.log(acceptedArray);
+    console.log('ScanShipment.js/updateDetails2 ',acceptedArray);
     db.transaction(tx => {
       tx.executeSql(
         'UPDATE SellerMainScreenDetails SET status="accepted", expectedPackagingId=?, eventTime=?, latitude=?, longitude=? WHERE shipmentAction="Seller Delivery" AND stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) AND FMtripId=?',
@@ -357,25 +357,25 @@ console.log("packagingId",packagingID)
         ],
         (tx1, results) => {
           let temp = [];
-          console.log('Results', results.rowsAffected);
-          console.log(results);
+          console.log('ScanShipment.js/updateDetails2 ','Results', results.rowsAffected);
+          console.log('ScanShipment.js/updateDetails2 ',results);
 
           if (results.rowsAffected > 0) {
-            console.log(barcode + 'accepted');
+            console.log('ScanShipment.js/updateDetails2 ',barcode + 'accepted');
             Vibration.vibrate(200);
             dingAccept.play(success => {
               if (success) {
                 // Vibration.vibrate(800);
-                console.log('successfully finished playing');
+                console.log('ScanShipment.js/updateDetails2 ','successfully finished playing');
               } else {
-                console.log('playback failed due to audio decoding errors');
+                console.log('ScanShipment.js/updateDetails2 ','playback failed due to audio decoding errors');
               }
             });
             displayDataSPScan();
           } else {
-            console.log(barcode + 'not accepted');
+            console.log('ScanShipment.js/updateDetails2 ',barcode + 'not accepted');
           }
-          console.log(results.rows.length);
+          console.log('ScanShipment.js/updateDetails2 ',results.rows.length);
           for (let i = 0; i < results.rows.length; ++i) {
             temp.push(results.rows.item(i));
           }
@@ -393,24 +393,24 @@ console.log("packagingId",packagingID)
       //     [new Date().valueOf(), latitude, longitude, DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
       //     (tx1, results) => {
       //       let temp = [];
-      //       console.log('Rejected Reason : ', DropDownValue);
-      //       console.log('Results', results.rowsAffected);
-      //       console.log(results);
+      //       console.log('ScanShipment.js/ ','Rejected Reason : ', DropDownValue);
+      //       console.log('ScanShipment.js/ ','Results', results.rowsAffected);
+      //       console.log('ScanShipment.js/ ',results);
       //       if (results.rowsAffected > 0) {
-      //         console.log(barcode + 'rejected');
+      //         console.log('ScanShipment.js/ ',barcode + 'rejected');
       //         ToastAndroid.show(barcode + ' Rejected', ToastAndroid.SHORT);
       //         Vibration.vibrate(100);
       //         RNBeep.beep();
       //         setDropDownValue('');
-      //         console.log(acceptedArray);
+      //         console.log('ScanShipment.js/ ',acceptedArray);
       //         const newArray = acceptedArray.filter(item => item !== barcode);
-      //         console.log(newArray);
+      //         console.log('ScanShipment.js/ ',newArray);
       //         setAcceptedArray(newArray);
       //         displayDataSPScan();
       //       } else {
-      //         console.log(barcode + 'failed to reject item locally');
+      //         console.log('ScanShipment.js/ ',barcode + 'failed to reject item locally');
       //       }
-      //       console.log(results.rows.length);
+      //       console.log('ScanShipment.js/ ',results.rows.length);
       //       for (let i = 0; i < results.rows.length; ++i) {
       //         temp.push(results.rows.item(i));
       //       }
@@ -425,21 +425,21 @@ console.log("packagingId",packagingID)
           [new Date().valueOf(), latitude, longitude, expectedPackagingId, reason, route.params.stopId, barcode, barcode, barcode, route.params.tripId],
           (tx1, results) => {
             let temp = [];
-            console.log('Rejected Reason : ', reason);
-            console.log('Results', results.rowsAffected);
-            console.log(results);
+            // console.log('ScanShipment.js/ ','Rejected Reason : ', reason);
+            // console.log('ScanShipment.js/ ','Results', results.rowsAffected);
+            // console.log('ScanShipment.js/ ',results);
             if (results.rowsAffected > 0) {
               // ContinueHandle11();
-              console.log(barcode + 'rejected');
+              console.log('ScanShipment.js/rejectDetails2 ',barcode + 'rejected');
               ToastAndroid.show(barcode + ' Rejected', ToastAndroid.SHORT);
               Vibration.vibrate(100);
               RNBeep.beep();
               setDropDownValue('');
               displayDataSPScan();
             } else {
-              console.log(barcode + 'failed to reject item locally');
+              console.log('ScanShipment.js/rejectDetails2 ',barcode + 'failed to reject item locally');
             }
-            console.log(results.rows.length);
+            console.log('ScanShipment.js/rejectDetails2 ',results.rows.length);
             for (let i = 0; i < results.rows.length; ++i) {
               temp.push(results.rows.item(i));
             }
@@ -459,24 +459,24 @@ console.log("packagingId",packagingID)
     //     [new Date().valueOf(), latitude, longitude,packagingID ,expectedPackagingId,DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
     //     (tx1, results) => {
     //       let temp = [];
-    //       console.log('Rejected Reason : ', DropDownValue);
-    //       console.log('Results', results.rowsAffected);
-    //       console.log(results);
+    //       console.log('ScanShipment.js/ ','Rejected Reason : ', DropDownValue);
+    //       console.log('ScanShipment.js/ ','Results', results.rowsAffected);
+    //       console.log('ScanShipment.js/ ',results);
     //       if (results.rowsAffected > 0) {
-    //         console.log(barcode + 'tagged');
+    //         console.log('ScanShipment.js/ ',barcode + 'tagged');
     //         ToastAndroid.show(barcode + ' Tagged', ToastAndroid.SHORT);
     //         Vibration.vibrate(100);
     //         RNBeep.beep();
     //         setDropDownValue('');
-    //         console.log(acceptedArray);
+    //         console.log('ScanShipment.js/ ',acceptedArray);
     //         const newArray = acceptedArray.filter(item => item !== barcode);
-    //         console.log(newArray);
+    //         console.log('ScanShipment.js/ ',newArray);
     //         setAcceptedArray(newArray);
     //         displayDataSPScan();
     //       } else {
-    //         console.log(barcode + 'failed to tagged item locally');
+    //         console.log('ScanShipment.js/ ',barcode + 'failed to tagged item locally');
     //       }
-    //       console.log(results.rows.length);
+    //       console.log('ScanShipment.js/ ',results.rows.length);
     //       for (let i = 0; i < results.rows.length; ++i) {
     //         temp.push(results.rows.item(i));
     //       }
@@ -493,21 +493,21 @@ console.log("packagingId",packagingID)
         [new Date().valueOf(), latitude, longitude, expectedPackagingId, DropDownValue, route.params.stopId, barcode, barcode, barcode, route.params.tripId],
         (tx1, results) => {
           let temp = [];
-          console.log('Rejected Reason : ', DropDownValue);
-          console.log('Results', results.rowsAffected);
-          console.log(results);
+          console.log('ScanShipment.js/rejectDetails2 ','Rejected Reason : ', DropDownValue);
+          console.log('ScanShipment.js/rejectDetails2 ','Results', results.rowsAffected);
+          console.log('ScanShipment.js/rejectDetails2 ',results);
           if (results.rowsAffected > 0) {
             // ContinueHandle11();
-            console.log(barcode + 'tagged');
+            console.log('ScanShipment.js/rejectDetails2 ',barcode + 'tagged');
             ToastAndroid.show(barcode + ' Tagged', ToastAndroid.SHORT);
             Vibration.vibrate(100);
             RNBeep.beep();
             setDropDownValue('');
             displayDataSPScan();
           } else {
-            console.log(barcode + 'failed to tagged item locally');
+            console.log('ScanShipment.js/rejectDetails2 ',barcode + 'failed to tagged item locally');
           }
-          console.log(results.rows.length);
+          console.log('ScanShipment.js/rejectDetails2 ',results.rows.length);
           for (let i = 0; i < results.rows.length; ++i) {
             temp.push(results.rows.item(i));
           }
@@ -556,7 +556,7 @@ console.log("packagingId",packagingID)
           // }
         },
         error => {
-          console.log('error on getting categories ' + error.message);
+          console.log('ScanShipment.js/getCategories ','error on getting categories ' + error.message);
         },
       );
     });
@@ -597,7 +597,7 @@ console.log("packagingId",packagingID)
         'UPDATE SellerMainScreenDetails set status=? where clientShipmentReferenceNumber=?',
         ['accepted', data],
         (tx, results) => {
-          console.log('Results', results.rowsAffected);
+          // console.log('ScanShipment.js/ ','Results', results.rowsAffected);
         },
       );
     });
@@ -609,13 +609,13 @@ console.log("packagingId",packagingID)
         'UPDATE categories set ScanStatus=?, UploadStatus=? where clientShipmentReferenceNumber=?',
         [1, 1, data],
         (tx, results) => {
-          console.log('Results', results.rowsAffected);
+          // console.log('ScanShipment.js/ ','Results', results.rowsAffected);
         },
       );
     });
   };
   const onSuccess = e => {
-    console.log(e.data, 'barcode');
+    console.log('ScanShipment.js/onSuccess ',e.data, 'barcode');
     setBarcode(e.data);
     getCategories(e.data);
   };
@@ -627,18 +627,18 @@ console.log("packagingId",packagingID)
     dingAccept.play(success => {
       if (success) {
 
-        console.log('successfully finished playing');
+        console.log('ScanShipment.js/onSuccess12 ','successfully finished playing');
       } else {
-        console.log('playback failed due to audio decoding errors');
+        console.log('ScanShipment.js/onSuccess12 ','playback failed due to audio decoding errors');
       }
     });
-    console.log(e.data, 'ExpectedPackagingID');
+    console.log('ScanShipment.js/onSuccess12 ',e.data, 'ExpectedPackagingID');
     // getCategories(e.data);
     setExpectedPackaging(e.data);
     handlepackaging(e.data);
   };
   const onSucessThroughButton=(data21)=>{
-    console.log(data21, 'barcode');
+    console.log('ScanShipment.js/onSucessThroughButton ',data21, 'barcode');
     setBarcode(data21);
 
     // barcode === data21 ? getCategories(data21) : setBarcode(data21);
@@ -672,7 +672,7 @@ console.log("packagingId",packagingID)
         [],
         (tx1, results) => {
           let temp = [];
-          // console.log(results.rows.length);
+          // console.log('ScanShipment.js/ ',results.rows.length);
           for (let i = 0; i < results.rows.length; ++i) {
             temp.push(results.rows.item(i));
           }
@@ -719,12 +719,12 @@ console.log("packagingId",packagingID)
                   PRSNumber: res.PRSNumber,
                 })
                 .then(function (response) {
-                  console.log(response.data, 'hello');
+                  // console.log('ScanShipment.js/ ',response.data, 'hello');
                   updateCategories1(res.clientShipmentReferenceNumber);
                   alert('Data send on Server');
                 })
                 .catch(function (error) {
-                  console.log(error);
+                  // console.log('ScanShipment.js/ ',error);
                 });
             } else {
               alert('No data found');
@@ -759,23 +759,23 @@ console.log("packagingId",packagingID)
         // })
         //   .then(status => {
         //     if (status) {
-        //       console.log('Location enabled');
+        //       console.log('ScanShipment.js/ ','Location enabled');
         //     }
         //   })
         //   .catch(err => {
-        //     console.log(err);
+        //     console.log('ScanShipment.js/ ',err);
         //   });
-        console.log('Location Lat long error', error);
+        console.log('ScanShipment.js/current_location ','Location Lat long error', error);
       });
   };
 
-
+ 
   const callErrorAPIFromScanner = (error) => {
-    console.log('Scanner Error API called');
+    console.log('ScanShipment.js/callErrorAPIFromScanner ','Scanner Error API called');
     callApi(error,latitude,longitude,route.params.userId);
   }
 
-  const submitForm = () => {
+  const submitFormsubmitForm1 = () => {
     axios
       .post('https://bked.logistiex.com/SellerMainScreen/postSPS', {
         clientShipmentReferenceNumber: route.params.barcode,
@@ -794,10 +794,10 @@ console.log("packagingId",packagingID)
         files: imageUrls,
       })
       .then(function (response) {
-        console.log(response.data, 'Data has been pushed');
+        console.log('ScanShipment.js/submitFormsubmitForm1 ',response.data, 'Data has been pushed');
       })
       .catch(function (error) {
-        console.log(error);
+        console.log('ScanShipment.js/submitFormsubmitForm1 ',error);
       });
   };
   const submitForm1 = () => {
@@ -819,10 +819,10 @@ console.log("packagingId",packagingID)
         files: imageUrls,
       })
       .then(function (response) {
-        console.log(response.data, 'Data has been pushed');
+        console.log('ScanShipment.js/submitForm1 ',response.data, 'Data has been pushed');
       })
       .catch(function (error) {
-        console.log(error);
+        console.log('ScanShipment.js/submitForm1 ',error);
       });
   };
   const partialClose112 = () => {

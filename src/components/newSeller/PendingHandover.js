@@ -85,7 +85,7 @@ const PendingHandover = ({ route }) => {
         //   .catch((err) => {
         //     console.log(err);
         //   });
-        console.log("Location Lat long error", error);
+        console.log("PendingHandover.js/CurrentLocation Location Lat long error", error);
       });
   };
 
@@ -248,10 +248,10 @@ const PendingHandover = ({ route }) => {
           stopId,
         ],
         (tx1, results) => {
-          console.log(results);
+          // console.log(results);
         },
         (error) => {
-          console.log("Status Update Local DB bug", error);
+          console.log("PendingHandover.js/updateQueryLocal Status Update Local DB bug", error);
         }
       );
     });
@@ -267,7 +267,7 @@ const PendingHandover = ({ route }) => {
         );
       }
     } catch (error) {
-      console.log("==err====", error);
+      console.log("PendingHandover.js/ChangeQueryLocal==err====", error);
     }
     navigation.navigate("HandOverSummary",{
       tripID:route.params.tripID,
@@ -276,7 +276,7 @@ const PendingHandover = ({ route }) => {
  
   function closeHandover() {
     let time11 = new Date().valueOf();
-    console.log("===handover close data P===", {
+    console.log("PendingHandover.js/CloseHandover ===handover close data P===", {
       handoverStatus: handoverStatus.concat(
         route.params.acceptedHandoverStatus
       ),
@@ -301,7 +301,7 @@ const PendingHandover = ({ route }) => {
       })
       .catch((error) => {
         ToastAndroid.show("Somthing Went Wrong", ToastAndroid.SHORT);
-        console.error("Error:", error);
+        console.error("PendingHandover/CloseHandover  Error:", error);
       });
   }
 
