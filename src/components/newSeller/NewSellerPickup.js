@@ -56,7 +56,7 @@ const NewSellerPickup = ({route}) => {
   
     if(value && value.length>0 && data && data.length===0){
       setData11(dataSeller.filter((_, index) => valueSeller[index] !== 0));
-    console.log("check ",data.length);
+    console.log("NewSellerPickup/useeffect_datalength",data.length);
     }
     
       }, [valueSeller,data]);
@@ -213,7 +213,7 @@ const NewSellerPickup = ({route}) => {
 
 
   const handlePhoneIconPress = (phone) => {
-    console.log(`Calling ${phone}`);
+    console.log("NewSellerPickup/handlePhoneIconPress",`Calling ${phone}`);
     Linking.openURL('tel:' + phone);
   };
 

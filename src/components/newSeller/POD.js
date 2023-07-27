@@ -173,7 +173,7 @@ const POD = ({ route }) => {
     const deviceId= await DeviceInfo.getUniqueId();
     const IpAddress= await DeviceInfo.getIpAddress();
     const eventTime=new Date().valueOf();
-    console.log('========postRD Data==========', {
+    console.log('POD/submitForm11/========postRD Data==========', {
       runsheetNo: runsheetNo,
       expected: route.params.Forward,
       accepted: newaccepted,
@@ -229,9 +229,9 @@ const POD = ({ route }) => {
                 // console.log('Results', results.rowsAffected);
                 // console.log(results);
                 if (results.rowsAffected > 0) {
-                  console.log('otp status updated  in seller table ');
+                  console.log('POD/SubmitForm11/otp status updated  in seller table ');
                 } else {
-                  console.log('opt status not updated in local table');
+                  console.log('POD/SubmitForm11/opt status not updated in local table');
                 }
                 // console.log(results.rows.length);
               },
@@ -251,25 +251,25 @@ const POD = ({ route }) => {
               ],
               (tx1, results) => {
                 if (results.rowsAffected > 0) {
-                  console.log('added notPicked item locally');
+                  console.log('POD/SubmitForm11/added notPicked item locally');
                 } else {
-                  console.log('failed to add notPicked item locally');
+                  console.log('POD/SubmitForm11/failed to add notPicked item locally');
                 }
               },
             );
           });
-          console.log('POST RD Data Submitted', response.data);
+          console.log('POD/SubmitForm11/POST RD Data Submitted', response.data);
           alert('Pickup Successfully completed');
           postRDStatus();
           navigation.navigate('Main');
         })
         .catch(function (error) {
-          console.log(error.response.data);
+          console.log("POD/SubmitForm11",error.response.data);
           alert(error.response.data.msg);
           navigation.navigate('Main');
         });
     } catch (error) {
-      console.log('===try catch post rd error====', error);
+      console.log('POD/SubmitForm11/===try catch post rd error====', error);
     }
   };
 
@@ -284,7 +284,7 @@ const POD = ({ route }) => {
         }
       })
       .then(setShowModal11(true))
-      .catch(err => console.log('OTP not send'));
+      .catch(err => console.log('POD/sendSmsOtp/OTP not send'));
   };
 
   function handleButtonPress11(item) {
@@ -302,9 +302,9 @@ const POD = ({ route }) => {
         [route.params.stopId],
         (tx1, results) => {
           if (results.rowsAffected > 0) {
-            console.log('postRd STATUS UPDATED');
+            console.log('POD/postRDStatus/postRd STATUS UPDATED');
           } else {
-            console.log('postRD not updated in local table');
+            console.log('POD/postRDStatus/postRD not updated in local table');
           }
         },
       );
@@ -312,7 +312,7 @@ const POD = ({ route }) => {
   }
 
   function validateOTP() {
-    console.log(inputOtp)
+    console.log("POD/validateOTP",inputOtp)
     var otp11=inputOtp;
     // const otp11=mm.filter(Boolean).join('');
     // console.log(otp11);
@@ -339,7 +339,7 @@ const POD = ({ route }) => {
       .catch(error => {
         // alert('Invalid OTP, please try again !!');
         setMessage(2);
-        console.log(error);
+        console.log("POD/validateOTP",error);
       });
   }
 
@@ -351,7 +351,7 @@ const POD = ({ route }) => {
         (tx1, results) => {
           // ToastAndroid.show("Loading...", ToastAndroid.SHORT);
           let temp = [];
-          console.log(results.rows.length);
+          console.log("POD/displayData/",results.rows.length);
           for (let i = 0; i < results.rows.length; ++i) {
             temp.push(results.rows.item(i));
           }

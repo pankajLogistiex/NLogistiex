@@ -73,7 +73,7 @@ useEffect(() => {
   fetchNotificationData();
 }, []);
 
-  console.log(notificationData);
+  console.log("Notices/notificationData",notificationData);
   return (
 <NativeBaseProvider>
 {loading ? 

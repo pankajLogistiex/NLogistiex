@@ -144,7 +144,6 @@ const NewSellerSelection = ({ route }) => {
     const IpAddress= await DeviceInfo.getIpAddress();
     const eventTime=new Date().valueOf();
     // console.log(latitude);
-    console.log("***Attempt Failed")
 
     GetLocation.getCurrentPosition({
       enableHighAccuracy: true,
@@ -154,7 +153,7 @@ const NewSellerSelection = ({ route }) => {
         setLatitude(location.latitude);
         setLongitude(location.longitude);
         
-        console.log({consignorCode: route.params.consignorCode,
+        console.log("NewSellerSelection/notPicked/",{consignorCode: route.params.consignorCode,
           rejectionReason: rejectionCode,
           feUserID: route.params.userId,
           latitude: parseFloat(location.latitude),
@@ -182,25 +181,24 @@ const NewSellerSelection = ({ route }) => {
         deviceIPaddress: IpAddress,
       })
       .then(function (response) {
-        console.log(response.data);
+        console.log("NewSellerSelection/notPicked",response.data);
         db.transaction((tx) => {
           tx.executeSql(
             'UPDATE SyncSellerPickUp  SET otpSubmitted="true" WHERE stopId=? AND FMtripId=?',
             [route.params.stopId, route.params.FMtripId],
             (tx1, results) => {
               if (results.rowsAffected > 0) {
-                console.log("otp status updated  in seller table ");
+                console.log("NewSellerSelection/notPicked/otp status updated  in seller table ");
                 // navigation.navigate(NewSellerPickup);
                 navigation.goBack();
                 setLoading(false);
                 // loadSellerPickupDetails();
               } else {
-                console.log("opt status not updated in local table");
+                console.log("NewSellerSelection/notPicked/opt status not updated in local table");
               }
             }
           );
         });
-        console.log("####eventtime",eventTime)
         db.transaction((tx) => {
           tx.executeSql(
             'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=?, postRDStatus="true"  WHERE shipmentAction="Seller Pickup" AND status IS Null AND stopId=? AND FMtripId=?',
@@ -214,7 +212,7 @@ const NewSellerSelection = ({ route }) => {
             ],
             (tx1, results) => {
               let temp = [];
-              console.log(results.rows.length);
+              // console.log(results.rows.length);
               for (let i = 0; i < results.rows.length; ++i) {
                 temp.push(results.rows.item(i));
               }
@@ -225,7 +223,7 @@ const NewSellerSelection = ({ route }) => {
         setStatus("success");
       })
       .catch(function (error) {
-        console.log(error);
+        console.log("NewSellerSelection/notPicked/",error);
         setMessage("Submission failed");
         // navigation.goBack();
         setLoading(false);
@@ -235,7 +233,7 @@ const NewSellerSelection = ({ route }) => {
     })
     .catch((error) => {
       ToastAndroid.show("Turn on device location ",ToastAndroid.SHORT);
-      console.log("Location Lat long error", error);
+      console.log("NewSellerSelection/notPicked/Location Lat long error", error);
       setDropDownValue('');
       setLoading(false);
       setDropDownValue1('');
@@ -293,7 +291,7 @@ const NewSellerSelection = ({ route }) => {
         loadSellerPickupDetails();
       }
     } catch (e) {
-      console.log(e);
+      console.log("NewSellerSelection/notPicked/",e);
     }
   };
 
@@ -411,20 +409,19 @@ const NewSellerSelection = ({ route }) => {
       tx.executeSql("SELECT * FROM SellerDetails11", [], (tx1, results) => {
         // ToastAndroid.show("Loading...", ToastAndroid.SHORT);
         let temp = [];
-        console.log(results.rows.length);
+        // console.log(results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
-          console.log(results.rows.item(i).consignorName);
           // var address121 = results.rows.item(i).consignorAddress;
           // var address_json = JSON.parse(address121);
           // console.log(typeof (address_json));
           // console.log("Address from local db : " + address_json.consignorAddress1 + " " + address_json.consignorAddress2);
           // ToastAndroid.show('consignorName:' + results.rows.item(i).consignorName + "\n" + 'PRSNumber : ' + results.rows.item(i).PRSNumber, ToastAndroid.SHORT);
         }
-        console.log(
-          "Data from Local Database : \n ",
-          JSON.stringify(temp, null, 4)
-        );
+        // console.log(
+        //   "Data from Local Database : \n ",
+        //   JSON.stringify(temp, null, 4)
+        // );
         setData(temp);
         //   setIsLoading(false);
       });
@@ -451,7 +448,7 @@ const NewSellerSelection = ({ route }) => {
   };
 
   const triggerCall = () => {
-    console.log(phone);
+    console.log("NewSellerSelection/triggerCall",phone);
     Linking.openURL("tel:" + phone);
     // const args = {
     //   number: phone,
@@ -531,10 +528,10 @@ const NewSellerSelection = ({ route }) => {
         }
       })
       .then(setShowModal11(true))
-      .catch(err => console.log('OTP not send'));
+      .catch(err => console.log('NewSellerSelection/sendSmsOtp/OTP not send'));
   };
   function validateOTP() {
-    console.log(inputOtp,phone)
+    console.log("NewSellerSelection/validateOTP",inputOtp,phone)
     var otp11=inputOtp;
     axios
       .post(backendUrl + 'SMS_new/OTPValidate', {
@@ -553,7 +550,7 @@ const NewSellerSelection = ({ route }) => {
         alert('Invalid OTP, please try again !!');
       }})
       .catch(error => {
-        console.log(error);
+        console.log("NewSellerSelection/validateOTP",error);
       });
   }
   return (
