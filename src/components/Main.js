@@ -97,7 +97,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
         dispatch(setUserEmail(value));
       })
       .catch(err => {
-        console.log(err);
+        console.log('Main.js/getUserDetails ',err);
       });
 
     await AsyncStorage.getItem('userId')
@@ -105,7 +105,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
         dispatch(setUserId(value));
       })
       .catch(err => {
-        console.log(err);
+        console.log('Main.js/userId ',err);
       });
 
     await AsyncStorage.getItem('name')
@@ -113,7 +113,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
         dispatch(setUserName(value));
       })
       .catch(err => {
-        console.log(err);
+        console.log('Main.js/name ',err);
       });
     
   }
@@ -143,7 +143,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   useEffect(() => {
     fetchTripInfo(); 
   }, [id]);
-  // console.log("####TripId###",tripID)
+  // console.log('Main.js/ ',"####TripId###",tripID)
   function getTripDetails() {
     axios
       .get(backendUrl + 'UserTripInfo/getUserTripInfo', {
@@ -163,7 +163,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
         }
       })
       .catch(error => {
-        console.log(error, 'error');
+        console.log('Main.js/getTripDetails ',error, 'error');
       });
   }
 
@@ -197,7 +197,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
         loadtripdetails();
       }
     } catch (e) {
-      console.log(e);
+      // console.log('Main.js/ ',e);
     }
   };
 
@@ -464,7 +464,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
       });
     setLoading(false);
   };
-// console.log("Pending",spp)
+// console.log('Main.js/ ',"Pending",spp)
   const value = {
     Accepted: 0,
     Rejected: 0,
@@ -483,10 +483,10 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
           }
         }
         setAcceptedItemData(totalLength)
-        console.log('Total length of acceptedItems11:', totalLength);
+        console.log('Main.js/loadAcceptedItemData12 ','Total length of acceptedItems11:', totalLength);
       }
     } catch (error) {
-      console.log(error);
+      console.log('Main.js/loadAcceptedItemData12 ',error);
     }
   };
   
@@ -494,20 +494,20 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   const fetchCloseHandoverStatus = async () => {
     if (id) {
       try {
-        console.log(id);
+        // console.log('Main.js/ ',id);
  await axios.get(`${backendUrl}/SellerMainScreen/handoverStatus?feUserID=${id}`).then((response) => {
         const responseData = response?.data?.data;
         setCloseHandoverStatus11(response?.data?.data?.handoverStatus);
-        console.log('closeHandoverStatus :', response.data.data);
+        // console.log('Main.js/ ','closeHandoverStatus :', response.data.data);
  }).catch((error) => {
-  console.log("Error Msg:", error);
+  console.log('Main.js/fetchCloseHandoverStatus ',"Error Msg:", error);
 });
       } catch (error) {
-        console.log('Error Msg1:', error);
+        console.log('Main.js/fetchCloseHandoverStatus ','Error Msg1:', error);
       }
     }
   };
-// console.log(closeHandoverStatus11);
+// console.log('Main.js/ ',closeHandoverStatus11);
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       dispatch(setAutoSync(true));
@@ -524,15 +524,15 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   // const createTables = () => {
   //     db.transaction(txn => {
   //         txn.executeSql('DROP TABLE IF EXISTS categories', []);
-  //         txn.executeSql('CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY AUTOINCREMENT, clientShipmentReferenceNumber VARCHAR(50), packagingId VARCHAR(50), packagingStatus VARCHAR(50), consignorCode VARCHAR(50), consignorContact VARCHAR(50), PRSNumber VARCHAR(50), ForwardPickups VARCHAR(50), ScanStatus INT(10), UploadStatus INT(10))', [], (sqlTxn, res) => { // console.log("table created successfully");
+  //         txn.executeSql('CREATE TABLE IF NOT EXISTS categories (id INTEGER PRIMARY KEY AUTOINCREMENT, clientShipmentReferenceNumber VARCHAR(50), packagingId VARCHAR(50), packagingStatus VARCHAR(50), consignorCode VARCHAR(50), consignorContact VARCHAR(50), PRSNumber VARCHAR(50), ForwardPickups VARCHAR(50), ScanStatus INT(10), UploadStatus INT(10))', [], (sqlTxn, res) => { // console.log('Main.js/ ',"table created successfully");
   //         }, error => {
-  //             console.log('error on creating table ' + error.message);
+  //             console.log('Main.js/ ','error on creating table ' + error.message);
   //         },);
   //     });
   // };
 
   // const addCategory = (clientShipmentReferenceNumber, packagingId, packagingStatus, consignorCode, consignorContact, PRSNumber, ForwardPickups, ScanStatus, UploadStatus) => {
-  //     // console.log(clientShipmentReferenceNumber, packagingId, packagingStatus, consignorCode, consignorContact, PRSNumber, ForwardPickups, ScanStatus, UploadStatus);
+  //     // console.log('Main.js/ ',clientShipmentReferenceNumber, packagingId, packagingStatus, consignorCode, consignorContact, PRSNumber, ForwardPickups, ScanStatus, UploadStatus);
   //     if (!clientShipmentReferenceNumber && !packagingId && !packagingStatus && !consignorCode && !consignorContact && !PRSNumber && !ForwardPickups && !ScanStatus && !UploadStatus) { // eslint-disable-next-line no-alert
   //         alert('Enter category');
   //         return false;
@@ -550,9 +550,9 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   //             ScanStatus,
   //             UploadStatus,
   //         ], (sqlTxn, res) => {
-  //             // console.log('category added successfully');
+  //             // console.log('Main.js/ ','category added successfully');
   //         }, error => {
-  //             console.log('error on adding category ' + error.message);
+  //             console.log('Main.js/ ','error on adding category ' + error.message);
   //         },);
   //     });
   // };
@@ -570,7 +570,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     try {
       await AsyncStorage.setItem('user', JSON.stringify(value));
     } catch (error) {
-      console.log(error);
+      console.log('Main.js/storeUser ',error);
     }
   };
 
@@ -582,9 +582,9 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   // db.transaction(txn => {
   //     txn.executeSql('DROP TABLE IF EXISTS Sync1', []);
   //     txn.executeSql('CREATE TABLE IF NOT EXISTS Sync1(userId ID VARCHAR(30) PRIMARY KEY  ,consignorPickupsList INT(15), CustomerPickupsList VARCHAR(50))', [], (sqlTxn, res) => {
-  //         console.log('table created successfully');
+  //         console.log('Main.js/ ','table created successfully');
   //     }, error => {
-  //         console.log('error on creating table ' + error.message);
+  //         console.log('Main.js/ ','error on creating table ' + error.message);
   //     },);
   // });
 
@@ -592,11 +592,11 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   //     txn.executeSql('INSERT OR REPLACE INTO Sync1 (userId ,consignorPickupsList , CustomerPickupsList) VALUES (?,?,?)', [
   //         userId, data1, data2,
   //     ], (sqlTxn, res) => {
-  //         console.log('Data Added to local db successfully');
-  //         console.log(res);
-  //         console.log(data1 + ' ' + data2);
+  //         console.log('Main.js/ ','Data Added to local db successfully');
+  //         console.log('Main.js/ ',res);
+  //         console.log('Main.js/ ',data1 + ' ' + data2);
   //     }, error => {
-  //         console.log('error on adding data ' + error.message);
+  //         console.log('Main.js/ ','error on adding data ' + error.message);
   //     },);
   // });
 
@@ -606,13 +606,13 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   //             let temp = [];
   //             for (let i = 0; i < results.rows.length; ++i) {
   //                 temp.push(results.rows.item(i));
-  //                 console.log(results.rows.item(i).consignorPickupsList);
+  //                 console.log('Main.js/ ',results.rows.item(i).consignorPickupsList);
   //                 setData1(results.rows.item(i).consignorPickupsList);
   //                 setData2(results.rows.item(i).CustomerPickupsList);
   //                 ToastAndroid.show('consignorPickupsList :' + results.rows.item(i).consignorPickupsList + '\n' + 'CustomerPickupsList : ' + results.rows.item(i).CustomerPickupsList, ToastAndroid.SHORT);
   //             }
-  //             // console.log(temp);
-  //             // console.log(tx1);
+  //             // console.log('Main.js/ ',temp);
+  //             // console.log('Main.js/ ',tx1);
   //         });
   //     });
   // };
@@ -652,8 +652,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   //         await axios.get(getData).then((res) => {
   //             setData1(res.data.consignorPickupsList);
   //             setData2(res.data.CustomerPickupsList);
-  //             console.log(res.data.CustomerPickupsList);
-  //             console.log(res.data.consignorPickupsList);
+  //             console.log('Main.js/ ',res.data.CustomerPickupsList);
+  //             console.log('Main.js/ ',res.data.consignorPickupsList);
   //             // createTables();
   //         }, (error) => {
   //             Alert.alert(error);
