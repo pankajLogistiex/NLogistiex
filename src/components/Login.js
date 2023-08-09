@@ -18,8 +18,7 @@ import {
 } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import MaterialIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { Pressable, Linking,
-  PermissionsAndroid, } from "react-native";
+import { Pressable, Linking, PermissionsAndroid } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { backendUrl } from "../utils/backendUrl";
 import { BackHandler } from "react-native";
@@ -32,11 +31,14 @@ import {
   setUserName,
   setToken,
   setIdToken,
+  setRefreshToken,
+  setRefreshTime,
 } from "../redux/slice/userSlice";
 import { authorize } from "react-native-app-auth";
 import { setForceSync } from "../redux/slice/autoSyncSlice";
-import GetLocation from 'react-native-get-location';
-import DeviceInfo from 'react-native-device-info';
+import GetLocation from "react-native-get-location";
+import DeviceInfo from "react-native-device-info";
+import { getAuthorizedHeaders } from "../utils/headers";
 const config = {
   issuer: "https://uacc.logistiex.com/realms/Logistiex-Demo",
   clientId: "logistiex-demo",
@@ -66,7 +68,7 @@ export default function Login() {
   const [message, setMessage] = useState(0);
   const [loginClicked, setLoginClicked] = useState(false);
   const [notificationToken, setNotificationToken] = useState("");
-  const deviceInfo= useSelector((state) => state.deviceInfo.currentDeviceInfo);
+  const deviceInfo = useSelector((state) => state.deviceInfo.currentDeviceInfo);
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
   const navigation = useNavigation();
@@ -81,10 +83,15 @@ export default function Login() {
       console.log(e);
     }
   };
-// console.log(deviceInfo);
-  async function getProfile(token, idToken) {
-    const deviceId=await DeviceInfo.getUniqueId();
-    const IpAddress= await DeviceInfo.getIpAddress();
+  // console.log(deviceInfo);
+  async function getProfile(
+    token,
+    idToken,
+    refreshToken,
+    accessTokenExpirationDate
+  ) {
+    const deviceId = await DeviceInfo.getUniqueId();
+    const IpAddress = await DeviceInfo.getIpAddress();
     await axios
       .post(
         backendUrl + "Login/userLogin",
@@ -95,7 +102,7 @@ export default function Login() {
           latitude: latitude,
           longitude: longitude,
         },
-        { headers: { Authorization: token } }
+        { headers: getAuthorizedHeaders(token) }
       )
       .then((response) => {
         console.log("===login response===", response?.data?.userDetails);
@@ -103,6 +110,13 @@ export default function Login() {
 
         setMessage(1);
         setShowModal(true);
+
+        const currentDate = new Date();
+        const providedDate = new Date(accessTokenExpirationDate);
+
+        // Calculate the time difference in milliseconds
+        const timeDifference = providedDate - currentDate;
+
         AsyncStorage.setItem("userId", response?.data?.userDetails?.userId);
         AsyncStorage.setItem(
           "name",
@@ -116,7 +130,8 @@ export default function Login() {
         );
         AsyncStorage.setItem("token", token);
         AsyncStorage.setItem("idToken", idToken);
-        // AsyncStorage.setItem("acceptedItemData", JSON.stringify({}));
+        AsyncStorage.setItem("refreshToken", refreshToken);
+        AsyncStorage.setItem("refreshTime", timeDifference.toString());
 
         dispatch(setUserId(response?.data?.userDetails?.userId));
         dispatch(
@@ -131,6 +146,8 @@ export default function Login() {
         );
         dispatch(setToken(token));
         dispatch(setIdToken(idToken));
+        dispatch(setRefreshToken(refreshToken));
+        dispatch(setRefreshTime(timeDifference));
 
         setLoginClicked(false);
 
@@ -155,56 +172,55 @@ export default function Login() {
     current_location1();
   }, []);
 
-  const current_location1 = async() => {
-  const locationPermission = await PermissionsAndroid.request(
-    PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-    {
-      title: "Location Permission",
-      message: "This app needs access to your location.",
-      buttonNeutral: "Ask Me Later",
-      buttonNegative: "Cancel",
-      buttonPositive: "OK",
+  const current_location1 = async () => {
+    const locationPermission = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      {
+        title: "Location Permission",
+        message: "This app needs access to your location.",
+        buttonNeutral: "Ask Me Later",
+        buttonNegative: "Cancel",
+        buttonPositive: "OK",
+      }
+    );
+    if (locationPermission !== PermissionsAndroid.RESULTS.GRANTED) {
+      console.log("Location permission denied");
+    } else {
+      current_location();
     }
-  );
-  if (locationPermission !== PermissionsAndroid.RESULTS.GRANTED) {
-    console.log("Location permission denied");
-  }else{
-    current_location();
-  }
-}
+  };
 
-console.log(latitude);
+  console.log(latitude);
   const current_location = () => {
     GetLocation.getCurrentPosition({
       enableHighAccuracy: true,
       timeout: 10000,
     })
-      .then(location => {
+      .then((location) => {
         setLatitude(location.latitude);
         setLongitude(location.longitude);
       })
-      .catch(error => {
+      .catch((error) => {
         RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
           interval: 10000,
           fastInterval: 5000,
         })
-          .then(status => {
+          .then((status) => {
             if (status) {
-              console.log('Location enabled');
+              console.log("Location enabled");
               GetLocation.getCurrentPosition({
                 enableHighAccuracy: true,
                 timeout: 10000,
-              })
-                .then(location => {
-                  setLatitude(location.latitude);
-                  setLongitude(location.longitude);
-                })
+              }).then((location) => {
+                setLatitude(location.latitude);
+                setLongitude(location.longitude);
+              });
             }
           })
-          .catch(err => {
+          .catch((err) => {
             console.log(err);
           });
-        console.log('Location Lat long error2', error);
+        console.log("Location Lat long error2", error);
       });
   };
   async function handleLogin() {
@@ -214,7 +230,12 @@ console.log(latitude);
         .then((res) => {
           console.log("====Keycloak res=====", res);
           if (res?.accessToken) {
-            getProfile(res?.accessToken, res?.idToken);
+            getProfile(
+              res?.accessToken,
+              res?.idToken,
+              res?.refreshToken,
+              res?.accessTokenExpirationDate
+            );
           } else {
             setMessage(2);
             setShowModal(true);

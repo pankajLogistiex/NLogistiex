@@ -86,6 +86,7 @@ import messaging from "@react-native-firebase/messaging";
 import { setIsNewSync } from "./src/redux/slice/isNewSync";
 import { setCurrentDeviceInfo } from "./src/redux/slice/deviceInfoSlice";
 import {
+  setIdToken,
   setToken,
   setUserEmail,
   setUserId,
@@ -94,7 +95,7 @@ import {
 import { setCurrentDateValue } from "./src/redux/slice/currentDateSlice";
 import { setAdditionalWorkloadData } from "./src/redux/slice/additionalWorkloadSlice";
 import { setTripStatus } from "./src/redux/slice/tripSlice";
-import { logout } from "react-native-app-auth";
+import { logout, refresh } from "react-native-app-auth";
 import PushNotification from "react-native-push-notification";
 import { setNotificationCount } from "./src/redux/slice/notificationSlice";
 import BackgroundTimer from "react-native-background-timer";
@@ -108,6 +109,8 @@ import * as RNLocalize from "react-native-localize";
 import Mixpanel from "react-native-mixpanel";
 import GetLocation from "react-native-get-location";
 import { callApi } from "./src/components/ApiError";
+import { autoSyncTime } from "./src/utils/autoSyncTime";
+import { getAuthorizedHeaders } from "./src/utils/headers";
 const db = openDatabase({ name: "rn_sqlite" });
 
 const Stack = createStackNavigator();
@@ -123,6 +126,8 @@ function StackNavigators({ navigation }) {
   const syncTime = useSelector((state) => state.autoSync.syncTime);
   const forceSync = useSelector((state) => state.autoSync.forceSync);
   const token = useSelector((state) => state.user.token);
+  const refreshToken = useSelector((state) => state.user.refreshToken);
+  const refreshTime = useSelector((state) => state.user.refreshTime);
   const isAutoSyncEnable = useSelector(
     (state) => state.autoSync.isAutoSyncEnable
   );
@@ -144,6 +149,55 @@ function StackNavigators({ navigation }) {
   const [tripID, setTripID] = useState("");
   const [showModal11, setShowModal11] = useState(false);
   const [dataN, setDataN] = useState([]);
+
+  const config = {
+    issuer: "https://uacc.logistiex.com/realms/Logistiex-Demo",
+    clientId: "logistiex-demo",
+    redirectUrl: "com.demoproject.app://Login",
+    scopes: [
+      "openid",
+      "web-origins",
+      "acr",
+      "offline_access",
+      "email",
+      "microprofile-jwt",
+      "profile",
+      "address",
+      "phone",
+      "roles",
+    ],
+  };
+
+  useEffect(() => {
+    if (refreshTime && refreshToken) {
+      const intervalId = setInterval(() => {
+        if (refreshToken) {
+          refreshTokenAgain(refreshToken);
+        }
+      }, refreshTime);
+
+      return () => {
+        clearInterval(intervalId);
+      };
+    }
+  }, [refreshToken, refreshTime]);
+
+  async function refreshTokenAgain(refreshToken) {
+    await refresh(config, {
+      refreshToken: refreshToken,
+    })
+      .then((response) => {
+        AsyncStorage.setItem("token", response?.accessToken);
+        AsyncStorage.setItem("idToken", response?.idToken);
+
+        dispatch(setToken(response?.accessToken));
+        dispatch(setIdToken(response?.idToken));
+        console.log("App.js/refreshTokenAgain/Token Refreshed", response);
+      })
+      .catch((error) => {
+        console.log("App.js/refreshTokenAgain/Refresh Token Error".error);
+      });
+  }
   // console.log('App.js/ ',additionalWorkloadInfo11);
   // console.log('App.js/ ',userId);
   const DisplayData = async () => {
@@ -154,19 +208,20 @@ function StackNavigators({ navigation }) {
           try {
             const response = await axios.get(
               `${backendUrl}SellerMainScreen/getadditionalwork/${userId}`,
-              { headers: { Authorization: token } }
+              { headers: getAuthorizedHeaders(token) }
             );
             const responseData = response?.data?.data;
             setDataN(responseData);
             // console.log('App.js/ ','AdditionalWorkload API data=============================================>>>>>>>>>>>>');
             dispatch(setAdditionalWorkloadData(responseData));
-            console.log('App.js/DisplayData ',
+            console.log(
+              "App.js/DisplayData ",
               "Additional Workload API Data:",
               response.data.data.length
             );
             setShowModal11(responseData && responseData.length > 0);
           } catch (error) {
-            console.log('App.js/DisplayData ',"Error Msg11:", error);
+            console.log("App.js/DisplayData ", "Error Msg11:", error);
           }
         };
         fetchData();
@@ -176,7 +231,7 @@ function StackNavigators({ navigation }) {
         //   clearInterval(intervalId);
         // };
       } catch (error) {
-        console.log('App.js/DisplayData ',"Error Msg1:", error);
+        console.log("App.js/DisplayData ", "Error Msg1:", error);
       }
     }
   };
@@ -189,22 +244,31 @@ function StackNavigators({ navigation }) {
 
   const AcceptHandler = async (consignorCodeAccept, stopId, tripId) => {
     // console.log('App.js/ ','df')
-    console.log('App.js/AcceptHandler ',{
+    console.log("App.js/AcceptHandler ", {
       consignorCode: consignorCodeAccept,
       feUserId: userId,
       stopId: stopId,
       tripID: tripId,
     });
     axios
-      .post(backendUrl + "SellerMainScreen/acceptWorkLoad", {
-        consignorCode: consignorCodeAccept,
-        feUserId: userId,
-        stopId: stopId,
-        tripID: tripId,
-      },
-      { headers: { Authorization: token } })
+      .post(
+        backendUrl + "SellerMainScreen/acceptWorkLoad",
+        {
+          consignorCode: consignorCodeAccept,
+          feUserId: userId,
+          stopId: stopId,
+          tripID: tripId,
+        },
+        { headers: getAuthorizedHeaders(token) }
+      )
       .then((response) => {
-        console.log('App.js/AcceptHandler ',"Msg Accepted ", response.data, "", userId);
+        console.log(
+          "App.js/AcceptHandler ",
+          "Msg Accepted ",
+          response.data,
+          "",
+          userId
+        );
         dispatch(setNotificationCount(notificationCount - 1));
         dispatch(setForceSync(true));
         const updatedData = dataN.filter(
@@ -217,23 +281,25 @@ function StackNavigators({ navigation }) {
         }
       })
       .catch((error) => {
-        console.log('App.js/AcceptHandler ',error);
+        console.log("App.js/AcceptHandler ", error);
       });
   };
 
   const RejectHandler = async (consignorCodeReject, stopId, tripId) => {
-    console.log('App.js/RejectHandler ',"REJECT ");
+    console.log("App.js/RejectHandler ", "REJECT ");
     axios
-      .post(backendUrl + "SellerMainScreen/rejectWorkLoad", {
-        consignorCode: consignorCodeReject,
-        feUserId: userId,
-        stopId: stopId,
-        tripID: tripId,
-      },
-      { headers: { Authorization: token } }
+      .post(
+        backendUrl + "SellerMainScreen/rejectWorkLoad",
+        {
+          consignorCode: consignorCodeReject,
+          feUserId: userId,
+          stopId: stopId,
+          tripID: tripId,
+        },
+        { headers: getAuthorizedHeaders(token) }
       )
       .then((response) => {
-        console.log('App.js/RejectHandler ',"Msg Rejected ", response.data);
+        console.log("App.js/RejectHandler ", "Msg Rejected ", response.data);
         dispatch(setNotificationCount(notificationCount - 1));
         const updatedData = dataN.filter(
           (item) => item.consignorCode !== consignorCodeReject
@@ -245,16 +311,16 @@ function StackNavigators({ navigation }) {
         }
       })
       .catch((error) => {
-        console.log('App.js/RejectHandler ',error);
+        console.log("App.js/RejectHandler ", error);
       });
   };
 
   let m = 0;
   // console.log('App.js/ ',latitude," " ,longitude);
   useEffect(() => {
-    if(userId){
-    current_location();
-  }
+    if (userId) {
+      current_location();
+    }
   }, []);
 
   const current_location = () => {
@@ -279,17 +345,25 @@ function StackNavigators({ navigation }) {
         //   .catch(err => {
         //     console.log('App.js/ ',err);
         //   });
-        console.log('App.js/current_location ',"Location Lat long error", error);
+        console.log(
+          "App.js/current_location ",
+          "Location Lat long error",
+          error
+        );
       });
   };
   useEffect(() => {
     Mixpanel.sharedInstanceWithToken("c8b2a1b9ad65958a04d82787add43a72")
       .then(() => {
         setIsMixPanelInit(true);
-        console.log('App.js/Mixpanel ',"Mixpanel is initialized");
+        console.log("App.js/Mixpanel ", "Mixpanel is initialized");
       })
       .catch((error) => {
-        console.log('App.js/Mixpanel ',"Mixpanel initialization error:", error);
+        console.log(
+          "App.js/Mixpanel ",
+          "Mixpanel initialization error:",
+          error
+        );
       });
   }, []);
   // console.log('App.js/ ',"CurrentDate :",currentDateValue);
@@ -332,10 +406,17 @@ function StackNavigators({ navigation }) {
         `DELETE FROM ${tableName} WHERE date <= ?`,
         [yesterdayDateString],
         (_, { rowsAffected }) => {
-          console.log('App.js/deleteRowsByDate ',`${rowsAffected} rows deleted from ${tableName}`);
+          console.log(
+            "App.js/deleteRowsByDate ",
+            `${rowsAffected} rows deleted from ${tableName}`
+          );
         },
         (error) => {
-          console.log('App.js/deleteRowsByDate ',`Error deleting rows from ${tableName}:`, error);
+          console.log(
+            "App.js/deleteRowsByDate ",
+            `Error deleting rows from ${tableName}:`,
+            error
+          );
         }
       );
     });
@@ -345,16 +426,23 @@ function StackNavigators({ navigation }) {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 3);
     const yesterdayDateString = yesterday.toISOString().split("T")[0];
-    console.log('App.js/deleteRowsByDateBag ',yesterdayDateString);
+    console.log("App.js/deleteRowsByDateBag ", yesterdayDateString);
     db.transaction((tx) => {
       tx.executeSql(
         `DELETE FROM ${tableName} WHERE bagDate <= ?`,
         [yesterdayDateString],
         (_, { rowsAffected }) => {
-          console.log('App.js/deleteRowsByDateBag ',`${rowsAffected} rows deleted from ${tableName}`);
+          console.log(
+            "App.js/deleteRowsByDateBag ",
+            `${rowsAffected} rows deleted from ${tableName}`
+          );
         },
         (error) => {
-          console.log('App.js/deleteRowsByDateBag ',`Error deleting rows from ${tableName}:`, error);
+          console.log(
+            "App.js/deleteRowsByDateBag ",
+            `Error deleting rows from ${tableName}:`,
+            error
+          );
         }
       );
     });
@@ -565,7 +653,11 @@ function StackNavigators({ navigation }) {
 
       return ramUsagePercentage;
     } catch (error) {
-      console.log('App.js/ ',"Error occurred while calculating RAM usage:", error);
+      console.log(
+        "App.js/ ",
+        "Error occurred while calculating RAM usage:",
+        error
+      );
       return 0; // Default value or error handling logic
     }
   };
@@ -584,7 +676,11 @@ function StackNavigators({ navigation }) {
 
       return diskUsagePercentage;
     } catch (error) {
-      console.log('App.js/ ',"Error occurred while calculating disk utilization:", error);
+      console.log(
+        "App.js/ ",
+        "Error occurred while calculating disk utilization:",
+        error
+      );
       return 0; // Default value or error handling logic
     }
   };
@@ -593,7 +689,7 @@ function StackNavigators({ navigation }) {
     try {
       return (await NetInfo.fetch()).details?.strength;
     } catch (error) {
-      console.log('App.js/ ',"Error getting Signal Strength:", error);
+      console.log("App.js/ ", "Error getting Signal Strength:", error);
       return null;
     }
   };
@@ -602,7 +698,7 @@ function StackNavigators({ navigation }) {
     try {
       return await DeviceInfo.getMacAddress();
     } catch (error) {
-      console.log('App.js/ ',"Error getting MAC address:", error);
+      console.log("App.js/ ", "Error getting MAC address:", error);
       return null;
     }
   };
@@ -636,7 +732,10 @@ function StackNavigators({ navigation }) {
 
   useEffect(() => {
     if (userId) {
-      console.log('App.js/Mixpanel ',"===Background Task Run UseEffect Called===");
+      console.log(
+        "App.js/Mixpanel ",
+        "===Background Task Run UseEffect Called==="
+      );
       if (isMixPanelInit) {
         Mixpanel.trackWithProperties("Background Task Run UseEffect Called", {
           userId: userId,
@@ -654,9 +753,9 @@ function StackNavigators({ navigation }) {
               userEmail: userEmail,
             });
           }
-          console.log('App.js/Mixpanel ',"===Auto sync called===");
+          console.log("App.js/Mixpanel ", "===Auto sync called===");
         }
-      }, 180000);
+      }, autoSyncTime);
 
       return () => {
         BackgroundTimer.stopBackgroundTimer(timer);
@@ -674,7 +773,7 @@ function StackNavigators({ navigation }) {
           userEmail: userEmail,
         });
       }
-      console.log('App.js/forceSync ',"===Force sync called===");
+      console.log("App.js/forceSync ", "===Force sync called===");
     }
   }, [forceSync]);
 
@@ -684,12 +783,13 @@ function StackNavigators({ navigation }) {
   }, [userId]);
 
   useEffect(() => {
-    if(userId){
-      setTimeout(()=>{
+    if (userId) {
+      setTimeout(() => {
         requestPermissions();
-    },3000);
+      }, 3000);
 
-  console.log('App.js/requestPermissions ','Request permission',userId);}
+      console.log("App.js/requestPermissions ", "Request permission", userId);
+    }
   }, [userId]);
 
   const requestPermissions = async () => {
@@ -705,7 +805,7 @@ function StackNavigators({ navigation }) {
         }
       );
       if (cameraPermission !== PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('App.js/requestPermissions ',"Camera permission denied");
+        console.log("App.js/requestPermissions ", "Camera permission denied");
       }
 
       const storagePermission = await PermissionsAndroid.request(
@@ -719,19 +819,25 @@ function StackNavigators({ navigation }) {
         }
       );
       if (storagePermission !== PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('App.js/requestPermissions ',"Storage permission denied");
+        console.log("App.js/requestPermissions ", "Storage permission denied");
       }
 
       messaging()
         .requestPermission()
         .then((permission) => {
           if (permission) {
-            console.log('App.js/requestPermissions ',"Notification permission granted");
+            console.log(
+              "App.js/requestPermissions ",
+              "Notification permission granted"
+            );
             // messaging().getToken().then((token) => {
             // console.log('App.js/ ','FCM Token:', token);
             // });
           } else {
-            console.log('App.js/requestPermissions ',"Notification permission denied");
+            console.log(
+              "App.js/requestPermissions ",
+              "Notification permission denied"
+            );
           }
         });
 
@@ -746,7 +852,7 @@ function StackNavigators({ navigation }) {
         }
       );
       if (locationPermission !== PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('App.js/requestPermissions ',"Location permission denied");
+        console.log("App.js/requestPermissions ", "Location permission denied");
       }
     } catch (error) {
       console.warn(error);
@@ -759,7 +865,7 @@ function StackNavigators({ navigation }) {
   }
 
   const handleIncomingMessage = async (message) => {
-    console.log('App.js/handleIncomingMessage ',message);
+    console.log("App.js/handleIncomingMessage ", message);
     const { messageId, notification, sentTime } = message;
     const sendDate = new Date().toISOString().slice(0, 10);
     const date = new Date(sentTime);
@@ -767,7 +873,7 @@ function StackNavigators({ navigation }) {
     const options = { hour: "numeric", minute: "numeric", hour12: true };
     const formattedTime = date.toLocaleTimeString("en-US", options);
 
-    console.log('App.js/handleIncomingMessage ',formattedTime, notification);
+    console.log("App.js/handleIncomingMessage ", formattedTime, notification);
 
     db.transaction((tx) => {
       const messageRegex = /.*?- (.+?) \(/;
@@ -781,7 +887,15 @@ function StackNavigators({ navigation }) {
       const sellerCodeRegex = /\( (.+?) \)/;
       const sellerCodeMatch = notification.body.match(sellerCodeRegex);
       const sellerCode = sellerCodeMatch ? sellerCodeMatch[1] : null;
-      console.log('App.js/handleIncomingMessage ',message, " ", sellerName, " ", " ", sellerCode);
+      console.log(
+        "App.js/handleIncomingMessage ",
+        message,
+        " ",
+        sellerName,
+        " ",
+        " ",
+        sellerCode
+      );
       tx.executeSql(
         "INSERT INTO noticeMessages (messageId, notificationTitle, notificationBody, date, sentTime, message, sellerName, sellerCode) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         [
@@ -795,9 +909,10 @@ function StackNavigators({ navigation }) {
           sellerCode,
         ],
         (tx, results) => {
-          console.log('App.js/handleIncomingMessage ',results);
+          console.log("App.js/handleIncomingMessage ", results);
           if (results.rowsAffected > 0) {
-            console.log('App.js/handleIncomingMessage ',
+            console.log(
+              "App.js/handleIncomingMessage ",
               "Message stored in the local database ",
               notification.body
             );
@@ -810,11 +925,11 @@ function StackNavigators({ navigation }) {
   // console.log('App.js/ ',"Notification Count",notificationCount," ",useSelector((state) => state.notification.count));
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-      console.log('App.js/onMessage ',remoteMessage.notification);
+      console.log("App.js/onMessage ", remoteMessage.notification);
       const newvalue = notificationCount + 1;
       dispatch(setNotificationCount(newvalue));
       DisplayData();
-      console.log('App.js/onMessage ','Notification Arrived');
+      console.log("App.js/onMessage ", "Notification Arrived");
       handleIncomingMessage(remoteMessage);
       PushNotification.localNotification({
         title: remoteMessage.notification.title,
@@ -822,7 +937,6 @@ function StackNavigators({ navigation }) {
         channelId: "AdditionalWork_1",
       });
       pull_API_Data();
-      
     });
 
     return unsubscribe;
@@ -835,11 +949,11 @@ function StackNavigators({ navigation }) {
     });
     PushNotification.configure({
       onRegister: function (token) {
-        console.log('App.js/PushNotification ',"TOKEN:", token);
+        console.log("App.js/PushNotification ", "TOKEN:", token);
       },
 
       onNotification: function (notification) {
-        console.log('App.js/PushNotification ',"NOTIFICATION:", notification);
+        console.log("App.js/PushNotification ", "NOTIFICATION:", notification);
 
         navigation.navigate("NewSellerAdditionNotification");
       },
@@ -906,7 +1020,7 @@ function StackNavigators({ navigation }) {
       dispatch(setSyncTime(datetime));
       dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
       AsyncStorage.setItem("lastSyncTime112", datetime);
-      console.log('App.js/pull_API_Data ',"api pull");
+      console.log("App.js/pull_API_Data ", "api pull");
       loadAPI_Data1();
       loadAPI_Data2();
       loadAPI_3();
@@ -944,7 +1058,7 @@ function StackNavigators({ navigation }) {
       }
     })();
   }, [userId, tripID]);
-// console.log(token)
+  // console.log(token)
   // Sync button function
   const note11 = () => {
     if (!isLoading) {
@@ -969,7 +1083,7 @@ function StackNavigators({ navigation }) {
           dispatch(setSyncTimeFull(data11));
         })
         .catch((e) => {
-          console.log('App.js/useEffect ',e);
+          console.log("App.js/useEffect ", e);
         });
     }
   }, [userId]);
@@ -1003,7 +1117,7 @@ function StackNavigators({ navigation }) {
   async function postSPSCalling(row) {
     const deviceId = await DeviceInfo.getUniqueId();
     const IpAddress = await DeviceInfo.getIpAddress();
-    console.log('App.js/postSPSCalling ',"===========row=========", {
+    console.log("App.js/postSPSCalling ", "===========row=========", {
       clientShipmentReferenceNumber: row.clientShipmentReferenceNumber,
       awbNo: row.awbNo,
       clientRefId: row.clientRefId,
@@ -1032,52 +1146,60 @@ function StackNavigators({ navigation }) {
       deviceIPaddress: IpAddress,
     });
     await axios
-      .post(backendUrl + "SellerMainScreen/postSPS", {
-        clientShipmentReferenceNumber: row.clientShipmentReferenceNumber,
-        awbNo: row.awbNo,
-        clientRefId: row.clientRefId,
-        expectedPackagingId: row.packagingId,
-        packagingId: row.expectedPackagingId,
-        courierCode: row.courierCode,
-        consignorCode: row.consignorCode,
-        packagingAction: row.packagingAction,
-        runsheetNo: row.runSheetNumber,
-        shipmentAction: row.shipmentAction,
-        feUserID: userId,
-        rejectionReason: row.rejectionReasonL2
-          ? row.rejectionReasonL2
-          : row.rejectionReasonL1,
-        rejectionStage: 1,
-        bagId: row.bagId,
-        eventTime: parseInt(row.eventTime),
-        latitude: parseFloat(row.latitude),
-        longitude: parseFloat(row.longitude),
-        packagingStatus: 1,
-        scanStatus:
-          row.status == "accepted" ? 1 : row.status == "rejected" ? 2 : 0,
-        stopId: row.stopId,
-        tripID: row.FMtripId,
-        deviceId: deviceId,
-        deviceIPaddress: IpAddress,
-      },
-      { headers: { Authorization: token } })
+      .post(
+        backendUrl + "SellerMainScreen/postSPS",
+        {
+          clientShipmentReferenceNumber: row.clientShipmentReferenceNumber,
+          awbNo: row.awbNo,
+          clientRefId: row.clientRefId,
+          expectedPackagingId: row.packagingId,
+          packagingId: row.expectedPackagingId,
+          courierCode: row.courierCode,
+          consignorCode: row.consignorCode,
+          packagingAction: row.packagingAction,
+          runsheetNo: row.runSheetNumber,
+          shipmentAction: row.shipmentAction,
+          feUserID: userId,
+          rejectionReason: row.rejectionReasonL2
+            ? row.rejectionReasonL2
+            : row.rejectionReasonL1,
+          rejectionStage: 1,
+          bagId: row.bagId,
+          eventTime: parseInt(row.eventTime),
+          latitude: parseFloat(row.latitude),
+          longitude: parseFloat(row.longitude),
+          packagingStatus: 1,
+          scanStatus:
+            row.status == "accepted" ? 1 : row.status == "rejected" ? 2 : 0,
+          stopId: row.stopId,
+          tripID: row.FMtripId,
+          deviceId: deviceId,
+          deviceIPaddress: IpAddress,
+        },
+        { headers: getAuthorizedHeaders(token) }
+      )
       .then((response) => {
-        console.log('App.js/postSPSCalling ',"sync Successfully pushed");
-        console.log('App.js/postSPSCalling ',response);
+        console.log("App.js/postSPSCalling ", "sync Successfully pushed");
+        console.log("App.js/postSPSCalling ", response);
         db.transaction((tx) => {
           tx.executeSql(
             'UPDATE SellerMainScreenDetails SET syncStatus="done" WHERE clientShipmentReferenceNumber = ?',
             [row.clientShipmentReferenceNumber],
             (tx1, results) => {
               let temp = [];
-              console.log('App.js/postSPSCalling ',
+              console.log(
+                "App.js/postSPSCalling ",
                 "===========Local Sync Status Results==========",
                 results.rowsAffected
               );
               if (results.rowsAffected > 0) {
-                console.log('App.js/postSPSCalling ',"Sync status done in localDB");
+                console.log(
+                  "App.js/postSPSCalling ",
+                  "Sync status done in localDB"
+                );
               } else {
-                console.log('App.js/postSPSCalling ',
+                console.log(
+                  "App.js/postSPSCalling ",
                   "Sync Status not changed in localDB or already synced"
                 );
               }
@@ -1088,7 +1210,7 @@ function StackNavigators({ navigation }) {
       .catch((error) => {
         setIsLoading(false);
         callApi(error, latitude, longitude, userId, token);
-        console.log('App.js/postSPSCalling ',"sync error", { error });
+        console.log("App.js/postSPSCalling ", "sync error", { error });
       });
   }
 
@@ -1114,7 +1236,8 @@ function StackNavigators({ navigation }) {
   }
 
   const push_Data = () => {
-    console.log('App.js/push_Data ',
+    console.log(
+      "App.js/push_Data ",
       "push data function",
       new Date().toJSON().slice(0, 10).replace(/-/g, "/")
     );
@@ -1163,7 +1286,10 @@ function StackNavigators({ navigation }) {
               ToastAndroid.SHORT
             );
           } else {
-            console.log('App.js/push_Data ',"Only Pulling Data.No data to push...");
+            console.log(
+              "App.js/push_Data ",
+              "Only Pulling Data.No data to push..."
+            );
             pull_API_Data();
           }
         }
@@ -1196,7 +1322,10 @@ function StackNavigators({ navigation }) {
           // loadAPI_Data();
         },
         (error) => {
-          console.log('App.js/createTables1 ',"error on creating table " + error.message);
+          console.log(
+            "App.js/createTables1 ",
+            "error on creating table " + error.message
+          );
         }
       );
     });
@@ -1225,7 +1354,7 @@ function StackNavigators({ navigation }) {
       );
     });
   };
-  
+
   useEffect(() => {
     fetchTripInfo();
   }, [userId]);
@@ -1240,11 +1369,14 @@ function StackNavigators({ navigation }) {
             params: {
               tripID: tripID,
             },
-             headers: { Authorization: token } 
+            headers: getAuthorizedHeaders(token),
           })
           .then(
             (res) => {
-              console.log('App.js/loadAPI_Data1 ',"API 1 OK: " + res.data.data.length);
+              console.log(
+                "App.js/loadAPI_Data1 ",
+                "API 1 OK: " + res.data.data.length
+              );
               // console.log('App.js/ ',res);
               for (let i = 0; i < res.data.data.length; i++) {
                 // let m21 = JSON.stringify(res.data[i].consignorAddress, null, 4);
@@ -1288,7 +1420,8 @@ function StackNavigators({ navigation }) {
                               // console.log('App.js/ ',res);
                             },
                             (error) => {
-                              console.log('App.js/loadAPI_Data1 ',
+                              console.log(
+                                "App.js/loadAPI_Data1 ",
                                 "error on loading  data from api SellerMainScreen/consignorslist/" +
                                   error.message
                               );
@@ -1320,7 +1453,11 @@ function StackNavigators({ navigation }) {
               setIsLoading(false);
             },
             (error) => {
-              console.log('App.js/loadAPI_Data1 ',"error api SellerMainScreen/consignorslist/", error);
+              console.log(
+                "App.js/loadAPI_Data1 ",
+                "error api SellerMainScreen/consignorslist/",
+                error
+              );
             }
           );
       })();
@@ -1328,37 +1465,51 @@ function StackNavigators({ navigation }) {
   };
   const viewDetails1 = () => {
     db.transaction((tx) => {
-      tx.executeSql("SELECT * FROM SellerMainScreenDetails", [], (tx1, results) => {
-        let temp = [];
-        // console.log('App.js/ ',results.rows.length);
-        for (let i = 0; i < results.rows.length; ++i) {
-          temp.push(results.rows.item(i));
+      tx.executeSql(
+        "SELECT * FROM SellerMainScreenDetails",
+        [],
+        (tx1, results) => {
+          let temp = [];
+          // console.log('App.js/ ',results.rows.length);
+          for (let i = 0; i < results.rows.length; ++i) {
+            temp.push(results.rows.item(i));
 
-          console.log('App.js/ ',"SellerMainScreenDetails",results.rows.item(i));
-          // var address121 = results.rows.item(i).consignorAddress;
-          // var address_json = JSON.parse(address121);
-          // console.log('App.js/ ',typeof (address_json));
-          // console.log('App.js/ ',"Address from local db : " + address_json.consignorAddress1 + " " + address_json.consignorAddress2);
-          // ToastAndroid.show('consignorName:' + results.rows.item(i).consignorName + "\n" + 'PRSNumber : ' + results.rows.item(i).PRSNumber, ToastAndroid.SHORT);
-        }
-        if (m === 4) {
-          ToastAndroid.show("Sync Successful", ToastAndroid.SHORT);
-          setIsLoading(false);
-          setIsLogin(true);
-          AsyncStorage.setItem("apiDataLoaded", "true");
-          console.log('App.js/viewDetails1 ',"All " + 4 + " APIs loaded successfully ");
-          m = 0;
+            console.log(
+              "App.js/ ",
+              "SellerMainScreenDetails",
+              results.rows.item(i)
+            );
+            // var address121 = results.rows.item(i).consignorAddress;
+            // var address_json = JSON.parse(address121);
+            // console.log('App.js/ ',typeof (address_json));
+            // console.log('App.js/ ',"Address from local db : " + address_json.consignorAddress1 + " " + address_json.consignorAddress2);
+            // ToastAndroid.show('consignorName:' + results.rows.item(i).consignorName + "\n" + 'PRSNumber : ' + results.rows.item(i).PRSNumber, ToastAndroid.SHORT);
+          }
+          if (m === 4) {
+            ToastAndroid.show("Sync Successful", ToastAndroid.SHORT);
+            setIsLoading(false);
+            setIsLogin(true);
+            AsyncStorage.setItem("apiDataLoaded", "true");
+            console.log(
+              "App.js/viewDetails1 ",
+              "All " + 4 + " APIs loaded successfully "
+            );
+            m = 0;
 
-          AsyncStorage.setItem("refresh11", "refresh");
-        } else {
-          console.log('App.js/viewDetails1 ',"Only " + m + " APIs loaded out of 4 ");
+            AsyncStorage.setItem("refresh11", "refresh");
+          } else {
+            console.log(
+              "App.js/viewDetails1 ",
+              "Only " + m + " APIs loaded out of 4 "
+            );
+          }
+          // m++;
+          // ToastAndroid.show("Sync Successful",ToastAndroid.SHORT);
+          // console.log('App.js/ ','Data from Local Database : \n ', JSON.stringify(temp, null, 4));
+          // console.log('App.js/ ','data loaded API 1',temp);
+          // console.log('App.js/ ','Table1 DB OK:', temp.length);
         }
-        // m++;
-        // ToastAndroid.show("Sync Successful",ToastAndroid.SHORT);
-        // console.log('App.js/ ','Data from Local Database : \n ', JSON.stringify(temp, null, 4));
-        // console.log('App.js/ ','data loaded API 1',temp);
-        // console.log('App.js/ ','Table1 DB OK:', temp.length);
-      });
+      );
     });
   };
 
@@ -1402,7 +1553,8 @@ function StackNavigators({ navigation }) {
           // loadAPI_Data();
         },
         (error) => {
-          console.log('App.js/createTables2 ',
+          console.log(
+            "App.js/createTables2 ",
             "error on creating table SellerMainScreenDetails" + error.message
           );
         }
@@ -1420,19 +1572,22 @@ function StackNavigators({ navigation }) {
           if (result.rows.length > 0) {
             var tripStatus = result.rows.item(0).tripStatus;
           }
-          console.log('App.js/loadAPI_Data2 ',"Trip id: ", tripID, tripStatus);
+          console.log("App.js/loadAPI_Data2 ", "Trip id: ", tripID, tripStatus);
           (async () => {
             await axios
               .get(backendUrl + `SellerMainScreen/workload/${userId}`, {
                 params: {
                   tripID: tripID,
                 },
-                headers: { Authorization: token } 
+                headers: getAuthorizedHeaders(token),
               })
               .then(
                 (res) => {
                   createTables2();
-                  console.log('App.js/loadAPI_Data2 ',"API 2 OK: " + res.data.data.length);
+                  console.log(
+                    "App.js/loadAPI_Data2 ",
+                    "API 2 OK: " + res.data.data.length
+                  );
                   for (let i = 0; i < res.data.data.length; i++) {
                     const shipmentStatus = res.data.data[i].shipmentStatus;
 
@@ -1534,7 +1689,8 @@ function StackNavigators({ navigation }) {
                                     // console.log('App.js/ ',res);
                                   },
                                   (error) => {
-                                    console.log('App.js/loadAPI_Data2 ',
+                                    console.log(
+                                      "App.js/loadAPI_Data2 ",
                                       "error on adding data " + error.message
                                     );
                                   }
@@ -1565,7 +1721,7 @@ function StackNavigators({ navigation }) {
                   setIsLoading(false);
                 },
                 (error) => {
-                  console.log('App.js/loadAPI_Data2 ',error);
+                  console.log("App.js/loadAPI_Data2 ", error);
                 }
               );
           })();
@@ -1592,7 +1748,10 @@ function StackNavigators({ navigation }) {
           // loadAPI_Data();
         },
         (error) => {
-          console.log('App.js/createTables3 ',"error on creating table " + error.message);
+          console.log(
+            "App.js/createTables3 ",
+            "error on creating table " + error.message
+          );
         }
       );
     });
@@ -1606,7 +1765,7 @@ function StackNavigators({ navigation }) {
           params: {
             feUserID: userId,
           },
-          headers: { Authorization: token } 
+          headers: getAuthorizedHeaders(token),
         })
         .then(
           (res) => {
@@ -1627,10 +1786,11 @@ function StackNavigators({ navigation }) {
                   ],
                   (sqlTxn, _res) => {
                     m++;
-                  fetchTripInfo();
+                    fetchTripInfo();
                   },
                   (error) => {
-                    console.log('App.js/ ',
+                    console.log(
+                      "App.js/ ",
                       "error on adding data in tripdetails " + error.message
                     );
                   }
@@ -1639,12 +1799,12 @@ function StackNavigators({ navigation }) {
             }
           },
           (error) => {
-            console.log('App.js/ ',"tripdetailserror", error);
+            console.log("App.js/ ", "tripdetailserror", error);
           }
         );
     })();
   };
-// console.log(token)
+  // console.log(token)
   const createTablesSF = () => {
     db.transaction((tx) => {
       tx.executeSql(
@@ -1664,7 +1824,11 @@ function StackNavigators({ navigation }) {
           // console.log('App.js/ ',"Table created successfully Notice");
         },
         (error) => {
-          console.log('App.js/createTablesSF ',"Error creating table: ", error);
+          console.log(
+            "App.js/createTablesSF ",
+            "Error creating table: ",
+            error
+          );
         }
       );
     });
@@ -1678,7 +1842,10 @@ function StackNavigators({ navigation }) {
           // loadAPI_Data();
         },
         (error) => {
-          console.log('App.js/createTablesSF ',"error on creating table " + error.message);
+          console.log(
+            "App.js/createTablesSF ",
+            "error on creating table " + error.message
+          );
         }
       );
     });
@@ -1687,60 +1854,64 @@ function StackNavigators({ navigation }) {
     // setIsLoading(!isLoading);
     createTablesSF();
     (async () => {
-      await axios.get(
-        backendUrl + "ADshipmentFailure/getList",
-        { headers: { Authorization: token }, },
-      ).then(
-        (res) => {
-          // console.log('App.js/ ','Table6 API OK: ' + res.data.data.length);
-          // console.log('App.js/ ',res.data);
-          for (let i = 0; i < res.data.data.length; i++) {
-            // const appliesto=JSON.parse(JSON.stringify(res.data.data[i].appliesTo))
-            const appliesto = String(res.data.data[i].appliesTo.slice());
-            db.transaction((txn) => {
-              txn.executeSql(
-                `INSERT OR REPLACE INTO ShipmentFailure(_id ,description , parentCode, short_code , consignor_failure , fe_failure , operational_failure , system_failure , enable_geo_fence , enable_future_scheduling , enable_otp , enable_call_validation, created_by , last_updated_by, applies_to ,life_cycle_code , __v,date
+      await axios
+        .get(backendUrl + "ADshipmentFailure/getList", {
+          headers: getAuthorizedHeaders(token),
+        })
+        .then(
+          (res) => {
+            // console.log('App.js/ ','Table6 API OK: ' + res.data.data.length);
+            // console.log('App.js/ ',res.data);
+            for (let i = 0; i < res.data.data.length; i++) {
+              // const appliesto=JSON.parse(JSON.stringify(res.data.data[i].appliesTo))
+              const appliesto = String(res.data.data[i].appliesTo.slice());
+              db.transaction((txn) => {
+                txn.executeSql(
+                  `INSERT OR REPLACE INTO ShipmentFailure(_id ,description , parentCode, short_code , consignor_failure , fe_failure , operational_failure , system_failure , enable_geo_fence , enable_future_scheduling , enable_otp , enable_call_validation, created_by , last_updated_by, applies_to ,life_cycle_code , __v,date
                           ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-                [
-                  res.data.data[i]._id,
-                  res.data.data[i].description,
-                  res.data.data[i].parentCode,
-                  res.data.data[i].shortCode,
-                  res.data.data[i].consignorFailure,
-                  res.data.data[i].feFailure,
-                  res.data.data[i].operationalFailure,
-                  res.data.data[i].systemFailure,
-                  res.data.data[i].enableGeoFence,
-                  res.data.data[i].enableFutureScheduling,
-                  res.data.data[i].enableOTP,
-                  res.data.data[i].enableCallValidation,
-                  res.data.data[i].createdBy,
-                  res.data.data[i].lastUpdatedBy,
-                  appliesto,
-                  res.data.data[i].lifeCycleCode,
-                  res.data.data[i].__v,
-                  currentDateValue,
-                ],
-                (sqlTxn, _res) => {
-                  // console.log('App.js/ ','\n Data Added to local db 6 ');
-                  // console.log('App.js/ ',res);
-                },
-                (error) => {
-                  console.log('App.js/loadAPI_DataSF ',"error on adding data " + error.message);
-                }
-              );
-            });
-          }
-          m++;
-          // console.log('App.js/ ','value of m6 '+m);
+                  [
+                    res.data.data[i]._id,
+                    res.data.data[i].description,
+                    res.data.data[i].parentCode,
+                    res.data.data[i].shortCode,
+                    res.data.data[i].consignorFailure,
+                    res.data.data[i].feFailure,
+                    res.data.data[i].operationalFailure,
+                    res.data.data[i].systemFailure,
+                    res.data.data[i].enableGeoFence,
+                    res.data.data[i].enableFutureScheduling,
+                    res.data.data[i].enableOTP,
+                    res.data.data[i].enableCallValidation,
+                    res.data.data[i].createdBy,
+                    res.data.data[i].lastUpdatedBy,
+                    appliesto,
+                    res.data.data[i].lifeCycleCode,
+                    res.data.data[i].__v,
+                    currentDateValue,
+                  ],
+                  (sqlTxn, _res) => {
+                    // console.log('App.js/ ','\n Data Added to local db 6 ');
+                    // console.log('App.js/ ',res);
+                  },
+                  (error) => {
+                    console.log(
+                      "App.js/loadAPI_DataSF ",
+                      "error on adding data " + error.message
+                    );
+                  }
+                );
+              });
+            }
+            m++;
+            // console.log('App.js/ ','value of m6 '+m);
 
-          // viewDetailsSF();
-          // setIsLoading(false);
-        },
-        (error) => {
-          console.log('App.js/loadAPI_DataSF ',error);
-        }
-      );
+            // viewDetailsSF();
+            // setIsLoading(false);
+          },
+          (error) => {
+            console.log("App.js/loadAPI_DataSF ", error);
+          }
+        );
     })();
   };
 
@@ -1755,7 +1926,11 @@ function StackNavigators({ navigation }) {
           // console.log('App.js/ ',"Table created successfully Pickup close bag");
         },
         (error) => {
-          console.log('App.js/createTableBag1 ',"Error occurred while creating the table:", error);
+          console.log(
+            "App.js/createTableBag1 ",
+            "Error occurred while creating the table:",
+            error
+          );
         }
       );
     });
@@ -1769,7 +1944,11 @@ function StackNavigators({ navigation }) {
           // console.log('App.js/ ',"Table created successfully Handover Close Bag");
         },
         (error) => {
-          console.log('App.js/createTableBag1 ',"Error occurred while creating the table:", error);
+          console.log(
+            "App.js/createTableBag1 ",
+            "Error occurred while creating the table:",
+            error
+          );
         }
       );
     });
@@ -3660,11 +3839,11 @@ function CustomDrawerContent({ navigation }) {
     loadDetails();
   }, []);
   const handleStartTrip = () => {
-    if(detailsLoaded){
-      if ((pendingPickup != 0 || pendingDelivery != 0) && tripStatus == 1 ) {
-        navigation.navigate("PendingWork",{token:token});
+    if (detailsLoaded) {
+      if ((pendingPickup != 0 || pendingDelivery != 0) && tripStatus == 1) {
+        navigation.navigate("PendingWork", { token: token });
       } else {
-        navigation.navigate("MyTrip", { userId: id, token:token });
+        navigation.navigate("MyTrip", { userId: id, token: token });
       }
       navigation.closeDrawer();
     }
@@ -3685,11 +3864,11 @@ function CustomDrawerContent({ navigation }) {
       dispatch(setCurrentDeviceInfo(""));
       dispatch(setAdditionalWorkloadData(""));
     } catch (e) {
-      console.log('App.js/LogoutHandle ',e);
+      console.log("App.js/LogoutHandle ", e);
     }
     try {
       await AsyncStorage.multiRemove(await AsyncStorage.getAllKeys());
-      console.log('App.js/LogoutHandle ',"AsyncStorage cleared successfully!");
+      console.log("App.js/LogoutHandle ", "AsyncStorage cleared successfully!");
     } catch (error) {
       console.error("Error clearing AsyncStorage:", error);
     }
@@ -3699,15 +3878,18 @@ function CustomDrawerContent({ navigation }) {
         "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
         [],
         (tx1, result) => {
-          console.log('App.js/LogoutHandle ',result);
+          console.log("App.js/LogoutHandle ", result);
           let i = 0;
           for (i = 0; i < result.rows.length; i++) {
             const tableName = result.rows.item(i).name;
-            console.log('App.js/LogoutHandle ',tableName);
+            console.log("App.js/LogoutHandle ", tableName);
             tx.executeSql(`DROP TABLE IF EXISTS ${tableName}`);
           }
           if (i === result.rows.length) {
-            console.log('App.js/LogoutHandle ',"SQlite DB cleared successfully!");
+            console.log(
+              "App.js/LogoutHandle ",
+              "SQlite DB cleared successfully!"
+            );
           }
         }
       );
@@ -3721,10 +3903,10 @@ function CustomDrawerContent({ navigation }) {
       }
     )
       .then((result) => {
-        console.log('App.js/LogoutHandle ',result);
+        console.log("App.js/LogoutHandle ", result);
       })
       .catch((err) => {
-        console.log('App.js/LogoutHandle ',"Logout Error", err);
+        console.log("App.js/LogoutHandle ", "Logout Error", err);
       });
   };
 

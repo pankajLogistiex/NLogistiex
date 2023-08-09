@@ -7,6 +7,9 @@ export const userSlice = createSlice({
     user_name: "",
     user_email: "",
     token: "",
+    idToken: "",
+    refreshToken: "",
+    refreshTime: null,
   },
   reducers: {
     setUserId: (state, action) => {
@@ -24,10 +27,23 @@ export const userSlice = createSlice({
     setIdToken: (state, action) => {
       state.idToken = action.payload;
     },
+    setRefreshToken: (state, action) => {
+      state.refreshToken = action.payload;
+    },
+    setRefreshTime: (state, action) => {
+      state.refreshTime = action.payload;
+    },
   },
 });
 
-export const { setUserId, setUserEmail, setUserName, setToken, setIdToken } =
-  userSlice.actions;
+export const {
+  setUserId,
+  setUserEmail,
+  setUserName,
+  setToken,
+  setIdToken,
+  setRefreshToken,
+  setRefreshTime,
+} = userSlice.actions;
 
 export default userSlice.reducer;

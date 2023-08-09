@@ -15,7 +15,7 @@ import {
   View,
   ToastAndroid,
   Vibration,
-  TouchableOpacity
+  TouchableOpacity,
 } from "react-native";
 import { DataTable, Searchbar, Text, Card } from "react-native-paper";
 import { openDatabase } from "react-native-sqlite-storage";
@@ -32,12 +32,13 @@ import axios from "axios";
 const db = openDatabase({ name: "rn_sqlite" });
 import { backendUrl } from "../../utils/backendUrl";
 import { setAutoSync } from "../../redux/slice/autoSyncSlice";
+import { getAuthorizedHeaders } from "../../utils/headers";
 
 const OpenBags = ({ route }) => {
   const dispatch = useDispatch();
   const userId = useSelector((state) => state.user.user_id);
   const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
- 
+
   const [data, setData] = useState([]);
   const navigation = useNavigation();
   const [showCloseBagModal, setShowCloseBagModal] = useState(false);
@@ -52,7 +53,9 @@ const OpenBags = ({ route }) => {
   const [acceptedItemData, setAcceptedItemData] = useState(
     route.params.allCloseBAgData || {}
   );
-  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
+  const currentDateValue =
+    useSelector((state) => state.currentDate.currentDateValue) ||
+    new Date().toISOString().split("T")[0];
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
   const [acceptedHandoverStatus, setAcceptedHandoverStatus] = useState([]);
@@ -61,15 +64,19 @@ const OpenBags = ({ route }) => {
   const currentDate = new Date().toISOString().slice(0, 10);
   const loadDetails = () => {
     db.transaction((tx) => {
-      tx.executeSql("SELECT * FROM SyncSellerPickUp WHERE FMtripId = ?", [route.params.tripID], (tx1, results) => {
-        let temp = [];
-        // console.log(results.rows.length);
-        for (let i = 0; i < results.rows.length; ++i) {
-          temp.push(results.rows.item(i));
+      tx.executeSql(
+        "SELECT * FROM SyncSellerPickUp WHERE FMtripId = ?",
+        [route.params.tripID],
+        (tx1, results) => {
+          let temp = [];
+          // console.log(results.rows.length);
+          for (let i = 0; i < results.rows.length; ++i) {
+            temp.push(results.rows.item(i));
+          }
+          setData(temp);
+          // console.log(data[0].ShipmentListArray.split().length, "data");
         }
-        setData(temp);
-        // console.log(data[0].ShipmentListArray.split().length, "data");
-      });
+      );
     });
   };
 
@@ -85,8 +92,8 @@ const OpenBags = ({ route }) => {
   };
 
   function CloseBag() {
-    console.log("OpenBags.jsCloseBag",bagId);
-    console.log("OpenBags.jsCloseBag",bagSeal);
+    console.log("OpenBags.jsCloseBag", bagId);
+    console.log("OpenBags.jsCloseBag", bagSeal);
     setBagId("");
     setBagIdNo(bagIdNo + 1);
   }
@@ -107,10 +114,7 @@ const OpenBags = ({ route }) => {
   useEffect(() => {
     // const saveAcceptedItemData = async () => {
     // try {
-    AsyncStorage.setItem(
-      'acceptedItemData',
-      JSON.stringify(acceptedItemData)
-    );
+    AsyncStorage.setItem("acceptedItemData", JSON.stringify(acceptedItemData));
     // } catch (error) {
     // console.log("aaaa", acceptedItemData);
     // }
@@ -156,7 +160,7 @@ const OpenBags = ({ route }) => {
     loadDetails112();
     // loadAcceptedItemData12();
   }, []);
- 
+
   const loadDetails112 = () => {
     db.transaction((tx) => {
       tx.executeSql(
@@ -184,59 +188,72 @@ const OpenBags = ({ route }) => {
     // console.log(bagSeal);
     // console.log(acceptedArray);
     db.transaction((tx) => {
-
-      tx.executeSql("SELECT * FROM SyncSellerPickUp WHERE FMtripId = ? AND stopId=?  ", [route.params.tripID,consCode], (tx1, resultsCC) => {        
-        // console.log(resultsCC.rows.item(0).consignorCode);
       tx.executeSql(
-        "SELECT * FROM closeHandoverBag1 Where stopId=? AND bagDate=? ",
-        [consCode, currentDate],
-        (tx, results) => {
-          // console.log(results.rows.length);
-          // console.log(results);
+        "SELECT * FROM SyncSellerPickUp WHERE FMtripId = ? AND stopId=?  ",
+        [route.params.tripID, consCode],
+        (tx1, resultsCC) => {
+          // console.log(resultsCC.rows.item(0).consignorCode);
           tx.executeSql(
-            "INSERT INTO closeHandoverBag1 (bagSeal, bagId, bagDate, AcceptedList,status,consignorCode,stopId,consignorName) VALUES (?, ?, ?,?, ?,?,?,?)",
-            [
-              bagSeal,
-              consCode + "-" + currentDate + "-" + (results.rows.length + 1),
-              currentDate,
-              JSON.stringify(acceptedItemData[consCode].acceptedItems11),
-              "pending",
-              resultsCC.rows.item(0).consignorCode,
-              consCode,
-              consName,
-            ],
-            (tx, results11) => {
-              // console.log("Row inserted successfully");
-              // setAcceptedArray([]);
-              // acceptedItemData[consCode] = null;
-              setAcceptedItemData(
-                Object.fromEntries(
-                  Object.entries(acceptedItemData).filter(
-                    ([k, v]) => k !== consCode
-                  )
-                )
+            "SELECT * FROM closeHandoverBag1 Where stopId=? AND bagDate=? ",
+            [consCode, currentDate],
+            (tx, results) => {
+              // console.log(results.rows.length);
+              // console.log(results);
+              tx.executeSql(
+                "INSERT INTO closeHandoverBag1 (bagSeal, bagId, bagDate, AcceptedList,status,consignorCode,stopId,consignorName) VALUES (?, ?, ?,?, ?,?,?,?)",
+                [
+                  bagSeal,
+                  consCode +
+                    "-" +
+                    currentDate +
+                    "-" +
+                    (results.rows.length + 1),
+                  currentDate,
+                  JSON.stringify(acceptedItemData[consCode].acceptedItems11),
+                  "pending",
+                  resultsCC.rows.item(0).consignorCode,
+                  consCode,
+                  consName,
+                ],
+                (tx, results11) => {
+                  // console.log("Row inserted successfully");
+                  // setAcceptedArray([]);
+                  // acceptedItemData[consCode] = null;
+                  setAcceptedItemData(
+                    Object.fromEntries(
+                      Object.entries(acceptedItemData).filter(
+                        ([k, v]) => k !== consCode
+                      )
+                    )
+                  );
+                  setBagSeal("");
+                  console.log(
+                    " OpenBags.jsCloseBags Data Added to local db successfully Handover closeBag"
+                  );
+                  ToastAndroid.show(
+                    "Bag closed successfully",
+                    ToastAndroid.SHORT
+                  );
+                  // console.log(results11);
+                  viewDetailBag();
+                },
+                (error) => {
+                  console.log(
+                    "OpenBags.jsCloseBags Error occurred while inserting a row:",
+                    error
+                  );
+                }
               );
-              setBagSeal("");
-              console.log(
-                " OpenBags.jsCloseBags Data Added to local db successfully Handover closeBag"
-              );
-              ToastAndroid.show("Bag closed successfully", ToastAndroid.SHORT);
-              // console.log(results11);
-              viewDetailBag();
             },
             (error) => {
-              console.log("OpenBags.jsCloseBags Error occurred while inserting a row:", error);
+              console.log(
+                "OpenBags.jsCloseBags Error occurred while generating a unique bag ID:",
+                error
+              );
             }
-          );
-        },
-        (error) => {
-          console.log(
-            "OpenBags.jsCloseBags Error occurred while generating a unique bag ID:",
-            error
           );
         }
       );
-    });
     });
   }
 
@@ -282,7 +299,10 @@ const OpenBags = ({ route }) => {
         //   .catch((err) => {
         //     console.log(err);
         //   });
-        console.log("OpenBags.jsCurrentLocation Location Lat long error", error);
+        console.log(
+          "OpenBags.jsCurrentLocation Location Lat long error",
+          error
+        );
       });
   };
 
@@ -294,7 +314,7 @@ const OpenBags = ({ route }) => {
     db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" And stopId=?',
-        [route.params.tripID,stopId],
+        [route.params.tripID, stopId],
         (tx1, results) => {
           let exp = results.rows.length;
           let acc = 0;
@@ -309,7 +329,7 @@ const OpenBags = ({ route }) => {
               }
             }
           }
-          if (exp == acc && exp !==0) {
+          if (exp == acc && exp !== 0) {
             const consignorData = {
               expected: exp,
               accepted: acc,
@@ -333,14 +353,18 @@ const OpenBags = ({ route }) => {
       );
     });
   }
-//  console.log(acceptedHandoverStatus); 
+  //  console.log(acceptedHandoverStatus);
   function getAllConsignors() {
     db.transaction((tx) => {
-      tx.executeSql("SELECT * FROM SyncSellerPickUp WHERE FMtripId = ?", [route.params.tripID], (tx1, results) => {
-        for (var i = 0; i < results.rows.length; i++) {
-          getAllAcceptedHandovers(results.rows.item(i).stopId);
+      tx.executeSql(
+        "SELECT * FROM SyncSellerPickUp WHERE FMtripId = ?",
+        [route.params.tripID],
+        (tx1, results) => {
+          for (var i = 0; i < results.rows.length; i++) {
+            getAllAcceptedHandovers(results.rows.item(i).stopId);
+          }
         }
-      });
+      );
     });
   }
 
@@ -355,18 +379,22 @@ const OpenBags = ({ route }) => {
       longitude: parseFloat(longitude),
     });
     axios
-      .post(backendUrl + "SellerMainScreen/closeHandover", {
-        handoverStatus: acceptedHandoverStatus,
-        runsheets: runSheetNumbers,
-        feUserID: userId,
-        receivingTime: parseInt(time11),
-        latitude: parseFloat(latitude),
-        longitude: parseFloat(longitude),
-      },{ headers: { Authorization: token } })
+      .post(
+        backendUrl + "SellerMainScreen/closeHandover",
+        {
+          handoverStatus: acceptedHandoverStatus,
+          runsheets: runSheetNumbers,
+          feUserID: userId,
+          receivingTime: parseInt(time11),
+          latitude: parseFloat(latitude),
+          longitude: parseFloat(longitude),
+        },
+        { headers: getAuthorizedHeaders(token) }
+      )
       .then((response) => {
-        navigation.navigate("HandOverSummary",{
-          tripID:route.params.tripID,
-          token:token
+        navigation.navigate("HandOverSummary", {
+          tripID: route.params.tripID,
+          token: token,
         });
         ToastAndroid.show("Successfully Handover Closed", ToastAndroid.SHORT);
       })
@@ -593,28 +621,32 @@ const OpenBags = ({ route }) => {
                           {single.consignorName}
                         </Text>
                       </DataTable.Cell>
-                      <DataTable.Cell style={{ flex: 1,}}>
+                      <DataTable.Cell style={{ flex: 1 }}>
                         {/* <Text style={styles.fontvalue}>{data[0].ShipmentListArray.split().length}</Text> */}
                         <Text style={styles.fontvalue}>
                           {single.shipmentsCount}
                         </Text>
                       </DataTable.Cell>
-                      <DataTable.Cell style={{  flex: 1,backgroundColor: "lightgrey",padding:5,margin:10}}>
-                        
+                      <DataTable.Cell
+                        style={{
+                          flex: 1,
+                          backgroundColor: "lightgrey",
+                          padding: 5,
+                          margin: 10,
+                        }}
+                      >
                         <TouchableOpacity
-                          style={{ color: "black",}}
+                          style={{ color: "black" }}
                           onPress={() => {
                             ToastAndroid.show(
                               "Bag already closed",
                               ToastAndroid.SHORT
                             );
                           }}
-                        ><Center>
-                          <Text>
-                            Closed Bag
-                            
-                            </Text>
-                        </Center>
+                        >
+                          <Center>
+                            <Text>Closed Bag</Text>
+                          </Center>
                         </TouchableOpacity>
                       </DataTable.Cell>
                       {/* <DataTable.Cell style={{flex: 1}}><Button style={{backgroundColor:'#004aad', color:'#fff'}} onPress={
@@ -696,8 +728,8 @@ const OpenBags = ({ route }) => {
                         consignorName: "consignorName",
                         expected: "0",
                         acceptedHandoverStatus: acceptedHandoverStatus,
-                        tripID:route.params.tripID,
-                        token:token
+                        tripID: route.params.tripID,
+                        token: token,
                       });
                     }
                   : () =>

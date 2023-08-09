@@ -16,7 +16,7 @@ import {
   Item,
 } from "native-base";
 import MaterialIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import GetLocation from 'react-native-get-location';
+import GetLocation from "react-native-get-location";
 import { callApi } from "./ApiError";
 import {
   ActivityIndicator,
@@ -35,6 +35,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setTripStatus } from "../redux/slice/tripSlice";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setAutoSync, setForceSync } from "../redux/slice/autoSyncSlice";
+import { getAuthorizedHeaders } from "../utils/headers";
 
 export default function MyTrip({ navigation, route }) {
   const dispatch = useDispatch();
@@ -72,7 +73,9 @@ export default function MyTrip({ navigation, route }) {
   const focus = useIsFocused();
   const startKmInputRef = useRef(null);
   const EndKmInputRef = useRef(null);
-  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
+  const currentDateValue =
+    useSelector((state) => state.currentDate.currentDateValue) ||
+    new Date().toISOString().split("T")[0];
   useEffect(() => {
     setTimeout(() => {
       if (startKmInputRef.current) {
@@ -84,7 +87,6 @@ export default function MyTrip({ navigation, route }) {
     }, 200);
   }, []);
 
-
   useEffect(() => {
     current_location();
   }, []);
@@ -94,27 +96,27 @@ export default function MyTrip({ navigation, route }) {
       enableHighAccuracy: true,
       timeout: 10000,
     })
-      .then(location => {
+      .then((location) => {
         setLatitude(location.latitude);
         setLongitude(location.longitude);
       })
-      .catch(error => {
+      .catch((error) => {
         RNAndroidLocationEnabler.promptForEnableLocationIfNeeded({
           interval: 10000,
           fastInterval: 5000,
         })
-          .then(status => {
+          .then((status) => {
             if (status) {
-              console.log('MyTrip/current_location/Location enabled');
+              console.log("MyTrip/current_location/Location enabled");
             }
           })
-          .catch(err => {
-            console.log("MyTrip/current_location",err);
+          .catch((err) => {
+            console.log("MyTrip/current_location", err);
           });
-        console.log('MyTrip/current_location/Location Lat long error', error);
+        console.log("MyTrip/current_location/Location Lat long error", error);
       });
   };
-// console.log(token)
+  // console.log(token)
   useEffect(() => {
     if (userId && token) {
       getTripDetails(tripID);
@@ -127,7 +129,7 @@ export default function MyTrip({ navigation, route }) {
         params: {
           tripID: tripID,
         },
-         headers: { Authorization: token } 
+        headers: getAuthorizedHeaders(token),
       })
       .then((response) => {
         if (response?.data?.res_data) {
@@ -135,7 +137,10 @@ export default function MyTrip({ navigation, route }) {
           const startKm = response.data.res_data.startKilometer;
           setStartKm(startKm);
           if (response.data.res_data.endkilometer) {
-            navigation.navigate("StartEndDetails", { tripID: tripID, token: token });
+            navigation.navigate("StartEndDetails", {
+              tripID: tripID,
+              token: token,
+            });
           }
         }
         setLoading(false);
@@ -151,7 +156,7 @@ export default function MyTrip({ navigation, route }) {
         params: {
           feUserID: userId,
         },
-        headers: { Authorization: token } 
+        headers: getAuthorizedHeaders(token),
       })
       .then((response) => {
         setTripDetails(response.data.res_data);
@@ -183,7 +188,7 @@ export default function MyTrip({ navigation, route }) {
         }
       );
     });
-    if(tripID){
+    if (tripID) {
       db.transaction((tx) => {
         tx.executeSql(
           'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="accepted" AND FMtripId=?',
@@ -221,7 +226,7 @@ export default function MyTrip({ navigation, route }) {
           }
         );
       });
-  
+
       db.transaction((tx) => {
         tx.executeSql(
           'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND FMtripId=? AND (handoverStatus="accepted" AND status IS NULL)',
@@ -272,7 +277,7 @@ export default function MyTrip({ navigation, route }) {
           }
         );
       });
-    } 
+    }
   };
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
@@ -283,7 +288,7 @@ export default function MyTrip({ navigation, route }) {
     return unsubscribe;
   }, [navigation, syncTimeFull, tripID]);
   useEffect(() => {
-      loadDetails();
+    loadDetails();
   }, [tripID]);
 
   const requestCameraPermission = async () => {
@@ -342,14 +347,17 @@ export default function MyTrip({ navigation, route }) {
     if (result.assets !== undefined) {
       fetch(backendUrl + "DSQCPicture/uploadPicture", {
         method: "POST",
-        body: createFormData(result.assets[0], {
-          useCase: "DSQC",
-          type: "front",
-          contextId: "SI002",
-          contextType: "shipment",
-          hubCode: "HC001",
-        },
-        { headers: { Authorization: token } }),
+        body: createFormData(
+          result.assets[0],
+          {
+            useCase: "DSQC",
+            type: "front",
+            contextId: "SI002",
+            contextType: "shipment",
+            hubCode: "HC001",
+          },
+          { headers: getAuthorizedHeaders(token) }
+        ),
       })
         .then((data) => data.json())
         .then((res) => {
@@ -359,7 +367,7 @@ export default function MyTrip({ navigation, route }) {
         .catch((error) => {
           console.log("MyTrip/takeStartPhoto/upload error", error);
           setUploadStatus("error");
-          callApi(error,latitude,longitude,userId,token);
+          callApi(error, latitude, longitude, userId, token);
         });
     }
   };
@@ -386,13 +394,17 @@ export default function MyTrip({ navigation, route }) {
     if (result.assets !== undefined) {
       fetch(backendUrl + "DSQCPicture/uploadPicture", {
         method: "POST",
-        body: createFormData(result.assets[0], {
-          useCase: "DSQC",
-          type: "front",
-          contextId: "SI002",
-          contextType: "shipment",
-          hubCode: "HC001",
-        },{ headers: { Authorization: token } }),
+        body: createFormData(
+          result.assets[0],
+          {
+            useCase: "DSQC",
+            type: "front",
+            contextId: "SI002",
+            contextType: "shipment",
+            hubCode: "HC001",
+          },
+          { headers: getAuthorizedHeaders(token) }
+        ),
       })
         .then((data) => data.json())
         .then((res) => {
@@ -402,7 +414,7 @@ export default function MyTrip({ navigation, route }) {
         .catch((error) => {
           console.log("MyTrip/takeEndPhoto/upload error", error);
           setUploadStatus("error");
-          callApi(error,latitude,longitude,userId,token);
+          callApi(error, latitude, longitude, userId, token);
         });
     }
   };
@@ -410,27 +422,33 @@ export default function MyTrip({ navigation, route }) {
   const submitEndTrip = () => {
     (async () => {
       await axios
-        .post(backendUrl + "UserTripInfo/updateUserTripEndDetails", {
-          tripID: tripID,
-          endTime: new Date().valueOf(),
-          endkilometer: endkm,
-          endVehicleImageUrl: endImageUrl,
-          tripStatus: 200,
-          tripSummary: {
-            acceptedPickup: completePickup,
-            notPicked: notPicked,
-            rejectedPickup: rejectedPickup,
-            acceptedDelivery: completeDelivery,
-            notDelivered: notDelivered,
-            rejectedDelivery: rejectedDelivery,
+        .post(
+          backendUrl + "UserTripInfo/updateUserTripEndDetails",
+          {
+            tripID: tripID,
+            endTime: new Date().valueOf(),
+            endkilometer: endkm,
+            endVehicleImageUrl: endImageUrl,
+            tripStatus: 200,
+            tripSummary: {
+              acceptedPickup: completePickup,
+              notPicked: notPicked,
+              rejectedPickup: rejectedPickup,
+              acceptedDelivery: completeDelivery,
+              notDelivered: notDelivered,
+              rejectedDelivery: rejectedDelivery,
+            },
           },
-        },
-        { headers: { Authorization: token } })
+          { headers: getAuthorizedHeaders(token) }
+        )
         .then(function (res) {
           dispatch(setTripStatus(0));
           getTripDetails(tripID);
           setMessage(1);
-          navigation.navigate("StartEndDetails", { tripID: tripID, token:token });
+          navigation.navigate("StartEndDetails", {
+            tripID: tripID,
+            token: token,
+          });
           db.transaction((tx) => {
             tx.executeSql(
               "UPDATE TripDetails SET tripStatus=? WHERE tripID = ?",
@@ -444,7 +462,7 @@ export default function MyTrip({ navigation, route }) {
           });
         })
         .catch(function (error) {
-          console.log("MyTrip/submitEndTrip/",error);
+          console.log("MyTrip/submitEndTrip/", error);
         });
     })();
   };
@@ -465,15 +483,19 @@ export default function MyTrip({ navigation, route }) {
   const submitStartTrip = () => {
     (async () => {
       await axios
-        .post(backendUrl + "UserTripInfo/userTripDetails", {
-          tripID: tripID,
-          userID: userId,
-          startTime: new Date().valueOf(),
-          vehicleNumber: vehicle,
-          startKilometer: startkm,
-          startVehicleImageUrl: startImageUrl,
-          tripStatus: 50,
-        },{ headers: { Authorization: token } })
+        .post(
+          backendUrl + "UserTripInfo/userTripDetails",
+          {
+            tripID: tripID,
+            userID: userId,
+            startTime: new Date().valueOf(),
+            vehicleNumber: vehicle,
+            startKilometer: startkm,
+            startVehicleImageUrl: startImageUrl,
+            tripStatus: 50,
+          },
+          { headers: getAuthorizedHeaders(token) }
+        )
         .then(function (res) {
           if (res.data.msg === "TripID already exists") {
             getTripDetails(tripID);
@@ -498,7 +520,7 @@ export default function MyTrip({ navigation, route }) {
           setShowModal(true);
         })
         .catch(function (error) {
-          console.log("MyTrip/submitStartTrip",error);
+          console.log("MyTrip/submitStartTrip", error);
         });
     })();
   };
@@ -949,7 +971,9 @@ export default function MyTrip({ navigation, route }) {
                       <Button
                         backgroundColor="#004aad"
                         _text={{ color: "white", fontSize: 20 }}
-                        onPress={() => navigation.navigate("PendingWork",{token:token})}
+                        onPress={() =>
+                          navigation.navigate("PendingWork", { token: token })
+                        }
                       >
                         Pending Work
                       </Button>

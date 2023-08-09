@@ -34,7 +34,7 @@ import MaterialIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import NetInfo from "@react-native-community/netinfo";
 import RNBeep from "react-native-a-beep";
 import { Picker } from "@react-native-picker/picker";
-import GetLocation from 'react-native-get-location';
+import GetLocation from "react-native-get-location";
 import { callApi } from "../ApiError";
 import RNAndroidLocationEnabler from "react-native-android-location-enabler";
 import {
@@ -53,7 +53,8 @@ import Sound from "react-native-sound";
 import { backendUrl } from "../../utils/backendUrl";
 import { useDispatch, useSelector } from "react-redux";
 import { setAutoSync } from "../../redux/slice/autoSyncSlice";
- 
+import { getAuthorizedHeaders } from "../../utils/headers";
+
 const db = openDatabase({
   name: "rn_sqlite",
 });
@@ -84,7 +85,9 @@ const HandoverShipmentRTO = ({ route }) => {
   const [acceptedItemData, setAcceptedItemData] = useState(
     route.params.allCloseBAgData || {}
   );
-  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
+  const currentDateValue =
+    useSelector((state) => state.currentDate.currentDateValue) ||
+    new Date().toISOString().split("T")[0];
   const [bagStatus, setBagStatus] = useState(true);
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
@@ -193,13 +196,18 @@ const HandoverShipmentRTO = ({ route }) => {
         })
           .then((status) => {
             if (status) {
-              console.log("HandoverShipmentsRTO.js/currentLocation Location enabled");
+              console.log(
+                "HandoverShipmentsRTO.js/currentLocation Location enabled"
+              );
             }
           })
           .catch((err) => {
             console.log(err);
           });
-        console.log("HandoverShipmentsRTO.js/currentLocation Location Lat long error", error);
+        console.log(
+          "HandoverShipmentsRTO.js/currentLocation Location Lat long error",
+          error
+        );
       });
   };
 
@@ -293,7 +301,7 @@ const HandoverShipmentRTO = ({ route }) => {
   //   });
   // };
 
-  function CloseBag(consCode, consName,consignorCodeRTO) {
+  function CloseBag(consCode, consName, consignorCodeRTO) {
     // console.log(bagSeal);
     // console.log(acceptedArray);
     db.transaction((tx) => {
@@ -309,16 +317,16 @@ const HandoverShipmentRTO = ({ route }) => {
               bagSeal,
               consCode + "-" + currentDate + "-" + (results.rows.length + 1),
               currentDate,
-              JSON.stringify(
-                acceptedItemData[data[0].stopId].acceptedItems11
-              ),
+              JSON.stringify(acceptedItemData[data[0].stopId].acceptedItems11),
               "pending",
               consignorCodeRTO,
               consCode,
               consName,
             ],
             (tx, results11) => {
-              console.log("HandoverShipmentsRTO.js/closeBag Row inserted successfully");
+              console.log(
+                "HandoverShipmentsRTO.js/closeBag Row inserted successfully"
+              );
               setAcceptedArray([]);
               setBagSeal("");
               // acceptedItemData[consCode] = null;
@@ -330,12 +338,18 @@ const HandoverShipmentRTO = ({ route }) => {
                 )
               );
 
-              ToastAndroid.show("HandoverShipmentsRTO/closeBag Bag closed successfully", ToastAndroid.SHORT);
+              ToastAndroid.show(
+                "HandoverShipmentsRTO/closeBag Bag closed successfully",
+                ToastAndroid.SHORT
+              );
               // console.log(results11);
               viewDetailBag();
             },
             (error) => {
-              console.log("HandoverShipmentsRTO.js/closeBag Error occurred while inserting a row:", error);
+              console.log(
+                "HandoverShipmentsRTO.js/closeBag Error occurred while inserting a row:",
+                error
+              );
             }
           );
         },
@@ -358,8 +372,8 @@ const HandoverShipmentRTO = ({ route }) => {
           temp.push(results.rows.item(i));
         }
         // console.log(
-          // "Data from Local Database Handover Bag: \n ",
-          // JSON.stringify(temp, null, 4)
+        // "Data from Local Database Handover Bag: \n ",
+        // JSON.stringify(temp, null, 4)
         // );
       });
     });
@@ -371,10 +385,13 @@ const HandoverShipmentRTO = ({ route }) => {
     db.transaction((tx) => {
       tx.executeSql(
         'UPDATE SellerMainScreenDetails  SET handoverStatus="accepted" WHERE FMtripId = ? AND shipmentAction="Seller Delivery" AND (awbNo = ? OR clientShipmentReferenceNumber = ? OR clientRefId = ? )',
-        [route.params.tripID,data, data, data],
+        [route.params.tripID, data, data, data],
         (tx1, results) => {
           let temp = [];
-          console.log("HandoverShipmentsRTO.js/updateDetails2 Results", results.rowsAffected);
+          console.log(
+            "HandoverShipmentsRTO.js/updateDetails2 Results",
+            results.rowsAffected
+          );
           // console.log(results);
 
           if (results.rowsAffected > 0) {
@@ -384,9 +401,13 @@ const HandoverShipmentRTO = ({ route }) => {
             dingAccept.play((success) => {
               if (success) {
                 // Vibration.vibrate(800);
-                console.log("HandoverShipmentsRTO.js/updateDetails2 successfully finished playing");
+                console.log(
+                  "HandoverShipmentsRTO.js/updateDetails2 successfully finished playing"
+                );
               } else {
-                console.log("HandoverShipmentsRTO.js/updateDetails2 playback failed due to audio decoding errors");
+                console.log(
+                  "HandoverShipmentsRTO.js/updateDetails2 playback failed due to audio decoding errors"
+                );
               }
             });
             db.transaction((tx) => {
@@ -395,17 +416,15 @@ const HandoverShipmentRTO = ({ route }) => {
                 [route.params.tripID, data, data, data],
                 (tx2, results122) => {
                   // console.log(results122.rows.item(0));
-                  loadDetails(
-                    results122.rows.item(0).stopId,
-                    data,
-                    false
-                  );
+                  loadDetails(results122.rows.item(0).stopId, data, false);
                   // setnewAccepted(results122.rows.item[0].consignorName);
                 }
               );
             });
           } else {
-            console.log(barcode + "HandoverShipmentsRTO/updateDetails2 not accepted");
+            console.log(
+              barcode + "HandoverShipmentsRTO/updateDetails2 not accepted"
+            );
           }
           // console.log(results.rows.length);
           // for (let i = 0; i < results.rows.length; ++i) {
@@ -436,7 +455,7 @@ const HandoverShipmentRTO = ({ route }) => {
       : db.transaction((tx) => {
           tx.executeSql(
             "SELECT BagOpenClose11 FROM SyncSellerPickUp WHERE FMtripId = ? AND   stopId=? ",
-            [route.params.tripID,data333],
+            [route.params.tripID, data333],
             (tx1, results) => {
               if (results.rows.item(0).BagOpenClose11 === "true" && !check) {
                 setModalVisible(true);
@@ -463,7 +482,7 @@ const HandoverShipmentRTO = ({ route }) => {
       db.transaction((tx) => {
         tx.executeSql(
           'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND stopId=?  AND handoverStatus="accepted"',
-          [route.params.tripID,data333],
+          [route.params.tripID, data333],
           (tx1, results) => {
             setScanProgressRD(results.rows.length);
           }
@@ -483,26 +502,30 @@ const HandoverShipmentRTO = ({ route }) => {
     });
   };
 
-  function uploadDataToServer(data,dataUD) {
+  function uploadDataToServer(data, dataUD) {
     // console.log("===========BarCode===========", data.item(0));
     const row = data.item(0);
     try {
       axios
-        .post(backendUrl + "SellerMainScreen/returnShipmentScan", {
-          clientShipmentReferenceNumber: row.clientShipmentReferenceNumber,
-          awbNo: row.awbNo,
-          clientRefId: row.clientRefId,
-          courierCode: row.courierCode,
-          feUserID: userId,
-          isAccepted: true,
-          consignorCode: row.stopId,
-          eventTime: parseInt(new Date().valueOf()),
-          latitude: latitude,
-          longitude: longitude,
-          runsheetNo: row.runSheetNumber,
-          scanStatus: 1,
-          bagSealNo: bagId,
-        },{ headers: { Authorization: token } })
+        .post(
+          backendUrl + "SellerMainScreen/returnShipmentScan",
+          {
+            clientShipmentReferenceNumber: row.clientShipmentReferenceNumber,
+            awbNo: row.awbNo,
+            clientRefId: row.clientRefId,
+            courierCode: row.courierCode,
+            feUserID: userId,
+            isAccepted: true,
+            consignorCode: row.stopId,
+            eventTime: parseInt(new Date().valueOf()),
+            latitude: latitude,
+            longitude: longitude,
+            runsheetNo: row.runSheetNumber,
+            scanStatus: 1,
+            bagSealNo: bagId,
+          },
+          { headers: getAuthorizedHeaders(token) }
+        )
         .then((response) => {
           console.log(
             "HandoverShipmentsRTO/updateDataToServer ===========Return Handover Result===========",
@@ -516,13 +539,13 @@ const HandoverShipmentRTO = ({ route }) => {
             error.response.data
           );
           // console.log(error);
-          ToastAndroid.show(
-            "API Error",
-            ToastAndroid.SHORT
-          );
+          ToastAndroid.show("API Error", ToastAndroid.SHORT);
         });
     } catch (e) {
-      console.log("HandoverShipmentsRTO.js/updateDataToServer ++++++++++++++++Catch Error++++++++++++++++", e);
+      console.log(
+        "HandoverShipmentsRTO.js/updateDataToServer ++++++++++++++++Catch Error++++++++++++++++",
+        e
+      );
     }
   }
 
@@ -532,7 +555,10 @@ const HandoverShipmentRTO = ({ route }) => {
         'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND (awbNo = ? OR clientShipmentReferenceNumber = ? OR clientRefId = ? )AND handoverStatus IS NULL ',
         [route.params.tripID, data, data, data],
         (sqlTxn, res) => {
-          console.log("HandoverShipmentsRTO.js/getCategories categories retrieved successfully", res.rows.length);
+          console.log(
+            "HandoverShipmentsRTO.js/getCategories categories retrieved successfully",
+            res.rows.length
+          );
 
           if (!res.rows.length) {
             db.transaction((tx) => {
@@ -542,8 +568,14 @@ const HandoverShipmentRTO = ({ route }) => {
                 'Select * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND handoverStatus IS NOT NULL  AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?)',
                 [route.params.tripID, data, data, data],
                 (tx1, results) => {
-                  console.log("HandoverShipmentsRTO.js/getCategories Results121", results.rows.length);
-                  console.log("HandoverShipmentsRTO.js/getCategories ok4444", data);
+                  console.log(
+                    "HandoverShipmentsRTO.js/getCategories Results121",
+                    results.rows.length
+                  );
+                  console.log(
+                    "HandoverShipmentsRTO.js/getCategories ok4444",
+                    data
+                  );
 
                   // console.log(data);
                   if (results.rows.length === 0) {
@@ -554,7 +586,9 @@ const HandoverShipmentRTO = ({ route }) => {
                     Vibration.vibrate(800);
                     dingReject.play((success) => {
                       if (success) {
-                        console.log("HandoverShipmentsRTO.js/getCategories successfully finished playing");
+                        console.log(
+                          "HandoverShipmentsRTO.js/getCategories successfully finished playing"
+                        );
                       } else {
                         console.log(
                           "HandoverShipmentsRTO/getCategories playback failed due to audio decoding errors"
@@ -569,7 +603,9 @@ const HandoverShipmentRTO = ({ route }) => {
                     Vibration.vibrate(800);
                     dingReject.play((success) => {
                       if (success) {
-                        console.log("HandoverShipmentsRTO.js/getCategories successfully finished playing");
+                        console.log(
+                          "HandoverShipmentsRTO.js/getCategories successfully finished playing"
+                        );
                       } else {
                         console.log(
                           "HandoverShipmentsRTO/getCategories playback failed due to audio decoding errors"
@@ -580,7 +616,7 @@ const HandoverShipmentRTO = ({ route }) => {
                     db.transaction((tx) => {
                       tx.executeSql(
                         'SELECT stopId FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND (awbNo = ? OR clientShipmentReferenceNumber = ? OR clientRefId = ? )  AND handoverStatus="accepted"',
-                        [route.params.tripID,data, data, data],
+                        [route.params.tripID, data, data, data],
                         (tx2, results122) => {
                           // console.log(results122.rows.item(0));
                           //  if (acceptedItemData[results122.rows.item(0).stopId] !== null)
@@ -619,11 +655,14 @@ const HandoverShipmentRTO = ({ route }) => {
             // RNBeep.beep();
             // updateDetails2(data);
             // loadDetails(data);
-            uploadDataToServer(res.rows,data);
+            uploadDataToServer(res.rows, data);
           }
-        }, 
+        },
         (error) => {
-          console.log("HandoverShipmentsRTO.js/getCategories error on getting categories " + error.message);
+          console.log(
+            "HandoverShipmentsRTO.js/getCategories error on getting categories " +
+              error.message
+          );
         }
       );
     });
@@ -644,20 +683,25 @@ const HandoverShipmentRTO = ({ route }) => {
     // displayConsignorDetails11();
   };
 
-
   const callErrorAPIFromScanner = (error) => {
-    console.log('HandoverShipmentsRTO/callErrorAPIFromScanner Scanner Error API called');
-    callApi(error,latitude,longitude,userId,token);
-  }
+    console.log(
+      "HandoverShipmentsRTO/callErrorAPIFromScanner Scanner Error API called"
+    );
+    callApi(error, latitude, longitude, userId, token);
+  };
 
   const onSuccess11 = (e) => {
     Vibration.vibrate(100);
     // Vibration.vibrate(800);
     dingAccept.play((success) => {
       if (success) {
-        console.log("HandoverShipmentsRTO.js/Sound successfully finished playing");
+        console.log(
+          "HandoverShipmentsRTO.js/Sound successfully finished playing"
+        );
       } else {
-        console.log("HandoverShipmentsRTO.js/Sound playback failed due to audio decoding errors");
+        console.log(
+          "HandoverShipmentsRTO.js/Sound playback failed due to audio decoding errors"
+        );
       }
     });
     // RNBeep.beep();
@@ -670,13 +714,18 @@ const HandoverShipmentRTO = ({ route }) => {
     db.transaction((txn) => {
       txn.executeSql(
         'UPDATE SyncSellerPickUp SET BagOpenClose11="false" WHERE stopId=? AND FMtripId = ? ',
-        [conscode12,route.params.tripID],
+        [conscode12, route.params.tripID],
         (sqlTxn, _res) => {
           setModalVisible(false);
-          console.log(" HandoverShipmentsRTO/updateBagStatus bag status updated to false");
+          console.log(
+            " HandoverShipmentsRTO/updateBagStatus bag status updated to false"
+          );
         },
         (error) => {
-          console.log("HandoverShipmentsRTO.js/updateBagStatus error on adding data " + error.message);
+          console.log(
+            "HandoverShipmentsRTO.js/updateBagStatus error on adding data " +
+              error.message
+          );
         }
       );
     });
@@ -703,7 +752,7 @@ const HandoverShipmentRTO = ({ route }) => {
   // useEffect(() => {
   //   `displayConsignorDetails11`();
   // }, []);
- 
+
   //   const displayConsignorDetails11 = () => {
   //     db.transaction(tx => {
   //         tx.executeSql('SELECT * FROM SyncSellerPickUp WHERE FMtripId = ? AND  stopId= ?', [barcode], (tx1, results) => {
@@ -785,7 +834,11 @@ const HandoverShipmentRTO = ({ route }) => {
               mt={2}
               bg="#004aad"
               onPress={() => {
-                CloseBag(data[0].stopId, data[0].consignorName,data[0].consignorCode);
+                CloseBag(
+                  data[0].stopId,
+                  data[0].consignorName,
+                  data[0].consignorCode
+                );
                 setShowCloseBagModal(false);
               }}
             >
@@ -869,10 +922,8 @@ const HandoverShipmentRTO = ({ route }) => {
                     data.length &&
                     data[0].stopId &&
                     acceptedItemData[data[0].stopId] &&
-                    acceptedItemData[data[0].stopId].acceptedItems11
-                      .length > 0
-                      ? acceptedItemData[data[0].stopId].acceptedItems11
-                          .length
+                    acceptedItemData[data[0].stopId].acceptedItems11.length > 0
+                      ? acceptedItemData[data[0].stopId].acceptedItems11.length
                       : null}
                   </Text>
                 ) : null}
@@ -926,7 +977,7 @@ const HandoverShipmentRTO = ({ route }) => {
               ) : (
                 <ProgressBar width={70} />
               )}
-            </Text> 
+            </Text>
             <View
               style={{
                 width: "90%",
@@ -938,10 +989,7 @@ const HandoverShipmentRTO = ({ route }) => {
             >
               <Button
                 onPress={() => {
-                  bagopenCloseHandler(
-                    data[0].stopId,
-                    data[0].consignorName
-                  );
+                  bagopenCloseHandler(data[0].stopId, data[0].consignorName);
                   setSellerNoOfShipment11(0);
                   setModalVisible(false);
                 }}
@@ -1138,8 +1186,7 @@ const HandoverShipmentRTO = ({ route }) => {
                     data.length &&
                     data[0].stopId &&
                     acceptedItemData[data[0].stopId] &&
-                    acceptedItemData[data[0].stopId].acceptedItems11
-                      .length > 0
+                    acceptedItemData[data[0].stopId].acceptedItems11.length > 0
                       ? "Yes"
                       : "No"}
                   </Text>
@@ -1190,8 +1237,8 @@ const HandoverShipmentRTO = ({ route }) => {
                 onPress={() =>
                   navigation.navigate("OpenBags", {
                     allCloseBAgData: acceptedItemData,
-                    tripID:route.params.tripID,
-                    token:token
+                    tripID: route.params.tripID,
+                    token: token,
                   })
                 }
               >

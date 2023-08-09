@@ -13,7 +13,7 @@ import {
   ScrollView,
   View,
   ToastAndroid,
-  ActivityIndicator, 
+  ActivityIndicator,
 } from "react-native";
 import { DataTable, Searchbar, Text, Card } from "react-native-paper";
 import { openDatabase } from "react-native-sqlite-storage";
@@ -27,6 +27,7 @@ import RNAndroidLocationEnabler from "react-native-android-location-enabler";
 import { backendUrl } from "../../utils/backendUrl";
 import { useDispatch, useSelector } from "react-redux";
 import { setAutoSync } from "../../redux/slice/autoSyncSlice";
+import { getAuthorizedHeaders } from "../../utils/headers";
 
 const PendingHandover = ({ route }) => {
   const dispatch = useDispatch();
@@ -57,7 +58,9 @@ const PendingHandover = ({ route }) => {
   const [handoverStatus, setHandoverStatus] = useState([]);
   const [runSheetNumbers, setRunSheetNumbers] = useState([]);
   const [totalDone, setTotalDone] = useState(0);
-  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
+  const currentDateValue =
+    useSelector((state) => state.currentDate.currentDateValue) ||
+    new Date().toISOString().split("T")[0];
   const userId = useSelector((state) => state.user.user_id);
 
   useEffect(() => {
@@ -86,7 +89,10 @@ const PendingHandover = ({ route }) => {
         //   .catch((err) => {
         //     console.log(err);
         //   });
-        console.log("PendingHandover.js/CurrentLocation Location Lat long error", error);
+        console.log(
+          "PendingHandover.js/CurrentLocation Location Lat long error",
+          error
+        );
       });
   };
 
@@ -101,50 +107,54 @@ const PendingHandover = ({ route }) => {
 
   const loadDetails = () => {
     db.transaction((tx) => {
-      tx.executeSql("SELECT * FROM SyncSellerPickUp WHERE FMtripId = ? ", [route.params.tripID], (tx1, results) => {
-        let temp = [];
-        var m = 0;
-        for (let i = 0; i < results.rows.length; ++i) {
-          const newData = {};
-          temp.push(results.rows.item(i));
-          // var stopId=results.rows.item(i).stopId;
-          // var consignorName=results.rows.item(i).consignorName;
+      tx.executeSql(
+        "SELECT * FROM SyncSellerPickUp WHERE FMtripId = ? ",
+        [route.params.tripID],
+        (tx1, results) => {
+          let temp = [];
+          var m = 0;
+          for (let i = 0; i < results.rows.length; ++i) {
+            const newData = {};
+            temp.push(results.rows.item(i));
+            // var stopId=results.rows.item(i).stopId;
+            // var consignorName=results.rows.item(i).consignorName;
 
-          db.transaction((tx) => {
             db.transaction((tx) => {
-              tx.executeSql(
-                'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND stopId=? ',
-                [route.params.tripID,results.rows.item(i).stopId],
-                (tx1, results11) => {
-                  //    console.log(results11,'1',results11.rows.length);
-                  //    var expected=results11.rows.length;
-                  tx.executeSql(
-                    'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND stopId=? AND handoverStatus IS  NULL',
-                    [route.params.tripID,results.rows.item(i).stopId],
-                    (tx1, results22) => {
-                      // console.log(results22,'2',results22.rows.length);
-                      // var scanned=results.rows.length;
-                      newData[results.rows.item(i).stopId] = {
-                        consignorName: results.rows.item(i).consignorName,
-                        expected: results11.rows.length,
-                        pending: results22.rows.length,
-                      };
-                      // console.log(newData);
-                      if (newData != null) {
-                        setDisplayData((prevData) => ({
-                          ...prevData,
-                          ...newData,
-                        }));
+              db.transaction((tx) => {
+                tx.executeSql(
+                  'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND stopId=? ',
+                  [route.params.tripID, results.rows.item(i).stopId],
+                  (tx1, results11) => {
+                    //    console.log(results11,'1',results11.rows.length);
+                    //    var expected=results11.rows.length;
+                    tx.executeSql(
+                      'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND stopId=? AND handoverStatus IS  NULL',
+                      [route.params.tripID, results.rows.item(i).stopId],
+                      (tx1, results22) => {
+                        // console.log(results22,'2',results22.rows.length);
+                        // var scanned=results.rows.length;
+                        newData[results.rows.item(i).stopId] = {
+                          consignorName: results.rows.item(i).consignorName,
+                          expected: results11.rows.length,
+                          pending: results22.rows.length,
+                        };
+                        // console.log(newData);
+                        if (newData != null) {
+                          setDisplayData((prevData) => ({
+                            ...prevData,
+                            ...newData,
+                          }));
+                        }
                       }
-                    }
-                  );
-                }
-              );
+                    );
+                  }
+                );
+              });
             });
-          });
+          }
+          setData(temp);
         }
-        setData(temp);
-      });
+      );
     });
     db.transaction((tx) => {
       tx.executeSql("SELECT * FROM ShipmentFailure", [], (tx1, results) => {
@@ -184,7 +194,7 @@ const PendingHandover = ({ route }) => {
     db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails WHERE FMtripId = ? AND  shipmentAction="Seller Delivery" AND stopId=? ',
-        [route.params.tripID,stopId],
+        [route.params.tripID, stopId],
         (tx1, results111) => {
           const consignorData = {
             expected: expected11,
@@ -252,7 +262,10 @@ const PendingHandover = ({ route }) => {
           // console.log(results);
         },
         (error) => {
-          console.log("PendingHandover.js/updateQueryLocal Status Update Local DB bug", error);
+          console.log(
+            "PendingHandover.js/updateQueryLocal Status Update Local DB bug",
+            error
+          );
         }
       );
     });
@@ -270,32 +283,39 @@ const PendingHandover = ({ route }) => {
     } catch (error) {
       console.log("PendingHandover.js/ChangeQueryLocal==err====", error);
     }
-    navigation.navigate("HandOverSummary",{
-      tripID:route.params.tripID,
+    navigation.navigate("HandOverSummary", {
+      tripID: route.params.tripID,
     });
   }
- 
+
   function closeHandover() {
     let time11 = new Date().valueOf();
-    console.log("PendingHandover.js/CloseHandover ===handover close data P===", {
-      handoverStatus: handoverStatus.concat(
-        route.params.acceptedHandoverStatus
-      ),
-      runsheets: runSheetNumbers,
-      feUserID: userId,
-      receivingTime: parseInt(time11),
-      latitude: parseFloat(latitude),
-      longitude: parseFloat(longitude),
-    });
-    axios
-      .post(backendUrl + "SellerMainScreen/closeHandover", {
-        handoverStatus: handoverStatus,
+    console.log(
+      "PendingHandover.js/CloseHandover ===handover close data P===",
+      {
+        handoverStatus: handoverStatus.concat(
+          route.params.acceptedHandoverStatus
+        ),
         runsheets: runSheetNumbers,
         feUserID: userId,
         receivingTime: parseInt(time11),
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
-      },{ headers: { Authorization: token } })
+      }
+    );
+    axios
+      .post(
+        backendUrl + "SellerMainScreen/closeHandover",
+        {
+          handoverStatus: handoverStatus,
+          runsheets: runSheetNumbers,
+          feUserID: userId,
+          receivingTime: parseInt(time11),
+          latitude: parseFloat(latitude),
+          longitude: parseFloat(longitude),
+        },
+        { headers: getAuthorizedHeaders(token) }
+      )
       .then((response) => {
         changeLocalStatus(time11);
         ToastAndroid.show("Successfully Handover Closed", ToastAndroid.SHORT);
@@ -391,9 +411,8 @@ const PendingHandover = ({ route }) => {
                         mt={4}
                       >
                         {handoverStatus.length > 0 &&
-                        handoverStatus.filter(
-                          (obj) => obj.stopId === stopId
-                        )[0]?.rejectReason
+                        handoverStatus.filter((obj) => obj.stopId === stopId)[0]
+                          ?.rejectReason
                           ? (data11
                               ?.filter((d) => d.applies_to.includes("PRHC"))
                               .filter(
@@ -489,9 +508,11 @@ const PendingHandover = ({ route }) => {
               w="48%"
               size="lg"
               bg="#004aad"
-              onPress={() => navigation.navigate("HandoverShipmentRTO",{
-                tripID:route.params.tripID,
-              })}
+              onPress={() =>
+                navigation.navigate("HandoverShipmentRTO", {
+                  tripID: route.params.tripID,
+                })
+              }
             >
               Resume Scanning
             </Button>

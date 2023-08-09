@@ -46,8 +46,9 @@ import GetLocation from "react-native-get-location";
 import { backendUrl } from "../../utils/backendUrl";
 import { useDispatch, useSelector } from "react-redux";
 import { setAutoSync } from "../../redux/slice/autoSyncSlice";
-import OTPTextInput from 'react-native-otp-textinput';
-import DeviceInfo from 'react-native-device-info';
+import OTPTextInput from "react-native-otp-textinput";
+import DeviceInfo from "react-native-device-info";
+import { getAuthorizedHeaders } from "../../utils/headers";
 
 const NewSellerSelection = ({ route }) => {
   const dispatch = useDispatch();
@@ -61,7 +62,9 @@ const NewSellerSelection = ({ route }) => {
   const [reject, setReject] = useState(0);
   const [data, setData] = useState([]);
   const [order, setOrder] = useState([]);
-  const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
+  const currentDateValue =
+    useSelector((state) => state.currentDate.currentDateValue) ||
+    new Date().toISOString().split("T")[0];
   const [newdata, setnewdata] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [phone, setPhone] = useState(route.params.phone);
@@ -87,7 +90,7 @@ const NewSellerSelection = ({ route }) => {
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [inputOtp, setInputOtp] = useState('');
+  const [inputOtp, setInputOtp] = useState("");
   const [showModal11, setShowModal11] = useState(false);
   const [timer, setTimer] = useState(60);
 
@@ -106,7 +109,7 @@ const NewSellerSelection = ({ route }) => {
   //   if(!loading){
   //   current_location();}
   // }, [loading]);
-// console.log(latitude);
+  // console.log(latitude);
   // const current_location = () => {
   //   GetLocation.getCurrentPosition({
   //     enableHighAccuracy: true,
@@ -140,9 +143,9 @@ const NewSellerSelection = ({ route }) => {
   const notPicked = async () => {
     setLoading(true);
     AsyncStorage.setItem("refresh11", "refresh");
-    const deviceId= await DeviceInfo.getUniqueId();
-    const IpAddress= await DeviceInfo.getIpAddress();
-    const eventTime=new Date().valueOf();
+    const deviceId = await DeviceInfo.getUniqueId();
+    const IpAddress = await DeviceInfo.getIpAddress();
+    const eventTime = new Date().valueOf();
     // console.log(latitude);
 
     GetLocation.getCurrentPosition({
@@ -152,92 +155,103 @@ const NewSellerSelection = ({ route }) => {
       .then((location) => {
         setLatitude(location.latitude);
         setLongitude(location.longitude);
-        
-        console.log("NewSellerSelection/notPicked/",{consignorCode: route.params.consignorCode,
+
+        console.log("NewSellerSelection/notPicked/", {
+          consignorCode: route.params.consignorCode,
           rejectionReason: rejectionCode,
           feUserID: route.params.userId,
           latitude: parseFloat(location.latitude),
           longitude: parseFloat(location.longitude),
           eventTime: eventTime,
           rejectionStage: "SLPF",
-          stopId:route.params.stopId,
-        tripId:route.params.FMtripId,
-        deviceId: deviceId,
-        deviceIPaddress: IpAddress,});
-
-
-    axios
-      .post(backendUrl + "SellerMainScreen/attemptFailed", {
-        consignorCode: route.params.consignorCode,
-        rejectionReason: rejectionCode,
-        feUserID: route.params.userId,
-        latitude: parseFloat(location.latitude),
-        longitude: parseFloat(location.longitude),
-        eventTime: eventTime,
-        rejectionStage: "SLPF",
-        stopId:route.params.stopId,
-        tripID:route.params.FMtripId,
-        deviceId: deviceId,
-        deviceIPaddress: IpAddress,
-      },{ headers: { Authorization: token } })
-      .then(function (response) {
-        console.log("NewSellerSelection/notPicked",response.data);
-        db.transaction((tx) => {
-          tx.executeSql(
-            'UPDATE SyncSellerPickUp  SET otpSubmitted="true" WHERE stopId=? AND FMtripId=?',
-            [route.params.stopId, route.params.FMtripId],
-            (tx1, results) => {
-              if (results.rowsAffected > 0) {
-                console.log("NewSellerSelection/notPicked/otp status updated  in seller table ");
-                // navigation.navigate(NewSellerPickup);
-                navigation.goBack();
-                setLoading(false);
-                // loadSellerPickupDetails();
-              } else {
-                console.log("NewSellerSelection/notPicked/opt status not updated in local table");
-              }
-            }
-          );
+          stopId: route.params.stopId,
+          tripId: route.params.FMtripId,
+          deviceId: deviceId,
+          deviceIPaddress: IpAddress,
         });
-        db.transaction((tx) => {
-          tx.executeSql(
-            'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=?, postRDStatus="true"  WHERE shipmentAction="Seller Pickup" AND status IS Null AND stopId=? AND FMtripId=?',
-            [
-              rejectionCode,
-              eventTime,
-              location.latitude,
-              location.longitude,
-              route.params.stopId,
-              route.params.FMtripId
-            ],
-            (tx1, results) => {
-              let temp = [];
-              // console.log(results.rows.length);
-              for (let i = 0; i < results.rows.length; ++i) {
-                temp.push(results.rows.item(i));
-              }
-            }
-          );
-        });
-        setMessage("Successfully submitted");
-        setStatus("success");
+
+        axios
+          .post(
+            backendUrl + "SellerMainScreen/attemptFailed",
+            {
+              consignorCode: route.params.consignorCode,
+              rejectionReason: rejectionCode,
+              feUserID: route.params.userId,
+              latitude: parseFloat(location.latitude),
+              longitude: parseFloat(location.longitude),
+              eventTime: eventTime,
+              rejectionStage: "SLPF",
+              stopId: route.params.stopId,
+              tripID: route.params.FMtripId,
+              deviceId: deviceId,
+              deviceIPaddress: IpAddress,
+            },
+            { headers: getAuthorizedHeaders(token) }
+          )
+          .then(function (response) {
+            console.log("NewSellerSelection/notPicked", response.data);
+            db.transaction((tx) => {
+              tx.executeSql(
+                'UPDATE SyncSellerPickUp  SET otpSubmitted="true" WHERE stopId=? AND FMtripId=?',
+                [route.params.stopId, route.params.FMtripId],
+                (tx1, results) => {
+                  if (results.rowsAffected > 0) {
+                    console.log(
+                      "NewSellerSelection/notPicked/otp status updated  in seller table "
+                    );
+                    // navigation.navigate(NewSellerPickup);
+                    navigation.goBack();
+                    setLoading(false);
+                    // loadSellerPickupDetails();
+                  } else {
+                    console.log(
+                      "NewSellerSelection/notPicked/opt status not updated in local table"
+                    );
+                  }
+                }
+              );
+            });
+            db.transaction((tx) => {
+              tx.executeSql(
+                'UPDATE SellerMainScreenDetails SET status="notPicked", rejectionReasonL1=?, eventTime=?, latitude=?, longitude=?, postRDStatus="true"  WHERE shipmentAction="Seller Pickup" AND status IS Null AND stopId=? AND FMtripId=?',
+                [
+                  rejectionCode,
+                  eventTime,
+                  location.latitude,
+                  location.longitude,
+                  route.params.stopId,
+                  route.params.FMtripId,
+                ],
+                (tx1, results) => {
+                  let temp = [];
+                  // console.log(results.rows.length);
+                  for (let i = 0; i < results.rows.length; ++i) {
+                    temp.push(results.rows.item(i));
+                  }
+                }
+              );
+            });
+            setMessage("Successfully submitted");
+            setStatus("success");
+          })
+          .catch(function (error) {
+            console.log("NewSellerSelection/notPicked/", error);
+            setMessage("Submission failed");
+            // navigation.goBack();
+            setLoading(false);
+            setStatus("error");
+          });
       })
-      .catch(function (error) {
-        console.log("NewSellerSelection/notPicked/",error);
-        setMessage("Submission failed");
-        // navigation.goBack();
+      .catch((error) => {
+        ToastAndroid.show("Turn on device location ", ToastAndroid.SHORT);
+        console.log(
+          "NewSellerSelection/notPicked/Location Lat long error",
+          error
+        );
+        setDropDownValue("");
         setLoading(false);
-        setStatus("error");
+        setDropDownValue1("");
       });
-
-    })
-    .catch((error) => {
-      ToastAndroid.show("Turn on device location ",ToastAndroid.SHORT);
-      console.log("NewSellerSelection/notPicked/Location Lat long error", error);
-      setDropDownValue('');
-      setLoading(false);
-      setDropDownValue1('');
-    });
     // navigation.goBack();
   };
   const closePickup11 = () => {
@@ -291,7 +305,7 @@ const NewSellerSelection = ({ route }) => {
         loadSellerPickupDetails();
       }
     } catch (e) {
-      console.log("NewSellerSelection/notPicked/",e);
+      console.log("NewSellerSelection/notPicked/", e);
     }
   };
 
@@ -310,7 +324,7 @@ const NewSellerSelection = ({ route }) => {
   const sync11 = () => {
     loadSellerPickupDetails();
   };
- 
+
   const loadSellerPickupDetails = async () => {
     // setAcc(1);
     //     setPending(1);
@@ -357,7 +371,7 @@ const NewSellerSelection = ({ route }) => {
     db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND status="notPicked" AND FMtripId=?',
-        [route.params.stopId,route.params.FMtripId],
+        [route.params.stopId, route.params.FMtripId],
         (tx1, results) => {
           setNotPicked11(results.rows.length);
         }
@@ -431,14 +445,16 @@ const NewSellerSelection = ({ route }) => {
   const toggleLoading = () => {
     setIsLoading(!isLoading);
     (async () => {
-      await axios.get(shipmentData,{ headers: { Authorization: token } }).then(
-        (res) => {
-          setData(res.data);
-        },
-        (error) => {
-          alert(error);
-        }
-      );
+      await axios
+        .get(shipmentData, { headers: getAuthorizedHeaders(token) })
+        .then(
+          (res) => {
+            setData(res.data);
+          },
+          (error) => {
+            alert(error);
+          }
+        );
     })();
     setIsLoading ? navigation.navigate("loading1") : null;
     setTimeout(() => {
@@ -448,7 +464,7 @@ const NewSellerSelection = ({ route }) => {
   };
 
   const triggerCall = () => {
-    console.log("NewSellerSelection/triggerCall",phone);
+    console.log("NewSellerSelection/triggerCall", phone);
     Linking.openURL("tel:" + phone);
     // const args = {
     //   number: phone,
@@ -484,7 +500,7 @@ const NewSellerSelection = ({ route }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function handleButtonPress(item, item2,item3) {
+  function handleButtonPress(item, item2, item3) {
     if (item == "Could Not Attempt") {
       setModalVisible2(true);
       setModalVisible(false);
@@ -499,7 +515,7 @@ const NewSellerSelection = ({ route }) => {
   function handleButtonPress2(item, item2, item3) {
     setDropDownValue1(item);
     setRejectionCode(item2);
-    setEnableOTP(item3)
+    setEnableOTP(item3);
     setRejectStage("L2");
   }
 
@@ -519,38 +535,48 @@ const NewSellerSelection = ({ route }) => {
   }
   const sendSmsOtp = async () => {
     await axios
-      .post(backendUrl + 'SMS_new/sendOTP', {
-        mobileNumber: phone,
-        useCase: "POSTRD PICKUP OTP",
-        payLoad:{
-          acceptedCount: 0,
-          failedCount: pending
-        }
-      },{ headers: { Authorization: token } })
+      .post(
+        backendUrl + "SMS_new/sendOTP",
+        {
+          mobileNumber: phone,
+          useCase: "POSTRD PICKUP OTP",
+          payLoad: {
+            acceptedCount: 0,
+            failedCount: pending,
+          },
+        },
+        { headers: getAuthorizedHeaders(token) }
+      )
       .then(setShowModal11(true))
-      .catch(err => console.log('NewSellerSelection/sendSmsOtp/OTP not send'));
+      .catch((err) =>
+        console.log("NewSellerSelection/sendSmsOtp/OTP not send")
+      );
   };
   function validateOTP() {
-    console.log("NewSellerSelection/validateOTP",inputOtp,phone)
-    var otp11=inputOtp;
+    console.log("NewSellerSelection/validateOTP", inputOtp, phone);
+    var otp11 = inputOtp;
     axios
-      .post(backendUrl + 'SMS_new/OTPValidate', {
-        mobileNumber: phone,
-        useCase:"POSTRD PICKUP OTP",
-        otp: otp11,
-      },{ headers: { Authorization: token } })
-      .then(response => {
+      .post(
+        backendUrl + "SMS_new/OTPValidate",
+        {
+          mobileNumber: phone,
+          useCase: "POSTRD PICKUP OTP",
+          otp: otp11,
+        },
+        { headers: getAuthorizedHeaders(token) }
+      )
+      .then((response) => {
         if (response.data.return) {
-          setInputOtp('');
+          setInputOtp("");
           notPicked();
           setModalVisible3(false);
           setShowModal11(false);
-      }
-      else {
-        alert('Invalid OTP, please try again !!');
-      }})
-      .catch(error => {
-        console.log("NewSellerSelection/validateOTP",error);
+        } else {
+          alert("Invalid OTP, please try again !!");
+        }
+      })
+      .catch((error) => {
+        console.log("NewSellerSelection/validateOTP", error);
       });
   }
   return (
@@ -562,26 +588,27 @@ const NewSellerSelection = ({ route }) => {
         //   style={{ marginTop: 44 }}
         // />
         <View
-              style={[
-                StyleSheet.absoluteFillObject,
-                {
-                  flex: 1,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  zIndex: 1,
-                  backgroundColor: 'rgba(0,0,0,0.65)',
-                },
-              ]}>
-              <Text style={{color: 'white'}}>Loading...</Text>
-              <Lottie
-                source={require('../../assets/loading11.json')}
-                autoPlay
-                loop
-                speed={1}
-                //   progress={animationProgress.current}
-              />
-              <ProgressBar width={70} />
-            </View>
+          style={[
+            StyleSheet.absoluteFillObject,
+            {
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 1,
+              backgroundColor: "rgba(0,0,0,0.65)",
+            },
+          ]}
+        >
+          <Text style={{ color: "white" }}>Loading...</Text>
+          <Lottie
+            source={require("../../assets/loading11.json")}
+            autoPlay
+            loop
+            speed={1}
+            //   progress={animationProgress.current}
+          />
+          <ProgressBar width={70} />
+        </View>
       ) : (
         <View>
           <Modal>
@@ -653,7 +680,11 @@ const NewSellerSelection = ({ route }) => {
                       }}
                       title={d.description}
                       onPress={() =>
-                        handleButtonPress(d.description, d.short_code, d.enable_otp)
+                        handleButtonPress(
+                          d.description,
+                          d.short_code,
+                          d.enable_otp
+                        )
                       }
                     >
                       <Text
@@ -679,9 +710,9 @@ const NewSellerSelection = ({ route }) => {
                         ToastAndroid.SHORT
                       );
                     } else {
-                      if(enableOTP==1){
-                        setModalVisible3(true)
-                      }else{
+                      if (enableOTP == 1) {
+                        setModalVisible3(true);
+                      } else {
                         notPicked();
                       }
                       setModalVisible(false);
@@ -724,7 +755,11 @@ const NewSellerSelection = ({ route }) => {
                       }}
                       title={d.description}
                       onPress={() =>
-                        handleButtonPress2(d.description, d.short_code, d.enable_otp)
+                        handleButtonPress2(
+                          d.description,
+                          d.short_code,
+                          d.enable_otp
+                        )
                       }
                     >
                       <Text
@@ -750,10 +785,9 @@ const NewSellerSelection = ({ route }) => {
                         ToastAndroid.SHORT
                       );
                     } else {
-                      if(enableOTP==1){
+                      if (enableOTP == 1) {
                         setModalVisible3(true);
-                      }
-                      else{
+                      } else {
                         notPicked();
                       }
                       setModalVisible2(false);
@@ -791,96 +825,110 @@ const NewSellerSelection = ({ route }) => {
               <Modal.CloseButton />
               <Modal.Header>Submit OTP</Modal.Header>
               <Modal.Body>
-              <Input
-              mx="3"
-              mt={4}
-              placeholder="Receiver Name"
-              w="90%"
-              bg="gray.200"
-              size="lg"
-              value={name}
-              onChangeText={e => setName(e)}
-            />
-            <Input
-              mx="3"
-              my={4}
-              placeholder="Mobile Number"
-              w="90%"
-              bg="gray.200"
-              size="lg"
-              value={phone}
-              onChangeText={e => setPhone(e)}
-            />
-            {!showModal11?
-            <Center>
-            <Button
-              w="90%"
-              size="lg"
-              style={{backgroundColor: '#004aad', color: '#fff'}}
-              title="Submit"
-              onPress={() => {sendSmsOtp();setTimer(60);}}>
-              Send OTP
-            </Button>
-            </Center>: timer ? (
-              <Center>
-                <Button w="90%" size="lg" bg="gray.500">
-                  <Text style={{color: 'white', fontSize:16.5}}>Resend OTP in {timer}sec</Text>
-                </Button>
-                </Center>
-              ) : (
-                <Center>
-                <Button
-                  w="90%" size="lg"
-                  bg="gray.500"
-                  onPress={() => {
-                    sendSmsOtp();
-                    setTimer(60);
-                  }}>
-                  Resend
-                </Button>
-                </Center>
-              )}
+                <Input
+                  mx="3"
+                  mt={4}
+                  placeholder="Receiver Name"
+                  w="90%"
+                  bg="gray.200"
+                  size="lg"
+                  value={name}
+                  onChangeText={(e) => setName(e)}
+                />
+                <Input
+                  mx="3"
+                  my={4}
+                  placeholder="Mobile Number"
+                  w="90%"
+                  bg="gray.200"
+                  size="lg"
+                  value={phone}
+                  onChangeText={(e) => setPhone(e)}
+                />
+                {!showModal11 ? (
+                  <Center>
+                    <Button
+                      w="90%"
+                      size="lg"
+                      style={{ backgroundColor: "#004aad", color: "#fff" }}
+                      title="Submit"
+                      onPress={() => {
+                        sendSmsOtp();
+                        setTimer(60);
+                      }}
+                    >
+                      Send OTP
+                    </Button>
+                  </Center>
+                ) : timer ? (
+                  <Center>
+                    <Button w="90%" size="lg" bg="gray.500">
+                      <Text style={{ color: "white", fontSize: 16.5 }}>
+                        Resend OTP in {timer}sec
+                      </Text>
+                    </Button>
+                  </Center>
+                ) : (
+                  <Center>
+                    <Button
+                      w="90%"
+                      size="lg"
+                      bg="gray.500"
+                      onPress={() => {
+                        sendSmsOtp();
+                        setTimer(60);
+                      }}
+                    >
+                      Resend
+                    </Button>
+                  </Center>
+                )}
 
-            { showModal11? 
-            <>
-             <Center>
-              <View style={{
-    flexDirection: 'row',
-    justifyContent: 'center',
-  }}>
- <OTPTextInput 
-        handleTextChange={e => setInputOtp(e)}
-        inputCount={6} 
-        tintColor="#004aad" 
-        offTintColor="gray" 
-        containerStyle={{
-          marginTop: 4,
-          padding:10,
-        }}
-        textInputStyle={{
-          width:'12.5%',
-          backgroundColor: '#F5F5F5',
-          borderRadius: 10,
-          borderWidth: 1,
-          borderColor: '#BDBDBD',
-          padding: 10,
-        }}
-        keyboardType="number-pad"
-        onBackspace={() => console.log('back')}
-      />
-</View>
-</Center>
-              <Center>
-              <Button
-                w="90%" size="lg"
-                bg="#004aad"
-                onPress={() => {
-                  validateOTP();
-                }}>
-                Verify OTP
-              </Button>
-              </Center>
-            </>:null}      
+                {showModal11 ? (
+                  <>
+                    <Center>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <OTPTextInput
+                          handleTextChange={(e) => setInputOtp(e)}
+                          inputCount={6}
+                          tintColor="#004aad"
+                          offTintColor="gray"
+                          containerStyle={{
+                            marginTop: 4,
+                            padding: 10,
+                          }}
+                          textInputStyle={{
+                            width: "12.5%",
+                            backgroundColor: "#F5F5F5",
+                            borderRadius: 10,
+                            borderWidth: 1,
+                            borderColor: "#BDBDBD",
+                            padding: 10,
+                          }}
+                          keyboardType="number-pad"
+                          onBackspace={() => console.log("back")}
+                        />
+                      </View>
+                    </Center>
+                    <Center>
+                      <Button
+                        w="90%"
+                        size="lg"
+                        bg="#004aad"
+                        onPress={() => {
+                          validateOTP();
+                        }}
+                      >
+                        Verify OTP
+                      </Button>
+                    </Center>
+                  </>
+                ) : null}
               </Modal.Body>
             </Modal.Content>
           </Modal>
@@ -1161,15 +1209,15 @@ const NewSellerSelection = ({ route }) => {
                           Forward: Forward,
                           PRSNumber: route.params.PRSNumber,
                           consignorCode: route.params.consignorCode,
-                          stopId:route.params.stopId,
-                          tripID:route.params.FMtripId,
+                          stopId: route.params.stopId,
+                          tripID: route.params.FMtripId,
                           userId: route.params.userId,
                           phone: route.params.phone,
                           contactPersonName: route.params.contactPersonName,
                           packagingId: route.params.packagingId,
                           latitude: route.params.consignorLatitude,
                           longitude: route.params.consignorLongitude,
-                          token:token
+                          token: token,
                           // TotalpickUp : newdata[0].totalPickups
                         })
                       }

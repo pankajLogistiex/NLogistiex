@@ -38,9 +38,10 @@ import {useIsFocused} from '@react-navigation/native';
 import {backendUrl} from '../utils/backendUrl';
 import {convertAbsoluteToRem} from 'native-base/lib/typescript/theme/tools';
 import {useSelector, useDispatch} from 'react-redux';
-import {setUserEmail, setUserId, setUserName, setToken} from '../redux/slice/userSlice';
+import {setUserEmail, setUserId, setUserName, setToken, setRefreshToken, setRefreshTime} from '../redux/slice/userSlice';
 import {setTripStatus} from '../redux/slice/tripSlice';
 import { setAutoSync, setForceSync } from "../redux/slice/autoSyncSlice";
+import { getAuthorizedHeaders } from "../utils/headers";
 
 export default function Main({navigation, route}) {
   const dispatch = useDispatch();
@@ -125,6 +126,21 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
         console.log('Main.js/name ',err);
       });
     
+    await AsyncStorage.getItem("refreshToken")
+      .then((value) => {
+        dispatch(setRefreshToken(value));
+      })
+      .catch((err) => {
+        console.log("Main.js/refreshToken ", err);
+      });
+    
+    await AsyncStorage.getItem("refreshTime")
+      .then((value) => {
+        dispatch(setRefreshTime(parseInt(value)));
+      })
+      .catch((err) => {
+        console.log("Main.js/refreshTime ", err);
+      });
   }
   const fetchTripInfo = async () => {
     db.transaction((txn) => {
@@ -159,7 +175,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
         params: {
           tripID: tripID,
         },
-        headers: { Authorization: token } 
+        headers: getAuthorizedHeaders(token) 
       })
       .then(response => {
         if (response?.data?.res_data) {
@@ -506,7 +522,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
       try {
         // console.log('Main.js/ ',id);
  await axios.get(`${backendUrl}/SellerMainScreen/handoverStatus?feUserID=${id}`,
- { headers: { Authorization: token } })
+ { headers: getAuthorizedHeaders(token) })
  .then((response) => {
         const responseData = response?.data?.data;
         setCloseHandoverStatus11(response?.data?.data?.handoverStatus);
