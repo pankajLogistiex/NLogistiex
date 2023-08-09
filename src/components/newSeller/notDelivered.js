@@ -40,6 +40,7 @@ const NotDelivered = ({route}) => {
     const [enableOTP, setEnableOTP] = useState(0);
     const [inputOtp, setInputOtp] = useState('');
     const [phone, setPhone] = useState(route.params.phone);
+    const [token, setToken] = useState(route.params.token);
     const [showModal11, setShowModal11] = useState(false);
     const [timer, setTimer] = useState(60);
 
@@ -112,7 +113,7 @@ const NotDelivered = ({route}) => {
         tripID: route.params.tripId,
         deviceId: deviceId,
         deviceIPaddress: IpAddress,
-      })
+      },{ headers: { Authorization: token } })
       .then(function (response) {
         console.log(response.data);
         db.transaction(tx => {
@@ -221,7 +222,7 @@ const NotDelivered = ({route}) => {
               acceptedCount: 0,
               failedCount: route.params.pending
             }
-          })
+          },{ headers: { Authorization: token } })
           .then(setShowModal11(true))
           .catch(err => console.log('OTP not send'));
       };
@@ -233,7 +234,7 @@ const NotDelivered = ({route}) => {
             mobileNumber: phone,
             useCase:"POSTRD DELIVERY OTP",
             otp: otp11,
-          })
+          },{ headers: { Authorization: token } })
           .then(response => {
             if (response.data.return) {
               setInputOtp('');

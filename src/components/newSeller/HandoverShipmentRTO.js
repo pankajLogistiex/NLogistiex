@@ -63,11 +63,11 @@ const HandoverShipmentRTO = ({ route }) => {
 
   const userId = useSelector((state) => state.user.user_id);
   const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
-
   const [barcode, setBarcode] = useState("");
   const [len, setLen] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [bagId, setBagId] = useState("");
+  const [token, setToken] = useState(route.params.token);
   const [bagIdNo, setBagIdNo] = useState(1);
   const [showCloseBagModal, setShowCloseBagModal] = useState(false);
   const [bagSeal, setBagSeal] = useState("");
@@ -502,7 +502,7 @@ const HandoverShipmentRTO = ({ route }) => {
           runsheetNo: row.runSheetNumber,
           scanStatus: 1,
           bagSealNo: bagId,
-        })
+        },{ headers: { Authorization: token } })
         .then((response) => {
           console.log(
             "HandoverShipmentsRTO/updateDataToServer ===========Return Handover Result===========",
@@ -647,7 +647,7 @@ const HandoverShipmentRTO = ({ route }) => {
 
   const callErrorAPIFromScanner = (error) => {
     console.log('HandoverShipmentsRTO/callErrorAPIFromScanner Scanner Error API called');
-    callApi(error,latitude,longitude,userId);
+    callApi(error,latitude,longitude,userId,token);
   }
 
   const onSuccess11 = (e) => {
@@ -1191,6 +1191,7 @@ const HandoverShipmentRTO = ({ route }) => {
                   navigation.navigate("OpenBags", {
                     allCloseBAgData: acceptedItemData,
                     tripID:route.params.tripID,
+                    token:token
                   })
                 }
               >

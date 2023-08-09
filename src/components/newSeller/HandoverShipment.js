@@ -53,7 +53,7 @@ const db = openDatabase({
 const HandoverShipment = ({route}) => {
   const dispatch = useDispatch();
   const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
-  
+  const token = useSelector((state) => state.user.token);
   const [barcodeValue, setBarcodeValue] = useState('');
   const [packageValue, setpackageValue] = useState('');
   const [otp, setOtp] = useState('');
@@ -267,7 +267,7 @@ const HandoverShipment = ({route}) => {
   }, [len]);
 
   const displaydata = async () => {
-    await fetch(RejectReason)
+    await fetch(RejectReason, { headers: { Authorization: token } })
       .then(response => response.json())
       .then(json => {
         setRejectedData(json);
@@ -340,7 +340,7 @@ const HandoverShipment = ({route}) => {
                   packagingId: 'ss',
                   packageingStatus: 1,
                   PRSNumber: res.PRSNumber,
-                })
+                },{ headers: { Authorization: token } })
                 .then(function (response) {
                   console.log(response.data, 'hello');
                   updateCategories1(res.clientShipmentReferenceNumber);
@@ -412,7 +412,7 @@ const HandoverShipment = ({route}) => {
         packagingId: 'PL00000026',
         packageingStatus: 1,
         PRSNumber: route.params.PRSNumber,
-      })
+      },{ headers: { Authorization: token } })
       .then(function (response) {
         console.log(response.data, 'Data has been pushed');
         ContinueHandle();

@@ -35,7 +35,6 @@ import { setAutoSync } from "../../redux/slice/autoSyncSlice";
 
 const OpenBags = ({ route }) => {
   const dispatch = useDispatch();
-
   const userId = useSelector((state) => state.user.user_id);
   const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
  
@@ -45,6 +44,7 @@ const OpenBags = ({ route }) => {
   const [keyword, setKeyword] = useState("");
   const [consignorNames, setconsignorNames] = useState("");
   const [stopId, setstopId] = useState("");
+  const [token, setToken] = useState(route.params.token);
   const [NoShipment, setNoShipment] = useState(45);
   const [bagSeal, setBagSeal] = useState("");
   const [totalAccepted, setTotalAccepted] = useState(0);
@@ -362,10 +362,11 @@ const OpenBags = ({ route }) => {
         receivingTime: parseInt(time11),
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
-      })
+      },{ headers: { Authorization: token } })
       .then((response) => {
         navigation.navigate("HandOverSummary",{
           tripID:route.params.tripID,
+          token:token
         });
         ToastAndroid.show("Successfully Handover Closed", ToastAndroid.SHORT);
       })
@@ -696,6 +697,7 @@ const OpenBags = ({ route }) => {
                         expected: "0",
                         acceptedHandoverStatus: acceptedHandoverStatus,
                         tripID:route.params.tripID,
+                        token:token
                       });
                     }
                   : () =>

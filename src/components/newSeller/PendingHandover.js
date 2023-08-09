@@ -48,6 +48,7 @@ const PendingHandover = ({ route }) => {
   const [DropDownValue, setDropDownValue] = useState("");
   const [totalPending, setTotalPending] = useState(0);
   const [stopId, setstopId] = useState("");
+  const [token, setToken] = useState(route.params.token);
   const [showCloseBagModal, setShowCloseBagModal] = useState(false);
   const [latitude, setLatitude] = useState(0);
   const [data11, setData11] = useState([]);
@@ -294,7 +295,7 @@ const PendingHandover = ({ route }) => {
         receivingTime: parseInt(time11),
         latitude: parseFloat(latitude),
         longitude: parseFloat(longitude),
-      })
+      },{ headers: { Authorization: token } })
       .then((response) => {
         changeLocalStatus(time11);
         ToastAndroid.show("Successfully Handover Closed", ToastAndroid.SHORT);

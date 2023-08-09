@@ -342,7 +342,8 @@ return (
           userId: seller.userId,
           phone: seller.consignorContact,
           otpSubmitted: seller.otpSubmitted,
-          FMtripId: seller.FMtripId
+          FMtripId: seller.FMtripId,
+          token:route.params.token
         });
         }}>
           <View
@@ -419,7 +420,8 @@ position: 'relative',
                     userId: seller.userId,
                     phone: seller.consignorContact,
                     otpSubmitted: seller.otpSubmitted,
-                    FMtripId: seller.FMtripId
+                    FMtripId: seller.FMtripId,
+                    token: route.params.token
                   });
                   }}>
                     <View

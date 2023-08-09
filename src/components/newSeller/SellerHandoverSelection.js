@@ -52,12 +52,12 @@ import DeviceInfo from 'react-native-device-info';
 const SellerHandoverSelection = ({ route }) => {
   const dispatch = useDispatch();
   const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
-
   const [barcodeValue, setBarcodeValue] = useState('');
   const shipmentData =
     backendUrl + `SellerMainScreen/getSellerDetails/${route.params.paramKey}`;
   const [acc, setAcc] = useState(0);
   const [pending, setPending] = useState(route.params.Reverse);
+  const [token, setToken] = useState(route.params.token);
   const [Forward, setForward] = useState('');
   const [reject, setReject] = useState(0);
   const [data, setData] = useState([]);
@@ -161,7 +161,7 @@ const SellerHandoverSelection = ({ route }) => {
         tripID: route.params.tripId,
         deviceId: deviceId,
         deviceIPaddress: IpAddress,
-      })
+      },{ headers: { Authorization: token } })
       .then(function (response) {
         console.log('SellerHandoverSelection.js/notPicked ',response.data);
         db.transaction(tx => {
@@ -387,7 +387,7 @@ const SellerHandoverSelection = ({ route }) => {
   const toggleLoading = () => {
     setIsLoading(!isLoading);
     (async () => {
-      await axios.get(shipmentData).then(
+      await axios.get(shipmentData,{ headers: { Authorization: token } }).then(
         res => {
           setData(res.data);
         },
@@ -472,7 +472,7 @@ const SellerHandoverSelection = ({ route }) => {
           acceptedCount: 0,
           failedCount: pending
         }
-      })
+      },{ headers: { Authorization: token } })
       .then(setShowModal11(true))
       .catch(err => console.log('SellerHandoverSelection.js/sendSmsOtp ','OTP not send'));
   };
@@ -484,7 +484,7 @@ const SellerHandoverSelection = ({ route }) => {
         mobileNumber: phone,
         useCase:"POSTRD DELIVERY OTP",
         otp: otp11,
-      })
+      },{ headers: { Authorization: token } })
       .then(response => {
         if (response.data.return) {
           setInputOtp('');
@@ -1038,7 +1038,8 @@ const SellerHandoverSelection = ({ route }) => {
           contactPersonName: route.params.contactPersonName,
           packagingId: route.params.packagingId,
           latitude:route.params.consignorLatitude,
-          longitude:route.params.consignorLongitude
+          longitude:route.params.consignorLongitude,
+          token:token
           // TotalpickUp : newdata[0].totalPickups
         })
       }>

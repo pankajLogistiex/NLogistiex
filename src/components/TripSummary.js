@@ -36,11 +36,10 @@ import { ProgressBar } from '@react-native-community/progress-bar-android';
 import PieChart from 'react-native-pie-chart';
 
 export default function TripSummary({ navigation, route }) {
-  const [userId, setUserId] = useState(route.params.userId);
+  const [token, setToken] = useState(route.params.token);
 
   const [tripDetails, setTripDetails] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const focus = useIsFocused();
 
   useEffect(() => {
@@ -49,6 +48,7 @@ export default function TripSummary({ navigation, route }) {
         params: {
           tripID: route.params.tripID,
         },
+        headers: { Authorization: token } 
       })
       .then(response => {
         setTripDetails(response?.data?.res_data?.tripSummary);

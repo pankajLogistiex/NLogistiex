@@ -455,6 +455,7 @@ const handleMapIconPress = (seller) => {
             onPress={() => navigation.navigate('HandoverShipmentRTO', {
               allCloseBAgData: acceptedItemData,
               tripID:route.params.tripID,
+              token:route.params.token
             })}>
             Start Scanning
           </Button>

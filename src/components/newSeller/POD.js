@@ -46,6 +46,7 @@ const POD = ({ route }) => {
   const [name, setName] = useState(route.params.contactPersonName);
   const [inputOtp, setInputOtp] = useState('');
   const [mobileNumber, setMobileNumber] = useState(route.params.phone);
+  const [token, setToken] = useState(route.params.token);
   const [showModal11, setShowModal11] = useState(false);
   const [modalVisible11, setModalVisible11] = useState(false);
   const [DropDownValue11, setDropDownValue11] = useState(null);
@@ -219,7 +220,7 @@ const POD = ({ route }) => {
           tripID: route.params.tripId,
           deviceId: deviceId,
           deviceIPaddress: IpAddress,
-        })
+        },{ headers: { Authorization: token } })
         .then(function (response) {
           db.transaction(tx => {
             tx.executeSql(
@@ -282,7 +283,7 @@ const POD = ({ route }) => {
           acceptedCount: newaccepted,
           failedCount: newrejected+newNotPicked
         }
-      })
+      },{ headers: { Authorization: token } })
       .then(setShowModal11(true))
       .catch(err => console.log('POD/sendSmsOtp/OTP not send'));
   };
@@ -321,7 +322,7 @@ const POD = ({ route }) => {
         mobileNumber: mobileNumber,
         useCase:"POSTRD PICKUP OTP",
         otp: otp11,
-      })
+      },{ headers: { Authorization: token } })
       .then(response => {
         if (response.data.return) {
           // alert("OTP Submitted Successfully")

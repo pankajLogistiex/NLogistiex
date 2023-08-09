@@ -310,7 +310,8 @@ const PendingWork = ({ route }) => {
                                 tripId:displayData11[stopId].tripId,
                                 contactPersonName:displayData11[stopId].contactPersonName,
                                 phone:displayData11[stopId].phone,
-                                pending:displayData11[stopId].forward
+                                pending:displayData11[stopId].forward,
+                                token:route.params.token
                               })
                             }
                             style={{
@@ -348,7 +349,8 @@ const PendingWork = ({ route }) => {
                                 tripId:displayData11[stopId].tripId,
                                 contactPersonName:displayData11[stopId].contactPersonName,
                                 phone:displayData11[stopId].phone,
-                                pending:displayData11[stopId].reverse
+                                pending:displayData11[stopId].reverse,
+                                token:route.params.token
                               })
                             }
                             style={{
@@ -389,7 +391,7 @@ const PendingWork = ({ route }) => {
               w="48%"
               size="lg"
               bg="#004aad"
-              onPress={() => navigation.navigate("MyTrip", { userId: userId })}
+              onPress={() => navigation.navigate("MyTrip", { userId: userId, token:token })}
             >
               Close Trip
             </Button>

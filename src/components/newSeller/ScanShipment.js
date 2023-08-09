@@ -62,7 +62,6 @@ const db = openDatabase({
 const ScanShipment = ({ route }) => {
   const dispatch = useDispatch();
   const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
-
   const [expected, setExpected] = useState(0);
   const [newaccepted, setnewAccepted] = useState(0);
   const [newrejected, setnewRejected] = useState(0);
@@ -70,6 +69,7 @@ const ScanShipment = ({ route }) => {
   const [notDelivered, setnotDelivered] = useState(0);
   const [barcode, setBarcode] = useState('');
   const [len, setLen] = useState(0);
+  const [token, setToken] = useState(route.params.token);
   const [DropDownValue, setDropDownValue] = useState(null);
   const [DropDownValue11, setDropDownValue11] = useState(null);
   const [rejectedData, setRejectedData] = useState([]);
@@ -168,7 +168,7 @@ const ScanShipment = ({ route }) => {
       fetch(backendUrl + 'DSQCPicture/uploadPicture', {
         method: 'POST',
         body: formData,
-      })
+      },{ headers: { Authorization: token } })
         .then(data => data.json())
         .then(res => {
           setImageUrl(res.publicURL);
@@ -772,7 +772,7 @@ const ScanShipment = ({ route }) => {
  
   const callErrorAPIFromScanner = (error) => {
     console.log('ScanShipment.js/callErrorAPIFromScanner ','Scanner Error API called');
-    callApi(error,latitude,longitude,route.params.userId);
+    callApi(error,latitude,longitude,route.params.userId,token);
   }
 
   const submitFormsubmitForm1 = () => {
@@ -843,6 +843,7 @@ const ScanShipment = ({ route }) => {
         latitude: latitude,
         longitude: longitude,
         DropDownValue: DropDownValue11,
+        token:token
       });
     } else {
       setDropDownValue11('');
@@ -924,6 +925,7 @@ const ScanShipment = ({ route }) => {
                     latitude: latitude,
                     longitude: longitude,
                     DropDownValue: DropDownValue11,
+                    token:token
                   });
                   }
                 }}>
@@ -992,6 +994,7 @@ const ScanShipment = ({ route }) => {
                     latitude: latitude,
                     longitude: longitude,
                     DropDownValue: DropDownValue11,
+                    token:token
                   });
                 }}>
                 Submit

@@ -38,7 +38,7 @@ import {useIsFocused} from '@react-navigation/native';
 import {backendUrl} from '../utils/backendUrl';
 import {convertAbsoluteToRem} from 'native-base/lib/typescript/theme/tools';
 import {useSelector, useDispatch} from 'react-redux';
-import {setUserEmail, setUserId, setUserName} from '../redux/slice/userSlice';
+import {setUserEmail, setUserId, setUserName, setToken} from '../redux/slice/userSlice';
 import {setTripStatus} from '../redux/slice/tripSlice';
 import { setAutoSync, setForceSync } from "../redux/slice/autoSyncSlice";
 
@@ -46,6 +46,7 @@ export default function Main({navigation, route}) {
   const dispatch = useDispatch();
 
   const id = useSelector(state => state.user.user_id);
+  const token = useSelector((state) => state.user.token);
   const tripStatus = useSelector(state => state.trip.tripStatus);
   const isNewSync = useSelector(state => state.newSync.value);
   const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
@@ -108,6 +109,14 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
         console.log('Main.js/userId ',err);
       });
 
+      await AsyncStorage.getItem('token')
+      .then(value => {
+        dispatch(setToken(value));
+      })
+      .catch(err => {
+        console.log('Main.js/token ',err);
+      });
+
     await AsyncStorage.getItem('name')
       .then(value => {
         dispatch(setUserName(value));
@@ -150,6 +159,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
         params: {
           tripID: tripID,
         },
+        headers: { Authorization: token } 
       })
       .then(response => {
         if (response?.data?.res_data) {
@@ -495,7 +505,9 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
     if (id) {
       try {
         // console.log('Main.js/ ',id);
- await axios.get(`${backendUrl}/SellerMainScreen/handoverStatus?feUserID=${id}`).then((response) => {
+ await axios.get(`${backendUrl}/SellerMainScreen/handoverStatus?feUserID=${id}`,
+ { headers: { Authorization: token } })
+ .then((response) => {
         const responseData = response?.data?.data;
         setCloseHandoverStatus11(response?.data?.data?.handoverStatus);
         // console.log('Main.js/ ','closeHandoverStatus :', response.data.data);
@@ -561,11 +573,12 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
       setMessage1(2);
       setShowModal1(true);
     } else if ((spp != 0 || spp1 != 0) &&  tripValue == 'End Trip' ) {
-      navigation.navigate('PendingWork')
+      navigation.navigate('PendingWork',{token:token})
     } else {
-      navigation.navigate('MyTrip', {userId: id});
+      navigation.navigate('MyTrip', {userId: id, token:token});
     }
   };
+  console.log("pending",spp)
   const storeUser = async () => {
     try {
       await AsyncStorage.setItem('user', JSON.stringify(value));
@@ -969,7 +982,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                             paddingHorizontal: 10,
                           }}
                           onPress={()=>{navigation.navigate('SellerHandover', {
-                            tripID:tripID
+                            tripID:tripID, token:token
                           });}}
                         >
                           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -1046,7 +1059,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                                   Reverse: Reverse,
                                   Trip: tripValue,
                                   PendingHandover: shp1,
-                                  tripID:tripID
+                                  tripID:tripID,
+                                  token: token
                                 })}}
                               >
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -1132,7 +1146,8 @@ w="100%"
         Trip: tripValue,
         userId: id,
         PendingHandover: shp1,
-        tripID:tripID
+        tripID:tripID,
+        token: token
       })}}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -1439,7 +1454,8 @@ w="100%"
         paddingHorizontal: 10,
       }}
       onPress={()=>{navigation.navigate('SellerHandover', {
-        tripID:tripID
+        tripID:tripID,
+        token:token
       });}}
     >
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -1567,7 +1583,8 @@ onPress={() =>
                                   Reverse: Reverse,
                                   Trip: tripValue,
                                   PendingHandover: shp1,
-                                  tripID:tripID
+                                  tripID:tripID,
+                                  token:token
                                 })}}
                               >
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -1653,7 +1670,8 @@ onPress={() =>
                                   Trip: tripValue,
                                   userId: id,
                                   PendingHandover: shp1,
-                                  tripID:tripID
+                                  tripID:tripID,
+                                  token:token
                                 })}}
                               >
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -1949,7 +1967,7 @@ onPress={() =>
                   <Button
                   variant="outline"
                   onPress={() => {
-                    navigation.navigate('TripHistory', { userId: id , tripValue:tripValue});
+                    navigation.navigate('TripHistory', { userId: id , tripValue:tripValue, token: token});
                   }}
                   mt={4}
                   style={{
@@ -2023,7 +2041,7 @@ onPress={() =>
                 <Button
                   variant="outline"
                   onPress={() => {
-                    navigation.navigate('TripHistory', { userId: id , tripValue:tripValue});
+                    navigation.navigate('TripHistory', { userId: id , tripValue:tripValue, token: token});
                   }}
                   mt={4}
                   style={{

@@ -40,11 +40,11 @@ export default function TripHistory({navigation, route}) {
   const dispatch = useDispatch();
   const tripStatus = useSelector(state => state.trip.tripStatus);
   const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
-
   const [vehicle, setVehicle] = useState('');
   const [startkm, setStartKm] = useState(0);
   const [tripID, setTripID] = useState('');
   const [userId, setUserId] = useState(route.params.userId);
+  const [token, setToken] = useState(route.params.token);
   const [pendingPickup, setPendingPickup] = useState(0);
   const [pendingDelivery, setPendingDelivery] = useState(0);
   const [pendingHandover, setPendingHandover] = useState(0);
@@ -60,9 +60,9 @@ export default function TripHistory({navigation, route}) {
       setMessage1(2);
       setShowModal1(true);
     } else if ((pendingPickup !== 0 || pendingDelivery !== 0) && route.params.tripValue=='End Trip' ) {
-      navigation.navigate('PendingWork')
+      navigation.navigate('PendingWork',{token:token})
     } else {
-      navigation.navigate('MyTrip', {userId: id});
+      navigation.navigate('MyTrip', {userId: id, token:token});
     }
   };
 useEffect(() => {
@@ -73,6 +73,7 @@ useEffect(() => {
           params: {
             feUserID: userId,
           },
+           headers: { Authorization: token } 
         });
         setTripDetails(response.data.res_data);
         setLoading(false);
@@ -496,7 +497,7 @@ useEffect(() => {
                   elevation: 10,
                 }}
                 onPress={() => {
-                  navigation.navigate('StartEndDetails', { tripID: data.tripID });
+                  navigation.navigate('StartEndDetails', { tripID: data.tripID, token:token });
                 }}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -523,7 +524,7 @@ useEffect(() => {
                   elevation: 10,
                 }}
                 onPress={() => {
-                  navigation.navigate('TripSummary', { tripID: data.tripID });
+                  navigation.navigate('TripSummary', { tripID: data.tripID, token:token });
                 }}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
