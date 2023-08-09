@@ -40,12 +40,12 @@ const CollectPOD = ({ route }) => {
   
   const dispatch = useDispatch();
   const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
-
   var otpInput = useRef(null);
   const navigation = useNavigation();
   const [name, setName] = useState(route.params.contactPersonName);
   const [inputOtp, setInputOtp] = useState('');
   const [mobileNumber, setMobileNumber] = useState(route.params.phone);
+  const [token, setToken] = useState(route.params.token);
   const [showModal11, setShowModal11] = useState(false);
   const [DropDownValue11, setDropDownValue11] = useState(null);
   const [PartialCloseData, setPartialCloseData] = useState([]);
@@ -207,7 +207,8 @@ const CollectPOD = ({ route }) => {
         tripID:route.params.tripId,
         deviceId: deviceId,
         deviceIPaddress: IpAddress,
-      })
+      },
+      { headers: { Authorization: token } })
       .then(function (response) {
         db.transaction(tx => {
           tx.executeSql(
@@ -265,7 +266,7 @@ const CollectPOD = ({ route }) => {
         deliveredCount: newaccepted,
         failedCount: newrejected+newNotDelivered
       }
-    })
+    },{ headers: { Authorization: token } })
       .then(setShowModal11(true))
       .catch(err => console.log('CollectPOD.js/sendSmsOtp ','OTP not send'));
   };
@@ -284,7 +285,7 @@ const CollectPOD = ({ route }) => {
         mobileNumber: mobileNumber,
         useCase: "POSTRD DELIVERY OTP",
         otp: inputOtp,
-      })
+      },{ headers: { Authorization: token } })
       .then(response => {
         if (response.data.return) {
           // alert("OTP Submitted Successfully")

@@ -326,6 +326,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
                                  phone: single.consignorContact,
                                  Reverse: reverse[data.findIndex((item) => item.stopId === single.stopId)],
                                  otpSubmittedDelivery: single.otpSubmittedDelivery,
+                                 token:route.params.token
                                  });
                          }}>
                         <View
@@ -406,6 +407,7 @@ import {ProgressBar} from '@react-native-community/progress-bar-android';
                          phone: single.consignorContact,
                          Reverse: reverse[data.findIndex((item) => item.stopId === single.stopId)],
                          otpSubmittedDelivery: single.otpSubmittedDelivery,
+                         token: route.params.token
                          });
                  }}>
                         <View

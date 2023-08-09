@@ -122,6 +122,7 @@ function StackNavigators({ navigation }) {
   // const [notificationCount,setNotificationCount1]=useState(0);
   const syncTime = useSelector((state) => state.autoSync.syncTime);
   const forceSync = useSelector((state) => state.autoSync.forceSync);
+  const token = useSelector((state) => state.user.token);
   const isAutoSyncEnable = useSelector(
     (state) => state.autoSync.isAutoSyncEnable
   );
@@ -152,7 +153,8 @@ function StackNavigators({ navigation }) {
         const fetchData = async () => {
           try {
             const response = await axios.get(
-              `${backendUrl}SellerMainScreen/getadditionalwork/${userId}`
+              `${backendUrl}SellerMainScreen/getadditionalwork/${userId}`,
+              { headers: { Authorization: token } }
             );
             const responseData = response?.data?.data;
             setDataN(responseData);
@@ -199,7 +201,8 @@ function StackNavigators({ navigation }) {
         feUserId: userId,
         stopId: stopId,
         tripID: tripId,
-      })
+      },
+      { headers: { Authorization: token } })
       .then((response) => {
         console.log('App.js/AcceptHandler ',"Msg Accepted ", response.data, "", userId);
         dispatch(setNotificationCount(notificationCount - 1));
@@ -226,7 +229,9 @@ function StackNavigators({ navigation }) {
         feUserId: userId,
         stopId: stopId,
         tripID: tripId,
-      })
+      },
+      { headers: { Authorization: token } }
+      )
       .then((response) => {
         console.log('App.js/RejectHandler ',"Msg Rejected ", response.data);
         dispatch(setNotificationCount(notificationCount - 1));
@@ -886,7 +891,6 @@ function StackNavigators({ navigation }) {
   //     unsubscribeNotification();
   //   };
   // }, []);
-
   const pull_API_Data = () => {
     if (userId) {
       var date = new Date();
@@ -940,7 +944,7 @@ function StackNavigators({ navigation }) {
       }
     })();
   }, [userId, tripID]);
-
+// console.log(token)
   // Sync button function
   const note11 = () => {
     if (!isLoading) {
@@ -1055,7 +1059,8 @@ function StackNavigators({ navigation }) {
         tripID: row.FMtripId,
         deviceId: deviceId,
         deviceIPaddress: IpAddress,
-      })
+      },
+      { headers: { Authorization: token } })
       .then((response) => {
         console.log('App.js/postSPSCalling ',"sync Successfully pushed");
         console.log('App.js/postSPSCalling ',response);
@@ -1082,7 +1087,7 @@ function StackNavigators({ navigation }) {
       })
       .catch((error) => {
         setIsLoading(false);
-        callApi(error, latitude, longitude, userId);
+        callApi(error, latitude, longitude, userId, token);
         console.log('App.js/postSPSCalling ',"sync error", { error });
       });
   }
@@ -1224,6 +1229,7 @@ function StackNavigators({ navigation }) {
   useEffect(() => {
     fetchTripInfo();
   }, [userId]);
+  // console.log("token",token)
   const loadAPI_Data1 = () => {
     setIsLoading(!isLoading);
     createTables1();
@@ -1234,6 +1240,7 @@ function StackNavigators({ navigation }) {
             params: {
               tripID: tripID,
             },
+             headers: { Authorization: token } 
           })
           .then(
             (res) => {
@@ -1321,13 +1328,13 @@ function StackNavigators({ navigation }) {
   };
   const viewDetails1 = () => {
     db.transaction((tx) => {
-      tx.executeSql("SELECT * FROM TripDetails", [], (tx1, results) => {
+      tx.executeSql("SELECT * FROM SellerMainScreenDetails", [], (tx1, results) => {
         let temp = [];
         // console.log('App.js/ ',results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
 
-          // console.log('App.js/ ',"SellerMainScreenDetails",results.rows.item(i));
+          console.log('App.js/ ',"SellerMainScreenDetails",results.rows.item(i));
           // var address121 = results.rows.item(i).consignorAddress;
           // var address_json = JSON.parse(address121);
           // console.log('App.js/ ',typeof (address_json));
@@ -1420,6 +1427,7 @@ function StackNavigators({ navigation }) {
                 params: {
                   tripID: tripID,
                 },
+                headers: { Authorization: token } 
               })
               .then(
                 (res) => {
@@ -1565,6 +1573,7 @@ function StackNavigators({ navigation }) {
       );
     });
   };
+  // console.log("token",token)
   const createTables3 = () => {
     db.transaction((txn) => {
       txn.executeSql(
@@ -1597,6 +1606,7 @@ function StackNavigators({ navigation }) {
           params: {
             feUserID: userId,
           },
+          headers: { Authorization: token } 
         })
         .then(
           (res) => {
@@ -1634,7 +1644,7 @@ function StackNavigators({ navigation }) {
         );
     })();
   };
-
+// console.log(token)
   const createTablesSF = () => {
     db.transaction((tx) => {
       tx.executeSql(
@@ -1677,7 +1687,10 @@ function StackNavigators({ navigation }) {
     // setIsLoading(!isLoading);
     createTablesSF();
     (async () => {
-      await axios.get(backendUrl + "ADshipmentFailure/getList").then(
+      await axios.get(
+        backendUrl + "ADshipmentFailure/getList",
+        { headers: { Authorization: token }, },
+      ).then(
         (res) => {
           // console.log('App.js/ ','Table6 API OK: ' + res.data.data.length);
           // console.log('App.js/ ',res.data);
@@ -3649,9 +3662,9 @@ function CustomDrawerContent({ navigation }) {
   const handleStartTrip = () => {
     if(detailsLoaded){
       if ((pendingPickup != 0 || pendingDelivery != 0) && tripStatus == 1 ) {
-        navigation.navigate("PendingWork");
+        navigation.navigate("PendingWork",{token:token});
       } else {
-        navigation.navigate("MyTrip", { userId: id });
+        navigation.navigate("MyTrip", { userId: id, token:token });
       }
       navigation.closeDrawer();
     }

@@ -53,7 +53,6 @@ const db = openDatabase({
 const ShipmentBarcode = ({ route }) => {
   const dispatch = useDispatch();
   const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
-
   const [expected, setExpected] = useState(0);
   const [newaccepted, setnewAccepted] = useState(0);
   const [newrejected, setnewRejected] = useState(0);
@@ -88,6 +87,7 @@ const ShipmentBarcode = ({ route }) => {
   const [scannedValue, setScannedValue] = useState(expectedPackagingId);
   const [showScanner, setShowScanner] = useState(true);
   const [Forward, setForward] = useState(route.params.Forward);
+  const [token, setToken] = useState(route.params.token);
 
   const buttonColor = acceptedArray.length === 0 ? 'gray.300' : '#004aad';
 
@@ -399,6 +399,7 @@ var dingAccept = new Sound(dingAccept11, error => {
         runsheetno: route.params.PRSNumber,
         latitude: latitude,
         longitude: longitude,
+        token:token
       });
     } else {
       setDropDownValue11('');
@@ -464,7 +465,7 @@ var dingAccept = new Sound(dingAccept11, error => {
     const response = await axios
       .post(backendUrl + 'SMS/msg', {
         mobileNumber: mobileNumber,
-      })
+      },{ headers: { Authorization: token } })
       .then(setShowModal11(true))
       .catch(err => console.log('ShipmentBarcode/sendSmsOtp/OTP not send'));
     
@@ -478,7 +479,8 @@ var dingAccept = new Sound(dingAccept11, error => {
       navigation.navigate('Dispatch', {
         consignorCode: route.params.consignorCode,
         userId:route.params.userId,
-        stopId:route.params.stopId
+        stopId:route.params.stopId,
+        token:token
       });
     }
     if(item == 'CNA'){
@@ -495,7 +497,7 @@ var dingAccept = new Sound(dingAccept11, error => {
       .post(backendUrl + 'SMS/OTPValidate', {
         mobileNumber: mobileNumber,
         otp: inputOtp,
-      })
+      },{ headers: { Authorization: token } })
       .then(response => {
         if (response.data.return) {
           // submitForm11();
@@ -527,7 +529,7 @@ var dingAccept = new Sound(dingAccept11, error => {
 
   const callErrorAPIFromScanner = (error) => {
     console.log('ShipmentBarcode/callErrorAPIFromScanner/Scanner Error API called');
-    callApi(error,latitude,longitude,route.params.userId);
+    callApi(error,latitude,longitude,route.params.userId,token);
   }
 
   function CloseBagEndScan() {
@@ -1317,6 +1319,7 @@ var barcode11 = barcode;
                     runsheetno: route.params.PRSNumber,
                     latitude: latitude,
                     longitude: longitude,
+                    token:token
                   });
                 }
               }}>
@@ -1387,6 +1390,7 @@ var barcode11 = barcode;
                     runsheetno: route.params.PRSNumber,
                     latitude: latitude,
                     longitude: longitude,
+                    token:token
                   })
                   }
                 }}>

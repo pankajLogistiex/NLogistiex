@@ -22,6 +22,7 @@ import { setForceSync } from "../../redux/slice/autoSyncSlice";
 import { setAdditionalWorkloadData } from "../../redux/slice/additionalWorkloadSlice";
 export default function Additional_workload() {
   const dispatch = useDispatch();
+  const token = useSelector((state) => state.user.token);
   const userId = useSelector((state) => state.user.user_id);
   const notificationCount = useSelector((state) => state.notification.count);
   const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
@@ -33,7 +34,7 @@ export default function Additional_workload() {
   const DisplayData = async() => {
     if (userId && additionalWorkloadInfo11 && additionalWorkloadInfo11.length ===0 ) {
       await axios
-        .get(backendUrl + `SellerMainScreen/getadditionalwork/${userId}`)
+        .get(backendUrl + `SellerMainScreen/getadditionalwork/${userId}`,{ headers: { Authorization: token } })
         .then((res) => {
           // console.log("API DATA",res.data.data);
           // setData(res.data.data);
@@ -69,7 +70,7 @@ export default function Additional_workload() {
         feUserId: userId,
         stopId: stopId,
         tripID: tripId
-      })
+      },{ headers: { Authorization: token } })
       .then((response) => {
         console.log("Additional_Workload/AcceptHandler/Msg Accepted ", response.data,'',userId);
         dispatch(setNotificationCount(notificationCount - 1));
@@ -92,7 +93,7 @@ export default function Additional_workload() {
         feUserId: userId,
         stopId:stopId,
         tripID:tripId
-      })
+      },{ headers: { Authorization: token } })
       .then((response) => {
         console.log("Additional_Workload/RejectHandler/Msg Rejected ", response.data);
         dispatch(setNotificationCount(notificationCount - 1));

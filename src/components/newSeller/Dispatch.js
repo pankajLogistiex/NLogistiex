@@ -24,11 +24,11 @@ const db = openDatabase({
 const Dispatch = ({ route }) => {
   const dispatch = useDispatch();
   const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
-
     const [keyword, setKeyword] = useState('');
     const [eligibleBags, setEligibleBags] = useState(0);
     const [scanned, setScanned] = useState(0);
     const [pending,setPending] = useState(0);
+    const [token,setToken] = useState(route.params.token);
     const [bagSeal, setBagSeal] = useState('');
     const [showCloseBagModal11, setShowCloseBagModal11] = useState(false);
     const currentDateValue = useSelector((state) => state.currentDate.currentDateValue) || new Date().toISOString().split('T')[0] ;
@@ -143,7 +143,7 @@ const Dispatch = ({ route }) => {
                     bagDate: data.bagDate,
                     feUserID: route.params.userId,
                     receivingTime: parseInt(new Date().valueOf(), 10)
-                  }) .then(response => {
+                  },{ headers: { Authorization: token } }) .then(response => {
                     console.log('Successfully pushed');
                     console.log(response.data);
                   

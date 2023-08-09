@@ -52,7 +52,6 @@ import DeviceInfo from 'react-native-device-info';
 const NewSellerSelection = ({ route }) => {
   const dispatch = useDispatch();
   const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
-
   const [barcodeValue, setBarcodeValue] = useState("");
   const shipmentData =
     backendUrl + `SellerMainScreen/getSellerDetails/${route.params.paramKey}`;
@@ -68,6 +67,7 @@ const NewSellerSelection = ({ route }) => {
   const [phone, setPhone] = useState(route.params.phone);
   const [name, setName] = useState(route.params.contactPersonName);
   const [type, setType] = useState("");
+  const [token, setToken] = useState(route.params.token);
   const [DropDownValue, setDropDownValue] = useState(null);
   const [rejectionCode, setRejectionCode] = useState("");
   const [DropDownValue1, setDropDownValue1] = useState(null);
@@ -179,7 +179,7 @@ const NewSellerSelection = ({ route }) => {
         tripID:route.params.FMtripId,
         deviceId: deviceId,
         deviceIPaddress: IpAddress,
-      })
+      },{ headers: { Authorization: token } })
       .then(function (response) {
         console.log("NewSellerSelection/notPicked",response.data);
         db.transaction((tx) => {
@@ -431,7 +431,7 @@ const NewSellerSelection = ({ route }) => {
   const toggleLoading = () => {
     setIsLoading(!isLoading);
     (async () => {
-      await axios.get(shipmentData).then(
+      await axios.get(shipmentData,{ headers: { Authorization: token } }).then(
         (res) => {
           setData(res.data);
         },
@@ -526,7 +526,7 @@ const NewSellerSelection = ({ route }) => {
           acceptedCount: 0,
           failedCount: pending
         }
-      })
+      },{ headers: { Authorization: token } })
       .then(setShowModal11(true))
       .catch(err => console.log('NewSellerSelection/sendSmsOtp/OTP not send'));
   };
@@ -538,7 +538,7 @@ const NewSellerSelection = ({ route }) => {
         mobileNumber: phone,
         useCase:"POSTRD PICKUP OTP",
         otp: otp11,
-      })
+      },{ headers: { Authorization: token } })
       .then(response => {
         if (response.data.return) {
           setInputOtp('');
@@ -1169,6 +1169,7 @@ const NewSellerSelection = ({ route }) => {
                           packagingId: route.params.packagingId,
                           latitude: route.params.consignorLatitude,
                           longitude: route.params.consignorLongitude,
+                          token:token
                           // TotalpickUp : newdata[0].totalPickups
                         })
                       }

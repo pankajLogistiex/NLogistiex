@@ -7,14 +7,15 @@ import moment from 'moment';
 
 export default function StartEndDetails({navigation,route}) {
   const [data, setData] = useState();
+  const [token, setToken] = useState(route.params.token);
   const [printData,setPrintData]=useState([])
-  
     useEffect(() => {
         axios
           .get(backendUrl + 'UserTripInfo/getUserTripInfo', {
             params: {
               tripID: route.params.tripID,
             },
+            headers: { Authorization: token } 
           })
           .then(response => {
             console.log('StartEndDetails/useEffect/data', response.data);
