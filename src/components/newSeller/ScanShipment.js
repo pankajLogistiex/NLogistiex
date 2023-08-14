@@ -173,8 +173,8 @@ const ScanShipment = ({ route }) => {
         {
           method: "POST",
           body: formData,
+          headers: getAuthorizedHeaders(token)
         },
-        { headers: getAuthorizedHeaders(token) }
       )
         .then((data) => data.json())
         .then((res) => {

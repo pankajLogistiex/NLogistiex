@@ -356,8 +356,9 @@ export default function MyTrip({ navigation, route }) {
             contextType: "shipment",
             hubCode: "HC001",
           },
-          { headers: getAuthorizedHeaders(token) }
+          
         ),
+        headers: getAuthorizedHeaders(token) 
       })
         .then((data) => data.json())
         .then((res) => {
@@ -403,8 +404,8 @@ export default function MyTrip({ navigation, route }) {
             contextType: "shipment",
             hubCode: "HC001",
           },
-          { headers: getAuthorizedHeaders(token) }
         ),
+         headers: getAuthorizedHeaders(token) 
       })
         .then((data) => data.json())
         .then((res) => {
