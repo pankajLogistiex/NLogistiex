@@ -1006,7 +1006,7 @@ function StackNavigators({ navigation }) {
   //   };
   // }, []);
   const pull_API_Data = () => {
-    if (userId) {
+    if (userId && isAutoSyncEnable) {
       var date = new Date();
       var hours = date.getHours();
       var minutes = date.getMinutes();
@@ -1206,6 +1206,7 @@ function StackNavigators({ navigation }) {
             }
           );
         });
+        setIsLoading(false);
       })
       .catch((error) => {
         setIsLoading(false);
@@ -1236,65 +1237,68 @@ function StackNavigators({ navigation }) {
   }
 
   const push_Data = () => {
-    console.log(
-      "App.js/push_Data ",
-      "push data function",
-      new Date().toJSON().slice(0, 10).replace(/-/g, "/")
-    );
+    if (isAutoSyncEnable) {
+      console.log(
+        "App.js/push_Data ",
+        "push data function",
+        new Date().toJSON().slice(0, 10).replace(/-/g, "/")
+      );
 
-    dispatch(setForceSync(false));
+      dispatch(setForceSync(false));
 
-    Login_Data_load();
+      Login_Data_load();
 
-    var date = new Date();
-    var hours = date.getHours();
-    var minutes = date.getMinutes();
-    var seconds = date.getSeconds();
-    var miliseconds = date.getMilliseconds();
-    var ampm = hours >= 12 ? "PM" : "AM";
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    minutes = minutes < 10 ? "0" + minutes : minutes;
-    var time = hours + ":" + minutes + " " + ampm;
-    var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
-    dispatch(setSyncTime(datetime));
-    dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
-    AsyncStorage.setItem("lastSyncTime112", datetime);
+      var date = new Date();
+      var hours = date.getHours();
+      var minutes = date.getMinutes();
+      var seconds = date.getSeconds();
+      var miliseconds = date.getMilliseconds();
+      var ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      minutes = minutes < 10 ? "0" + minutes : minutes;
+      var time = hours + ":" + minutes + " " + ampm;
+      var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
+      dispatch(setSyncTime(datetime));
+      dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
+      AsyncStorage.setItem("lastSyncTime112", datetime);
 
-    if (isMixPanelInit) {
-      Mixpanel.trackWithProperties("Post SPS Done at time: " + datetime, {
-        userId: userId,
-        userEmail: userEmail,
+      if (isMixPanelInit) {
+        Mixpanel.trackWithProperties("Post SPS Done at time: " + datetime, {
+          userId: userId,
+          userEmail: userEmail,
+        });
+      }
+
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM SellerMainScreenDetails WHERE status IS NOT Null AND syncStatus IS Null",
+          [],
+          (tx1, results) => {
+            if (results.rows.length > 0) {
+              ToastAndroid.show("Synchronizing data...", ToastAndroid.SHORT);
+              let temp = [];
+              for (let i = 0; i < results.rows.length; ++i) {
+                temp.push(results.rows.item(i));
+              }
+              postSPS(temp);
+              setIsLoading(false);
+              ToastAndroid.show(
+                "Synchronizing data finished",
+                ToastAndroid.SHORT
+              );
+            } else {
+              console.log(
+                "App.js/push_Data ",
+                "Only Pulling Data.No data to push..."
+              );
+              setIsLoading(false);
+              pull_API_Data();
+            }
+          }
+        );
       });
     }
-
-    db.transaction((tx) => {
-      tx.executeSql(
-        "SELECT * FROM SellerMainScreenDetails WHERE status IS NOT Null AND syncStatus IS Null",
-        [],
-        (tx1, results) => {
-          if (results.rows.length > 0) {
-            ToastAndroid.show("Synchronizing data...", ToastAndroid.SHORT);
-            let temp = [];
-            for (let i = 0; i < results.rows.length; ++i) {
-              temp.push(results.rows.item(i));
-            }
-            postSPS(temp);
-            setIsLoading(false);
-            ToastAndroid.show(
-              "Synchronizing data finished",
-              ToastAndroid.SHORT
-            );
-          } else {
-            console.log(
-              "App.js/push_Data ",
-              "Only Pulling Data.No data to push..."
-            );
-            pull_API_Data();
-          }
-        }
-      );
-    });
   };
 
   const sync11 = () => {
@@ -1360,7 +1364,7 @@ function StackNavigators({ navigation }) {
   }, [userId]);
   // console.log("token",token)
   const loadAPI_Data1 = () => {
-    setIsLoading(!isLoading);
+    setIsLoading(true);
     createTables1();
     if (tripID) {
       (async () => {
@@ -1458,9 +1462,18 @@ function StackNavigators({ navigation }) {
                 "error api SellerMainScreen/consignorslist/",
                 error
               );
+              setIsLoading(false);
             }
-          );
+          )
+          .catch((error) => {
+            console.log(
+              "App.js/loadAPI_Data1/Error in API Call Get consgnorsList", error
+            );
+            setIsLoading(false);
+          });
       })();
+    } else {
+      setIsLoading(false);
     }
   };
   const viewDetails1 = () => {
@@ -1502,6 +1515,7 @@ function StackNavigators({ navigation }) {
               "App.js/viewDetails1 ",
               "Only " + m + " APIs loaded out of 4 "
             );
+            setIsLoading(false);
           }
           // m++;
           // ToastAndroid.show("Sync Successful",ToastAndroid.SHORT);
@@ -1563,7 +1577,7 @@ function StackNavigators({ navigation }) {
   };
 
   const loadAPI_Data2 = () => {
-    setIsLoading(!isLoading);
+    setIsLoading(true);
     db.transaction((txn) => {
       txn.executeSql(
         "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ?",
@@ -1722,8 +1736,13 @@ function StackNavigators({ navigation }) {
                 },
                 (error) => {
                   console.log("App.js/loadAPI_Data2 ", error);
+                  setIsLoading(false);
                 }
-              );
+              )
+              .catch((error) => {
+                console.log("App.js/loadAPI_Data2/API call workload error", error);
+                setIsLoading(false);
+              });
           })();
         }
       );
@@ -1851,7 +1870,7 @@ function StackNavigators({ navigation }) {
     });
   };
   const loadAPI_DataSF = () => {
-    // setIsLoading(!isLoading);
+    setIsLoading(true);
     createTablesSF();
     (async () => {
       await axios
@@ -1906,12 +1925,20 @@ function StackNavigators({ navigation }) {
             // console.log('App.js/ ','value of m6 '+m);
 
             // viewDetailsSF();
-            // setIsLoading(false);
+            setIsLoading(false);
           },
           (error) => {
             console.log("App.js/loadAPI_DataSF ", error);
+            setIsLoading(false);
           }
-        );
+        )
+        .catch((error) => {
+          console.log(
+            "App.js/loadAPI_DataSF/ADshipmentFailure/getList Error",
+            error
+          );
+          setIsLoading(false);
+        });
     })();
   };
 
@@ -3039,7 +3066,7 @@ function StackNavigators({ navigation }) {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{ flexDirection: "row", marginRight: 10 }}>
-                <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
+                {/* <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}
                   onPress={() => {
@@ -3050,7 +3077,7 @@ function StackNavigators({ navigation }) {
                     name="sync"
                     style={{ fontSize: 30, color: "white", marginTop: 5 }}
                   />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                 <TouchableOpacity
                   onPress={() => {
                     navigation.navigate("NewSellerAdditionNotification");
@@ -3181,7 +3208,7 @@ function StackNavigators({ navigation }) {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{ flexDirection: "row", marginRight: 10 }}>
-                <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
+                {/* <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}
                   onPress={() => {
@@ -3192,7 +3219,7 @@ function StackNavigators({ navigation }) {
                     name="sync"
                     style={{ fontSize: 30, color: "white", marginTop: 5 }}
                   />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                 <TouchableOpacity
                   onPress={() => {
                     navigation.navigate("NewSellerAdditionNotification");
@@ -3391,7 +3418,7 @@ function StackNavigators({ navigation }) {
             headerLeft: () => null,
             headerRight: () => (
               <View style={{ flexDirection: "row", marginRight: 10 }}>
-                <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
+                {/* <Text style={{ fontSize: 12, color: "white" }}>{syncTime}</Text>
                 <TouchableOpacity
                   style={{ marginRight: 15 }}
                   onPress={() => {
@@ -3402,7 +3429,7 @@ function StackNavigators({ navigation }) {
                     name="sync"
                     style={{ fontSize: 30, color: "white", marginTop: 5 }}
                   />
-                </TouchableOpacity>
+                </TouchableOpacity> */}
                 <TouchableOpacity
                   onPress={() => {
                     navigation.navigate("NewSellerAdditionNotification");
