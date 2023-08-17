@@ -921,7 +921,7 @@ function StackNavigators({ navigation }) {
       );
     });
   };
-
+console.log(token);
   // console.log('App.js/ ',"Notification Count",notificationCount," ",useSelector((state) => state.notification.count));
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {

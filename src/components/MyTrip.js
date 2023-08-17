@@ -73,6 +73,16 @@ export default function MyTrip({ navigation, route }) {
   const focus = useIsFocused();
   const startKmInputRef = useRef(null);
   const EndKmInputRef = useRef(null);
+  const [errorText, setErrorText] = useState('');
+
+  const handleEndKmChange = (value) => {
+    if (Number(value) < Number(startkm)) {
+      setErrorText('End KMs cannot be lower than Start KMs');
+    } else {
+      setErrorText('');
+    }
+    setEndkm(value);
+  };
   const currentDateValue =
     useSelector((state) => state.currentDate.currentDateValue) ||
     new Date().toISOString().split("T")[0];
@@ -910,7 +920,7 @@ export default function MyTrip({ navigation, route }) {
                         ref={EndKmInputRef}
                         value={endkm}
                         keyboardType="numeric"
-                        onChangeText={setEndkm}
+                        onChangeText={handleEndKmChange}
                         size="lg"
                         type={"number"}
                         placeholder="Input End KMs"
@@ -924,6 +934,8 @@ export default function MyTrip({ navigation, route }) {
                           borderRadius: 4,
                         }}
                       />
+                      {errorText && (
+                      <Text style={{ color: "red", marginTop: 5 }}>{errorText}</Text>)}
                     </View>
                     <Button
                       py={3}

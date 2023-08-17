@@ -1125,6 +1125,7 @@ const ScanShipment = ({ route }) => {
         isOpen={modalVisible}
         onClose={() => {
           setModalVisible(false);
+          setScanned(true);
         }}
         size="lg"
       >
@@ -1184,6 +1185,7 @@ const ScanShipment = ({ route }) => {
                   } else {
                     setModalVisible(false);
                     rejectDetails2(DropDownValue);
+                    setScanned(true)
                   }
                 }}
               >
@@ -1204,6 +1206,7 @@ const ScanShipment = ({ route }) => {
                   } else {
                     setModalVisible(false);
                     taggedDetails();
+                    setScanned(true);
                   }
                 }}
               >
@@ -1218,6 +1221,7 @@ const ScanShipment = ({ route }) => {
         onClose={() => {
           setModalVisible1(false);
           setImageUrls([]);
+          setScanned(true);
         }}
         size="lg"
       >
@@ -1307,6 +1311,7 @@ const ScanShipment = ({ route }) => {
                   onPress={() => {
                     setModalVisible(true);
                     setModalVisible1(false);
+                    setScanned(false);
                   }}
                 >
                   Save
@@ -1425,6 +1430,7 @@ const ScanShipment = ({ route }) => {
                 onPress={() => {
                   rejectDetails2("WPR");
                   setModal1(false);
+                  setScanned(false);
                 }}
               >
                 Reject Shipment
@@ -1533,6 +1539,7 @@ const ScanShipment = ({ route }) => {
                             ToastAndroid.SHORT
                           )
                         : setModalVisible1(true);
+                        setScanned(false)
                     }}
                     w="90%"
                     size="lg"

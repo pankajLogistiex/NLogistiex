@@ -914,7 +914,7 @@ const SellerHandoverSelection = ({ route }) => {
                 <Center>
                   <Image
                     style={{ width: 140, height: 140 }}
-                    source={require("../../assets/noDataAvailable.jpg")}
+                    source={require("../../assets/no_assignment.png")}
                     alt={"No data Image"}
                   />
                 </Center>
