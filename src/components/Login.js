@@ -170,6 +170,7 @@ export default function Login() {
   }
   useEffect(() => {
     current_location1();
+    requestPermissions();
   }, []);
 
   const current_location1 = async () => {
@@ -189,6 +190,69 @@ export default function Login() {
       current_location();
     }
   };
+  useEffect(() => {
+    // if (userId) {
+    //   setTimeout(() => {
+    //     requestPermissions();
+    //   }, 3000);
+
+    //   console.log("Login/requestPermissions ", "Request permission", userId);
+    // }
+
+  });
+
+  const requestPermissions = async () => {
+    try {
+      const cameraPermission = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: "Camera Permission",
+          message: "This app needs access to your camera.",
+          buttonNeutral: "Ask Me Later",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK",
+        }
+      );
+      if (cameraPermission !== PermissionsAndroid.RESULTS.GRANTED) {
+        console.log("Login/requestPermissions ", "Camera permission denied");
+      }
+
+      const storagePermission = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        {
+          title: "Storage Permission",
+          message: "This app needs access to your storage.",
+          buttonNeutral: "Ask Me Later",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK",
+        }
+      );
+      if (storagePermission !== PermissionsAndroid.RESULTS.GRANTED) {
+        console.log("Login/requestPermissions ", "Storage permission denied");
+      }
+    } catch (error) {
+      console.warn(error);
+    }
+  };
+  messaging()
+  .requestPermission()
+  .then((permission) => {
+    if (permission) {
+      console.log(
+        "App.js/requestPermissions ",
+        "Notification permission granted"
+      );
+      // messaging().getToken().then((token) => {
+      // console.log('App.js/ ','FCM Token:', token);
+      // });
+    } else {
+      console.log(
+        "App.js/requestPermissions ",
+        "Notification permission denied"
+      );
+    }
+  });
+
 
   console.log(latitude);
   const current_location = () => {

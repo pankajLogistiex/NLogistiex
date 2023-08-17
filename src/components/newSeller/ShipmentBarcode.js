@@ -165,9 +165,11 @@ const ShipmentBarcode = ({ route }) => {
         let m = isWithin100Meters(location.latitude, location.longitude);
         if (geofencing == 0) {
           rejectDetails2(location.latitude, location.longitude, reason);
+          setShowOuterScanner(true);
         } else {
           if (m <= 100) {
             rejectDetails2(location.latitude, location.longitude, reason);
+            setShowOuterScanner(true);
           } else {
             Alert.alert(
               "Shipment cannot be rejected",
@@ -186,6 +188,7 @@ const ShipmentBarcode = ({ route }) => {
                     setEnableGeoFence(0);
                     setDropDownValue("");
                     setExpectedPackaging("");
+                    setShowOuterScanner(true);
                     setLen(0);
                   },
                   style: "cancel",
@@ -1144,6 +1147,7 @@ const ShipmentBarcode = ({ route }) => {
         setLen(0);
       } else {
         setModal(true);
+        setShowOuterScanner(false);
       }
     } else if (packagingAction == 3) {
       if (packagingID.trim() === value.trim()) {
@@ -1154,6 +1158,7 @@ const ShipmentBarcode = ({ route }) => {
         setLen(0);
       } else {
         setModal1(true);
+        setShowOuterScanner(false);
       }
     } else {
       console.log(
@@ -1177,6 +1182,7 @@ const ShipmentBarcode = ({ route }) => {
       setLen(0);
     } else {
       setModal1(true);
+      setShowOuterScanner(false);
       console.log("ShipmentBarcode/handleReScan/values not matched ");
     }
   };
@@ -1333,6 +1339,7 @@ const ShipmentBarcode = ({ route }) => {
         onClose={() => {
           setModalVisible11(false);
           setDropDownValue11("");
+          setShowOuterScanner(true);
         }}
         size="lg"
       >
@@ -1743,6 +1750,7 @@ const ShipmentBarcode = ({ route }) => {
           setModal(false);
           setExpectedPackaging("");
           setLen(0);
+          setShowOuterScanner(true)
         }}
         size="lg"
       >
@@ -1811,6 +1819,7 @@ const ShipmentBarcode = ({ route }) => {
           setModal1(false);
           setExpectedPackaging("");
           setLen(0);
+          setShowOuterScanner(true);
         }}
         size="lg"
       >
@@ -1847,6 +1856,7 @@ const ShipmentBarcode = ({ route }) => {
                 marginRight={1}
                 onPress={() => {
                   setModal1(false);
+                  setShowOuterScanner(true);
                   handleRejectAction("WPF", 0);
                 }}
               >
@@ -1861,6 +1871,7 @@ const ShipmentBarcode = ({ route }) => {
                 onPress={() => {
                   handleReScan();
                   setModal1(false);
+                  setShowOuterScanner(true);
                 }}
               >
                 ReScan
@@ -1875,6 +1886,7 @@ const ShipmentBarcode = ({ route }) => {
         onClose={() => {
           setModalVisible(false);
           setDropDownValue("");
+          setShowOuterScanner(true);
         }}
         size="lg"
       >
@@ -1927,6 +1939,7 @@ const ShipmentBarcode = ({ route }) => {
                 } else {
                   handleRejectAction(DropDownValue, enableGeoFence);
                   setModalVisible(false);
+                  setShowOuterScanner(true)
                 }
               }}
             >
@@ -2037,6 +2050,8 @@ const ShipmentBarcode = ({ route }) => {
                         ToastAndroid.SHORT
                       )
                     : setModalVisible(true);
+                    setShowOuterScanner(false);
+
                 }}
                 w="90%"
                 size="lg"

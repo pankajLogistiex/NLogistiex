@@ -1792,7 +1792,7 @@ onPress={() =>
                     //                 {/* <Text style={{color:'black'}}>No assignment for {it.title} </Text> */}
                     //                 <Image alt={'Icon Image'}
                     //                   style={{width: 80, height: 80}}
-                    //                   source={require('../assets/noDataAvailable.jpg')}
+                    //                   source={require('../assets/no_assignment.png')}
                     //                   alt={'No data Image'}
                     //                 />
                     //               </Center>
@@ -2095,13 +2095,16 @@ onPress={() =>
                 </>           
               
               ) : (
-                <Center style={{marginVertical: 50}}>
-                  {/* <Text style={{color:'black'}}>No assignment for {it.title} </Text> */}
-                  <Image
-                    source={require('../assets/noDataAvailable.jpg')}
-                    alt={'No data Image'}
-                  />
-                </Center>
+                <Center style={{ marginVertical: 90 }}>
+                <Image
+                 source={require('../assets/no_assignment.png')}
+                  alt={'No data Image'}
+                />
+                <Text style={{ color: 'black', fontSize: 20, marginTop: 10, textAlign: 'center' }}>
+                 No Activities Assigned! Contact Your Hub Incharge
+             </Text>
+          </Center>
+
               )}
 
               {/* <Fab onPress={()=>{navigation.navigate('MyTrip', {userId: id})}} position="absolute" size="sm" style={{backgroundColor: '#004aad'}} label={<Text style={{color: 'white', fontSize: 16}} >{tripValue}</Text>} /> */}
