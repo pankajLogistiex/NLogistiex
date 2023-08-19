@@ -126,8 +126,6 @@ function StackNavigators({ navigation }) {
   const syncTime = useSelector((state) => state.autoSync.syncTime);
   const forceSync = useSelector((state) => state.autoSync.forceSync);
   const token = useSelector((state) => state.user.token);
-  const refreshToken = useSelector((state) => state.user.refreshToken);
-  const refreshTime = useSelector((state) => state.user.refreshTime);
   const isAutoSyncEnable = useSelector(
     (state) => state.autoSync.isAutoSyncEnable
   );
@@ -150,54 +148,6 @@ function StackNavigators({ navigation }) {
   const [showModal11, setShowModal11] = useState(false);
   const [dataN, setDataN] = useState([]);
 
-  const config = {
-    issuer: "https://uacc.logistiex.com/realms/Logistiex-Demo",
-    clientId: "logistiex-demo",
-    redirectUrl: "com.demoproject.app://Login",
-    scopes: [
-      "openid",
-      "web-origins",
-      "acr",
-      "offline_access",
-      "email",
-      "microprofile-jwt",
-      "profile",
-      "address",
-      "phone",
-      "roles",
-    ],
-  };
-
-  useEffect(() => {
-    if (refreshTime && refreshToken) {
-      const intervalId = setInterval(() => {
-        if (refreshToken) {
-          refreshTokenAgain(refreshToken);
-        }
-      }, refreshTime);
-
-      return () => {
-        clearInterval(intervalId);
-      };
-    }
-  }, [refreshToken, refreshTime]);
-
-  async function refreshTokenAgain(refreshToken) {
-    await refresh(config, {
-      refreshToken: refreshToken,
-    })
-      .then((response) => {
-        AsyncStorage.setItem("token", response?.accessToken);
-        AsyncStorage.setItem("idToken", response?.idToken);
-
-        dispatch(setToken(response?.accessToken));
-        dispatch(setIdToken(response?.idToken));
-        console.log("App.js/refreshTokenAgain/Token Refreshed", response);
-      })
-      .catch((error) => {
-        console.log("App.js/refreshTokenAgain/Refresh Token Error".error);
-      });
-  }
   // console.log('App.js/ ',additionalWorkloadInfo11);
   // console.log('App.js/ ',userId);
   const DisplayData = async () => {
@@ -237,7 +187,7 @@ function StackNavigators({ navigation }) {
   };
   useEffect(() => {
     DisplayData();
-  }, [userId]);
+  }, [userId, token]);
   useEffect(() => {
     setShowModal11(dataN && dataN.length > 0);
   }, [userId, setShowModal11]);
@@ -321,7 +271,7 @@ function StackNavigators({ navigation }) {
     if (userId) {
       current_location();
     }
-  }, []);
+  }, [token]);
 
   const current_location = () => {
     GetLocation.getCurrentPosition({
@@ -391,7 +341,7 @@ function StackNavigators({ navigation }) {
       }
     };
 
-    const checkAndUpdateDate = setInterval(updateDateAtMidnight, 6000); // Checks every minute
+    const checkAndUpdateDate = setInterval(updateDateAtMidnight, 60000); // Checks every minute
 
     return () => clearInterval(checkAndUpdateDate);
   }, [currentDateValue, dispatch]);
@@ -775,12 +725,12 @@ function StackNavigators({ navigation }) {
       }
       console.log("App.js/forceSync ", "===Force sync called===");
     }
-  }, [forceSync]);
+  }, [forceSync, token]);
 
   useEffect(() => {
     // loadAPI_3();
     pull_API_Data();
-  }, [userId]);
+  }, [userId, token]);
 
   useEffect(() => {
     if (userId) {
@@ -921,7 +871,7 @@ function StackNavigators({ navigation }) {
       );
     });
   };
-console.log(token);
+
   // console.log('App.js/ ',"Notification Count",notificationCount," ",useSelector((state) => state.notification.count));
   useEffect(() => {
     const unsubscribe = messaging().onMessage(async (remoteMessage) => {
@@ -1043,6 +993,7 @@ console.log(token);
     // LogBox.ignoreLogs(['Warning: Each child in a list should have a unique "key" prop.']);
     LogBox.ignoreAllLogs(true);
   }, []);
+
   useEffect(() => {
     (async () => {
       if (userId) {
@@ -1057,7 +1008,7 @@ console.log(token);
         navigation.navigate("Login");
       }
     })();
-  }, [userId, tripID]);
+  }, [userId, tripID, token]);
   // console.log(token)
   // Sync button function
   const note11 = () => {
@@ -1073,7 +1024,7 @@ console.log(token);
         Login_Data_load();
       }, 10);
     }
-  }, [userId]);
+  }, [userId, token]);
 
   useEffect(() => {
     if (userId !== null) {
@@ -1086,7 +1037,7 @@ console.log(token);
           console.log("App.js/useEffect ", e);
         });
     }
-  }, [userId]);
+  }, [userId, token]);
 
   const Login_Data_load = () => {
     // console.log('App.js/ ','Login Data Load called');
@@ -1487,11 +1438,11 @@ console.log(token);
           for (let i = 0; i < results.rows.length; ++i) {
             temp.push(results.rows.item(i));
 
-            console.log(
-              "App.js/ ",
-              "SellerMainScreenDetails",
-              results.rows.item(i)
-            );
+            // console.log(
+            //   "App.js/ ",
+            //   "SellerMainScreenDetails",
+            //   results.rows.item(i)
+            // );
             // var address121 = results.rows.item(i).consignorAddress;
             // var address_json = JSON.parse(address121);
             // console.log('App.js/ ',typeof (address_json));
@@ -1503,18 +1454,18 @@ console.log(token);
             setIsLoading(false);
             setIsLogin(true);
             AsyncStorage.setItem("apiDataLoaded", "true");
-            console.log(
-              "App.js/viewDetails1 ",
-              "All " + 4 + " APIs loaded successfully "
-            );
+            // console.log(
+            //   "App.js/viewDetails1 ",
+            //   "All " + 4 + " APIs loaded successfully "
+            // );
             m = 0;
 
             AsyncStorage.setItem("refresh11", "refresh");
           } else {
-            console.log(
-              "App.js/viewDetails1 ",
-              "Only " + m + " APIs loaded out of 4 "
-            );
+            // console.log(
+            //   "App.js/viewDetails1 ",
+            //   "Only " + m + " APIs loaded out of 4 "
+            // );
             setIsLoading(false);
           }
           // m++;
@@ -3839,6 +3790,67 @@ function CustomDrawerContent({ navigation }) {
   const idToken = useSelector((state) => state.user.idToken);
   const token = useSelector((state) => state.user.token);
   const tripStatus = useSelector((state) => state.trip.tripStatus);
+  const refreshToken = useSelector((state) => state.user.refreshToken);
+  const refreshTime = useSelector((state) => state.user.refreshTime);
+
+  const config = {
+    issuer: "https://uacc.logistiex.com/realms/Logistiex-Demo",
+    clientId: "logistiex-demo",
+    redirectUrl: "com.demoproject.app://Login",
+    scopes: [
+      "openid",
+      "web-origins",
+      "acr",
+      "offline_access",
+      "email",
+      "microprofile-jwt",
+      "profile",
+      "address",
+      "phone",
+      "roles",
+    ],
+  };
+
+  useEffect(() => {
+    if (refreshToken) {
+      refreshTokenAgain(refreshToken);
+    }
+    if (refreshTime && refreshToken) {
+      const intervalId = setInterval(() => {
+        if (refreshToken) {
+          refreshTokenAgain(refreshToken);
+        }
+      }, refreshTime);
+
+      return () => {
+        clearInterval(intervalId);
+      };
+    }
+  }, [refreshToken, refreshTime]);
+
+  async function refreshTokenAgain(refreshToken) {
+    await refresh(config, {
+      refreshToken: refreshToken,
+    })
+      .then((response) => {
+        if (response?.idToken) {
+          AsyncStorage.setItem("token", response?.accessToken);
+          AsyncStorage.setItem("idToken", response?.idToken);
+
+          dispatch(setToken(response?.accessToken));
+          dispatch(setIdToken(response?.idToken));
+          console.log("App.js/refreshTokenAgain/Token Refreshed", response);
+        }
+        else {
+          console.log("App.js/refreshTokenAgain/No ID Token Error", response);
+          LogoutHandle();
+        }
+      })
+      .catch((error) => {
+        console.log("App.js/refreshTokenAgain/Refresh Token Error".error);
+        LogoutHandle();
+      });
+  }
 
   useEffect(() => {
     const loadDetails = async () => {

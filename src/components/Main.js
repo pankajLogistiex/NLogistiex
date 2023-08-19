@@ -247,10 +247,6 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
 
   const loadSellerPickupDetails = async () => {
     setIsLoading(!isLoading);
-    // setSpp(1);
-    // setSpnp(1);
-    // setSpc(1);
-    // setSpr(1);
     // await AsyncStorage.setItem('refresh11', 'notrefresh');
       db.transaction(tx => {
         tx.executeSql(
@@ -332,10 +328,6 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   const loadHanoverDetails = async () => {
     setIsLoading(!isLoading);
     await AsyncStorage.setItem('refresh11', 'notrefresh');
-    // setSpp1(1);
-    // setSpnp1(1);
-    // setSpc1(1);
-    // setSpr1(1);
       db.transaction(tx => {
         tx.executeSql(
           'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND FMtripId=?',
@@ -412,10 +404,6 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   };
   const loadSellerDeliveryDetails = async () => {
     setIsLoading(!isLoading);
-    // setSpp1(1);
-    // setSpnp1(1);
-    // setSpc1(1);
-    // setSpr1(1);
     await AsyncStorage.setItem('refresh11', 'notrefresh');
       db.transaction(tx => {
         tx.executeSql(
@@ -594,7 +582,6 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
       navigation.navigate('MyTrip', {userId: id, token:token});
     }
   };
-  console.log("pending",spp)
   const storeUser = async () => {
     try {
       await AsyncStorage.setItem('user', JSON.stringify(value));
