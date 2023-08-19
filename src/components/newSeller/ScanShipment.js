@@ -180,6 +180,7 @@ const ScanShipment = ({ route }) => {
         .then((res) => {
           setImageUrl(res.publicURL);
           setUploadStatus("done");
+          setModalVisible1(true);
           console.log("ScanShipment.js/takePicture ", "upload success", res);
           setImageUrls((prevImageUrls) => [...prevImageUrls, res.publicURL]);
           setUploadStatus("idle");
@@ -418,38 +419,6 @@ const ScanShipment = ({ route }) => {
   };
 
   const rejectDetails2 = (reason) => {
-    // db.transaction(tx => {
-    //   tx.executeSql(
-    //     'UPDATE SellerMainScreenDetails SET status="rejected" , eventTime=?, latitude=?, longitude=?, rejectionReasonL1=?  WHERE  shipmentAction="Seller Delivery" AND  status="accepted" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-    //     [new Date().valueOf(), latitude, longitude, DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
-    //     (tx1, results) => {
-    //       let temp = [];
-    //       console.log('ScanShipment.js/ ','Rejected Reason : ', DropDownValue);
-    //       console.log('ScanShipment.js/ ','Results', results.rowsAffected);
-    //       console.log('ScanShipment.js/ ',results);
-    //       if (results.rowsAffected > 0) {
-    //         console.log('ScanShipment.js/ ',barcode + 'rejected');
-    //         ToastAndroid.show(barcode + ' Rejected', ToastAndroid.SHORT);
-    //         Vibration.vibrate(100);
-    //         RNBeep.beep();
-    //         setDropDownValue('');
-    //         console.log('ScanShipment.js/ ',acceptedArray);
-    //         const newArray = acceptedArray.filter(item => item !== barcode);
-    //         console.log('ScanShipment.js/ ',newArray);
-    //         setAcceptedArray(newArray);
-    //         displayDataSPScan();
-    //       } else {
-    //         console.log('ScanShipment.js/ ',barcode + 'failed to reject item locally');
-    //       }
-    //       console.log('ScanShipment.js/ ',results.rows.length);
-    //       for (let i = 0; i < results.rows.length; ++i) {
-    //         temp.push(results.rows.item(i));
-    //       }
-    //     },
-    //   );
-    // });
-    // submitForm();
-    // setImageUrls([]);
     db.transaction((tx) => {
       tx.executeSql(
         'UPDATE SellerMainScreenDetails SET status="rejected" , eventTime=?, latitude=?, longitude=? , expectedPackagingId=?, rejectionReasonL1=?  WHERE  shipmentAction="Seller Delivery" AND stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) AND FMtripId=?',
@@ -494,47 +463,13 @@ const ScanShipment = ({ route }) => {
         }
       );
     });
-    submitForm();
+    setScanned(true);
     setImageUrls([]);
     setCheck11(0);
     setExpectedPackaging("");
     setPackagingAction();
   };
   const taggedDetails = () => {
-    // db.transaction(tx => {
-    //   tx.executeSql(
-    //     'UPDATE SellerMainScreenDetails SET status="tagged" , eventTime=?, latitude=?, longitude=? ,packagingId=?, expectedPackagingId=?, rejectionReasonL1=?  WHERE status="accepted" AND consignorCode=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) ',
-    //     [new Date().valueOf(), latitude, longitude,packagingID ,expectedPackagingId,DropDownValue, route.params.consignorCode, barcode, barcode, barcode],
-    //     (tx1, results) => {
-    //       let temp = [];
-    //       console.log('ScanShipment.js/ ','Rejected Reason : ', DropDownValue);
-    //       console.log('ScanShipment.js/ ','Results', results.rowsAffected);
-    //       console.log('ScanShipment.js/ ',results);
-    //       if (results.rowsAffected > 0) {
-    //         console.log('ScanShipment.js/ ',barcode + 'tagged');
-    //         ToastAndroid.show(barcode + ' Tagged', ToastAndroid.SHORT);
-    //         Vibration.vibrate(100);
-    //         RNBeep.beep();
-    //         setDropDownValue('');
-    //         console.log('ScanShipment.js/ ',acceptedArray);
-    //         const newArray = acceptedArray.filter(item => item !== barcode);
-    //         console.log('ScanShipment.js/ ',newArray);
-    //         setAcceptedArray(newArray);
-    //         displayDataSPScan();
-    //       } else {
-    //         console.log('ScanShipment.js/ ',barcode + 'failed to tagged item locally');
-    //       }
-    //       console.log('ScanShipment.js/ ',results.rows.length);
-    //       for (let i = 0; i < results.rows.length; ++i) {
-    //         temp.push(results.rows.item(i));
-    //       }
-
-    //     },
-    //   );
-    // });
-    // submitForm1();
-    // setImageUrls([]);
-
     db.transaction((tx) => {
       tx.executeSql(
         'UPDATE SellerMainScreenDetails SET status="tagged", eventTime=?, latitude=?, longitude=? , expectedPackagingId=?, rejectionReasonL1=?  WHERE stopId=? AND (awbNo=? OR clientRefId=? OR clientShipmentReferenceNumber=?) AND FMtripId=?',
@@ -552,17 +487,17 @@ const ScanShipment = ({ route }) => {
         ],
         (tx1, results) => {
           let temp = [];
-          console.log(
-            "ScanShipment.js/rejectDetails2 ",
-            "Rejected Reason : ",
-            DropDownValue
-          );
-          console.log(
-            "ScanShipment.js/rejectDetails2 ",
-            "Results",
-            results.rowsAffected
-          );
-          console.log("ScanShipment.js/rejectDetails2 ", results);
+          // console.log(
+          //   "ScanShipment.js/rejectDetails2 ",
+          //   "Rejected Reason : ",
+          //   DropDownValue
+          // );
+          // console.log(
+          //   "ScanShipment.js/rejectDetails2 ",
+          //   "Results",
+          //   results.rowsAffected
+          // );
+          // console.log("ScanShipment.js/rejectDetails2 ", results);
           if (results.rowsAffected > 0) {
             // ContinueHandle11();
             console.log("ScanShipment.js/rejectDetails2 ", barcode + "tagged");
@@ -584,7 +519,6 @@ const ScanShipment = ({ route }) => {
         }
       );
     });
-    submitForm1();
     setImageUrls([]);
     setCheck11(0);
     setExpectedPackaging("");
@@ -1285,9 +1219,9 @@ const ScanShipment = ({ route }) => {
                 marginBottom={1.5}
                 marginTop={1.5}
                 marginRight={1}
-                onPress={() => setImageUrls([])}
+                onPress={() => {setImageUrls([]); takePicture()}}
               >
-                ReScan/Record
+                ReClick
               </Button>
               {imageUrls.length < 1 ? (
                 <Button
@@ -1430,7 +1364,7 @@ const ScanShipment = ({ route }) => {
                 onPress={() => {
                   rejectDetails2("WPR");
                   setModal1(false);
-                  setScanned(false);
+                  setScanned(true);
                 }}
               >
                 Reject Shipment
@@ -1538,7 +1472,9 @@ const ScanShipment = ({ route }) => {
                             "No Shipment to Reject/Tag",
                             ToastAndroid.SHORT
                           )
-                        : setModalVisible1(true);
+                        : 
+                        // setModalVisible1(true);
+                        takePicture();
                         setScanned(false)
                     }}
                     w="90%"

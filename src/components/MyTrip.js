@@ -78,7 +78,10 @@ export default function MyTrip({ navigation, route }) {
   const handleEndKmChange = (value) => {
     if (Number(value) < Number(startkm)) {
       setErrorText('End KMs cannot be lower than Start KMs');
-    } else {
+    } 
+    else if(Number(value) == Number(startkm)){
+      setErrorText('End KMs cannot be equal to Start KMs');
+    }else {
       setErrorText('');
     }
     setEndkm(value);
