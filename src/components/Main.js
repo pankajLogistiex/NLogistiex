@@ -1019,7 +1019,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                               }}
                             >
                               {tripValue === 'Start Trip'
-                                ? 'Start Handover'
+                                ? 'Start OFD Scan'
                                 : spp1 === 0
                                 ? 'Handover completed'
                                 : 'Handover in progress'}
@@ -1043,7 +1043,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                               navigation.navigate('SellerHandover')
                             }>
                             {tripValue === 'Start Trip'
-                              ? 'Start Handover'
+                              ? 'Start OFD Scan'
                               : spp1 === 0
                               ? 'Handover completed'
                               : 'Handover in progress'}
@@ -1492,7 +1492,7 @@ w="100%"
           }}
         >
           {tripValue === 'Start Trip'
-            ? 'Start Handover'
+            ? 'Start OFD Scan'
             : spp1 === 0
             ? 'Handover completed'
             : 'Handover in progress'}
@@ -1540,7 +1540,7 @@ onPress={() =>
       }}
     >
         {tripValue === 'Start Trip'
-                               ? 'Start Handover'
+                               ? 'Start OFD Scan'
                                : spp1 === 0
                                ? 'Handover completed'
                                : 'Handover in progress'}
@@ -1566,7 +1566,7 @@ onPress={() =>
                           //     navigation.navigate('SellerHandover')
                           //   }>
                           //   {tripValue === 'Start Trip'
-                          //     ? 'Start Handover'
+                          //     ? 'Start OFD Scan'
                           //     : spp1 === 0
                           //     ? 'Handover completed'
                           //     : 'Handover in progress'}
@@ -1973,7 +1973,7 @@ onPress={() =>
                 }
               })}
               {/* {(dashboardData[1].completedOrder!=0 || dashboardData[1].pendingOrder!=0 || dashboardData[1].notPicked!=0 || dashboardData[1].rejectedOrder!=0) ?
-        <Button w="100%" size="lg" bg="#004aad" onPress={()=>navigation.navigate('SellerHandover')}>Start Handover</Button>
+        <Button w="100%" size="lg" bg="#004aad" onPress={()=>navigation.navigate('SellerHandover')}>Start OFD Scan</Button>
         :
         null} */}
         {isData ? (
@@ -2109,7 +2109,7 @@ onPress={() =>
 
               {/* <Fab onPress={()=>{navigation.navigate('MyTrip', {userId: id})}} position="absolute" size="sm" style={{backgroundColor: '#004aad'}} label={<Text style={{color: 'white', fontSize: 16}} >{tripValue}</Text>} /> */}
               {/* <Button w="100%" size="lg" bg="#004aad" mt={-5} onPress={()=>navigation.navigate('SellerHandover')}>Seller Handover</Button> */}
-              {/* <Button w="100%" size="lg" bg="#004aad" onPress={()=>navigation.navigate('SellerHandover')}>Start Handover</Button> */}
+              {/* <Button w="100%" size="lg" bg="#004aad" onPress={()=>navigation.navigate('SellerHandover')}>Start OFD Scan</Button> */}
               <Center>
                 <Image
                   style={{width: 150, height: 100}}

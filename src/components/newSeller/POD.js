@@ -21,6 +21,8 @@ import {
   TextInput,
   ToastAndroid,
 } from "react-native";
+import Lottie from "lottie-react-native";
+import { ProgressBar } from "@react-native-community/progress-bar-android";
 import axios from "axios";
 import { HStack, Button } from "native-base";
 import React, { useState, useEffect, useRef } from "react";
@@ -64,6 +66,7 @@ const POD = ({ route }) => {
   const [acceptedArray, setAcceptedArray] = useState([]);
   const [rejectedArray, setRejectedArray] = useState([]);
   const [notPickedArray, setNotPickedArray] = useState([]);
+  const [showLoading, setLoading] = useState(false);
   const [timer, setTimer] = useState(60);
   const [showPassword, setShowPassword] = useState(false);
   const refs = useRef([]);
@@ -279,6 +282,7 @@ const POD = ({ route }) => {
         })
         .catch(function (error) {
           console.log("POD/SubmitForm11", error.response.data);
+          setLoading(false);
           alert(error.response.data.msg);
           navigation.navigate("Main");
         });
@@ -347,6 +351,7 @@ const POD = ({ route }) => {
       .then((response) => {
         if (response.data.return) {
           // alert("OTP Submitted Successfully")
+          setLoading(true)
           setMessage(1);
           submitForm11();
           setInputOtp("");
@@ -455,7 +460,31 @@ const POD = ({ route }) => {
           </Modal.Body>
         </Modal.Content>
       </Modal>
-      <View style={{ backgroundColor: "white", flex: 1, paddingTop: 30 }}>
+      {showLoading ? (
+        <View
+          style={[
+            StyleSheet.absoluteFillObject,
+            {
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 1,
+              backgroundColor: "rgba(0,0,0,0.65)",
+            },
+          ]}
+        >
+          <Text style={{ color: "white" }}>Loading...</Text>
+          <Lottie
+            source={require("../../assets/loading11.json")}
+            autoPlay
+            loop
+            speed={1}
+            //   progress={animationProgress.current}
+          />
+          <ProgressBar width={70} />
+        </View>
+      ) : (
+<View style={{ backgroundColor: "white", flex: 1, paddingTop: 30 }}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <Center>
             <View
@@ -636,6 +665,8 @@ const POD = ({ route }) => {
           </Center>
         </ScrollView>
       </View>
+      )}
+      
     </NativeBaseProvider>
   );
 };

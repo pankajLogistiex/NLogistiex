@@ -21,6 +21,8 @@ import {
   TextInput,
   ToastAndroid,
 } from "react-native";
+import Lottie from "lottie-react-native";
+import { ProgressBar } from "@react-native-community/progress-bar-android";
 import DeviceInfo from "react-native-device-info";
 import axios from "axios";
 import { HStack, Button } from "native-base";
@@ -66,6 +68,7 @@ const CollectPOD = ({ route }) => {
   const [acceptedArray, setAcceptedArray] = useState([]);
   const [rejectedArray, setRejectedArray] = useState([]);
   const [notDeliveredArray, setNotDeliveredArray] = useState([]);
+  const [showLoading, setLoading] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -269,6 +272,7 @@ const CollectPOD = ({ route }) => {
           response.data
         );
         alert("Delivery Successfully completed");
+        setLoading(false);
         navigation.navigate("Main");
       })
       .catch(function (error) {
@@ -315,6 +319,7 @@ const CollectPOD = ({ route }) => {
       .then((response) => {
         if (response.data.return) {
           // alert("OTP Submitted Successfully")
+          setLoading(true);
           setMessage(1);
           submitForm11();
           setInputOtp("");
@@ -415,8 +420,31 @@ const CollectPOD = ({ route }) => {
           </Modal.Body>
         </Modal.Content>
       </Modal>
-
-      <View style={{ backgroundColor: "white", flex: 1, paddingTop: 30 }}>
+      {showLoading ? (
+        <View
+          style={[
+            StyleSheet.absoluteFillObject,
+            {
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 1,
+              backgroundColor: "rgba(0,0,0,0.65)",
+            },
+          ]}
+        >
+          <Text style={{ color: "white" }}>Loading...</Text>
+          <Lottie
+            source={require("../../assets/loading11.json")}
+            autoPlay
+            loop
+            speed={1}
+            //   progress={animationProgress.current}
+          />
+          <ProgressBar width={70} />
+        </View>
+      ) : (
+<View style={{ backgroundColor: "white", flex: 1, paddingTop: 30 }}>
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={{ alignItems: "center", marginTop: 15 }}>
             <View
@@ -534,8 +562,8 @@ const CollectPOD = ({ route }) => {
                 style={{ backgroundColor: "#004aad", color: "#fff" }}
                 title="Submit"
                 onPress={() => {
-                  sendSmsOtp();
                   setShowModal11(true);
+                  sendSmsOtp();
                   setTimer(60);
                 }}
               >
@@ -634,6 +662,8 @@ const CollectPOD = ({ route }) => {
           </Center>
         </ScrollView>
       </View>
+      )}
+      
     </NativeBaseProvider>
   );
 };
