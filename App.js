@@ -733,14 +733,9 @@ function StackNavigators({ navigation }) {
   }, [userId, token]);
 
   useEffect(() => {
-    if (userId) {
-      setTimeout(() => {
-        requestPermissions();
-      }, 3000);
-
-      console.log("App.js/requestPermissions ", "Request permission", userId);
-    }
-  }, [userId]);
+    requestPermissions();
+    console.log("App.js/requestPermissions ", "Request permission", userId);
+  }, []);
 
   const requestPermissions = async () => {
     try {
