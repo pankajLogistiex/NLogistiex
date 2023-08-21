@@ -1281,18 +1281,23 @@ function StackNavigators({ navigation }) {
     });
   };
 
+
   const fetchTripInfo = async () => {
+    let today = new Date();
+              today.setUTCHours(0, 0, 0, 0);
+              today = today.valueOf();
     db.transaction((txn) => {
       txn.executeSql(
-        "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ?",
-        [20, 50, userId],
+        "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ? AND date > ?",
+        [20, 50, userId, today],
         (tx, result) => {
           if (result.rows.length > 0) {
             setTripID(result.rows.item(0).tripID);
+            console.log("date",result.rows.item(0).date> today)
           } else {
             txn.executeSql(
-              "SELECT * FROM TripDetails WHERE tripStatus = ? AND userID = ? ORDER BY tripID DESC LIMIT 1",
-              [200, userId],
+              "SELECT * FROM TripDetails WHERE tripStatus = ? AND userID = ? AND date > ?  ORDER BY tripID DESC LIMIT 1",
+              [200, userId,today],
               (tx, result) => {
                 if (result.rows.length > 0) {
                   setTripID(result.rows.item(0).tripID);
@@ -1425,7 +1430,7 @@ function StackNavigators({ navigation }) {
   const viewDetails1 = () => {
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM SellerMainScreenDetails",
+        "SELECT * FROM TripDetails",
         [],
         (tx1, results) => {
           let temp = [];
@@ -1705,7 +1710,7 @@ function StackNavigators({ navigation }) {
           tripStatus VARCHAR(200),
           createdAt VARCHAR(200),
           updatedAt VARCHAR(200),
-          date Text
+          date INTEGER
           )`,
         [],
         (sqlTxn, res) => {
@@ -1735,7 +1740,13 @@ function StackNavigators({ navigation }) {
         .then(
           (res) => {
             for (let i = 0; i < res.data.res_data.length; i++) {
+              let today = new Date();
+              today.setUTCHours(0, 0, 0, 0);
+              today = today.valueOf();
+              // console.log("today", today);
               // const dateValue = parseInt(res.data.res_data[i].date);
+              console.log("date check",res.data.res_data[i].date > today)
+              if(res.data.res_data[i].date > today){
               db.transaction((txn) => {
                 txn.executeSql(
                   `INSERT OR REPLACE INTO TripDetails(tripID , userID, vehicleNumber, tripStatus, createdAt ,updatedAt,date
@@ -1747,7 +1758,7 @@ function StackNavigators({ navigation }) {
                     res.data.res_data[i].tripStatus,
                     res.data.res_data[i].createdAt,
                     res.data.res_data[i].updatedAt,
-                    currentDateValue,
+                    res.data.res_data[i].date,
                   ],
                   (sqlTxn, _res) => {
                     m++;
@@ -1762,6 +1773,7 @@ function StackNavigators({ navigation }) {
                 );
               });
             }
+          }
           },
           (error) => {
             console.log("App.js/ ", "tripdetailserror", error);
