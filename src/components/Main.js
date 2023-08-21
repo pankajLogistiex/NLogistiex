@@ -143,17 +143,20 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
       });
   }
   const fetchTripInfo = async () => {
+    let today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    today = today.valueOf();
     db.transaction((txn) => {
-      txn.executeSql(
-        "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ?",
-        [20, 50, id],
+    txn.executeSql(
+    "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ? AND date > ?",
+        [20, 50, id, today],
         (tx, result) => {
           if (result.rows.length > 0) {
             setTripID(result.rows.item(0).tripID);
           } else {
             txn.executeSql(
-              "SELECT * FROM TripDetails WHERE tripStatus = ? AND userID = ? ORDER BY tripID DESC LIMIT 1",
-              [200, id],
+              "SELECT * FROM TripDetails WHERE tripStatus = ? AND userID = ? AND date > ? ORDER BY tripID DESC LIMIT 1",
+              [200, id, today],
               (tx, result) => {
                 if (result.rows.length > 0) {
                   setTripID(result.rows.item(0).tripID);
