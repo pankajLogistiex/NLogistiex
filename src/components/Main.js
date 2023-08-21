@@ -679,6 +679,8 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
   //         });
   //     })();
   // }, []);
+  console.log("not handed over",shnp1)
+  console.log(shp1 === 0 && acceptedItemData===0 && closeHandoverStatus11===1)
   const dashboardData = [
     {
       title: 'Seller Pickups',
@@ -704,7 +706,6 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
       rejectedOrder: shr1,
       notPicked: shnp1,
     },
-
     //  {
     //     title: 'Customer Pickups',
     //     totalUsers: 21,
@@ -753,7 +754,7 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                   it.notPicked !== 0 ||
                   it.rejectedOrder !== 0
                 ) {
-                  if (shp1 === 0 && acceptedItemData===0 && closeHandoverStatus11===1) {
+                  if (shp1 === 0 && acceptedItemData===0 && closeHandoverStatus11===1 && (spp1!==0 || spc1!==0 || spnp1!==0 || spr1!==0)) {
                     return it.title === 'Seller Pickups' ||
                       it.title === 'Seller Deliveries' ? (
                       <Box pt={4} mb="6" rounded="md" bg="white" key={index}>
@@ -1008,9 +1009,9 @@ const [bagShipmentCount,setBagShipmentCount] = useState(0);
                                 color: 'white',
                               }}
                             >
-                              {tripValue === 'Start Trip'
+                              {tripValue === 'Start Trip' && shp1 !==0
                                 ? 'Start OFD Scan'
-                                : spp1 === 0
+                                : shp1 === 0
                                 ? 'Handover completed'
                                 : 'Handover in progress'}
                             </Text>
@@ -1437,11 +1438,7 @@ w="100%"
                             </View>
                           </View>
                         </Box>
-                        {it.title === 'Seller Handover' ? (
-
-
-               
-
+                        {it.title === 'Seller Handover' ? (      
 <TouchableOpacity
 w="100%"
       style={{
@@ -1481,9 +1478,9 @@ w="100%"
             color: 'white',
           }}
         >
-          {tripValue === 'Start Trip'
+          {tripValue === 'Start Trip' && shp1 !==0
             ? 'Start OFD Scan'
-            : spp1 === 0
+            : shp1 === 0
             ? 'Handover completed'
             : 'Handover in progress'}
         </Text>
