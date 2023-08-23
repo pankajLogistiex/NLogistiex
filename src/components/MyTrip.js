@@ -193,8 +193,8 @@ export default function MyTrip({ navigation, route }) {
     today = today.valueOf();
     db.transaction((txn) => {
       txn.executeSql(
-        "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ? AND date > ?",
-        [20, 50, userId,today],
+        "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ? AND date = ?",
+        [20, 50, userId,currentDateValue],
         (tx, result) => {
           if (result.rows.length > 0) {
             setTripID(result.rows.item(0).tripID);

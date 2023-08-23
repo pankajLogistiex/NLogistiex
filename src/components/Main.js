@@ -100,7 +100,7 @@ export default function Main({ navigation, route }) {
   const [myArray, setMyArray] = useState([]);
   const [closeHandoverStatus11, setCloseHandoverStatus11] = useState(0);
   const [acceptedItemData, setAcceptedItemData] = useState(0);
-
+  
   const focus = useIsFocused();
 
   async function getUserDetails() {
@@ -153,20 +153,17 @@ export default function Main({ navigation, route }) {
       });
   }
   const fetchTripInfo = async () => {
-    let today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    today = today.valueOf();
     db.transaction((txn) => {
       txn.executeSql(
-        "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ? AND date > ?",
-        [20, 50, id, today],
+        "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ? AND date = ?",
+        [20, 50, id, currentDateValue],
         (tx, result) => {
           if (result.rows.length > 0) {
             setTripID(result.rows.item(0).tripID);
           } else {
             txn.executeSql(
-              "SELECT * FROM TripDetails WHERE tripStatus = ? AND userID = ? AND date > ? ORDER BY tripID DESC LIMIT 1",
-              [200, id, today],
+              "SELECT * FROM TripDetails WHERE tripStatus = ? AND userID = ? AND date = ? ORDER BY tripID DESC LIMIT 1",
+              [200, id, currentDateValue],
               (tx, result) => {
                 if (result.rows.length > 0) {
                   setTripID(result.rows.item(0).tripID);
@@ -228,7 +225,7 @@ export default function Main({ navigation, route }) {
       fetchTripInfo();
     });
     return unsubscribe;
-  }, [navigation, syncTimeFull]);
+  }, [navigation, syncTimeFull, currentDateValue]);
 
   const getData = async () => {
     try {
@@ -249,7 +246,7 @@ export default function Main({ navigation, route }) {
     loadHanoverDetails();
     loadSellerDeliveryDetails();
     loadtripdetails();
-  }, [isNewSync, syncTimeFull]);
+  }, [isNewSync, syncTimeFull, currentDateValue]);
 
   const loadtripdetails = async () => {
     setIsLoading(!isLoading);
@@ -267,8 +264,8 @@ export default function Main({ navigation, route }) {
     // await AsyncStorage.setItem('refresh11', 'notrefresh');
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND FMtripId=?',
-        [tripID],
+        'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND FMtripId=? AND date=?',
+        [tripID,currentDateValue],
         (tx1, results) => {
           setSpts(results.rows.item(0).count);
           if (results.rows.item(0).count != 0) {
@@ -279,8 +276,8 @@ export default function Main({ navigation, route }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND status IS NULL AND FMtripId=?',
-        [tripID],
+        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND status IS NULL AND FMtripId=? AND date=?',
+        [tripID,currentDateValue],
         (tx1, results) => {
           setSpp(results.rows.length);
         }
@@ -288,8 +285,8 @@ export default function Main({ navigation, route }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND FMtripId=?',
-        [tripID],
+        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND FMtripId=? AND date=?',
+        [tripID,currentDateValue],
         (tx1, results) => {
           setForward(results.rows.length);
         }
@@ -298,8 +295,8 @@ export default function Main({ navigation, route }) {
 
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="accepted" AND FMtripId=?',
-        [tripID],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="accepted" AND FMtripId=? AND date=?',
+        [tripID,currentDateValue],
         (tx1, results) => {
           setSpc(results.rows.length);
         }
@@ -307,8 +304,8 @@ export default function Main({ navigation, route }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="accepted" OR status="rejected" AND FMtripId=?',
-        [tripID],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="accepted" OR status="rejected" AND FMtripId=? AND date=?',
+        [tripID,currentDateValue],
         (tx1, results) => {
           setSpARC(results.rows.length);
         }
@@ -316,8 +313,8 @@ export default function Main({ navigation, route }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="notPicked" AND FMtripId=?',
-        [tripID],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="notPicked" AND FMtripId=? AND date=?',
+        [tripID, currentDateValue],
         (tx1, results) => {
           let temp = [];
           setSpnp(results.rows.length);
@@ -330,8 +327,8 @@ export default function Main({ navigation, route }) {
 
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="rejected" AND FMtripId=?',
-        [tripID],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND status="rejected" AND FMtripId=? AND date=?',
+        [tripID,currentDateValue],
         (tx1, results) => {
           setSpr(results.rows.length);
           setIsLoading(false);
@@ -347,8 +344,8 @@ export default function Main({ navigation, route }) {
     await AsyncStorage.setItem("refresh11", "notrefresh");
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND FMtripId=?',
-        [tripID],
+        'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND FMtripId=? AND date=?',
+        [tripID, currentDateValue],
         (tx1, results) => {
           setShts(results.rows.item(0).count);
           if (results.rows.item(0).count != 0) {
@@ -359,8 +356,8 @@ export default function Main({ navigation, route }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND handoverStatus IS NULL AND FMtripId=?',
-        [tripID],
+        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND handoverStatus IS NULL AND FMtripId=? AND date=?',
+        [tripID, currentDateValue],
         (tx1, results) => {
           setShp1(results.rows.length);
         }
@@ -368,8 +365,8 @@ export default function Main({ navigation, route }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND handoverStatus="pendingHandover" AND FMtripId=?',
-        [tripID],
+        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND handoverStatus="pendingHandover" AND FMtripId=? AND date=?',
+        [tripID, currentDateValue],
         (tx1, results) => {
           setShnp1(results.rows.length);
         }
@@ -378,8 +375,8 @@ export default function Main({ navigation, route }) {
 
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND handoverStatus="accepted" AND FMtripId=?',
-        [tripID],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND handoverStatus="accepted" AND FMtripId=? AND date=?',
+        [tripID, currentDateValue],
         (tx1, results) => {
           let temp = [];
           setShc1(results.rows.length);
@@ -388,8 +385,8 @@ export default function Main({ navigation, route }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND  handoverStatus="rejected" AND FMtripId=?',
-        [tripID],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND  handoverStatus="rejected" AND FMtripId=? AND date=?',
+        [tripID, currentDateValue],
         (tx1, results) => {
           setShr1(results.rows.length);
         }
@@ -424,8 +421,8 @@ export default function Main({ navigation, route }) {
     await AsyncStorage.setItem("refresh11", "notrefresh");
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND FMtripId=?',
-        [tripID],
+        'SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND FMtripId=? AND date=?',
+        [tripID, currentDateValue],
         (tx1, results) => {
           setSdts(results.rows.item(0).count);
         }
@@ -433,8 +430,8 @@ export default function Main({ navigation, route }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND FMtripId=?',
-        [tripID],
+        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL) AND FMtripId=? AND date=?',
+        [tripID, currentDateValue],
         (tx1, results) => {
           setSpp1(results.rows.length);
         }
@@ -442,8 +439,8 @@ export default function Main({ navigation, route }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND FMtripId=?',
-        [tripID],
+        'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Delivery" AND FMtripId=? AND date=?',
+        [tripID, currentDateValue],
         (tx1, results) => {
           setReverse(results.rows.length);
         }
@@ -452,8 +449,8 @@ export default function Main({ navigation, route }) {
 
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND (status="accepted" OR  status="tagged") AND FMtripId=?',
-        [tripID],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND (status="accepted" OR  status="tagged") AND FMtripId=? AND date=?',
+        [tripID, currentDateValue],
         (tx1, results) => {
           let temp = [];
           setSpc1(results.rows.length);
@@ -462,8 +459,8 @@ export default function Main({ navigation, route }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND(status="accepted" OR status="rejected") AND FMtripId=?',
-        [tripID],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND(status="accepted" OR status="rejected") AND FMtripId=? AND date=?',
+        [tripID,currentDateValue],
         (tx1, results) => {
           setSpARC1(results.rows.length);
         }
@@ -471,8 +468,8 @@ export default function Main({ navigation, route }) {
     });
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="notDelivered" AND FMtripId=?',
-        [tripID],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="notDelivered" AND FMtripId=? AND date=?',
+        [tripID, currentDateValue],
         (tx1, results) => {
           let temp = [];
           setSpnp1(results.rows.length);
@@ -485,8 +482,8 @@ export default function Main({ navigation, route }) {
 
     db.transaction((tx) => {
       tx.executeSql(
-        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="rejected" AND FMtripId=?',
-        [tripID],
+        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND status="rejected" AND FMtripId=? AND date=?',
+        [tripID,currentDateValue],
         (tx1, results) => {
           setSpr1(results.rows.length);
           setIsLoading(false);
@@ -495,7 +492,7 @@ export default function Main({ navigation, route }) {
     });
     setLoading(false);
   };
-  // console.log('Main.js/ ',"Pending",spp)
+  // console.log('Main.js/ ',"Pending",spp, currentDateValue)
   const value = {
     Accepted: 0,
     Rejected: 0,
@@ -709,10 +706,7 @@ export default function Main({ navigation, route }) {
   //         });
   //     })();
   // }, []);
-  console.log("not handed over", shnp1);
-  console.log(
-    shp1 === 0 && acceptedItemData === 0 && closeHandoverStatus11 === 1
-  );
+ 
   const dashboardData = [
     {
       title: "Seller Pickups",
@@ -754,6 +748,12 @@ export default function Main({ navigation, route }) {
     //     notPicked: 70,
     // },
   ];
+  // console.log((
+  //   shp1 === 0 &&
+  //   acceptedItemData === 0 &&
+  //   closeHandoverStatus11 === 1 &&
+  //   (spp1 !== 0 || spc1 !== 0 || spnp1 !== 0 || spr1 !== 0)
+  // ))
   return (
     <NativeBaseProvider>
       <Modal isOpen={showModal1} onClose={() => setShowModal1(false)}>
