@@ -194,7 +194,7 @@ function StackNavigators({ navigation }) {
   useEffect(() => {
     setShowModal11(dataN && dataN.length > 0);
   }, [userId, setShowModal11]);
-console.log(token);
+
   const AcceptHandler = async (consignorCodeAccept, stopId, tripId) => {
     // console.log('App.js/ ','df')
     console.log("App.js/AcceptHandler ", {

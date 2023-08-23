@@ -889,7 +889,7 @@ const SellerHandoverSelection = ({ route }) => {
               </Modal.Body>
             </Modal.Content>
           </Modal>
-          <ScrollView>
+          <ScrollView keyboardShouldPersistTaps="handled">
             <View
               style={{
                 width: "100%",
@@ -996,10 +996,11 @@ const SellerHandoverSelection = ({ route }) => {
             <View style={styles.containter}>
               <ScrollView
                 style={styles.homepage}
+                keyboardShouldPersistTaps="handled"
                 showsVerticalScrollIndicator={false}
                 showsHorizontalScrollIndicator={false}
               >
-                <ScrollView>
+                <ScrollView keyboardShouldPersistTaps="handled">
                   <View style={styles.containter}>
                     <View style={styles.mainbox}>
                       <View

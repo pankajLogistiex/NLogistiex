@@ -444,200 +444,211 @@ const CollectPOD = ({ route }) => {
           <ProgressBar width={70} />
         </View>
       ) : (
-<View style={{ backgroundColor: "white", flex: 1, paddingTop: 30 }}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={{ alignItems: "center", marginTop: 15 }}>
-            <View
-              style={{
-                width: "90%",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                borderWidth: 1,
-                borderBottomWidth: 0,
-                borderColor: "lightgray",
-                borderTopLeftRadius: 5,
-                borderTopRightRadius: 5,
-                padding: 10,
-              }}
-            >
-              <Text style={{ fontSize: 18, fontWeight: "500" }}>Expected</Text>
-              <Text style={{ fontSize: 18, fontWeight: "500" }}>
-                {route.params.Forward}
-              </Text>
-            </View>
-            <View
-              style={{
-                width: "90%",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                borderWidth: 1,
-                borderBottomWidth: 0,
-                borderColor: "lightgray",
-                padding: 10,
-              }}
-            >
-              <Text style={{ fontSize: 18, fontWeight: "500" }}>Accepted</Text>
-              <Text style={{ fontSize: 18, fontWeight: "500" }}>
-                {route.params.accepted}
-              </Text>
-            </View>
-            <View
-              style={{
-                width: "90%",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                borderWidth: 1,
-                borderBottomWidth: 0,
-                borderColor: "lightgray",
-                padding: 10,
-              }}
-            >
-              <Text style={{ fontSize: 18, fontWeight: "500" }}>Rejected</Text>
-              <Text style={{ fontSize: 18, fontWeight: "500" }}>
-                {route.params.rejected}
-              </Text>
-            </View>
-            <View
-              style={{
-                width: "90%",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                borderWidth: 1,
-                borderBottomWidth: 0,
-                borderColor: "lightgray",
-                padding: 10,
-              }}
-            >
-              <Text style={{ fontSize: 18, fontWeight: "500" }}>Tagged</Text>
-              <Text style={{ fontSize: 18, fontWeight: "500" }}>
-                {route.params.tagged}
-              </Text>
-            </View>
-            <View
-              style={{
-                width: "90%",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                borderWidth: 1,
-                borderColor: "lightgray",
-                borderBottomLeftRadius: 5,
-                borderBottomRightRadius: 5,
-                padding: 10,
-              }}
-            >
-              <Text style={{ fontSize: 18, fontWeight: "500" }}>
-                Not Handed Over
-              </Text>
-              <Text style={{ fontSize: 18, fontWeight: "500" }}>
-                {newNotDelivered}
-              </Text>
-            </View>
-          </View>
-          <Center>
-            <Input
-              mx="3"
-              mt={4}
-              placeholder="Receiver Name"
-              w="90%"
-              bg="gray.200"
-              size="lg"
-              value={name}
-              onChangeText={(e) => setName(e)}
-            />
-            <Input
-              mx="3"
-              my={4}
-              placeholder="Mobile Number"
-              w="90%"
-              bg="gray.200"
-              size="lg"
-              value={mobileNumber}
-              onChangeText={(e) => setMobileNumber(e)}
-            />
-
-            {!showModal11 ? (
-              <Button
-                w="90%"
-                size="lg"
-                style={{ backgroundColor: "#004aad", color: "#fff" }}
-                title="Submit"
-                onPress={() => {
-                  setShowModal11(true);
-                  sendSmsOtp();
-                  setTimer(60);
+        <View style={{ backgroundColor: "white", flex: 1, paddingTop: 30 }}>
+          <ScrollView
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={{ alignItems: "center", marginTop: 15 }}>
+              <View
+                style={{
+                  width: "90%",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  borderWidth: 1,
+                  borderBottomWidth: 0,
+                  borderColor: "lightgray",
+                  borderTopLeftRadius: 5,
+                  borderTopRightRadius: 5,
+                  padding: 10,
                 }}
               >
-                Send OTP
-              </Button>
-            ) : timer ? (
-              <Button w="90%" size="lg" bg="gray.500">
-                <Text style={{ color: "white", fontSize: 16.5 }}>
-                  Resend OTP in {timer}sec
+                <Text style={{ fontSize: 18, fontWeight: "500" }}>
+                  Expected
                 </Text>
-              </Button>
-            ) : (
-              <Button
-                w="90%"
-                size="lg"
-                bg="gray.500"
-                onPress={() => {
-                  sendSmsOtp();
-                  setTimer(60);
+                <Text style={{ fontSize: 18, fontWeight: "500" }}>
+                  {route.params.Forward}
+                </Text>
+              </View>
+              <View
+                style={{
+                  width: "90%",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  borderWidth: 1,
+                  borderBottomWidth: 0,
+                  borderColor: "lightgray",
+                  padding: 10,
                 }}
               >
-                Resend
-              </Button>
-            )}
+                <Text style={{ fontSize: 18, fontWeight: "500" }}>
+                  Accepted
+                </Text>
+                <Text style={{ fontSize: 18, fontWeight: "500" }}>
+                  {route.params.accepted}
+                </Text>
+              </View>
+              <View
+                style={{
+                  width: "90%",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  borderWidth: 1,
+                  borderBottomWidth: 0,
+                  borderColor: "lightgray",
+                  padding: 10,
+                }}
+              >
+                <Text style={{ fontSize: 18, fontWeight: "500" }}>
+                  Rejected
+                </Text>
+                <Text style={{ fontSize: 18, fontWeight: "500" }}>
+                  {route.params.rejected}
+                </Text>
+              </View>
+              <View
+                style={{
+                  width: "90%",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  borderWidth: 1,
+                  borderBottomWidth: 0,
+                  borderColor: "lightgray",
+                  padding: 10,
+                }}
+              >
+                <Text style={{ fontSize: 18, fontWeight: "500" }}>Tagged</Text>
+                <Text style={{ fontSize: 18, fontWeight: "500" }}>
+                  {route.params.tagged}
+                </Text>
+              </View>
+              <View
+                style={{
+                  width: "90%",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  borderWidth: 1,
+                  borderColor: "lightgray",
+                  borderBottomLeftRadius: 5,
+                  borderBottomRightRadius: 5,
+                  padding: 10,
+                }}
+              >
+                <Text style={{ fontSize: 18, fontWeight: "500" }}>
+                  Not Handed Over
+                </Text>
+                <Text style={{ fontSize: 18, fontWeight: "500" }}>
+                  {newNotDelivered}
+                </Text>
+              </View>
+            </View>
+            <Center>
+              <Input
+                mx="3"
+                mt={4}
+                placeholder="Receiver Name"
+                w="90%"
+                bg="gray.200"
+                size="lg"
+                value={name}
+                onChangeText={(e) => setName(e)}
+              />
+              <Input
+                mx="3"
+                my={4}
+                placeholder="Mobile Number"
+                w="90%"
+                bg="gray.200"
+                size="lg"
+                value={mobileNumber}
+                onChangeText={(e) => setMobileNumber(e)}
+              />
 
-            {showModal11 ? (
-              <>
-                <Center>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {/* <Center> */}
-                    <OTPTextInput
-                      handleTextChange={(e) => setInputOtp(e)}
-                      inputCount={6}
-                      tintColor="#004aad"
-                      offTintColor="gray"
-                      containerStyle={{
-                        marginTop: 4,
-                        padding: 10,
-                        // size:20
-                      }}
-                      textInputStyle={{
-                        backgroundColor: "#F5F5F5",
-                        borderRadius: 10,
-                        borderWidth: 1,
-                        borderColor: "#BDBDBD",
-                        padding: 10,
-                      }}
-                      // secureTextEntry={!showPassword}
-                      keyboardType="number-pad"
-                      onBackspace={() => console.log("CollectPOD.js/ ", "back")}
-                    />
-                  </View>
-                </Center>
-
+              {!showModal11 ? (
                 <Button
                   w="90%"
                   size="lg"
-                  bg="#004aad"
+                  style={{ backgroundColor: "#004aad", color: "#fff" }}
+                  title="Submit"
                   onPress={() => {
-                    validateOTP();
+                    setShowModal11(true);
+                    sendSmsOtp();
+                    setTimer(60);
                   }}
                 >
-                  Verify OTP
+                  Send OTP
                 </Button>
-                {/* </Box> */}
-              </>
-            ) : null}
+              ) : timer ? (
+                <Button w="90%" size="lg" bg="gray.500">
+                  <Text style={{ color: "white", fontSize: 16.5 }}>
+                    Resend OTP in {timer}sec
+                  </Text>
+                </Button>
+              ) : (
+                <Button
+                  w="90%"
+                  size="lg"
+                  bg="gray.500"
+                  onPress={() => {
+                    sendSmsOtp();
+                    setTimer(60);
+                  }}
+                >
+                  Resend
+                </Button>
+              )}
 
-            {/* <Button
+              {showModal11 ? (
+                <>
+                  <Center>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {/* <Center> */}
+                      <OTPTextInput
+                        handleTextChange={(e) => setInputOtp(e)}
+                        inputCount={6}
+                        tintColor="#004aad"
+                        offTintColor="gray"
+                        containerStyle={{
+                          marginTop: 4,
+                          padding: 10,
+                          // size:20
+                        }}
+                        textInputStyle={{
+                          backgroundColor: "#F5F5F5",
+                          borderRadius: 10,
+                          borderWidth: 1,
+                          borderColor: "#BDBDBD",
+                          padding: 10,
+                        }}
+                        // secureTextEntry={!showPassword}
+                        keyboardType="number-pad"
+                        onBackspace={() =>
+                          console.log("CollectPOD.js/ ", "back")
+                        }
+                      />
+                    </View>
+                  </Center>
+
+                  <Button
+                    w="90%"
+                    size="lg"
+                    bg="#004aad"
+                    onPress={() => {
+                      validateOTP();
+                    }}
+                  >
+                    Verify OTP
+                  </Button>
+                  {/* </Box> */}
+                </>
+              ) : null}
+
+              {/* <Button
               w="90%"
               size="lg"
               style={{
@@ -652,18 +663,17 @@ const CollectPOD = ({ route }) => {
               }}>
               Generate OTP
             </Button> */}
-          </Center>
-          <Center>
-            <Image
-              style={{ width: 150, height: 150 }}
-              source={require("../../assets/image.png")}
-              alt={"Logo Image"}
-            />
-          </Center>
-        </ScrollView>
-      </View>
+            </Center>
+            <Center>
+              <Image
+                style={{ width: 150, height: 150 }}
+                source={require("../../assets/image.png")}
+                alt={"Logo Image"}
+              />
+            </Center>
+          </ScrollView>
+        </View>
       )}
-      
     </NativeBaseProvider>
   );
 };
