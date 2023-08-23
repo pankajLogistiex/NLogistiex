@@ -56,6 +56,7 @@ import { backendUrl } from "../../utils/backendUrl";
 import { setAutoSync } from "../../redux/slice/autoSyncSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { getAuthorizedHeaders } from "../../utils/headers";
+import { is } from "@babel/types";
 const db = openDatabase({
   name: "rn_sqlite",
 });
@@ -101,6 +102,7 @@ const ScanShipment = ({ route }) => {
   const [imageUrls, setImageUrls] = useState([]);
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isRejecting, setIsRejecting] = useState(false);
   const currentDateValue =
     useSelector((state) => state.currentDate.currentDateValue) ||
     new Date().toISOString().split("T")[0];
@@ -456,6 +458,11 @@ const ScanShipment = ({ route }) => {
               barcode + "failed to reject item locally"
             );
           }
+          setIsRejecting(false);
+          setImageUrls([]);
+          setCheck11(0);
+          setExpectedPackaging("");
+          setPackagingAction();
           console.log("ScanShipment.js/rejectDetails2 ", results.rows.length);
           for (let i = 0; i < results.rows.length; ++i) {
             temp.push(results.rows.item(i));
@@ -463,11 +470,6 @@ const ScanShipment = ({ route }) => {
         }
       );
     });
-    setScanned(true);
-    setImageUrls([]);
-    setCheck11(0);
-    setExpectedPackaging("");
-    setPackagingAction();
   };
   const taggedDetails = () => {
     db.transaction((tx) => {
@@ -512,6 +514,11 @@ const ScanShipment = ({ route }) => {
               barcode + "failed to tagged item locally"
             );
           }
+          setIsRejecting(false);
+          setImageUrls([]);
+          setCheck11(0);
+          setExpectedPackaging("");
+          setPackagingAction();
           console.log("ScanShipment.js/rejectDetails2 ", results.rows.length);
           for (let i = 0; i < results.rows.length; ++i) {
             temp.push(results.rows.item(i));
@@ -519,12 +526,8 @@ const ScanShipment = ({ route }) => {
         }
       );
     });
-    setImageUrls([]);
-    setCheck11(0);
-    setExpectedPackaging("");
-    setPackagingAction();
   };
-
+console.log(isRejecting);
   const getCategories = (data) => {
     db.transaction((txn) => {
       txn.executeSql(
@@ -549,6 +552,8 @@ const ScanShipment = ({ route }) => {
                       data + " already scanned",
                       ToastAndroid.SHORT
                     );
+                    setExpectedPackaging("");
+                    setPackagingAction();
                   }
                 }
               );
@@ -578,6 +583,7 @@ const ScanShipment = ({ route }) => {
       setLen(0);
     } else {
       setModal1(true);
+      setIsRejecting(true);
     }
     setShowCloseBagModal12(false);
     setScanned(true);
@@ -595,8 +601,10 @@ const ScanShipment = ({ route }) => {
       updateDetails2(expectedPackagingId);
       displayDataSPScan();
       setLen(0);
+      setIsRejecting(false);
     } else {
       setModal1(true);
+      setIsRejecting(true);
     }
   };
 
@@ -624,9 +632,11 @@ const ScanShipment = ({ route }) => {
     });
   };
   const onSuccess = (e) => {
+    if(!isRejecting){
     console.log("ScanShipment.js/onSuccess ", e.data, "barcode");
     setBarcode(e.data);
     getCategories(e.data);
+    }
   };
 
   const onSuccess12 = (e) => {
@@ -1059,7 +1069,7 @@ const ScanShipment = ({ route }) => {
         isOpen={modalVisible}
         onClose={() => {
           setModalVisible(false);
-          setScanned(true);
+          setIsRejecting(false);
         }}
         size="lg"
       >
@@ -1119,7 +1129,7 @@ const ScanShipment = ({ route }) => {
                   } else {
                     setModalVisible(false);
                     rejectDetails2(DropDownValue);
-                    setScanned(true)
+                    setIsRejecting(true);
                   }
                 }}
               >
@@ -1140,7 +1150,6 @@ const ScanShipment = ({ route }) => {
                   } else {
                     setModalVisible(false);
                     taggedDetails();
-                    setScanned(true);
                   }
                 }}
               >
@@ -1155,7 +1164,7 @@ const ScanShipment = ({ route }) => {
         onClose={() => {
           setModalVisible1(false);
           setImageUrls([]);
-          setScanned(true);
+          setIsRejecting(false);
         }}
         size="lg"
       >
@@ -1245,7 +1254,7 @@ const ScanShipment = ({ route }) => {
                   onPress={() => {
                     setModalVisible(true);
                     setModalVisible1(false);
-                    setScanned(false);
+                    setIsRejecting(true);
                   }}
                 >
                   Save
@@ -1327,6 +1336,7 @@ const ScanShipment = ({ route }) => {
           setModal1(false);
           setExpectedPackaging("");
           setLen(0);
+          setIsRejecting(false);
         }}
         size="lg"
       >
@@ -1364,7 +1374,7 @@ const ScanShipment = ({ route }) => {
                 onPress={() => {
                   rejectDetails2("WPR");
                   setModal1(false);
-                  setScanned(true);
+                  setIsRejecting(true)
                 }}
               >
                 Reject Shipment
@@ -1467,15 +1477,14 @@ const ScanShipment = ({ route }) => {
                   <Button
                     title="Reject/Tag Shipment"
                     onPress={() => {
-                      check11 === 0
-                        ? ToastAndroid.show(
+                      if(check11 === 0){
+                        ToastAndroid.show(
                             "No Shipment to Reject/Tag",
                             ToastAndroid.SHORT
                           )
-                        : 
-                        // setModalVisible1(true);
+                      }else{// setModalVisible1(true);
                         takePicture();
-                        setScanned(false)
+                        setIsRejecting(true)}
                     }}
                     w="90%"
                     size="lg"

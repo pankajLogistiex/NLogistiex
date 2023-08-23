@@ -194,7 +194,7 @@ function StackNavigators({ navigation }) {
   useEffect(() => {
     setShowModal11(dataN && dataN.length > 0);
   }, [userId, setShowModal11]);
-
+console.log(token);
   const AcceptHandler = async (consignorCodeAccept, stopId, tripId) => {
     // console.log('App.js/ ','df')
     console.log("App.js/AcceptHandler ", {
@@ -1297,21 +1297,18 @@ function StackNavigators({ navigation }) {
   };
 
   const fetchTripInfo = async () => {
-    let today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-    today = today.valueOf();
     db.transaction((txn) => {
       txn.executeSql(
-        "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ? AND date > ?",
-        [20, 50, userId, today],
+        "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ? AND date = ?",
+        [20, 50, userId, currentDateValue],
         (tx, result) => {
           if (result.rows.length > 0) {
             setTripID(result.rows.item(0).tripID);
             console.log("date", result.rows.item(0).date > today);
           } else {
             txn.executeSql(
-              "SELECT * FROM TripDetails WHERE tripStatus = ? AND userID = ? AND date > ?  ORDER BY tripID DESC LIMIT 1",
-              [200, userId, today],
+              "SELECT * FROM TripDetails WHERE tripStatus = ? AND userID = ? AND date = ?  ORDER BY tripID DESC LIMIT 1",
+              [200, userId, currentDateValue],
               (tx, result) => {
                 if (result.rows.length > 0) {
                   setTripID(result.rows.item(0).tripID);
@@ -1771,9 +1768,6 @@ function StackNavigators({ navigation }) {
                 let today = new Date();
                 today.setUTCHours(0, 0, 0, 0);
                 today = today.valueOf();
-                // console.log("today", today);
-                // const dateValue = parseInt(res.data.res_data[i].date);
-                console.log("date check", res.data.res_data[i].date > today);
                 if (res.data.res_data[i].date > today) {
                   db.transaction((txn) => {
                     txn.executeSql(
@@ -1786,7 +1780,7 @@ function StackNavigators({ navigation }) {
                         res.data.res_data[i].tripStatus,
                         res.data.res_data[i].createdAt,
                         res.data.res_data[i].updatedAt,
-                        res.data.res_data[i].date,
+                        currentDateValue,
                       ],
                       (sqlTxn, _res) => {
                         m++;
