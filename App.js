@@ -138,7 +138,9 @@ function StackNavigators({ navigation }) {
   const additionalWorkloadInfo11 = useSelector(
     (state) => state.additionalWorkloadInfo.currentAdditionalWorkloadInfo
   );
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading1, setIsLoading1] = useState(false);
+  const [isLoading2, setIsLoading2] = useState(false);
+  const [isLoadingSF, setIsLoadingSF] = useState(false);
   const [data, setData] = useState([]);
   const [isLogin, setIsLogin] = useState(false);
   const [scannedStatus, SetScannedStatus] = useState(0);
@@ -707,7 +709,7 @@ function StackNavigators({ navigation }) {
       const timer = BackgroundTimer.runBackgroundTimer(() => {
         if (isAutoSyncEnable) {
           loadAPI_3();
-          push_Data();
+          push_Data("auto");
           if (isMixPanelInit) {
             Mixpanel.trackWithProperties("Auto sync called", {
               userId: userId,
@@ -961,7 +963,7 @@ function StackNavigators({ navigation }) {
   //     unsubscribeNotification();
   //   };
   // }, []);
-  const pull_API_Data = () => {
+  const pull_API_Data = (syncType = "manual") => {
     if (userId && isAutoSyncEnable) {
       var date = new Date();
       var hours = date.getHours();
@@ -977,11 +979,11 @@ function StackNavigators({ navigation }) {
       dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
       AsyncStorage.setItem("lastSyncTime112", datetime);
       console.log("App.js/pull_API_Data ", "api pull");
-      loadAPI_Data1();
-      loadAPI_Data2();
+      loadAPI_Data1(syncType);
+      loadAPI_Data2(syncType);
       loadAPI_3();
       createTableBag1();
-      loadAPI_DataSF();
+      loadAPI_DataSF(syncType);
       DisplayData();
       const randomValue = Math.floor(Math.random() * (100 - 1 + 1)) + 1;
       dispatch(setIsNewSync(randomValue));
@@ -1017,12 +1019,12 @@ function StackNavigators({ navigation }) {
   }, [userId, tripID, token]);
   // console.log(token)
   // Sync button function
-  const note11 = () => {
-    if (!isLoading) {
-      // console.log('App.js/ ',"call notification");
-      navigation.navigate("NewSellerAdditionNotification");
-    }
-  };
+  // const note11 = () => {
+  //   if (!isLoading) {
+  //     // console.log('App.js/ ',"call notification");
+  //     navigation.navigate("NewSellerAdditionNotification");
+  //   }
+  // };
 
   useEffect(() => {
     if (userId !== null) {
@@ -1074,34 +1076,34 @@ function StackNavigators({ navigation }) {
   async function postSPSCalling(row) {
     const deviceId = await DeviceInfo.getUniqueId();
     const IpAddress = await DeviceInfo.getIpAddress();
-    console.log("App.js/postSPSCalling ", "===========row=========", {
-      clientShipmentReferenceNumber: row.clientShipmentReferenceNumber,
-      awbNo: row.awbNo,
-      clientRefId: row.clientRefId,
-      expectedPackagingId: row.packagingId,
-      packagingId: row.expectedPackagingId,
-      courierCode: row.courierCode,
-      consignorCode: row.consignorCode,
-      packagingAction: row.packagingAction,
-      runsheetNo: row.runSheetNumber,
-      shipmentAction: row.shipmentAction,
-      feUserID: userId,
-      rejectionReason: row.rejectionReasonL2
-        ? row.rejectionReasonL2
-        : row.rejectionReasonL1,
-      rejectionStage: 1,
-      bagId: row.bagId,
-      eventTime: parseInt(row.eventTime),
-      latitude: parseFloat(row.latitude),
-      longitude: parseFloat(row.longitude),
-      packagingStatus: 1,
-      scanStatus:
-        row.status == "accepted" ? 1 : row.status == "rejected" ? 2 : 0,
-      stopId: row.stopId,
-      tripID: row.FMtripId,
-      deviceId: deviceId,
-      deviceIPaddress: IpAddress,
-    });
+    // console.log("App.js/postSPSCalling ", "===========row=========", {
+    //   clientShipmentReferenceNumber: row.clientShipmentReferenceNumber,
+    //   awbNo: row.awbNo,
+    //   clientRefId: row.clientRefId,
+    //   expectedPackagingId: row.packagingId,
+    //   packagingId: row.expectedPackagingId,
+    //   courierCode: row.courierCode,
+    //   consignorCode: row.consignorCode,
+    //   packagingAction: row.packagingAction,
+    //   runsheetNo: row.runSheetNumber,
+    //   shipmentAction: row.shipmentAction,
+    //   feUserID: userId,
+    //   rejectionReason: row.rejectionReasonL2
+    //     ? row.rejectionReasonL2
+    //     : row.rejectionReasonL1,
+    //   rejectionStage: 1,
+    //   bagId: row.bagId,
+    //   eventTime: parseInt(row.eventTime),
+    //   latitude: parseFloat(row.latitude),
+    //   longitude: parseFloat(row.longitude),
+    //   packagingStatus: 1,
+    //   scanStatus:
+    //     row.status == "accepted" ? 1 : row.status == "rejected" ? 2 : 0,
+    //   stopId: row.stopId,
+    //   tripID: row.FMtripId,
+    //   deviceId: deviceId,
+    //   deviceIPaddress: IpAddress,
+    // });
     const decodedToken = token ? jwtDecode(token) : null;
     const currentEpochTime = Math.floor(Date.now() / 1000);
     if (decodedToken?.exp >= currentEpochTime) {
@@ -1166,17 +1168,15 @@ function StackNavigators({ navigation }) {
               }
             );
           });
-          setIsLoading(false);
         })
         .catch((error) => {
-          setIsLoading(false);
           callApi(error, latitude, longitude, userId, token);
           console.log("App.js/postSPSCalling ", "sync error", { error });
         });
     }
   }
 
-  async function postSPS(data) {
+  async function postSPS(data, syncType) {
     await data.map((row) => {
       postSPSCalling(row);
     });
@@ -1194,10 +1194,10 @@ function StackNavigators({ navigation }) {
     dispatch(setSyncTime(datetime));
     dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
     AsyncStorage.setItem("lastSyncTime112", datetime);
-    pull_API_Data();
+    pull_API_Data(syncType);
   }
 
-  const push_Data = () => {
+  const push_Data = (syncType = "manual") => {
     if (isAutoSyncEnable) {
       console.log(
         "App.js/push_Data ",
@@ -1237,24 +1237,26 @@ function StackNavigators({ navigation }) {
           [],
           (tx1, results) => {
             if (results.rows.length > 0) {
-              ToastAndroid.show("Synchronizing data...", ToastAndroid.SHORT);
+              if (syncType == "manual") {
+                ToastAndroid.show("Synchronizing data...", ToastAndroid.SHORT);
+              }
               let temp = [];
               for (let i = 0; i < results.rows.length; ++i) {
                 temp.push(results.rows.item(i));
               }
-              postSPS(temp);
-              setIsLoading(false);
-              ToastAndroid.show(
-                "Synchronizing data finished",
-                ToastAndroid.SHORT
-              );
+              postSPS(temp, syncType);
+              if (syncType == "manual") {
+                ToastAndroid.show(
+                  "Synchronizing data finished",
+                  ToastAndroid.SHORT
+                );
+              }
             } else {
               console.log(
                 "App.js/push_Data ",
                 "Only Pulling Data.No data to push..."
               );
-              setIsLoading(false);
-              pull_API_Data();
+              pull_API_Data(syncType);
             }
           }
         );
@@ -1325,8 +1327,10 @@ function StackNavigators({ navigation }) {
     fetchTripInfo();
   }, [userId]);
   // console.log("token",token)
-  const loadAPI_Data1 = () => {
-    setIsLoading(true);
+  const loadAPI_Data1 = (syncType) => {
+    if (syncType == "manual") {
+      setIsLoading1(true);
+    }
     createTables1();
     const decodedToken = token ? jwtDecode(token) : null;
     const currentEpochTime = Math.floor(Date.now() / 1000);
@@ -1418,7 +1422,7 @@ function StackNavigators({ navigation }) {
               dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
               AsyncStorage.setItem("lastSyncTime112", datetime);
               AsyncStorage.setItem("load11", "notload");
-              setIsLoading(false);
+              setIsLoading1(false);
             },
             (error) => {
               console.log(
@@ -1426,7 +1430,7 @@ function StackNavigators({ navigation }) {
                 "error api SellerMainScreen/consignorslist/",
                 error
               );
-              setIsLoading(false);
+              setIsLoading1(false);
             }
           )
           .catch((error) => {
@@ -1434,11 +1438,11 @@ function StackNavigators({ navigation }) {
               "App.js/loadAPI_Data1/Error in API Call Get consgnorsList",
               error
             );
-            setIsLoading(false);
+            setIsLoading1(false);
           });
       })();
     } else {
-      setIsLoading(false);
+      setIsLoading1(false);
     }
   };
   const viewDetails1 = () => {
@@ -1462,7 +1466,6 @@ function StackNavigators({ navigation }) {
         }
         if (m === 4) {
           ToastAndroid.show("Sync Successful", ToastAndroid.SHORT);
-          setIsLoading(false);
           setIsLogin(true);
           AsyncStorage.setItem("apiDataLoaded", "true");
           // console.log(
@@ -1477,7 +1480,6 @@ function StackNavigators({ navigation }) {
           //   "App.js/viewDetails1 ",
           //   "Only " + m + " APIs loaded out of 4 "
           // );
-          setIsLoading(false);
         }
         // m++;
         // ToastAndroid.show("Sync Successful",ToastAndroid.SHORT);
@@ -1537,8 +1539,10 @@ function StackNavigators({ navigation }) {
     });
   };
 
-  const loadAPI_Data2 = () => {
-    setIsLoading(true);
+  const loadAPI_Data2 = (syncType) => {
+    if (syncType == "manual") {
+      setIsLoading2(true);
+    }
     db.transaction((txn) => {
       txn.executeSql(
         "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ?",
@@ -1701,11 +1705,11 @@ function StackNavigators({ navigation }) {
                     dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
                     AsyncStorage.setItem("lastSyncTime112", datetime);
                     // console.log('App.js/ ','value of m2 '+m);
-                    setIsLoading(false);
+                    setIsLoading2(false);
                   },
                   (error) => {
                     console.log("App.js/loadAPI_Data2 ", error);
-                    setIsLoading(false);
+                    setIsLoading2(false);
                   }
                 )
                 .catch((error) => {
@@ -1713,7 +1717,7 @@ function StackNavigators({ navigation }) {
                     "App.js/loadAPI_Data2/API call workload error",
                     error
                   );
-                  setIsLoading(false);
+                  setIsLoading2(false);
                 });
             })();
           }
@@ -1850,8 +1854,10 @@ function StackNavigators({ navigation }) {
       );
     });
   };
-  const loadAPI_DataSF = () => {
-    setIsLoading(true);
+  const loadAPI_DataSF = (syncType) => {
+    if (syncType == "manual") {
+      setIsLoadingSF(true);
+    }
     createTablesSF();
     const decodedToken = token ? jwtDecode(token) : null;
     const currentEpochTime = Math.floor(Date.now() / 1000);
@@ -1909,11 +1915,11 @@ function StackNavigators({ navigation }) {
               // console.log('App.js/ ','value of m6 '+m);
 
               // viewDetailsSF();
-              setIsLoading(false);
+              setIsLoadingSF(false);
             },
             (error) => {
               console.log("App.js/loadAPI_DataSF ", error);
-              setIsLoading(false);
+              setIsLoadingSF(false);
             }
           )
           .catch((error) => {
@@ -1921,7 +1927,7 @@ function StackNavigators({ navigation }) {
               "App.js/loadAPI_DataSF/ADshipmentFailure/getList Error",
               error
             );
-            setIsLoading(false);
+            setIsLoadingSF(false);
           });
       })();
     }
@@ -3784,7 +3790,10 @@ function StackNavigators({ navigation }) {
         />
       </Stack.Navigator>
 
-      {isLoading && userId && userId.length > 0 && isLogin ? (
+      {(isLoading1 || isLoading2 || isLoadingSF) &&
+      userId &&
+      userId.length > 0 &&
+      isLogin ? (
         <View
           style={[
             StyleSheet.absoluteFillObject,
