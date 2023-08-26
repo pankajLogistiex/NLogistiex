@@ -115,7 +115,7 @@ export default function Login() {
         const providedDate = new Date(accessTokenExpirationDate);
 
         // Calculate the time difference in milliseconds
-        const timeDifference = providedDate - currentDate;
+        const timeDifference = providedDate - currentDate - 60000;
 
         AsyncStorage.setItem("userId", response?.data?.userDetails?.userId);
         AsyncStorage.setItem(

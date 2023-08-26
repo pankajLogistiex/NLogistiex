@@ -8,6 +8,7 @@ import {
   ScrollView,
   ToastAndroid,
   ActivityIndicator,
+  PermissionsAndroid,
 } from "react-native";
 import axios from "axios";
 import { Fab } from "native-base";
@@ -102,6 +103,40 @@ export default function Main({ navigation, route }) {
   const [acceptedItemData, setAcceptedItemData] = useState(0);
   
   const focus = useIsFocused();
+
+  useEffect(() => {
+    if (id) {
+      requestPermissions();
+      console.log("App.js/requestPermissions ", "Request permission", id);
+    }
+  }, [id]);
+
+  const requestPermissions = async () => {
+    try {
+      const cameraPermission = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA
+      );
+      if (cameraPermission !== PermissionsAndroid.RESULTS.GRANTED) {
+        console.log("App.js/requestPermissions ", "Camera permission denied");
+      }
+
+      const storagePermission = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+      );
+      if (storagePermission !== PermissionsAndroid.RESULTS.GRANTED) {
+        console.log("App.js/requestPermissions ", "Storage permission denied");
+      }
+
+      const locationPermission = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
+      );
+      if (locationPermission !== PermissionsAndroid.RESULTS.GRANTED) {
+        console.log("App.js/requestPermissions ", "Location permission denied");
+      }
+    } catch (error) {
+      console.warn(error);
+    }
+  };
 
   async function getUserDetails() {
     await AsyncStorage.getItem("email")

@@ -752,65 +752,17 @@ function StackNavigators({ navigation }) {
 
   const requestPermissions = async () => {
     try {
-      const cameraPermission = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.CAMERA,
-        {
-          title: "Camera Permission",
-          message: "This app needs access to your camera.",
-          buttonNeutral: "Ask Me Later",
-          buttonNegative: "Cancel",
-          buttonPositive: "OK",
-        }
-      );
-      if (cameraPermission !== PermissionsAndroid.RESULTS.GRANTED) {
-        console.log("App.js/requestPermissions ", "Camera permission denied");
-      }
-
-      const storagePermission = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-        {
-          title: "Storage Permission",
-          message: "This app needs access to your storage.",
-          buttonNeutral: "Ask Me Later",
-          buttonNegative: "Cancel",
-          buttonPositive: "OK",
-        }
-      );
-      if (storagePermission !== PermissionsAndroid.RESULTS.GRANTED) {
-        console.log("App.js/requestPermissions ", "Storage permission denied");
-      }
-
-      messaging()
-        .requestPermission()
-        .then((permission) => {
-          if (permission) {
-            console.log(
-              "App.js/requestPermissions ",
-              "Notification permission granted"
-            );
-            // messaging().getToken().then((token) => {
-            // console.log('App.js/ ','FCM Token:', token);
-            // });
-          } else {
-            console.log(
-              "App.js/requestPermissions ",
-              "Notification permission denied"
-            );
-          }
-        });
-
-      const locationPermission = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        {
-          title: "Location Permission",
-          message: "This app needs access to your location.",
-          buttonNeutral: "Ask Me Later",
-          buttonNegative: "Cancel",
-          buttonPositive: "OK",
-        }
-      );
-      if (locationPermission !== PermissionsAndroid.RESULTS.GRANTED) {
-        console.log("App.js/requestPermissions ", "Location permission denied");
+      const notificationPermission = await messaging().requestPermission();
+      if (notificationPermission == "granted") {
+        console.log(
+          "App.js/requestPermissions",
+          "Notification permission granted"
+        );
+      } else {
+        console.log(
+          "App.js/requestPermissions",
+          "Notification permission denied"
+        );
       }
     } catch (error) {
       console.warn(error);
@@ -3930,52 +3882,6 @@ function CustomDrawerContent({ navigation }) {
     }
   };
   const LogoutHandle = async () => {
-    try {
-      await AsyncStorage.removeItem("userId");
-      await AsyncStorage.removeItem("name");
-      await AsyncStorage.removeItem("email");
-      await AsyncStorage.removeItem("token");
-
-      dispatch(setUserId(""));
-      dispatch(setUserEmail(""));
-      dispatch(setUserName(""));
-      dispatch(setToken(""));
-      dispatch(setNotificationCount(0));
-      dispatch(setCurrentDateValue(0));
-      dispatch(setCurrentDeviceInfo(""));
-      dispatch(setAdditionalWorkloadData(""));
-    } catch (e) {
-      console.log("App.js/LogoutHandle ", e);
-    }
-    try {
-      await AsyncStorage.multiRemove(await AsyncStorage.getAllKeys());
-      console.log("App.js/LogoutHandle ", "AsyncStorage cleared successfully!");
-    } catch (error) {
-      console.error("Error clearing AsyncStorage:", error);
-    }
-
-    db.transaction((tx) => {
-      tx.executeSql(
-        "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
-        [],
-        (tx1, result) => {
-          console.log("App.js/LogoutHandle ", result);
-          let i = 0;
-          for (i = 0; i < result.rows.length; i++) {
-            const tableName = result.rows.item(i).name;
-            console.log("App.js/LogoutHandle ", tableName);
-            tx.executeSql(`DROP TABLE IF EXISTS ${tableName}`);
-          }
-          if (i === result.rows.length) {
-            console.log(
-              "App.js/LogoutHandle ",
-              "SQlite DB cleared successfully!"
-            );
-          }
-        }
-      );
-    });
-
     await logout(
       { issuer: "https://uacc.logistiex.com/realms/Logistiex-Demo" },
       {
@@ -3985,6 +3891,70 @@ function CustomDrawerContent({ navigation }) {
     )
       .then((result) => {
         console.log("App.js/LogoutHandle ", result);
+        async function call1() {
+          try {
+            await AsyncStorage.removeItem("userId");
+            await AsyncStorage.removeItem("name");
+            await AsyncStorage.removeItem("email");
+            await AsyncStorage.removeItem("token");
+
+            dispatch(setUserId(""));
+            dispatch(setUserEmail(""));
+            dispatch(setUserName(""));
+            dispatch(setToken(""));
+            dispatch(setNotificationCount(0));
+            dispatch(setCurrentDateValue(0));
+            dispatch(setCurrentDeviceInfo(""));
+            dispatch(setAdditionalWorkloadData(""));
+          } catch (e) {
+            console.log("App.js/LogoutHandle ", e);
+          }
+        }
+        async function call2() {
+          try {
+            await AsyncStorage.multiRemove(await AsyncStorage.getAllKeys());
+            console.log(
+              "App.js/LogoutHandle ",
+              "AsyncStorage cleared successfully!"
+            );
+          } catch (error) {
+            console.error("Error clearing AsyncStorage:", error);
+          }
+        }
+
+        call1();
+        call2();
+
+        db.transaction((tx) => {
+          tx.executeSql(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
+            [],
+            (tx1, result) => {
+              console.log("App.js/LogoutHandle ", result);
+              let i = 0;
+              for (i = 0; i < result.rows.length; i++) {
+                const tableName = result.rows.item(i).name;
+                console.log("App.js/LogoutHandle ", tableName);
+                tx.executeSql(`DROP TABLE IF EXISTS ${tableName}`);
+              }
+              if (i === result.rows.length) {
+                console.log(
+                  "App.js/LogoutHandle ",
+                  "SQlite DB cleared successfully!"
+                );
+              }
+            }
+          );
+        });
+
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 1,
+            routes: [{ name: "Login" }],
+          })
+        );
+
+        navigation.closeDrawer();
       })
       .catch((err) => {
         console.log("App.js/LogoutHandle ", "Logout Error", err);
@@ -4026,15 +3996,6 @@ function CustomDrawerContent({ navigation }) {
             mt={4}
             onPress={() => {
               LogoutHandle();
-
-              navigation.dispatch(
-                CommonActions.reset({
-                  index: 1,
-                  routes: [{ name: "Login" }],
-                })
-              );
-
-              navigation.closeDrawer();
             }}
             style={{
               backgroundColor: "#004aad",
