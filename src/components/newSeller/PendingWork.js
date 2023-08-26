@@ -123,27 +123,40 @@ const PendingWork = ({ route }) => {
                     'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND ( handoverStatus="accepted" AND status IS NULL)',
                     [results.rows.item(i).stopId, results.rows.item(i).FMtripId],
                     (tx1, results22) => {
-                      setMM(MM + results22.rows.length);
-                      newData[results.rows.item(i).stopId] = {
-                        consignorName: results.rows.item(i).consignorName,
-                        consignorLatitude:
-                          results.rows.item(i).consignorLatitude,
-                        consignorLongitude:
-                          results.rows.item(i).consignorLongitude,
-                          contactPersonName: results.rows.item(i).contactPersonName,
-                          phone: results.rows.item(i).consignorContact,
-                        forward: results11.rows.length,
-                        reverse: results22.rows.length,
-                        consignorCode:results.rows.item(i).consignorCode,
-                        tripId:results.rows.item(i).FMtripId
-                      };
-                      console.log(newData);
-                      if (newData != null) {
-                        setDisplayData((prevData) => ({
-                          ...prevData,
-                          ...newData,
-                        }));
-                      }
+                      tx.executeSql(
+                        'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Pickup" AND stopId=? AND FMtripId=?',
+                        [results.rows.item(i).stopId, results.rows.item(i).FMtripId],
+                        (tx1, resultsPickup) => {
+                          tx.executeSql(
+                            'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND ( handoverStatus="accepted")',
+                            [results.rows.item(i).stopId, results.rows.item(i).FMtripId],
+                            (tx1, resultsDelivery) => {
+                              setMM(MM + results22.rows.length);
+    
+                              newData[results.rows.item(i).stopId] = {
+                                consignorName: results.rows.item(i).consignorName,
+                                consignorLatitude: results.rows.item(i).consignorLatitude,
+                                consignorLongitude: results.rows.item(i).consignorLongitude,
+                                contactPersonName: results.rows.item(i).contactPersonName,
+                                phone: results.rows.item(i).consignorContact,
+                                forward: results11.rows.length,
+                                reverse: results22.rows.length,
+                                expectedPickup: resultsPickup.rows.length,
+                                expectedDelivery: resultsDelivery.rows.length,
+                                consignorCode: results.rows.item(i).consignorCode,
+                                tripId: results.rows.item(i).FMtripId,
+                              };
+                              console.log(newData);
+                              if (newData != null) {
+                                setDisplayData((prevData) => ({
+                                  ...prevData,
+                                  ...newData,
+                                }));
+                              }
+                            }
+                          );
+                        }
+                      );
                     }
                   );
                 }
@@ -155,6 +168,7 @@ const PendingWork = ({ route }) => {
         setLoading(false);
       });
     });
+  
     db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails WHERE shipmentAction="Seller Pickup" AND status IS NULL',
@@ -164,7 +178,7 @@ const PendingWork = ({ route }) => {
         }
       );
     });
-
+  
     db.transaction((tx) => {
       tx.executeSql(
         'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND (handoverStatus="accepted" AND status IS NULL)',
@@ -296,7 +310,27 @@ const PendingWork = ({ route }) => {
                                 size="sm"
                               />
                             }
-                            onPress={() =>
+                            onPress={() =>{
+                              if (displayData11[stopId].expectedPickup !== displayData11[stopId].forward) {
+                                navigation.navigate("ShipmentBarcode", {
+                                  consignorCode: displayData11[stopId].consignorCode,
+                                  latitude:
+                                    displayData11[stopId]
+                                      .consignorLatitude,
+                                  longitude:
+                                    displayData11[stopId]
+                                      .consignorLongitude,
+                                  userId: userId,
+                                  stopId:stopId,
+                                  tripID:displayData11[stopId].tripId,
+                                  contactPersonName:displayData11[stopId].contactPersonName,
+                                  phone:displayData11[stopId].phone,
+                                  pending:displayData11[stopId].forward,
+                                  token:route.params.token,
+                                  Forward:displayData11[stopId].expectedPickup
+                                })
+                              }
+                              else{
                               navigation.navigate("NotPicked", {
                                 consignorCode: displayData11[stopId].consignorCode,
                                 consignorLatitude:
@@ -312,7 +346,8 @@ const PendingWork = ({ route }) => {
                                 phone:displayData11[stopId].phone,
                                 pending:displayData11[stopId].forward,
                                 token:route.params.token
-                              })
+                              })}
+                            }
                             }
                             style={{
                               backgroundColor: "#004aad",
@@ -321,7 +356,9 @@ const PendingWork = ({ route }) => {
                               marginLeft: 20,
                             }}
                           >
-                            Close Pickup
+                             {displayData11[stopId].expectedPickup !== displayData11[stopId].forward
+                            ? "Complete Pickup"
+                            : "Close Pickup"}
                           </Button>
                         )}
                         {displayData11[stopId].reverse > 0 && (
@@ -335,7 +372,27 @@ const PendingWork = ({ route }) => {
                                 size="sm"
                               />
                             }
-                            onPress={() =>
+                            onPress={() =>{
+                              if (displayData11[stopId].expectedDelivery !== displayData11[stopId].reverse) {
+                                navigation.navigate("ScanShipment", {
+                                  consignorCode: displayData11[stopId].consignorCode,
+                                  latitude:
+                                    displayData11[stopId]
+                                      .consignorLatitude,
+                                  longitude:
+                                    displayData11[stopId]
+                                      .consignorLongitude,
+                                  userId: userId,
+                                  stopId:stopId,
+                                  tripId:displayData11[stopId].tripId,
+                                  contactPersonName:displayData11[stopId].contactPersonName,
+                                  phone:displayData11[stopId].phone,
+                                  pending:displayData11[stopId].forward,
+                                  token:route.params.token,
+                                  FOrward:displayData11[stopId].expectedDelivery
+                                })
+                              }
+                              else{
                               navigation.navigate("NotDelivered", {
                                 consignorCode:displayData11[stopId].consignorCode,
                                 consignorLatitude:
@@ -351,7 +408,8 @@ const PendingWork = ({ route }) => {
                                 phone:displayData11[stopId].phone,
                                 pending:displayData11[stopId].reverse,
                                 token:route.params.token
-                              })
+                              })}
+                            }
                             }
                             style={{
                               backgroundColor: "#004aad",
@@ -360,7 +418,9 @@ const PendingWork = ({ route }) => {
                               marginLeft: 20,
                             }}
                           >
-                            Close Delivery
+                             {displayData11[stopId].expectedDelivery !== displayData11[stopId].reverse
+                              ? "Complete Delivery"
+                              : "Close Delivery"}
                           </Button>
                         )}
                       </View>
