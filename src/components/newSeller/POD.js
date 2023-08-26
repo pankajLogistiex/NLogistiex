@@ -279,6 +279,7 @@ const POD = ({ route }) => {
           alert("Pickup Successfully completed");
           postRDStatus();
           navigation.navigate("Main");
+          setLoading(false);
         })
         .catch(function (error) {
           console.log("POD/SubmitForm11", error.response.data);
