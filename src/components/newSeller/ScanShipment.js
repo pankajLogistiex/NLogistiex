@@ -1300,7 +1300,7 @@ console.log(isRejecting);
                 callErrorAPIFromScanner(error);
               }}
             />
-            {"\n"}
+            <View style={{ alignItems: 'center' }}>
             <Input
               placeholder="Enter Packaging ID"
               size="md"
@@ -1319,14 +1319,16 @@ console.log(isRejecting);
                 onPress={() => {
                   handlepackaging(expectedPackagingId);
                 }}
+                style={{ width: 290 }}
               >
                 Submit
               </Button>
             ) : (
-              <Button flex="1" mt={2} bg="gray.300">
+              <Button flex="1" mt={2} bg="gray.300" style={{ width: 290 }}>
                 Submit
               </Button>
             )}
+            </View>
           </Modal.Body>
         </Modal.Content>
       </Modal>

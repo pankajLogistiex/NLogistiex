@@ -294,7 +294,8 @@ const CollectPOD = ({ route }) => {
         { headers: getAuthorizedHeaders(token) }
       )
       .then(setShowModal11(true))
-      .catch((err) => console.log("CollectPOD.js/sendSmsOtp ", "OTP not send"));
+      .catch((err) =>  ToastAndroid.show(err,"OTP not sent", ToastAndroid.SHORT)
+      );
   };
 
   function handleButtonPress11(item) {
@@ -571,9 +572,11 @@ const CollectPOD = ({ route }) => {
                   style={{ backgroundColor: "#004aad", color: "#fff" }}
                   title="Submit"
                   onPress={() => {
-                    setShowModal11(true);
-                    sendSmsOtp();
-                    setTimer(60);
+                    if(!name || !mobileNumber){
+                      ToastAndroid.show("Please enter name and mobile number", ToastAndroid.SHORT);
+                    }else{setShowModal11(true);
+                      sendSmsOtp();
+                      setTimer(60);}
                   }}
                 >
                   Send OTP

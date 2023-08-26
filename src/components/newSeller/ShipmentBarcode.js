@@ -1659,7 +1659,7 @@ console.log(packagingAction, packagingID)
                 callErrorAPIFromScanner(error);
               }}
             />
-            {"\n"}
+            <View style={{ alignItems: 'center' }}>
             <Input
               placeholder="Enter Packaging ID"
               size="md"
@@ -1678,14 +1678,16 @@ console.log(packagingAction, packagingID)
                 onPress={() => {
                   handlepackaging(expectedPackagingId, stopId);
                 }}
+                style={{ width: 290 }}
               >
                 Submit
               </Button>
             ) : (
-              <Button flex="1" mt={2} bg="gray.300">
+              <Button flex="1" mt={2} bg="gray.300" style={{ width: 290 }}>
                 Submit
               </Button>
             )}
+          </View>
           </Modal.Body>
         </Modal.Content>
       </Modal>
@@ -1724,7 +1726,7 @@ console.log(packagingAction, packagingID)
                 callErrorAPIFromScanner(error);
               }}
             />
-            {"\n"}
+            <View style={{ alignItems: 'center' }}>
             <Input
               placeholder="Enter Bag Seal"
               size="md"
@@ -1739,6 +1741,7 @@ console.log(packagingAction, packagingID)
               flex="1"
               mt={2}
               bg="#004aad"
+              style={{ width: 290 }}
               onPress={() => {
                 CloseBag(), setShowCloseBagModal(false);
                 setShowOuterScanner(true);
@@ -1746,6 +1749,7 @@ console.log(packagingAction, packagingID)
             >
               Submit
             </Button>
+            </View>
           </Modal.Body>
         </Modal.Content>
       </Modal>

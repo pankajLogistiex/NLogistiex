@@ -307,7 +307,7 @@ const POD = ({ route }) => {
         { headers: getAuthorizedHeaders(token) }
       )
       .then(setShowModal11(true))
-      .catch((err) => console.log("POD/sendSmsOtp/OTP not send"));
+      .catch((err) => ToastAndroid.show(err,"OTP not sent", ToastAndroid.SHORT));
   };
 
   function handleButtonPress11(item) {
@@ -595,8 +595,12 @@ const POD = ({ route }) => {
                   style={{ backgroundColor: "#004aad", color: "#fff" }}
                   title="Submit"
                   onPress={() => {
-                    sendSmsOtp();
-                    setTimer(60);
+                    if (!name || !mobileNumber) {
+                      ToastAndroid.show("Please enter name and mobile number", ToastAndroid.SHORT);
+                    } else {
+                      sendSmsOtp();
+                      setTimer(60);
+                    }
                   }}
                 >
                   Send OTP
