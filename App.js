@@ -1101,11 +1101,11 @@ function StackNavigators({ navigation }) {
               [row.clientShipmentReferenceNumber],
               (tx1, results) => {
                 let temp = [];
-                console.log(
-                  "App.js/postSPSCalling ",
-                  "===========Local Sync Status Results==========",
-                  results.rowsAffected
-                );
+                // console.log(
+                //   "App.js/postSPSCalling ",
+                //   "===========Local Sync Status Results==========",
+                //   results.rowsAffected
+                // );
                 if (results.rowsAffected > 0) {
                   console.log(
                     "App.js/postSPSCalling ",
@@ -1150,6 +1150,7 @@ function StackNavigators({ navigation }) {
   }
 
   const push_Data = (syncType = "manual") => {
+    fetchTripInfo();
     if (isAutoSyncEnable) {
       console.log(
         "App.js/push_Data ",
