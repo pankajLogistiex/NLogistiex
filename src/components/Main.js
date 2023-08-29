@@ -61,12 +61,12 @@ export default function Main({ navigation, route }) {
   const isNewSync = useSelector((state) => state.newSync.value);
   const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
   const currentDateValue =
-    useSelector((state) => state.currentDate.currentDateValue) ||
+    // useSelector((state) => state.currentDate.currentDateValue) ||
     new Date().toISOString().split("T")[0];
   const [data, setData] = useState(0);
   // const [data1, setData1] = useState(0);
   // const [data2, setData2] = useState('');
-
+// console.log("Main/currentDateValue",currentDateValue)
   const [isData, setIsData] = useState(false);
 
   const [spts, setSpts] = useState(0);
@@ -373,7 +373,7 @@ export default function Main({ navigation, route }) {
 
     setLoading(false);
   };
-
+// console.log("pendingPickups",spp)
   const loadHanoverDetails = async () => {
     setIsLoading(!isLoading);
     await AsyncStorage.setItem("refresh11", "notrefresh");

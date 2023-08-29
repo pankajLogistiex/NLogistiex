@@ -94,7 +94,7 @@ import {
 } from "./src/redux/slice/userSlice";
 import { setCurrentDateValue } from "./src/redux/slice/currentDateSlice";
 import { setAdditionalWorkloadData } from "./src/redux/slice/additionalWorkloadSlice";
-import { setTripStatus } from "./src/redux/slice/tripSlice";
+// import { setTripStatus } from "./src/redux/slice/tripSlice";
 import { logout, refresh } from "react-native-app-auth";
 import PushNotification from "react-native-push-notification";
 import { setNotificationCount } from "./src/redux/slice/notificationSlice";
@@ -936,7 +936,7 @@ function StackNavigators({ navigation }) {
       loadAPI_3();
       createTableBag1();
       loadAPI_DataSF(syncType);
-      DisplayData();
+      // DisplayData();
       const randomValue = Math.floor(Math.random() * (100 - 1 + 1)) + 1;
       dispatch(setIsNewSync(randomValue));
     }
@@ -1148,9 +1148,8 @@ function StackNavigators({ navigation }) {
     AsyncStorage.setItem("lastSyncTime112", datetime);
     pull_API_Data(syncType);
   }
-
   const push_Data = (syncType = "manual") => {
-    fetchTripInfo();
+    // fetchTripInfo();
     if (isAutoSyncEnable) {
       console.log(
         "App.js/push_Data ",
@@ -1259,7 +1258,6 @@ function StackNavigators({ navigation }) {
         (tx, result) => {
           if (result.rows.length > 0) {
             setTripID(result.rows.item(0).tripID);
-            console.log("date", result.rows.item(0).date > today);
           } else {
             txn.executeSql(
               "SELECT * FROM TripDetails WHERE tripStatus = ? AND userID = ? AND date = ?  ORDER BY tripID DESC LIMIT 1",
@@ -1267,7 +1265,7 @@ function StackNavigators({ navigation }) {
               (tx, result) => {
                 if (result.rows.length > 0) {
                   setTripID(result.rows.item(0).tripID);
-                }
+                    }
               }
             );
           }
@@ -1310,32 +1308,33 @@ function StackNavigators({ navigation }) {
                     "SELECT * FROM SyncSellerPickUp WHERE stopId = ? AND FMtripId=?",
                     [res.data.data[i].stopId, tripID],
                     (tx, result) => {
+                      const data=res.data.data[i];
                       if (result.rows.length <= 0) {
                         db.transaction((txn) => {
                           txn.executeSql(
                             "INSERT OR REPLACE INTO SyncSellerPickUp( contactPersonName,consignorCode ,userId ,consignorName,sellerIndex ,consignorAddress1,consignorAddress2,consignorCity,consignorPincode,consignorLatitude,consignorLongitude,consignorContact,ReverseDeliveries,runSheetNumber,ForwardPickups,BagOpenClose11, ShipmentListArray,otpSubmitted,otpSubmittedDelivery,stopId, FMtripId,date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                             [
-                              res.data.data[i].contactPersonName,
-                              res.data.data[i].consignorCode,
+                              data.contactPersonName,
+                              data.consignorCode,
                               userId,
-                              res.data.data[i].consignorName,
-                              res.data.data[i].sequenceNumber,
-                              res.data.data[i].consignorAddress1,
-                              res.data.data[i].consignorState,
-                              res.data.data[i].consignorCity,
-                              res.data.data[i].consignorPincode,
-                              res.data.data[i].consignorLatitude,
-                              res.data.data[i].consignorLongitude,
-                              res.data.data[i].consignorContact,
-                              res.data.data[i].ReverseDeliveries,
-                              res.data.data[i].runsheetNo,
-                              res.data.data[i].ForwardPickups,
+                              data.consignorName,
+                              data.sequenceNumber,
+                              data.consignorAddress1,
+                              data.consignorState,
+                              data.consignorCity,
+                              data.consignorPincode,
+                              data.consignorLatitude,
+                              data.consignorLongitude,
+                              data.consignorContact,
+                              data.ReverseDeliveries,
+                              data.runsheetNo,
+                              data.ForwardPickups,
                               "true",
                               " ",
                               "false",
                               "false",
-                              res.data.data[i].stopId,
-                              res.data.data[i].FMtripId,
+                              data.stopId,
+                              data.FMtripId,
                               currentDateValue,
                             ],
                             (sqlTxn, _res) => {
@@ -1496,15 +1495,16 @@ function StackNavigators({ navigation }) {
     if (syncType == "manual") {
       setIsLoading2(true);
     }
-    db.transaction((txn) => {
-      txn.executeSql(
-        "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ?",
-        [20, 50, userId],
-        (tx, result) => {
-          if (result.rows.length > 0) {
-            var tripStatus = result.rows.item(0).tripStatus;
-          }
-          console.log("App.js/loadAPI_Data2 ", "Trip id: ", tripID, tripStatus);
+    fetchTripInfo();
+    if(tripID){
+      db.transaction((txn) => {
+        txn.executeSql(
+          "SELECT * FROM TripDetails WHERE userID = ? AND date=?",
+          [userId, currentDateValue],
+          (tx, result) => {
+            if (result.rows.length > 0) {
+              var tripStatus = result.rows.item(0).tripStatus;
+      console.log("App.js/loadAPI_Data2 ", "Trip id: ", tripID, tripStatus);
           const decodedToken = token ? jwtDecode(token) : null;
           const currentEpochTime = Math.floor(Date.now() / 1000);
           if (decodedToken?.exp >= currentEpochTime) {
@@ -1525,16 +1525,15 @@ function StackNavigators({ navigation }) {
                     );
                     for (let i = 0; i < res.data.data.length; i++) {
                       const shipmentStatus = res.data.data[i].shipmentStatus;
-
+                      const data=res.data.data[i];
                       if (
-                        !(tripStatus == 50 && shipmentStatus === "WFP") &&
-                        tripID
+                        !(tripStatus == 50 && shipmentStatus === "WFP")
                       ) {
                         db.transaction((txn) => {
                           txn.executeSql(
                             "SELECT * FROM SellerMainScreenDetails where clientShipmentReferenceNumber = ? AND FMtripId=?",
                             [
-                              res.data.data[i].clientShipmentReferenceNumber,
+                              data.clientShipmentReferenceNumber,
                               tripID,
                             ],
                             (tx, result) => {
@@ -1569,59 +1568,59 @@ function StackNavigators({ navigation }) {
                           date
                         ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
                                     [
-                                      res.data.data[i]
+                                      data
                                         .clientShipmentReferenceNumber,
-                                      res.data.data[i].clientRefId,
-                                      res.data.data[i].awbNo,
-                                      res.data.data[i].courierCode,
-                                      res.data.data[i].consignorCode,
-                                      res.data.data[i].packagingStatus,
-                                      res.data.data[i].expectedPackagingId,
-                                      res.data.data[i].scannedPackageingId,
-                                      res.data.data[i].runsheetNo,
-                                      res.data.data[i].shipmentStatus,
-                                      res.data.data[i].shipmentAction,
+                                        data.clientRefId,
+                                        data.awbNo,
+                                        data.courierCode,
+                                        data.consignorCode,
+                                        data.packagingStatus,
+                                        data.expectedPackagingId,
+                                        data.scannedPackageingId,
+                                        data.runsheetNo,
+                                        data.shipmentStatus,
+                                        data.shipmentAction,
                                       "",
                                       "",
                                       0,
-                                      res.data.data[i].actionTime,
-                                      res.data.data[i].shipmentStatus ==
+                                      data.actionTime,
+                                      data.shipmentStatus ==
                                         "PUS" ||
-                                      res.data.data[i].shipmentStatus ==
+                                        data.shipmentStatus ==
                                         "PUC" ||
-                                      res.data.data[i].shipmentStatus ==
+                                        data.shipmentStatus ==
                                         "DLR" ||
-                                      res.data.data[i].shipmentStatus == "RDS"
+                                        data.shipmentStatus == "RDS"
                                         ? "accepted"
-                                        : res.data.data[i].shipmentStatus ==
+                                        : data.shipmentStatus ==
                                             "PUR" ||
-                                          res.data.data[i].shipmentStatus ==
+                                            data.shipmentStatus ==
                                             "RDR" ||
-                                          res.data.data[i].shipmentStatus ==
+                                            data.shipmentStatus ==
                                             "UDU" ||
-                                          res.data.data[i].shipmentStatus ==
+                                            data.shipmentStatus ==
                                             "PUF"
                                         ? "rejected"
-                                        : res.data.data[i].shipmentStatus ==
+                                        : data.shipmentStatus ==
                                           "RAH"
-                                        ? res.data.data[i].shipmentAction ==
+                                        ? data.shipmentAction ==
                                           "Seller Pickup"
                                           ? "accepted"
                                           : "rejected"
                                         : null,
                                       // null,
-                                      res.data.data[i].handoverStatus == 1
+                                      data.handoverStatus == 1
                                         ? "accepted"
-                                        : res.data.data[i].handoverStatus == 2
+                                        : data.handoverStatus == 2
                                         ? "rejected"
                                         : null,
                                       null,
                                       null,
                                       "",
-                                      res.data.data[i].packagingAction,
+                                      data.packagingAction,
                                       null,
-                                      res.data.data[i].stopId,
-                                      res.data.data[i].FMtripId,
+                                      data.stopId,
+                                      data.FMtripId,
                                       currentDateValue,
                                     ],
                                     (sqlTxn, _res) => {
@@ -1674,9 +1673,8 @@ function StackNavigators({ navigation }) {
                 });
             })();
           }
-        }
-      );
-    });
+    }})})  
+    }    
   };
   // console.log("token",token)
   const createTables3 = () => {
@@ -1689,7 +1687,7 @@ function StackNavigators({ navigation }) {
           tripStatus VARCHAR(200),
           createdAt VARCHAR(200),
           updatedAt VARCHAR(200),
-          date INTEGER
+          date VARCHAR(200)
           )`,
         [],
         (sqlTxn, res) => {
@@ -1726,22 +1724,23 @@ function StackNavigators({ navigation }) {
                 today.setUTCHours(0, 0, 0, 0);
                 today = today.valueOf();
                 if (res.data.res_data[i].date > today) {
+                  const data=res.data.res_data[i];
                   db.transaction((txn) => {
                     txn.executeSql(
                       `INSERT OR REPLACE INTO TripDetails(tripID , userID, vehicleNumber, tripStatus, createdAt ,updatedAt,date
                           ) VALUES (?,?,?,?,?,?,?)`,
                       [
-                        res.data.res_data[i].tripID,
-                        res.data.res_data[i].userID,
-                        res.data.res_data[i].vehicleNumber,
-                        res.data.res_data[i].tripStatus,
-                        res.data.res_data[i].createdAt,
-                        res.data.res_data[i].updatedAt,
+                        data.tripID,
+                        data.userID,
+                        data.vehicleNumber,
+                        data.tripStatus,
+                        data.createdAt,
+                        data.updatedAt,
                         currentDateValue,
                       ],
                       (sqlTxn, _res) => {
                         m++;
-                        fetchTripInfo();
+                        // fetchTripInfo();
                       },
                       (error) => {
                         console.log(
@@ -1827,28 +1826,29 @@ function StackNavigators({ navigation }) {
               for (let i = 0; i < res.data.data.length; i++) {
                 // const appliesto=JSON.parse(JSON.stringify(res.data.data[i].appliesTo))
                 const appliesto = String(res.data.data[i].appliesTo.slice());
+                const data=res.data.data[i];
                 db.transaction((txn) => {
                   txn.executeSql(
                     `INSERT OR REPLACE INTO ShipmentFailure(_id ,description , parentCode, short_code , consignor_failure , fe_failure , operational_failure , system_failure , enable_geo_fence , enable_future_scheduling , enable_otp , enable_call_validation, created_by , last_updated_by, applies_to ,life_cycle_code , __v,date
                           ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
                     [
-                      res.data.data[i]._id,
-                      res.data.data[i].description,
-                      res.data.data[i].parentCode,
-                      res.data.data[i].shortCode,
-                      res.data.data[i].consignorFailure,
-                      res.data.data[i].feFailure,
-                      res.data.data[i].operationalFailure,
-                      res.data.data[i].systemFailure,
-                      res.data.data[i].enableGeoFence,
-                      res.data.data[i].enableFutureScheduling,
-                      res.data.data[i].enableOTP,
-                      res.data.data[i].enableCallValidation,
-                      res.data.data[i].createdBy,
-                      res.data.data[i].lastUpdatedBy,
+                      data._id,
+                      data.description,
+                      data.parentCode,
+                      data.shortCode,
+                      data.consignorFailure,
+                      data.feFailure,
+                      data.operationalFailure,
+                      data.systemFailure,
+                      data.enableGeoFence,
+                      data.enableFutureScheduling,
+                      data.enableOTP,
+                      data.enableCallValidation,
+                      data.createdBy,
+                      data.lastUpdatedBy,
                       appliesto,
-                      res.data.data[i].lifeCycleCode,
-                      res.data.data[i].__v,
+                      data.lifeCycleCode,
+                      data.__v,
                       currentDateValue,
                     ],
                     (sqlTxn, _res) => {
@@ -1925,28 +1925,7 @@ function StackNavigators({ navigation }) {
     });
   };
 
-  const viewDetailsSF = () => {
-    db.transaction((tx) => {
-      tx.executeSql("SELECT * FROM ShipmentFailure", [], (tx1, results) => {
-        let temp = [];
-        // console.log('App.js/ ',results.rows.length);
-        for (let i = 0; i < results.rows.length; ++i) {
-          temp.push(results.rows.item(i));
-        }
-        // console.log('App.js/ ',"1173", temp);
-        // if (m <= 6){
-        //   // ToastAndroid.show('Sync Successful',ToastAndroid.SHORT);
-        //   console.log('App.js/ ','Waiting for ' + ( 7 - m ) + ' API to load. Plz wait...');
-        //   // m = 0;
-        // }
-        //  else {
-        //   console.log('App.js/ ','Only ' + m + ' APIs loaded out of 6 ');
-        // }
-        // console.log('App.js/ ','Data from Local Database 6 : \n ', temp);
-        // console.log('App.js/ ','TableSF DB OK:', temp.length);
-      });
-    });
-  };
+  
 
   return (
     <NativeBaseProvider>
