@@ -256,27 +256,45 @@ export default function Main({ navigation, route }) {
       loadSellerDeliveryDetails();
 
       fetchTripInfo();
+
+      if (tripID && currentDateValue) {
+        db.transaction((tx) => {
+          tx.executeSql(
+            "SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE FMtripId=? AND date=?",
+            [tripID, currentDateValue],
+            (tx1, results) => {
+              if (results.rows.item(0).count != 0) {
+                setIsData(true);
+              } else {
+                setIsData(false);
+              }
+            }
+          );
+        });
+      }
     });
     return unsubscribe;
   }, [navigation, syncTimeFull, currentDateValue]);
-
-  const getData = async () => {
-    try {
-      const value = await AsyncStorage.getItem("refresh11");
-      if (value === "refresh") {
-        loadSellerPickupDetails();
-        loadHanoverDetails();
-        loadSellerDeliveryDetails();
-      }
-    } catch (e) {
-      // console.log('Main.js/ ',e);
-    }
-  };
 
   useEffect(() => {
     loadSellerPickupDetails();
     loadHanoverDetails();
     loadSellerDeliveryDetails();
+    if (tripID && currentDateValue) {
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE FMtripId=? AND date=?",
+          [tripID, currentDateValue],
+          (tx1, results) => {
+            if (results.rows.item(0).count != 0) {
+              setIsData(true);
+            } else {
+              setIsData(false);
+            }
+          }
+        );
+      });
+    }
   }, [isNewSync, syncTimeFull, currentDateValue]);
 
   useEffect(() => {
@@ -296,9 +314,6 @@ export default function Main({ navigation, route }) {
         [tripID, currentDateValue],
         (tx1, results) => {
           setSpts(results.rows.item(0).count);
-          if (results.rows.item(0).count != 0) {
-            setIsData(true);
-          }
         }
       );
     });
@@ -374,9 +389,6 @@ export default function Main({ navigation, route }) {
         [tripID, currentDateValue],
         (tx1, results) => {
           setShts(results.rows.item(0).count);
-          if (results.rows.item(0).count != 0) {
-            setIsData(true);
-          }
         }
       );
     });

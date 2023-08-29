@@ -5,7 +5,6 @@ import "react-native-gesture-handler";
 import { Provider, useDispatch, useSelector } from "react-redux";
 import { store } from "./src/redux/store";
 import { useRoute } from "@react-navigation/native";
-import RNAndroidLocationEnabler from "react-native-android-location-enabler";
 
 import {
   NativeBaseProvider,
@@ -94,7 +93,6 @@ import {
 } from "./src/redux/slice/userSlice";
 import { setCurrentDateValue } from "./src/redux/slice/currentDateSlice";
 import { setAdditionalWorkloadData } from "./src/redux/slice/additionalWorkloadSlice";
-// import { setTripStatus } from "./src/redux/slice/tripSlice";
 import { logout, refresh } from "react-native-app-auth";
 import PushNotification from "react-native-push-notification";
 import { setNotificationCount } from "./src/redux/slice/notificationSlice";
@@ -106,7 +104,6 @@ import {
 } from "./src/redux/slice/autoSyncSlice";
 import DeviceInfo from "react-native-device-info";
 import * as RNLocalize from "react-native-localize";
-import Mixpanel from "react-native-mixpanel";
 import GetLocation from "react-native-get-location";
 import { callApi } from "./src/components/ApiError";
 import { autoSyncTime } from "./src/utils/autoSyncTime";
@@ -121,7 +118,6 @@ function StackNavigators({ navigation }) {
   const dispatch = useDispatch();
 
   const userId = useSelector((state) => state.user.user_id);
-  const userEmail = useSelector((state) => state.user.user_email);
   const notificationCount = useSelector((state) => state.notification.count);
   // const [notificationCount,setNotificationCount1]=useState(0);
   const syncTime = useSelector((state) => state.autoSync.syncTime);
@@ -134,72 +130,408 @@ function StackNavigators({ navigation }) {
   const currentDateValue =
     useSelector((state) => state.currentDate.currentDateValue) ||
     new Date().toISOString().split("T")[0];
-  const deviceInfo = useSelector((state) => state.deviceInfo.currentDeviceInfo);
-  const additionalWorkloadInfo11 = useSelector(
-    (state) => state.additionalWorkloadInfo.currentAdditionalWorkloadInfo
-  );
   const [isLoading1, setIsLoading1] = useState(false);
   const [isLoading2, setIsLoading2] = useState(false);
   const [isLoadingSF, setIsLoadingSF] = useState(false);
-  const [data, setData] = useState([]);
-  const [isLogin, setIsLogin] = useState(false);
-  const [scannedStatus, SetScannedStatus] = useState(0);
-  const [isMixPanelInit, setIsMixPanelInit] = useState(false);
+  const [isLoading4, setIsLoading4] = useState(false);
+  const [syncLoading, setSyncLoading] = useState(false);
   const [latitude, setLatitude] = useState(0);
   const [longitude, setLongitude] = useState(0);
   const [tripID, setTripID] = useState("");
   const [showModal11, setShowModal11] = useState(false);
   const [dataN, setDataN] = useState([]);
 
-  // console.log('App.js/ ',additionalWorkloadInfo11);
-  // console.log('App.js/ ',userId);
-  const DisplayData = async () => {
-    const decodedToken = token ? jwtDecode(token) : null;
-    const currentEpochTime = Math.floor(Date.now() / 1000);
-    if (userId && decodedToken?.exp >= currentEpochTime) {
-      try {
-        // console.log('App.js/ ',"UserId",userId);
-        const fetchData = async () => {
-          try {
-            const response = await axios.get(
-              `${backendUrl}SellerMainScreen/getadditionalwork/${userId}`,
-              { headers: getAuthorizedHeaders(token) }
-            );
-            const responseData = response?.data?.data;
-            setDataN(responseData);
-            // console.log('App.js/ ','AdditionalWorkload API data=============================================>>>>>>>>>>>>');
-            dispatch(setAdditionalWorkloadData(responseData));
-            console.log(
-              "App.js/DisplayData ",
-              "Additional Workload API Data:",
-              response.data.data.length
-            );
-            setShowModal11(responseData && responseData.length > 0);
-          } catch (error) {
-            console.log("App.js/DisplayData ", "Error Msg11:", error);
+  function createTables() {
+    createConsignorListTable();
+    createWorkloadTable();
+    createTripDetailTable();
+    createNofiticationTable();
+    createShipmentFailureTable();
+    createCloseBagTable();
+    createCloseBagHandoverTable();
+  }
+
+  useEffect(() => {
+    createTables();
+  }, [userId]);
+
+  async function syncData() {
+    try {
+      await getUserTripInfoApiCall();
+      await AdditionalWorkloadApiCall();
+      await getFailureReasonApiCall();
+    } catch (error) {
+      console.log("Error in API calls:", error);
+    }
+  }
+
+  useEffect(() => {
+    if (userId) {
+      syncData();
+    }
+  }, [userId, token]);
+
+  const formatDate = (dateArray) => {
+    const [mm, dd, yyyy] = dateArray;
+    return `${yyyy}-${mm?.padStart(2, "0")}-${dd?.padStart(2, "0")}`;
+  };
+
+  async function getWorkloadData(syncType = "manual") {
+    if (syncType != "auto") {
+      setSyncLoading(true);
+    }
+    const currentDate = new Date();
+    const currentEpochTime = currentDate.getTime();
+
+    const tripDate = new Date(parseInt(tripID.split("-")[1]));
+    const todayDate = new Date(currentEpochTime);
+
+    if (
+      formatDate(tripDate.toLocaleString().split(",")[0].split("/")) !=
+      formatDate(todayDate.toLocaleString().split(",")[0].split("/"))
+    ) {
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
+          [],
+          (tx1, result) => {
+            for (let i = 0; i < result.rows.length; i++) {
+              const tableName = result.rows.item(i).name;
+              tx1.executeSql(`DELETE FROM ${tableName}`);
+              // console.log(`Cleared data from table: ${tableName}`);
+            }
+            console.log("SQLite DB data cleared successfully!");
           }
-        };
-        fetchData();
-        // const pollingInterval = 20000;
-        // const intervalId = setInterval(fetchData, pollingInterval);
-        // return () => {
-        //   clearInterval(intervalId);
-        // };
-      } catch (error) {
-        console.log("App.js/DisplayData ", "Error Msg1:", error);
+        );
+      });
+      setIsLoading1(false);
+      setIsLoading2(false);
+      setIsLoading4(false);
+      setIsLoadingSF(false);
+      setSyncLoading(false);
+    } else {
+      if (tripID && userId) {
+        await getUserTripInfoApiCall(syncType);
+        await getConsignorListApiCall(syncType);
+        await getWorkloadApiCall(syncType);
       }
     }
-  };
-  useEffect(() => {
-    DisplayData();
-  }, [userId, token]);
-  useEffect(() => {
-    setShowModal11(dataN && dataN.length > 0);
-  }, [userId, setShowModal11]);
+    setSyncLoading(false);
+  }
 
-  const AcceptHandler = async (consignorCodeAccept, stopId, tripId) => {
-    // console.log('App.js/ ','df')
-    console.log("App.js/AcceptHandler ", {
+  useEffect(() => {
+    sync11();
+  }, [tripID, token, userId]);
+
+  useEffect(() => {
+    fetchTripInfo();
+  }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
+      console.log(
+        "App.js/AutoSync ",
+        "===Background Task Run UseEffect Called==="
+      );
+      const timer = BackgroundTimer.runBackgroundTimer(() => {
+        sync11("auto");
+        console.log("App.js/AutoSync/ ", "===Auto sync called===");
+      }, autoSyncTime);
+
+      return () => {
+        BackgroundTimer.stopBackgroundTimer(timer);
+      };
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    if (forceSync) {
+      sync11();
+      console.log("App.js/forceSync/ ", "===Force sync called===");
+    }
+  }, [forceSync, token]);
+
+  const createConsignorListTable = () => {
+    db.transaction((txn) => {
+      // txn.executeSql('DROP TABLE IF EXISTS SyncSellerPickUp', []);
+      txn.executeSql(
+        `CREATE TABLE IF NOT EXISTS SyncSellerPickUp( consignorCode VARCHAR(200) ,userId VARCHAR(100), 
+            consignorName VARCHAR(200),sellerIndex INT(20),consignorAddress1 VARCHAR(200),consignorAddress2 VARCHAR(200),consignorCity VARCHAR(200),consignorPincode,consignorLatitude INT(20),consignorLongitude DECIMAL(20,10),consignorContact VARCHAR(200),ReverseDeliveries INT(20),runSheetNumber VARCHAR(200),ForwardPickups INT(20), BagOpenClose11 VARCHAR(200), ShipmentListArray VARCHAR(800),contactPersonName VARCHAR(100),otpSubmitted VARCHAR(50),otpSubmittedDelivery VARCHAR(50), stopId VARCHAR(200) PRIMARY KEY, FMtripId VARCHAR(200),date Text)`,
+        [],
+        (sqlTxn, res) => {
+          console.log("App.js/ ", "table created successfully consignorList");
+          // loadAPI_Data();
+        },
+        (error) => {
+          console.log(
+            "App.js/createConsignorListTable ",
+            "error on creating table " + error.message
+          );
+        }
+      );
+    });
+  };
+
+  const createWorkloadTable = () => {
+    db.transaction((txn) => {
+      // txn.executeSql('DROP TABLE IF EXISTS SellerMainScreenDetails', []);
+      txn.executeSql(
+        `CREATE TABLE IF NOT EXISTS SellerMainScreenDetails( 
+          clientShipmentReferenceNumber id VARCHAR(200) PRIMARY KEY,
+          clientRefId VARCHAR(200),
+          awbNo VARCHAR(200),
+          courierCode VARCHAR(200),
+          consignorCode VARCHAR(200),
+          packagingStatus VARCHAR(200),
+          packagingId VARCHAR(200),
+          expectedPackagingId VARCHAR(200),
+          runSheetNumber VARCHAR(200),
+          shipmentStatus VARCHAR(200),
+          shipmentAction VARCHAR(200),
+          rejectionReasonL1 VARCHAR(200),
+          rejectionReasonL2 VARCHAR(200),
+          rejectionStage VARCHAR(200),
+          eventTime VARCHAR(200),
+          status VARCHAR(200),
+          handoverStatus VARCHAR(200),
+          syncStatus VARCHAR(200),
+          syncHandoverStatus VARCHAR(200),
+          latitude VARCHAR(200),
+          longitude VARCHAR(200),
+          bagId VARCHAR(200),
+          packagingAction VARCHAR(200),
+          postRDStatus VARCHAR(200),
+          stopId VARCHAR(200),
+          FMtripId VARCHAR(200),
+          date Text
+          )`,
+        [],
+        (sqlTxn, res) => {
+          console.log("App.js/ ", "table created successfully workload");
+          // loadAPI_Data();
+        },
+        (error) => {
+          console.log(
+            "App.js/createWorkloadTable ",
+            "error on creating table SellerMainScreenDetails" + error.message
+          );
+        }
+      );
+    });
+  };
+
+  const createTripDetailTable = () => {
+    db.transaction((txn) => {
+      txn.executeSql(
+        `CREATE TABLE IF NOT EXISTS TripDetails( 
+          tripID VARCHAR(200),
+          userID VARCHAR(200),
+          vehicleNumber VARCHAR(200),
+          tripStatus VARCHAR(200),
+          createdAt VARCHAR(200),
+          updatedAt VARCHAR(200),
+          date VARCHAR(200)
+          )`,
+        [],
+        (sqlTxn, res) => {
+          console.log("App.js/ ", "table created successfully TripDetails");
+          // loadAPI_Data();
+        },
+        (error) => {
+          console.log(
+            "App.js/createTripDetailTable ",
+            "error on creating table " + error.message
+          );
+        }
+      );
+    });
+  };
+
+  const createNofiticationTable = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        `CREATE TABLE IF NOT EXISTS noticeMessages (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          messageId TEXT,
+          notificationTitle TEXT,
+          notificationBody TEXT,
+          date TEXT,
+          sentTime TEXT,
+          message TEXT,
+          sellerName TEXT,
+          sellerCode TEXT
+        )`,
+        [],
+        (tx, results) => {
+          console.log("App.js/ ", "Table created successfully Notice");
+        },
+        (error) => {
+          console.log(
+            "App.js/createNofiticationTable ",
+            "Error creating table: ",
+            error
+          );
+        }
+      );
+    });
+  };
+
+  const createShipmentFailureTable = () => {
+    db.transaction((txn) => {
+      // txn.executeSql('DROP TABLE IF EXISTS ShipmentFailure', []);
+      txn.executeSql(
+        "CREATE TABLE IF NOT EXISTS ShipmentFailure(_id VARCHAR(24) PRIMARY KEY,description VARCHAR(255),parentCode VARCHAR(20), short_code VARCHAR(20), consignor_failure BOOLEAN, fe_failure BOOLEAN, operational_failure BOOLEAN, system_failure BOOLEAN, enable_geo_fence BOOLEAN, enable_future_scheduling BOOLEAN, enable_otp BOOLEAN, enable_call_validation BOOLEAN, created_by VARCHAR(10), last_updated_by VARCHAR(10), applies_to VARCHAR(255),life_cycle_code INT(20), __v INT(10),date Text)",
+        [],
+        (sqlTxn, res) => {
+          console.log("App.js/ ", "Table created successfully ShipmentFailure");
+          // loadAPI_Data();
+        },
+        (error) => {
+          console.log(
+            "App.js/createShipmentFailureTable ",
+            "error on creating table " + error.message
+          );
+        }
+      );
+    });
+  };
+
+  const createCloseBagTable = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS closeBag1 (bagSeal TEXT PRIMARY KEY, bagId TEXT, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode Text, stopId Text)",
+        [],
+        (tx, results) => {
+          console.log(
+            "App.js/ ",
+            "Table created successfully Pickup close bag"
+          );
+        },
+        (error) => {
+          console.log(
+            "App.js/createCloseBagTable ",
+            "Error occurred while creating the table:",
+            error
+          );
+        }
+      );
+    });
+  };
+
+  const createCloseBagHandoverTable = () => {
+    db.transaction((tx) => {
+      // tx.executeSql('DROP TABLE IF EXISTS closeHandoverBag1', []);
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS closeHandoverBag1 (bagSeal TEXT , bagId TEXT PRIMARY KEY, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode text,stopId Text,consignorName Text)",
+        [],
+        (tx, results) => {
+          console.log(
+            "App.js/ ",
+            "Table created successfully Handover Close Bag"
+          );
+        },
+        (error) => {
+          console.log(
+            "App.js/createCloseBagHandoverTable ",
+            "Error occurred while creating the table:",
+            error
+          );
+        }
+      );
+    });
+  };
+
+  const getUserTripInfoApiCall = async (syncType = "manual") => {
+    if (syncType != "auto") {
+      setIsLoading4(true);
+    }
+    try {
+      const decodedToken = token ? jwtDecode(token) : null;
+      const currentEpochTime = Math.floor(Date.now() / 1000);
+
+      if (decodedToken?.exp >= currentEpochTime) {
+        const response = await axios.get(
+          backendUrl + "UserTripInfo/getUserTripInfo",
+          {
+            params: {
+              feUserID: userId,
+            },
+            headers: getAuthorizedHeaders(token),
+          }
+        );
+        for (let i = 0; i < response.data.res_data.length; i++) {
+          let today = new Date();
+          today.setUTCHours(0, 0, 0, 0);
+          today = today.valueOf();
+          if (response.data.res_data[i].date > today) {
+            const data = response.data.res_data[i];
+            db.transaction((txn) => {
+              txn.executeSql(
+                `INSERT OR REPLACE INTO TripDetails(tripID , userID, vehicleNumber, tripStatus, createdAt ,updatedAt,date
+                          ) VALUES (?,?,?,?,?,?,?)`,
+                [
+                  data.tripID,
+                  data.userID,
+                  data.vehicleNumber,
+                  data.tripStatus,
+                  data.createdAt,
+                  data.updatedAt,
+                  currentDateValue,
+                ],
+                (sqlTxn, _res) => {
+                  m++;
+                  //
+                },
+                (error) => {
+                  console.log(
+                    "App.js/ ",
+                    "error on adding data in tripdetails " + error.message
+                  );
+                }
+              );
+            });
+          }
+        }
+        setIsLoading4(false);
+      }
+    } catch (error) {
+      setIsLoading4(false);
+      fetchTripInfo();
+      console.log("getUserTripInfoApiCall Error:", error);
+    }
+  };
+
+  const AdditionalWorkloadApiCall = async () => {
+    try {
+      const decodedToken = token ? jwtDecode(token) : null;
+      const currentEpochTime = Math.floor(Date.now() / 1000);
+
+      if (userId && decodedToken?.exp >= currentEpochTime) {
+        const response = await axios.get(
+          `${backendUrl}SellerMainScreen/getadditionalwork/${userId}`,
+          {
+            headers: getAuthorizedHeaders(token),
+          }
+        );
+
+        const responseData = response?.data?.data;
+        setDataN(responseData);
+        dispatch(setAdditionalWorkloadData(responseData));
+        console.log("Additional Workload API Data:", response.data.data.length);
+        setShowModal11(responseData && responseData.length > 0);
+      }
+    } catch (error) {
+      console.log("AdditionalWorkloadApiCall Error:", error);
+      throw error; // Re-throw the error to be caught by performApiCalls
+    }
+  };
+
+  const AdditionalWorkloadAcceptHandler = async (
+    consignorCodeAccept,
+    stopId,
+    tripId
+  ) => {
+    console.log("App.js/AdditionalWorkloadAcceptHandler ", {
       consignorCode: consignorCodeAccept,
       feUserId: userId,
       stopId: stopId,
@@ -221,7 +553,7 @@ function StackNavigators({ navigation }) {
         )
         .then((response) => {
           console.log(
-            "App.js/AcceptHandler ",
+            "App.js/AdditionalWorkloadAcceptHandler ",
             "Msg Accepted ",
             response.data,
             "",
@@ -239,13 +571,16 @@ function StackNavigators({ navigation }) {
           }
         })
         .catch((error) => {
-          console.log("App.js/AcceptHandler ", error);
+          console.log("App.js/AdditionalWorkloadAcceptHandler ", error);
         });
     }
   };
 
-  const RejectHandler = async (consignorCodeReject, stopId, tripId) => {
-    console.log("App.js/RejectHandler ", "REJECT ");
+  const AdditionalWorkloadRejectHandler = async (
+    consignorCodeReject,
+    stopId,
+    tripId
+  ) => {
     const decodedToken = token ? jwtDecode(token) : null;
     const currentEpochTime = Math.floor(Date.now() / 1000);
     if (decodedToken?.exp >= currentEpochTime) {
@@ -261,7 +596,11 @@ function StackNavigators({ navigation }) {
           { headers: getAuthorizedHeaders(token) }
         )
         .then((response) => {
-          console.log("App.js/RejectHandler ", "Msg Rejected ", response.data);
+          console.log(
+            "App.js/AdditionalWorkloadRejectHandler ",
+            "Msg Rejected ",
+            response.data
+          );
           dispatch(setNotificationCount(notificationCount - 1));
           const updatedData = dataN.filter(
             (item) => item.consignorCode !== consignorCodeReject
@@ -273,10 +612,573 @@ function StackNavigators({ navigation }) {
           }
         })
         .catch((error) => {
-          console.log("App.js/RejectHandler ", error);
+          console.log("App.js/AdditionalWorkloadRejectHandler ", error);
         });
     }
   };
+
+  const getConsignorListApiCall = async (syncType = "manual") => {
+    try {
+      if (syncType != "auto") {
+        setIsLoading1(true);
+      }
+
+      const decodedToken = token ? jwtDecode(token) : null;
+      const currentEpochTime = Math.floor(Date.now() / 1000);
+
+      if (tripID && decodedToken?.exp >= currentEpochTime) {
+        const response = await axios.get(
+          backendUrl + `SellerMainScreen/consignorsList/${userId}`,
+          {
+            params: {
+              tripID: tripID,
+            },
+            headers: getAuthorizedHeaders(token),
+          }
+        );
+
+        console.log(
+          "App.js/getConsignorListApiCall ",
+          "API 1 OK: " + response.data.data.length
+        );
+
+        for (let i = 0; i < response.data.data.length; i++) {
+          const data = response.data.data[i];
+          const result = await new Promise((resolve, reject) => {
+            db.transaction((txn) => {
+              txn.executeSql(
+                "SELECT * FROM SyncSellerPickUp WHERE stopId = ? AND FMtripId=?",
+                [data.stopId, tripID],
+                (tx, result) => {
+                  resolve(result);
+                },
+                (error) => {
+                  reject(error);
+                }
+              );
+            });
+          });
+
+          if (result.rows.length <= 0) {
+            db.transaction((txn) => {
+              txn.executeSql(
+                "INSERT OR REPLACE INTO SyncSellerPickUp( contactPersonName,consignorCode ,userId ,consignorName,sellerIndex ,consignorAddress1,consignorAddress2,consignorCity,consignorPincode,consignorLatitude,consignorLongitude,consignorContact,ReverseDeliveries,runSheetNumber,ForwardPickups,BagOpenClose11, ShipmentListArray,otpSubmitted,otpSubmittedDelivery,stopId, FMtripId,date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                [
+                  data.contactPersonName,
+                  data.consignorCode,
+                  userId,
+                  data.consignorName,
+                  data.sequenceNumber,
+                  data.consignorAddress1,
+                  data.consignorState,
+                  data.consignorCity,
+                  data.consignorPincode,
+                  data.consignorLatitude,
+                  data.consignorLongitude,
+                  data.consignorContact,
+                  data.ReverseDeliveries,
+                  data.runsheetNo,
+                  data.ForwardPickups,
+                  "true",
+                  " ",
+                  "false",
+                  "false",
+                  data.stopId,
+                  data.FMtripId,
+                  currentDateValue,
+                ],
+                (sqlTxn, _res) => {
+                  // console.log('App.js/ ',
+                  // "\n Data Added to local db successfully1212"
+                  // );
+                  // console.log('App.js/ ',res);
+                },
+                (error) => {
+                  console.log(
+                    "App.js/getConsignorListApiCall ",
+                    "error on loading  data from api SellerMainScreen/consignorslist/" +
+                      error.message
+                  );
+                }
+              );
+            });
+          }
+        }
+
+        viewDetails1();
+        m++;
+        // console.log('App.js/ ','value of m1 '+m);
+        var date = new Date();
+        var hours = date.getHours();
+        var minutes = date.getMinutes();
+        var seconds = date.getSeconds();
+        var miliseconds = date.getMilliseconds();
+        var ampm = hours >= 12 ? "PM" : "AM";
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        minutes = minutes < 10 ? "0" + minutes : minutes;
+        var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
+        dispatch(setSyncTime(datetime));
+        dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
+        AsyncStorage.setItem("lastSyncTime112", datetime);
+        AsyncStorage.setItem("load11", "notload");
+        setIsLoading1(false);
+      }
+    } catch (error) {
+      console.log(
+        "App.js/getConsignorListApiCall ",
+        "error api SellerMainScreen/consignorslist/",
+        error
+      );
+      setIsLoading1(false);
+      throw error;
+    }
+  };
+
+  const getWorkloadApiCall = async (syncType = "manual") => {
+    try {
+      if (syncType != "auto") {
+        setIsLoading2(true);
+      }
+      if (tripID) {
+        db.transaction((txn) => {
+          txn.executeSql(
+            "SELECT * FROM TripDetails WHERE userID = ? AND date=?",
+            [userId, currentDateValue],
+            (tx, result) => {
+              if (result.rows.length > 0) {
+                var tripStatus = result.rows.item(0).tripStatus;
+                console.log(
+                  "App.js/getWorkloadApiCall ",
+                  "Trip id: ",
+                  tripID,
+                  tripStatus
+                );
+                const decodedToken = token ? jwtDecode(token) : null;
+                const currentEpochTime = Math.floor(Date.now() / 1000);
+                if (decodedToken?.exp >= currentEpochTime) {
+                  async function callApiasync() {
+                    const response = await axios.get(
+                      backendUrl + `SellerMainScreen/workload/${userId}`,
+                      {
+                        params: {
+                          tripID: tripID,
+                        },
+                        headers: getAuthorizedHeaders(token),
+                      }
+                    );
+
+                    console.log(
+                      "App.js/getWorkloadApiCall ",
+                      "API 2 OK: " + response.data.data.length
+                    );
+
+                    for (let i = 0; i < response.data.data.length; i++) {
+                      const shipmentStatus =
+                        response.data.data[i].shipmentStatus;
+                      const data = response.data.data[i];
+                      if (!(tripStatus == 50 && shipmentStatus === "WFP")) {
+                        db.transaction((txn) => {
+                          txn.executeSql(
+                            "SELECT * FROM SellerMainScreenDetails where clientShipmentReferenceNumber = ? AND FMtripId=?",
+                            [data.clientShipmentReferenceNumber, tripID],
+                            (tx, result) => {
+                              if (result.rows.length <= 0) {
+                                db.transaction((txn) => {
+                                  txn.executeSql(
+                                    `INSERT OR REPLACE INTO SellerMainScreenDetails( 
+                          clientShipmentReferenceNumber,
+                          clientRefId,
+                          awbNo,
+                          courierCode,
+                          consignorCode,
+                          packagingStatus,
+                          packagingId,
+                          expectedPackagingId,
+                          runSheetNumber,
+                          shipmentStatus,
+                          shipmentAction,
+                          rejectionReasonL1,
+                          rejectionReasonL2,
+                          rejectionStage,
+                          eventTime,
+                          status,
+                          handoverStatus,
+                          syncStatus,
+                          syncHandoverStatus,
+                          bagId,
+                          packagingAction,
+                          postRDStatus,
+                          stopId,
+                          FMtripId,
+                          date
+                        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                                    [
+                                      data.clientShipmentReferenceNumber,
+                                      data.clientRefId,
+                                      data.awbNo,
+                                      data.courierCode,
+                                      data.consignorCode,
+                                      data.packagingStatus,
+                                      data.expectedPackagingId,
+                                      data.scannedPackageingId,
+                                      data.runsheetNo,
+                                      data.shipmentStatus,
+                                      data.shipmentAction,
+                                      "",
+                                      "",
+                                      0,
+                                      data.actionTime,
+                                      data.shipmentStatus == "PUS" ||
+                                      data.shipmentStatus == "PUC" ||
+                                      data.shipmentStatus == "DLR" ||
+                                      data.shipmentStatus == "RDS"
+                                        ? "accepted"
+                                        : data.shipmentStatus == "PUR" ||
+                                          data.shipmentStatus == "RDR" ||
+                                          data.shipmentStatus == "UDU" ||
+                                          data.shipmentStatus == "PUF"
+                                        ? "rejected"
+                                        : data.shipmentStatus == "RAH"
+                                        ? data.shipmentAction == "Seller Pickup"
+                                          ? "accepted"
+                                          : "rejected"
+                                        : null,
+                                      // null,
+                                      data.handoverStatus == 1
+                                        ? "accepted"
+                                        : data.handoverStatus == 2
+                                        ? "rejected"
+                                        : null,
+                                      null,
+                                      null,
+                                      "",
+                                      data.packagingAction,
+                                      null,
+                                      data.stopId,
+                                      data.FMtripId,
+                                      currentDateValue,
+                                    ],
+                                    (sqlTxn, _res) => {
+                                      // console.log('App.js/ ',`\n Data Added to local db successfully`);
+                                      // console.log('App.js/ ',res);
+                                    },
+                                    (error) => {
+                                      console.log(
+                                        "App.js/getWorkloadApiCall ",
+                                        "error on adding data " + error.message
+                                      );
+                                    }
+                                  );
+                                });
+                              }
+                            }
+                          );
+                        });
+                      }
+                    }
+                    m++;
+                    var date = new Date();
+                    var hours = date.getHours();
+                    var minutes = date.getMinutes();
+                    var seconds = date.getSeconds();
+                    var miliseconds = date.getMilliseconds();
+                    var ampm = hours >= 12 ? "PM" : "AM";
+                    hours = hours % 12;
+                    hours = hours ? hours : 12;
+                    minutes = minutes < 10 ? "0" + minutes : minutes;
+                    var datetime =
+                      "Last Sync\n" + hours + ":" + minutes + " " + ampm;
+                    dispatch(setSyncTime(datetime));
+                    dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
+                    AsyncStorage.setItem("lastSyncTime112", datetime);
+                    // console.log('App.js/ ','value of m2 '+m);
+                    setIsLoading2(false);
+                  }
+                  callApiasync();
+                }
+              }
+            }
+          );
+        });
+      } else {
+        setIsLoading2(false);
+      }
+    } catch (error) {
+      console.log("App.js/getWorkloadApiCall ", error);
+      setIsLoading2(false);
+      throw error;
+    }
+  };
+
+  const getFailureReasonApiCall = async () => {
+    try {
+      setIsLoadingSF(true);
+      const decodedToken = token ? jwtDecode(token) : null;
+      const currentEpochTime = Math.floor(Date.now() / 1000);
+      if (decodedToken?.exp >= currentEpochTime) {
+        const response = await axios.get(
+          backendUrl + "ADshipmentFailure/getList",
+          {
+            headers: getAuthorizedHeaders(token),
+          }
+        );
+
+        console.log("App.js/ ", "Table6 API OK: " + response.data.data.length);
+
+        for (let i = 0; i < response.data.data.length; i++) {
+          // const appliesto=JSON.parse(JSON.stringify(response.data.data[i].appliesTo))
+          const appliesto = String(response.data.data[i].appliesTo.slice());
+          const data = response.data.data[i];
+          db.transaction((txn) => {
+            txn.executeSql(
+              `INSERT OR REPLACE INTO ShipmentFailure(_id ,description , parentCode, short_code , consignor_failure , fe_failure , operational_failure , system_failure , enable_geo_fence , enable_future_scheduling , enable_otp , enable_call_validation, created_by , last_updated_by, applies_to ,life_cycle_code , __v,date
+                          ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+              [
+                data._id,
+                data.description,
+                data.parentCode,
+                data.shortCode,
+                data.consignorFailure,
+                data.feFailure,
+                data.operationalFailure,
+                data.systemFailure,
+                data.enableGeoFence,
+                data.enableFutureScheduling,
+                data.enableOTP,
+                data.enableCallValidation,
+                data.createdBy,
+                data.lastUpdatedBy,
+                appliesto,
+                data.lifeCycleCode,
+                data.__v,
+                currentDateValue,
+              ],
+              (sqlTxn, _res) => {
+                // console.log('App.js/ ','\n Data Added to local db 6 ');
+                // console.log('App.js/ ',res);
+              },
+              (error) => {
+                console.log(
+                  "App.js/getFailureReasonApiCall ",
+                  "error on adding data " + error.message
+                );
+              }
+            );
+          });
+        }
+        m++;
+        setIsLoadingSF(false);
+      }
+    } catch (error) {
+      console.log("App.js/ ", "error on adding data ", error.message);
+      setIsLoadingSF(false);
+      throw error;
+    }
+  };
+
+  async function postSPSCalling(row) {
+    const deviceId = await DeviceInfo.getUniqueId();
+    const IpAddress = await DeviceInfo.getIpAddress();
+    // console.log("App.js/postSPSCalling ", "===========row=========", {
+    //   clientShipmentReferenceNumber: row.clientShipmentReferenceNumber,
+    //   awbNo: row.awbNo,
+    //   clientRefId: row.clientRefId,
+    //   expectedPackagingId: row.packagingId,
+    //   packagingId: row.expectedPackagingId,
+    //   courierCode: row.courierCode,
+    //   consignorCode: row.consignorCode,
+    //   packagingAction: row.packagingAction,
+    //   runsheetNo: row.runSheetNumber,
+    //   shipmentAction: row.shipmentAction,
+    //   feUserID: userId,
+    //   rejectionReason: row.rejectionReasonL2
+    //     ? row.rejectionReasonL2
+    //     : row.rejectionReasonL1,
+    //   rejectionStage: 1,
+    //   bagId: row.bagId,
+    //   eventTime: parseInt(row.eventTime),
+    //   latitude: parseFloat(row.latitude),
+    //   longitude: parseFloat(row.longitude),
+    //   packagingStatus: 1,
+    //   scanStatus:
+    //     row.status == "accepted" ? 1 : row.status == "rejected" ? 2 : 0,
+    //   stopId: row.stopId,
+    //   tripID: row.FMtripId,
+    //   deviceId: deviceId,
+    //   deviceIPaddress: IpAddress,
+    // });
+    const decodedToken = token ? jwtDecode(token) : null;
+    const currentEpochTime = Math.floor(Date.now() / 1000);
+    if (decodedToken?.exp >= currentEpochTime) {
+      await axios
+        .post(
+          backendUrl + "SellerMainScreen/postSPS",
+          {
+            clientShipmentReferenceNumber: row.clientShipmentReferenceNumber,
+            awbNo: row.awbNo,
+            clientRefId: row.clientRefId,
+            expectedPackagingId: row.packagingId,
+            packagingId: row.expectedPackagingId,
+            courierCode: row.courierCode,
+            consignorCode: row.consignorCode,
+            packagingAction: row.packagingAction,
+            runsheetNo: row.runSheetNumber,
+            shipmentAction: row.shipmentAction,
+            feUserID: userId,
+            rejectionReason: row.rejectionReasonL2
+              ? row.rejectionReasonL2
+              : row.rejectionReasonL1,
+            rejectionStage: 1,
+            bagId: row.bagId,
+            eventTime: parseInt(row.eventTime),
+            latitude: parseFloat(row.latitude),
+            longitude: parseFloat(row.longitude),
+            packagingStatus: 1,
+            scanStatus:
+              row.status == "accepted" ? 1 : row.status == "rejected" ? 2 : 0,
+            stopId: row.stopId,
+            tripID: row.FMtripId,
+            deviceId: deviceId,
+            deviceIPaddress: IpAddress,
+          },
+          { headers: getAuthorizedHeaders(token) }
+        )
+        .then((response) => {
+          console.log("App.js/postSPSCalling ", "sync Successfully pushed");
+          console.log("App.js/postSPSCalling ", response);
+          db.transaction((tx) => {
+            tx.executeSql(
+              'UPDATE SellerMainScreenDetails SET syncStatus="done" WHERE clientShipmentReferenceNumber = ?',
+              [row.clientShipmentReferenceNumber],
+              (tx1, results) => {
+                let temp = [];
+                // console.log(
+                //   "App.js/postSPSCalling ",
+                //   "===========Local Sync Status Results==========",
+                //   results.rowsAffected
+                // );
+                if (results.rowsAffected > 0) {
+                  console.log(
+                    "App.js/postSPSCalling ",
+                    "Sync status done in localDB"
+                  );
+                } else {
+                  console.log(
+                    "App.js/postSPSCalling ",
+                    "Sync Status not changed in localDB or already synced"
+                  );
+                }
+              }
+            );
+          });
+        })
+        .catch((error) => {
+          callApi(error, latitude, longitude, userId, token);
+          console.log("App.js/postSPSCalling ", "sync error", { error });
+        });
+    }
+  }
+
+  async function postSPS(data) {
+    await data.map((row) => {
+      postSPSCalling(row);
+    });
+    var date = new Date();
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var seconds = date.getSeconds();
+    var miliseconds = date.getMilliseconds();
+    var ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    var time = hours + ":" + minutes + " " + ampm;
+    var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
+    dispatch(setSyncTime(datetime));
+    dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
+    AsyncStorage.setItem("lastSyncTime112", datetime);
+  }
+
+  const push_Data = (syncType = "manual") => {
+    console.log(
+      "App.js/push_Data ",
+      "push data function",
+      new Date().toJSON().slice(0, 10).replace(/-/g, "/")
+    );
+
+    dispatch(setForceSync(false));
+
+    var date = new Date();
+    var hours = date.getHours();
+    var minutes = date.getMinutes();
+    var seconds = date.getSeconds();
+    var miliseconds = date.getMilliseconds();
+    var ampm = hours >= 12 ? "PM" : "AM";
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    var time = hours + ":" + minutes + " " + ampm;
+    var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
+    dispatch(setSyncTime(datetime));
+    dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
+    AsyncStorage.setItem("lastSyncTime112", datetime);
+
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM SellerMainScreenDetails WHERE status IS NOT Null AND syncStatus IS Null",
+        [],
+        (tx1, results) => {
+          if (results.rows.length > 0) {
+            if (syncType != "auto") {
+              ToastAndroid.show("Synchronizing data...", ToastAndroid.SHORT);
+            }
+            let temp = [];
+            for (let i = 0; i < results.rows.length; ++i) {
+              temp.push(results.rows.item(i));
+            }
+            postSPS(temp);
+            if (syncType != "auto") {
+              ToastAndroid.show(
+                "Synchronizing data finished",
+                ToastAndroid.SHORT
+              );
+            }
+          } else {
+            console.log("App.js/push_Data/", "No data to push...");
+          }
+        }
+      );
+    });
+  };
+
+  const pull_Data = async (syncType = "manual") => {
+    try {
+      var date = new Date();
+      var hours = date.getHours();
+      var minutes = date.getMinutes();
+      var seconds = date.getSeconds();
+      var miliseconds = date.getMilliseconds();
+      var ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      minutes = minutes < 10 ? "0" + minutes : minutes;
+      var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
+      dispatch(setSyncTime(datetime));
+      dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
+      AsyncStorage.setItem("lastSyncTime112", datetime);
+      console.log("App.js/pull_Data ", "api pull");
+      getWorkloadData(syncType);
+      const randomValue = Math.floor(Math.random() * (100 - 1 + 1)) + 1;
+      dispatch(setIsNewSync(randomValue));
+    } catch (err) {
+      console.log("===Error Pull Api===", err);
+    }
+  };
+
+  useEffect(() => {
+    setShowModal11(dataN && dataN.length > 0);
+  }, [userId, setShowModal11]);
 
   let m = 0;
   // console.log('App.js/ ',latitude," " ,longitude);
@@ -284,7 +1186,7 @@ function StackNavigators({ navigation }) {
     if (userId) {
       current_location();
     }
-  }, [token]);
+  }, [userId, token]);
 
   const current_location = () => {
     GetLocation.getCurrentPosition({
@@ -315,101 +1217,83 @@ function StackNavigators({ navigation }) {
         );
       });
   };
-  useEffect(() => {
-    Mixpanel.sharedInstanceWithToken("c8b2a1b9ad65958a04d82787add43a72")
-      .then(() => {
-        setIsMixPanelInit(true);
-        console.log("App.js/Mixpanel ", "Mixpanel is initialized");
-      })
-      .catch((error) => {
-        console.log(
-          "App.js/Mixpanel ",
-          "Mixpanel initialization error:",
-          error
-        );
-      });
-  }, []);
-  // console.log('App.js/ ',"CurrentDate :",currentDateValue);
 
-  useEffect(() => {
-    // console.log('App.js/ ',"CurrentDate :", currentDateValue);
-    const updateDateAtMidnight = () => {
-      const currentDate = new Date();
-      const currentDay = currentDate.toISOString().split("T")[0];
-      // const temp=currentDateValue;
-      if (currentDay !== currentDateValue) {
-        // console.log('App.js/ ',"New Date :", currentDay);
-        dispatch(setCurrentDateValue(currentDay));
+  // useEffect(() => {
+  //   // console.log('App.js/ ',"CurrentDate :", currentDateValue);
+  //   const updateDateAtMidnight = () => {
+  //     const currentDate = new Date();
+  //     const currentDay = currentDate.toISOString().split("T")[0];
+  //     // const temp=currentDateValue;
+  //     if (currentDay !== currentDateValue) {
+  //       // console.log('App.js/ ',"New Date :", currentDay);
+  //       dispatch(setCurrentDateValue(currentDay));
 
-        deleteRowsByDate("SellerMainScreenDetails");
-        deleteRowsByDate("SyncSellerPickUp");
-        deleteRowsByDate("TripDetails");
-        deleteRowsByDate("noticeMessages");
-        deleteRowsByDate("ShipmentFailure");
-        deleteRowsByDateBag("closeBag1");
-        deleteRowsByDateBag("closeHandoverBag1");
-        // if(temp!==0){
-        //   pull_API_Data();
-        // }
-      }
-    };
+  //       deleteRowsByDate("SellerMainScreenDetails");
+  //       deleteRowsByDate("SyncSellerPickUp");
+  //       deleteRowsByDate("TripDetails");
+  //       deleteRowsByDate("noticeMessages");
+  //       deleteRowsByDate("ShipmentFailure");
+  //       deleteRowsByDateBag("closeBag1");
+  //       deleteRowsByDateBag("closeHandoverBag1");
+  //     }
+  //   };
 
-    const checkAndUpdateDate = setInterval(updateDateAtMidnight, 60000); // Checks every minute
+  //   const checkAndUpdateDate = setInterval(updateDateAtMidnight, 60000); // Checks every minute
 
-    return () => clearInterval(checkAndUpdateDate);
-  }, [currentDateValue, dispatch]);
+  //   return () => clearInterval(checkAndUpdateDate);
+  // }, [currentDateValue, dispatch]);
 
-  const deleteRowsByDate = (tableName) => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 3);
-    const yesterdayDateString = yesterday.toISOString().split("T")[0];
+  // const deleteRowsByDate = (tableName) => {
+  //   const yesterday = new Date();
+  //   yesterday.setDate(yesterday.getDate() - 3);
+  //   const yesterdayDateString = yesterday.toISOString().split("T")[0];
 
-    db.transaction((tx) => {
-      tx.executeSql(
-        `DELETE FROM ${tableName} WHERE date <= ?`,
-        [yesterdayDateString],
-        (_, { rowsAffected }) => {
-          console.log(
-            "App.js/deleteRowsByDate ",
-            `${rowsAffected} rows deleted from ${tableName}`
-          );
-        },
-        (error) => {
-          console.log(
-            "App.js/deleteRowsByDate ",
-            `Error deleting rows from ${tableName}:`,
-            error
-          );
-        }
-      );
-    });
-  };
+  //   db.transaction((tx) => {
+  //     tx.executeSql(
+  //       `DELETE FROM ${tableName} WHERE date <= ?`,
+  //       [yesterdayDateString],
+  //       (_, { rowsAffected }) => {
+  //         console.log(
+  //           "App.js/deleteRowsByDate ",
+  //           `${rowsAffected} rows deleted from ${tableName}`
+  //         );
+  //       },
+  //       (error) => {
+  //         console.log(
+  //           "App.js/deleteRowsByDate ",
+  //           `Error deleting rows from ${tableName}:`,
+  //           error
+  //         );
+  //       }
+  //     );
+  //   });
+  // };
 
-  const deleteRowsByDateBag = (tableName) => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 3);
-    const yesterdayDateString = yesterday.toISOString().split("T")[0];
-    console.log("App.js/deleteRowsByDateBag ", yesterdayDateString);
-    db.transaction((tx) => {
-      tx.executeSql(
-        `DELETE FROM ${tableName} WHERE bagDate <= ?`,
-        [yesterdayDateString],
-        (_, { rowsAffected }) => {
-          console.log(
-            "App.js/deleteRowsByDateBag ",
-            `${rowsAffected} rows deleted from ${tableName}`
-          );
-        },
-        (error) => {
-          console.log(
-            "App.js/deleteRowsByDateBag ",
-            `Error deleting rows from ${tableName}:`,
-            error
-          );
-        }
-      );
-    });
-  };
+  // const deleteRowsByDateBag = (tableName) => {
+  //   const yesterday = new Date();
+  //   yesterday.setDate(yesterday.getDate() - 3);
+  //   const yesterdayDateString = yesterday.toISOString().split("T")[0];
+  //   console.log("App.js/deleteRowsByDateBag ", yesterdayDateString);
+  //   db.transaction((tx) => {
+  //     tx.executeSql(
+  //       `DELETE FROM ${tableName} WHERE bagDate <= ?`,
+  //       [yesterdayDateString],
+  //       (_, { rowsAffected }) => {
+  //         console.log(
+  //           "App.js/deleteRowsByDateBag ",
+  //           `${rowsAffected} rows deleted from ${tableName}`
+  //         );
+  //       },
+  //       (error) => {
+  //         console.log(
+  //           "App.js/deleteRowsByDateBag ",
+  //           `Error deleting rows from ${tableName}:`,
+  //           error
+  //         );
+  //       }
+  //     );
+  //   });
+  // };
 
   // console.log('App.js/ ',"Redux deviceInfo Value ",deviceInfo);
   useEffect(() => {
@@ -479,17 +1363,6 @@ function StackNavigators({ navigation }) {
       return null;
     }
   };
-
-  // const fetchDeviceType = async () => {
-  //   const isTablet = await DeviceInfo.isTablet();
-  //   const isMobile = !isTablet;
-
-  //   if (isTablet) {
-  //     return 'Tablet';
-  //   } else if (isMobile) {
-  //     return 'Mobile';
-  //   }
-  // };
 
   const getDeviceType = async () => {
     try {
@@ -694,58 +1567,6 @@ function StackNavigators({ navigation }) {
   };
 
   useEffect(() => {
-    if (userId) {
-      console.log(
-        "App.js/Mixpanel ",
-        "===Background Task Run UseEffect Called==="
-      );
-      if (isMixPanelInit) {
-        Mixpanel.trackWithProperties("Background Task Run UseEffect Called", {
-          userId: userId,
-          userEmail: userEmail,
-        });
-      }
-
-      const timer = BackgroundTimer.runBackgroundTimer(() => {
-        if (isAutoSyncEnable) {
-          loadAPI_3();
-          push_Data("auto");
-          if (isMixPanelInit) {
-            Mixpanel.trackWithProperties("Auto sync called", {
-              userId: userId,
-              userEmail: userEmail,
-            });
-          }
-          console.log("App.js/Mixpanel ", "===Auto sync called===");
-        }
-      }, autoSyncTime);
-
-      return () => {
-        BackgroundTimer.stopBackgroundTimer(timer);
-      };
-    }
-  }, [userId]);
-
-  useEffect(() => {
-    if (forceSync) {
-      loadAPI_3();
-      push_Data();
-      if (isMixPanelInit) {
-        Mixpanel.trackWithProperties("Force sync called", {
-          userId: userId,
-          userEmail: userEmail,
-        });
-      }
-      console.log("App.js/forceSync ", "===Force sync called===");
-    }
-  }, [forceSync, token]);
-
-  useEffect(() => {
-    // loadAPI_3();
-    pull_API_Data();
-  }, [userId, token]);
-
-  useEffect(() => {
     requestPermissions();
     console.log("App.js/requestPermissions ", "Request permission", userId);
   }, []);
@@ -768,11 +1589,6 @@ function StackNavigators({ navigation }) {
       console.warn(error);
     }
   };
-
-  function NotificationCountIncrease() {
-    // dispatch(setNotificationCount(5));
-    // dispatch(setNotificationCount(useSelector((state) => state.notification.count) + 1));
-  }
 
   const handleIncomingMessage = async (message) => {
     console.log("App.js/handleIncomingMessage ", message);
@@ -838,7 +1654,7 @@ function StackNavigators({ navigation }) {
       console.log("App.js/onMessage ", remoteMessage.notification);
       const newvalue = notificationCount + 1;
       dispatch(setNotificationCount(newvalue));
-      DisplayData();
+      AdditionalWorkloadApiCall();
       console.log("App.js/onMessage ", "Notification Arrived");
       handleIncomingMessage(remoteMessage);
       PushNotification.localNotification({
@@ -846,7 +1662,7 @@ function StackNavigators({ navigation }) {
         message: remoteMessage.notification.body,
         channelId: "AdditionalWork_1",
       });
-      pull_API_Data();
+      pull_Data("auto");
     });
 
     return unsubscribe;
@@ -879,75 +1695,6 @@ function StackNavigators({ navigation }) {
     });
   }, []);
 
-  // useEffect(() => {
-  //   const unsubscribe = messaging().onMessage(async (remoteMessage) => {
-  //     // Handle FCM message here
-  //   });
-
-  //   const unsubscribeNotification = messaging().onNotificationOpenedApp(
-  //     (notificationOpen) => {
-  //       console.log('App.js/ ',
-  //         "Opened via notification11:",
-  //         notificationOpen.notification
-  //       );
-
-  //       // navigation.navigate('NewSellerAdditionNotification');
-  //     }
-  //   );
-
-  //   messaging()
-  //     .getInitialNotification()
-  //     .then((notificationOpen) => {
-  //       if (notificationOpen) {
-  //         console.log('App.js/ ',
-  //           "Opened via notification:",
-  //           notificationOpen.notification
-  //         );
-  //         note11();
-  //         // navigation.navigate('NewSellerAdditionNotification');
-  //       } else {
-  //         console.log('App.js/ ',"Opened normally");
-  //       }
-  //     });
-
-  //   return () => {
-  //     unsubscribe();
-  //     unsubscribeNotification();
-  //   };
-  // }, []);
-  const pull_API_Data = (syncType = "manual") => {
-    if (userId && isAutoSyncEnable) {
-      var date = new Date();
-      var hours = date.getHours();
-      var minutes = date.getMinutes();
-      var seconds = date.getSeconds();
-      var miliseconds = date.getMilliseconds();
-      var ampm = hours >= 12 ? "PM" : "AM";
-      hours = hours % 12;
-      hours = hours ? hours : 12;
-      minutes = minutes < 10 ? "0" + minutes : minutes;
-      var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
-      dispatch(setSyncTime(datetime));
-      dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
-      AsyncStorage.setItem("lastSyncTime112", datetime);
-      console.log("App.js/pull_API_Data ", "api pull");
-      loadAPI_Data1(syncType);
-      loadAPI_Data2(syncType);
-      loadAPI_3();
-      createTableBag1();
-      loadAPI_DataSF(syncType);
-      // DisplayData();
-      const randomValue = Math.floor(Math.random() * (100 - 1 + 1)) + 1;
-      dispatch(setIsNewSync(randomValue));
-    }
-  };
-
-  const handleButtonClick = async (APIerror1) => {
-    try {
-      // console.log('App.js/ ',"API EROOR", "userid");
-      // await callApi("APIerror1", "userid");
-    } catch (error) {}
-  };
   useEffect(() => {
     // This useEffect  is use to hide warnings in mobile screen .
     // LogBox.ignoreLogs(['Warning: Each child in a list should have a unique "key" prop.']);
@@ -955,39 +1702,15 @@ function StackNavigators({ navigation }) {
   }, []);
 
   useEffect(() => {
-    (async () => {
-      if (userId) {
-        loadAPI_3();
-        pull_API_Data();
-        setTimeout(() => {
-          loadAPI_Data1();
-          loadAPI_Data2();
-        }, 2000);
-        // console.log('App.js/ ','Pull Data from Api');
-      } else {
-        navigation.navigate("Login");
-      }
-    })();
-  }, [userId, tripID, token]);
-  // console.log(token)
-  // Sync button function
-  // const note11 = () => {
-  //   if (!isLoading) {
-  //     // console.log('App.js/ ',"call notification");
-  //     navigation.navigate("NewSellerAdditionNotification");
-  //   }
-  // };
-
-  useEffect(() => {
-    if (userId !== null) {
-      setTimeout(() => {
-        Login_Data_load();
-      }, 10);
+    if (userId) {
+      Login_Data_load();
+    } else {
+      navigation.navigate("Login");
     }
-  }, [userId, token]);
+  }, [userId]);
 
   useEffect(() => {
-    if (userId !== null) {
+    if (userId) {
       AsyncStorage.getItem("lastSyncTime112")
         .then((data11) => {
           dispatch(setSyncTime(data11));
@@ -997,17 +1720,15 @@ function StackNavigators({ navigation }) {
           console.log("App.js/useEffect ", e);
         });
     }
-  }, [userId, token]);
+  }, [userId]);
 
   const Login_Data_load = () => {
     // console.log('App.js/ ','Login Data Load called');
     AsyncStorage.getItem("apiDataLoaded")
       .then((data11) => {
         // console.log('App.js/ ', 'Api Data Loaded value : ',data11);
-        setIsLogin(data11);
         if (data11 === "false") {
           // console.log('App.js/ ',"1st time call");
-          pull_API_Data();
           AsyncStorage.setItem("apiDataLoaded", "true");
           // return;
         }
@@ -1024,229 +1745,17 @@ function StackNavigators({ navigation }) {
         // console.log('App.js/ ',e);
       });
   };
-  // console.log('App.js/ ',userId);
-  async function postSPSCalling(row) {
-    const deviceId = await DeviceInfo.getUniqueId();
-    const IpAddress = await DeviceInfo.getIpAddress();
-    // console.log("App.js/postSPSCalling ", "===========row=========", {
-    //   clientShipmentReferenceNumber: row.clientShipmentReferenceNumber,
-    //   awbNo: row.awbNo,
-    //   clientRefId: row.clientRefId,
-    //   expectedPackagingId: row.packagingId,
-    //   packagingId: row.expectedPackagingId,
-    //   courierCode: row.courierCode,
-    //   consignorCode: row.consignorCode,
-    //   packagingAction: row.packagingAction,
-    //   runsheetNo: row.runSheetNumber,
-    //   shipmentAction: row.shipmentAction,
-    //   feUserID: userId,
-    //   rejectionReason: row.rejectionReasonL2
-    //     ? row.rejectionReasonL2
-    //     : row.rejectionReasonL1,
-    //   rejectionStage: 1,
-    //   bagId: row.bagId,
-    //   eventTime: parseInt(row.eventTime),
-    //   latitude: parseFloat(row.latitude),
-    //   longitude: parseFloat(row.longitude),
-    //   packagingStatus: 1,
-    //   scanStatus:
-    //     row.status == "accepted" ? 1 : row.status == "rejected" ? 2 : 0,
-    //   stopId: row.stopId,
-    //   tripID: row.FMtripId,
-    //   deviceId: deviceId,
-    //   deviceIPaddress: IpAddress,
-    // });
-    const decodedToken = token ? jwtDecode(token) : null;
-    const currentEpochTime = Math.floor(Date.now() / 1000);
-    if (decodedToken?.exp >= currentEpochTime) {
-      await axios
-        .post(
-          backendUrl + "SellerMainScreen/postSPS",
-          {
-            clientShipmentReferenceNumber: row.clientShipmentReferenceNumber,
-            awbNo: row.awbNo,
-            clientRefId: row.clientRefId,
-            expectedPackagingId: row.packagingId,
-            packagingId: row.expectedPackagingId,
-            courierCode: row.courierCode,
-            consignorCode: row.consignorCode,
-            packagingAction: row.packagingAction,
-            runsheetNo: row.runSheetNumber,
-            shipmentAction: row.shipmentAction,
-            feUserID: userId,
-            rejectionReason: row.rejectionReasonL2
-              ? row.rejectionReasonL2
-              : row.rejectionReasonL1,
-            rejectionStage: 1,
-            bagId: row.bagId,
-            eventTime: parseInt(row.eventTime),
-            latitude: parseFloat(row.latitude),
-            longitude: parseFloat(row.longitude),
-            packagingStatus: 1,
-            scanStatus:
-              row.status == "accepted" ? 1 : row.status == "rejected" ? 2 : 0,
-            stopId: row.stopId,
-            tripID: row.FMtripId,
-            deviceId: deviceId,
-            deviceIPaddress: IpAddress,
-          },
-          { headers: getAuthorizedHeaders(token) }
-        )
-        .then((response) => {
-          console.log("App.js/postSPSCalling ", "sync Successfully pushed");
-          console.log("App.js/postSPSCalling ", response);
-          db.transaction((tx) => {
-            tx.executeSql(
-              'UPDATE SellerMainScreenDetails SET syncStatus="done" WHERE clientShipmentReferenceNumber = ?',
-              [row.clientShipmentReferenceNumber],
-              (tx1, results) => {
-                let temp = [];
-                // console.log(
-                //   "App.js/postSPSCalling ",
-                //   "===========Local Sync Status Results==========",
-                //   results.rowsAffected
-                // );
-                if (results.rowsAffected > 0) {
-                  console.log(
-                    "App.js/postSPSCalling ",
-                    "Sync status done in localDB"
-                  );
-                } else {
-                  console.log(
-                    "App.js/postSPSCalling ",
-                    "Sync Status not changed in localDB or already synced"
-                  );
-                }
-              }
-            );
-          });
-        })
-        .catch((error) => {
-          callApi(error, latitude, longitude, userId, token);
-          console.log("App.js/postSPSCalling ", "sync error", { error });
-        });
-    }
-  }
 
-  async function postSPS(data, syncType) {
-    await data.map((row) => {
-      postSPSCalling(row);
-    });
-    var date = new Date();
-    var hours = date.getHours();
-    var minutes = date.getMinutes();
-    var seconds = date.getSeconds();
-    var miliseconds = date.getMilliseconds();
-    var ampm = hours >= 12 ? "PM" : "AM";
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    minutes = minutes < 10 ? "0" + minutes : minutes;
-    var time = hours + ":" + minutes + " " + ampm;
-    var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
-    dispatch(setSyncTime(datetime));
-    dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
-    AsyncStorage.setItem("lastSyncTime112", datetime);
-    pull_API_Data(syncType);
-  }
-  const push_Data = (syncType = "manual") => {
-    // fetchTripInfo();
-    if (isAutoSyncEnable) {
-      console.log(
-        "App.js/push_Data ",
-        "push data function",
-        new Date().toJSON().slice(0, 10).replace(/-/g, "/")
-      );
-
-      dispatch(setForceSync(false));
-
-      Login_Data_load();
-
-      var date = new Date();
-      var hours = date.getHours();
-      var minutes = date.getMinutes();
-      var seconds = date.getSeconds();
-      var miliseconds = date.getMilliseconds();
-      var ampm = hours >= 12 ? "PM" : "AM";
-      hours = hours % 12;
-      hours = hours ? hours : 12;
-      minutes = minutes < 10 ? "0" + minutes : minutes;
-      var time = hours + ":" + minutes + " " + ampm;
-      var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
-      dispatch(setSyncTime(datetime));
-      dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
-      AsyncStorage.setItem("lastSyncTime112", datetime);
-
-      if (isMixPanelInit) {
-        Mixpanel.trackWithProperties("Post SPS Done at time: " + datetime, {
-          userId: userId,
-          userEmail: userEmail,
-        });
-      }
-
-      db.transaction((tx) => {
-        tx.executeSql(
-          "SELECT * FROM SellerMainScreenDetails WHERE status IS NOT Null AND syncStatus IS Null",
-          [],
-          (tx1, results) => {
-            if (results.rows.length > 0) {
-              if (syncType == "manual") {
-                ToastAndroid.show("Synchronizing data...", ToastAndroid.SHORT);
-              }
-              let temp = [];
-              for (let i = 0; i < results.rows.length; ++i) {
-                temp.push(results.rows.item(i));
-              }
-              postSPS(temp, syncType);
-              if (syncType == "manual") {
-                ToastAndroid.show(
-                  "Synchronizing data finished",
-                  ToastAndroid.SHORT
-                );
-              }
-            } else {
-              console.log(
-                "App.js/push_Data ",
-                "Only Pulling Data.No data to push..."
-              );
-              pull_API_Data(syncType);
-            }
-          }
-        );
-      });
-    }
-  };
-
-  const sync11 = () => {
+  const sync11 = (syncType = "manual") => {
     NetInfo.fetch().then((state) => {
       if (state.isConnected && state.isInternetReachable) {
-        push_Data();
+        if (userId) {
+          pull_Data(syncType);
+          push_Data(syncType);
+        }
       } else {
         ToastAndroid.show("You are Offline!", ToastAndroid.SHORT);
       }
-    });
-  };
-
-  /*              Press (Ctrl + k + 2) keys together for better API tables view in App.js (VSCode) */
-
-  // Table 1
-  const createTables1 = () => {
-    db.transaction((txn) => {
-      // txn.executeSql('DROP TABLE IF EXISTS SyncSellerPickUp', []);
-      txn.executeSql(
-        `CREATE TABLE IF NOT EXISTS SyncSellerPickUp( consignorCode VARCHAR(200) ,userId VARCHAR(100), 
-            consignorName VARCHAR(200),sellerIndex INT(20),consignorAddress1 VARCHAR(200),consignorAddress2 VARCHAR(200),consignorCity VARCHAR(200),consignorPincode,consignorLatitude INT(20),consignorLongitude DECIMAL(20,10),consignorContact VARCHAR(200),ReverseDeliveries INT(20),runSheetNumber VARCHAR(200),ForwardPickups INT(20), BagOpenClose11 VARCHAR(200), ShipmentListArray VARCHAR(800),contactPersonName VARCHAR(100),otpSubmitted VARCHAR(50),otpSubmittedDelivery VARCHAR(50), stopId VARCHAR(200) PRIMARY KEY, FMtripId VARCHAR(200),date Text)`,
-        [],
-        (sqlTxn, res) => {
-          // console.log('App.js/ ',"table created successfully consignorList");
-          // loadAPI_Data();
-        },
-        (error) => {
-          console.log(
-            "App.js/createTables1 ",
-            "error on creating table " + error.message
-          );
-        }
-      );
     });
   };
 
@@ -1274,660 +1783,20 @@ function StackNavigators({ navigation }) {
     });
   };
 
-  useEffect(() => {
-    fetchTripInfo();
-  }, [userId]);
-  // console.log("token",token)
-  const loadAPI_Data1 = (syncType) => {
-    if (syncType == "manual") {
-      setIsLoading1(true);
-    }
-    createTables1();
-    const decodedToken = token ? jwtDecode(token) : null;
-    const currentEpochTime = Math.floor(Date.now() / 1000);
-    if (tripID && decodedToken?.exp >= currentEpochTime) {
-      (async () => {
-        await axios
-          .get(backendUrl + `SellerMainScreen/consignorsList/${userId}`, {
-            params: {
-              tripID: tripID,
-            },
-            headers: getAuthorizedHeaders(token),
-          })
-          .then(
-            (res) => {
-              console.log(
-                "App.js/loadAPI_Data1 ",
-                "API 1 OK: " + res.data.data.length
-              );
-              // console.log('App.js/ ',res);
-              for (let i = 0; i < res.data.data.length; i++) {
-                // let m21 = JSON.stringify(res.data[i].consignorAddress, null, 4);
-                db.transaction((txn) => {
-                  txn.executeSql(
-                    "SELECT * FROM SyncSellerPickUp WHERE stopId = ? AND FMtripId=?",
-                    [res.data.data[i].stopId, tripID],
-                    (tx, result) => {
-                      const data = res.data.data[i];
-                      if (result.rows.length <= 0) {
-                        db.transaction((txn) => {
-                          txn.executeSql(
-                            "INSERT OR REPLACE INTO SyncSellerPickUp( contactPersonName,consignorCode ,userId ,consignorName,sellerIndex ,consignorAddress1,consignorAddress2,consignorCity,consignorPincode,consignorLatitude,consignorLongitude,consignorContact,ReverseDeliveries,runSheetNumber,ForwardPickups,BagOpenClose11, ShipmentListArray,otpSubmitted,otpSubmittedDelivery,stopId, FMtripId,date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                            [
-                              data.contactPersonName,
-                              data.consignorCode,
-                              userId,
-                              data.consignorName,
-                              data.sequenceNumber,
-                              data.consignorAddress1,
-                              data.consignorState,
-                              data.consignorCity,
-                              data.consignorPincode,
-                              data.consignorLatitude,
-                              data.consignorLongitude,
-                              data.consignorContact,
-                              data.ReverseDeliveries,
-                              data.runsheetNo,
-                              data.ForwardPickups,
-                              "true",
-                              " ",
-                              "false",
-                              "false",
-                              data.stopId,
-                              data.FMtripId,
-                              currentDateValue,
-                            ],
-                            (sqlTxn, _res) => {
-                              // console.log('App.js/ ',
-                              // "\n Data Added to local db successfully1212"
-                              // );
-                              // console.log('App.js/ ',res);
-                            },
-                            (error) => {
-                              console.log(
-                                "App.js/loadAPI_Data1 ",
-                                "error on loading  data from api SellerMainScreen/consignorslist/" +
-                                  error.message
-                              );
-                            }
-                          );
-                        });
-                      }
-                    }
-                  );
-                });
-              }
-              viewDetails1();
-              m++;
-              // console.log('App.js/ ','value of m1 '+m);
-              var date = new Date();
-              var hours = date.getHours();
-              var minutes = date.getMinutes();
-              var seconds = date.getSeconds();
-              var miliseconds = date.getMilliseconds();
-              var ampm = hours >= 12 ? "PM" : "AM";
-              hours = hours % 12;
-              hours = hours ? hours : 12;
-              minutes = minutes < 10 ? "0" + minutes : minutes;
-              var datetime = "Last Sync\n" + hours + ":" + minutes + " " + ampm;
-              dispatch(setSyncTime(datetime));
-              dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
-              AsyncStorage.setItem("lastSyncTime112", datetime);
-              AsyncStorage.setItem("load11", "notload");
-              setIsLoading1(false);
-            },
-            (error) => {
-              console.log(
-                "App.js/loadAPI_Data1 ",
-                "error api SellerMainScreen/consignorslist/",
-                error
-              );
-              setIsLoading1(false);
-            }
-          )
-          .catch((error) => {
-            console.log(
-              "App.js/loadAPI_Data1/Error in API Call Get consgnorsList",
-              error
-            );
-            setIsLoading1(false);
-          });
-      })();
-    } else {
-      setIsLoading1(false);
-    }
-  };
   const viewDetails1 = () => {
     db.transaction((tx) => {
       tx.executeSql("SELECT * FROM TripDetails", [], (tx1, results) => {
         let temp = [];
-        // console.log('App.js/ ',results.rows.length);
         for (let i = 0; i < results.rows.length; ++i) {
           temp.push(results.rows.item(i));
-
-          // console.log(
-          //   "App.js/ ",
-          //   "SellerMainScreenDetails",
-          //   results.rows.item(i)
-          // );
-          // var address121 = results.rows.item(i).consignorAddress;
-          // var address_json = JSON.parse(address121);
-          // console.log('App.js/ ',typeof (address_json));
-          // console.log('App.js/ ',"Address from local db : " + address_json.consignorAddress1 + " " + address_json.consignorAddress2);
-          // ToastAndroid.show('consignorName:' + results.rows.item(i).consignorName + "\n" + 'PRSNumber : ' + results.rows.item(i).PRSNumber, ToastAndroid.SHORT);
         }
         if (m === 4) {
           ToastAndroid.show("Sync Successful", ToastAndroid.SHORT);
-          setIsLogin(true);
           AsyncStorage.setItem("apiDataLoaded", "true");
-          // console.log(
-          //   "App.js/viewDetails1 ",
-          //   "All " + 4 + " APIs loaded successfully "
-          // );
           m = 0;
-
           AsyncStorage.setItem("refresh11", "refresh");
-        } else {
-          // console.log(
-          //   "App.js/viewDetails1 ",
-          //   "Only " + m + " APIs loaded out of 4 "
-          // );
         }
-        // m++;
-        // ToastAndroid.show("Sync Successful",ToastAndroid.SHORT);
-        // console.log('App.js/ ','Data from Local Database : \n ', JSON.stringify(temp, null, 4));
-        // console.log('App.js/ ','data loaded API 1',temp);
-        // console.log('App.js/ ','Table1 DB OK:', temp.length);
       });
-    });
-  };
-
-  // Table 2
-  const createTables2 = () => {
-    db.transaction((txn) => {
-      // txn.executeSql('DROP TABLE IF EXISTS SellerMainScreenDetails', []);
-      txn.executeSql(
-        `CREATE TABLE IF NOT EXISTS SellerMainScreenDetails( 
-          clientShipmentReferenceNumber id VARCHAR(200) PRIMARY KEY,
-          clientRefId VARCHAR(200),
-          awbNo VARCHAR(200),
-          courierCode VARCHAR(200),
-          consignorCode VARCHAR(200),
-          packagingStatus VARCHAR(200),
-          packagingId VARCHAR(200),
-          expectedPackagingId VARCHAR(200),
-          runSheetNumber VARCHAR(200),
-          shipmentStatus VARCHAR(200),
-          shipmentAction VARCHAR(200),
-          rejectionReasonL1 VARCHAR(200),
-          rejectionReasonL2 VARCHAR(200),
-          rejectionStage VARCHAR(200),
-          eventTime VARCHAR(200),
-          status VARCHAR(200),
-          handoverStatus VARCHAR(200),
-          syncStatus VARCHAR(200),
-          syncHandoverStatus VARCHAR(200),
-          latitude VARCHAR(200),
-          longitude VARCHAR(200),
-          bagId VARCHAR(200),
-          packagingAction VARCHAR(200),
-          postRDStatus VARCHAR(200),
-          stopId VARCHAR(200),
-          FMtripId VARCHAR(200),
-          date Text
-          )`,
-        [],
-        (sqlTxn, res) => {
-          // console.log('App.js/ ',"table created successfully workload");
-          // loadAPI_Data();
-        },
-        (error) => {
-          console.log(
-            "App.js/createTables2 ",
-            "error on creating table SellerMainScreenDetails" + error.message
-          );
-        }
-      );
-    });
-  };
-
-  const loadAPI_Data2 = (syncType) => {
-    if (syncType == "manual") {
-      setIsLoading2(true);
-    }
-    fetchTripInfo();
-    if (tripID) {
-      db.transaction((txn) => {
-        txn.executeSql(
-          "SELECT * FROM TripDetails WHERE userID = ? AND date=?",
-          [userId, currentDateValue],
-          (tx, result) => {
-            if (result.rows.length > 0) {
-              var tripStatus = result.rows.item(0).tripStatus;
-              console.log(
-                "App.js/loadAPI_Data2 ",
-                "Trip id: ",
-                tripID,
-                tripStatus
-              );
-              const decodedToken = token ? jwtDecode(token) : null;
-              const currentEpochTime = Math.floor(Date.now() / 1000);
-              if (decodedToken?.exp >= currentEpochTime) {
-                (async () => {
-                  await axios
-                    .get(backendUrl + `SellerMainScreen/workload/${userId}`, {
-                      params: {
-                        tripID: tripID,
-                      },
-                      headers: getAuthorizedHeaders(token),
-                    })
-                    .then(
-                      (res) => {
-                        createTables2();
-                        console.log(
-                          "App.js/loadAPI_Data2 ",
-                          "API 2 OK: " + res.data.data.length
-                        );
-                        for (let i = 0; i < res.data.data.length; i++) {
-                          const shipmentStatus =
-                            res.data.data[i].shipmentStatus;
-                          const data = res.data.data[i];
-                          if (!(tripStatus == 50 && shipmentStatus === "WFP")) {
-                            db.transaction((txn) => {
-                              txn.executeSql(
-                                "SELECT * FROM SellerMainScreenDetails where clientShipmentReferenceNumber = ? AND FMtripId=?",
-                                [data.clientShipmentReferenceNumber, tripID],
-                                (tx, result) => {
-                                  if (result.rows.length <= 0) {
-                                    db.transaction((txn) => {
-                                      txn.executeSql(
-                                        `INSERT OR REPLACE INTO SellerMainScreenDetails( 
-                          clientShipmentReferenceNumber,
-                          clientRefId,
-                          awbNo,
-                          courierCode,
-                          consignorCode,
-                          packagingStatus,
-                          packagingId,
-                          expectedPackagingId,
-                          runSheetNumber,
-                          shipmentStatus,
-                          shipmentAction,
-                          rejectionReasonL1,
-                          rejectionReasonL2,
-                          rejectionStage,
-                          eventTime,
-                          status,
-                          handoverStatus,
-                          syncStatus,
-                          syncHandoverStatus,
-                          bagId,
-                          packagingAction,
-                          postRDStatus,
-                          stopId,
-                          FMtripId,
-                          date
-                        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-                                        [
-                                          data.clientShipmentReferenceNumber,
-                                          data.clientRefId,
-                                          data.awbNo,
-                                          data.courierCode,
-                                          data.consignorCode,
-                                          data.packagingStatus,
-                                          data.expectedPackagingId,
-                                          data.scannedPackageingId,
-                                          data.runsheetNo,
-                                          data.shipmentStatus,
-                                          data.shipmentAction,
-                                          "",
-                                          "",
-                                          0,
-                                          data.actionTime,
-                                          data.shipmentStatus == "PUS" ||
-                                          data.shipmentStatus == "PUC" ||
-                                          data.shipmentStatus == "DLR" ||
-                                          data.shipmentStatus == "RDS"
-                                            ? "accepted"
-                                            : data.shipmentStatus == "PUR" ||
-                                              data.shipmentStatus == "RDR" ||
-                                              data.shipmentStatus == "UDU" ||
-                                              data.shipmentStatus == "PUF"
-                                            ? "rejected"
-                                            : data.shipmentStatus == "RAH"
-                                            ? data.shipmentAction ==
-                                              "Seller Pickup"
-                                              ? "accepted"
-                                              : "rejected"
-                                            : null,
-                                          // null,
-                                          data.handoverStatus == 1
-                                            ? "accepted"
-                                            : data.handoverStatus == 2
-                                            ? "rejected"
-                                            : null,
-                                          null,
-                                          null,
-                                          "",
-                                          data.packagingAction,
-                                          null,
-                                          data.stopId,
-                                          data.FMtripId,
-                                          currentDateValue,
-                                        ],
-                                        (sqlTxn, _res) => {
-                                          // console.log('App.js/ ',`\n Data Added to local db successfully`);
-                                          // console.log('App.js/ ',res);
-                                        },
-                                        (error) => {
-                                          console.log(
-                                            "App.js/loadAPI_Data2 ",
-                                            "error on adding data " +
-                                              error.message
-                                          );
-                                        }
-                                      );
-                                    });
-                                  }
-                                }
-                              );
-                            });
-                          }
-                        }
-                        m++;
-                        var date = new Date();
-                        var hours = date.getHours();
-                        var minutes = date.getMinutes();
-                        var seconds = date.getSeconds();
-                        var miliseconds = date.getMilliseconds();
-                        var ampm = hours >= 12 ? "PM" : "AM";
-                        hours = hours % 12;
-                        hours = hours ? hours : 12;
-                        minutes = minutes < 10 ? "0" + minutes : minutes;
-                        var datetime =
-                          "Last Sync\n" + hours + ":" + minutes + " " + ampm;
-                        dispatch(setSyncTime(datetime));
-                        dispatch(
-                          setSyncTimeFull(minutes + seconds + miliseconds)
-                        );
-                        AsyncStorage.setItem("lastSyncTime112", datetime);
-                        // console.log('App.js/ ','value of m2 '+m);
-                        setIsLoading2(false);
-                      },
-                      (error) => {
-                        console.log("App.js/loadAPI_Data2 ", error);
-                        setIsLoading2(false);
-                      }
-                    )
-                    .catch((error) => {
-                      console.log(
-                        "App.js/loadAPI_Data2/API call workload error",
-                        error
-                      );
-                      setIsLoading2(false);
-                    });
-                })();
-              } else {
-                setIsLoading2(false);
-              }
-            } else {
-              setIsLoading2(false);
-            }
-          }
-        );
-      });
-    } else {
-      setIsLoading2(false);
-    }
-  };
-  // console.log("token",token)
-  const createTables3 = () => {
-    db.transaction((txn) => {
-      txn.executeSql(
-        `CREATE TABLE IF NOT EXISTS TripDetails( 
-          tripID VARCHAR(200),
-          userID VARCHAR(200),
-          vehicleNumber VARCHAR(200),
-          tripStatus VARCHAR(200),
-          createdAt VARCHAR(200),
-          updatedAt VARCHAR(200),
-          date VARCHAR(200)
-          )`,
-        [],
-        (sqlTxn, res) => {
-          // console.log('App.js/ ',"table created successfully TripDetails");
-          // loadAPI_Data();
-        },
-        (error) => {
-          console.log(
-            "App.js/createTables3 ",
-            "error on creating table " + error.message
-          );
-        }
-      );
-    });
-  };
-
-  const loadAPI_3 = () => {
-    createTables3();
-    const decodedToken = token ? jwtDecode(token) : null;
-    const currentEpochTime = Math.floor(Date.now() / 1000);
-    if (decodedToken?.exp >= currentEpochTime) {
-      (async () => {
-        await axios
-          .get(backendUrl + "UserTripInfo/getUserTripInfo", {
-            params: {
-              feUserID: userId,
-            },
-            headers: getAuthorizedHeaders(token),
-          })
-          .then(
-            (res) => {
-              for (let i = 0; i < res.data.res_data.length; i++) {
-                let today = new Date();
-                today.setUTCHours(0, 0, 0, 0);
-                today = today.valueOf();
-                if (res.data.res_data[i].date > today) {
-                  const data = res.data.res_data[i];
-                  db.transaction((txn) => {
-                    txn.executeSql(
-                      `INSERT OR REPLACE INTO TripDetails(tripID , userID, vehicleNumber, tripStatus, createdAt ,updatedAt,date
-                          ) VALUES (?,?,?,?,?,?,?)`,
-                      [
-                        data.tripID,
-                        data.userID,
-                        data.vehicleNumber,
-                        data.tripStatus,
-                        data.createdAt,
-                        data.updatedAt,
-                        currentDateValue,
-                      ],
-                      (sqlTxn, _res) => {
-                        m++;
-                        // fetchTripInfo();
-                      },
-                      (error) => {
-                        console.log(
-                          "App.js/ ",
-                          "error on adding data in tripdetails " + error.message
-                        );
-                      }
-                    );
-                  });
-                }
-              }
-            },
-            (error) => {
-              console.log("App.js/ ", "tripdetailserror", error);
-            }
-          );
-      })();
-    }
-  };
-  // console.log(token)
-  const createTablesSF = () => {
-    db.transaction((tx) => {
-      tx.executeSql(
-        `CREATE TABLE IF NOT EXISTS noticeMessages (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          messageId TEXT,
-          notificationTitle TEXT,
-          notificationBody TEXT,
-          date TEXT,
-          sentTime TEXT,
-          message TEXT,
-          sellerName TEXT,
-          sellerCode TEXT
-        )`,
-        [],
-        (tx, results) => {
-          // console.log('App.js/ ',"Table created successfully Notice");
-        },
-        (error) => {
-          console.log(
-            "App.js/createTablesSF ",
-            "Error creating table: ",
-            error
-          );
-        }
-      );
-    });
-    db.transaction((txn) => {
-      // txn.executeSql('DROP TABLE IF EXISTS ShipmentFailure', []);
-      txn.executeSql(
-        "CREATE TABLE IF NOT EXISTS ShipmentFailure(_id VARCHAR(24) PRIMARY KEY,description VARCHAR(255),parentCode VARCHAR(20), short_code VARCHAR(20), consignor_failure BOOLEAN, fe_failure BOOLEAN, operational_failure BOOLEAN, system_failure BOOLEAN, enable_geo_fence BOOLEAN, enable_future_scheduling BOOLEAN, enable_otp BOOLEAN, enable_call_validation BOOLEAN, created_by VARCHAR(10), last_updated_by VARCHAR(10), applies_to VARCHAR(255),life_cycle_code INT(20), __v INT(10),date Text)",
-        [],
-        (sqlTxn, res) => {
-          // console.log('App.js/ ',"Table created successfully ShipmentFailure");
-          // loadAPI_Data();
-        },
-        (error) => {
-          console.log(
-            "App.js/createTablesSF ",
-            "error on creating table " + error.message
-          );
-        }
-      );
-    });
-  };
-  const loadAPI_DataSF = (syncType) => {
-    if (syncType == "manual") {
-      setIsLoadingSF(true);
-    }
-    createTablesSF();
-    const decodedToken = token ? jwtDecode(token) : null;
-    const currentEpochTime = Math.floor(Date.now() / 1000);
-    if (decodedToken?.exp >= currentEpochTime) {
-      (async () => {
-        await axios
-          .get(backendUrl + "ADshipmentFailure/getList", {
-            headers: getAuthorizedHeaders(token),
-          })
-          .then(
-            (res) => {
-              // console.log('App.js/ ','Table6 API OK: ' + res.data.data.length);
-              // console.log('App.js/ ',res.data);
-              for (let i = 0; i < res.data.data.length; i++) {
-                // const appliesto=JSON.parse(JSON.stringify(res.data.data[i].appliesTo))
-                const appliesto = String(res.data.data[i].appliesTo.slice());
-                const data = res.data.data[i];
-                db.transaction((txn) => {
-                  txn.executeSql(
-                    `INSERT OR REPLACE INTO ShipmentFailure(_id ,description , parentCode, short_code , consignor_failure , fe_failure , operational_failure , system_failure , enable_geo_fence , enable_future_scheduling , enable_otp , enable_call_validation, created_by , last_updated_by, applies_to ,life_cycle_code , __v,date
-                          ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-                    [
-                      data._id,
-                      data.description,
-                      data.parentCode,
-                      data.shortCode,
-                      data.consignorFailure,
-                      data.feFailure,
-                      data.operationalFailure,
-                      data.systemFailure,
-                      data.enableGeoFence,
-                      data.enableFutureScheduling,
-                      data.enableOTP,
-                      data.enableCallValidation,
-                      data.createdBy,
-                      data.lastUpdatedBy,
-                      appliesto,
-                      data.lifeCycleCode,
-                      data.__v,
-                      currentDateValue,
-                    ],
-                    (sqlTxn, _res) => {
-                      // console.log('App.js/ ','\n Data Added to local db 6 ');
-                      // console.log('App.js/ ',res);
-                    },
-                    (error) => {
-                      console.log(
-                        "App.js/loadAPI_DataSF ",
-                        "error on adding data " + error.message
-                      );
-                    }
-                  );
-                });
-              }
-              m++;
-              // console.log('App.js/ ','value of m6 '+m);
-
-              // viewDetailsSF();
-              setIsLoadingSF(false);
-            },
-            (error) => {
-              console.log("App.js/loadAPI_DataSF ", error);
-              setIsLoadingSF(false);
-            }
-          )
-          .catch((error) => {
-            console.log(
-              "App.js/loadAPI_DataSF/ADshipmentFailure/getList Error",
-              error
-            );
-            setIsLoadingSF(false);
-          });
-      })();
-    } else {
-      setIsLoadingSF(false);
-    }
-  };
-
-  const createTableBag1 = () => {
-    // AsyncStorage.setItem("acceptedItemData11", "");
-
-    db.transaction((tx) => {
-      tx.executeSql(
-        "CREATE TABLE IF NOT EXISTS closeBag1 (bagSeal TEXT PRIMARY KEY, bagId TEXT, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode Text, stopId Text)",
-        [],
-        (tx, results) => {
-          // console.log('App.js/ ',"Table created successfully Pickup close bag");
-        },
-        (error) => {
-          console.log(
-            "App.js/createTableBag1 ",
-            "Error occurred while creating the table:",
-            error
-          );
-        }
-      );
-    });
-
-    db.transaction((tx) => {
-      // tx.executeSql('DROP TABLE IF EXISTS closeHandoverBag1', []);
-      tx.executeSql(
-        "CREATE TABLE IF NOT EXISTS closeHandoverBag1 (bagSeal TEXT , bagId TEXT PRIMARY KEY, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode text,stopId Text,consignorName Text)",
-        [],
-        (tx, results) => {
-          // console.log('App.js/ ',"Table created successfully Handover Close Bag");
-        },
-        (error) => {
-          console.log(
-            "App.js/createTableBag1 ",
-            "Error occurred while creating the table:",
-            error
-          );
-        }
-      );
     });
   };
 
@@ -2044,7 +1913,7 @@ function StackNavigators({ navigation }) {
                                       color: "red.200",
                                     }}
                                     onPress={() =>
-                                      RejectHandler(
+                                      AdditionalWorkloadRejectHandler(
                                         d.consignorCode,
                                         d.stopId,
                                         d.FMtripId
@@ -2063,7 +1932,7 @@ function StackNavigators({ navigation }) {
                                       color: "blue.200",
                                     }}
                                     onPress={() =>
-                                      AcceptHandler(
+                                      AdditionalWorkloadAcceptHandler(
                                         d.consignorCode,
                                         d.stopId,
                                         d.FMtripId
@@ -3726,10 +3595,9 @@ function StackNavigators({ navigation }) {
         />
       </Stack.Navigator>
 
-      {(isLoading1 || isLoading2 || isLoadingSF) &&
+      {(isLoading1 || isLoading2 || isLoadingSF || isLoading4 || syncLoading) &&
       userId &&
-      userId.length > 0 &&
-      isLogin ? (
+      userId.length > 0 ? (
         <View
           style={[
             StyleSheet.absoluteFillObject,
@@ -3791,21 +3659,27 @@ function CustomDrawerContent({ navigation }) {
   };
 
   useEffect(() => {
-    if (refreshToken) {
-      refreshTokenAgain(refreshToken);
-    }
-    if (refreshTime && refreshToken) {
-      const intervalId = setInterval(() => {
-        if (refreshToken) {
-          refreshTokenAgain(refreshToken);
-        }
-      }, refreshTime);
+    // const decodedToken = token ? jwtDecode(token) : null;
+    // const currentEpochTime = Math.floor(Date.now() / 1000);
+    // if (id && decodedToken?.exp - 180 < currentEpochTime) {
 
-      return () => {
-        clearInterval(intervalId);
-      };
+    if (id) {
+      if (refreshToken) {
+        refreshTokenAgain(refreshToken);
+      }
+      if (refreshTime && refreshToken) {
+        const intervalId = setInterval(() => {
+          if (refreshToken) {
+            refreshTokenAgain(refreshToken);
+          }
+        }, refreshTime);
+
+        return () => {
+          clearInterval(intervalId);
+        };
+      }
     }
-  }, [refreshToken, refreshTime]);
+  }, [refreshToken, refreshTime, id]);
 
   async function refreshTokenAgain(refreshToken) {
     await refresh(config, {
