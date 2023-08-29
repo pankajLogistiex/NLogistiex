@@ -1265,7 +1265,7 @@ function StackNavigators({ navigation }) {
               (tx, result) => {
                 if (result.rows.length > 0) {
                   setTripID(result.rows.item(0).tripID);
-                    }
+                }
               }
             );
           }
@@ -1308,7 +1308,7 @@ function StackNavigators({ navigation }) {
                     "SELECT * FROM SyncSellerPickUp WHERE stopId = ? AND FMtripId=?",
                     [res.data.data[i].stopId, tripID],
                     (tx, result) => {
-                      const data=res.data.data[i];
+                      const data = res.data.data[i];
                       if (result.rows.length <= 0) {
                         db.transaction((txn) => {
                           txn.executeSql(
@@ -1496,7 +1496,7 @@ function StackNavigators({ navigation }) {
       setIsLoading2(true);
     }
     fetchTripInfo();
-    if(tripID){
+    if (tripID) {
       db.transaction((txn) => {
         txn.executeSql(
           "SELECT * FROM TripDetails WHERE userID = ? AND date=?",
@@ -1504,43 +1504,44 @@ function StackNavigators({ navigation }) {
           (tx, result) => {
             if (result.rows.length > 0) {
               var tripStatus = result.rows.item(0).tripStatus;
-      console.log("App.js/loadAPI_Data2 ", "Trip id: ", tripID, tripStatus);
-          const decodedToken = token ? jwtDecode(token) : null;
-          const currentEpochTime = Math.floor(Date.now() / 1000);
-          if (decodedToken?.exp >= currentEpochTime) {
-            (async () => {
-              await axios
-                .get(backendUrl + `SellerMainScreen/workload/${userId}`, {
-                  params: {
-                    tripID: tripID,
-                  },
-                  headers: getAuthorizedHeaders(token),
-                })
-                .then(
-                  (res) => {
-                    createTables2();
-                    console.log(
-                      "App.js/loadAPI_Data2 ",
-                      "API 2 OK: " + res.data.data.length
-                    );
-                    for (let i = 0; i < res.data.data.length; i++) {
-                      const shipmentStatus = res.data.data[i].shipmentStatus;
-                      const data=res.data.data[i];
-                      if (
-                        !(tripStatus == 50 && shipmentStatus === "WFP")
-                      ) {
-                        db.transaction((txn) => {
-                          txn.executeSql(
-                            "SELECT * FROM SellerMainScreenDetails where clientShipmentReferenceNumber = ? AND FMtripId=?",
-                            [
-                              data.clientShipmentReferenceNumber,
-                              tripID,
-                            ],
-                            (tx, result) => {
-                              if (result.rows.length <= 0) {
-                                db.transaction((txn) => {
-                                  txn.executeSql(
-                                    `INSERT OR REPLACE INTO SellerMainScreenDetails( 
+              console.log(
+                "App.js/loadAPI_Data2 ",
+                "Trip id: ",
+                tripID,
+                tripStatus
+              );
+              const decodedToken = token ? jwtDecode(token) : null;
+              const currentEpochTime = Math.floor(Date.now() / 1000);
+              if (decodedToken?.exp >= currentEpochTime) {
+                (async () => {
+                  await axios
+                    .get(backendUrl + `SellerMainScreen/workload/${userId}`, {
+                      params: {
+                        tripID: tripID,
+                      },
+                      headers: getAuthorizedHeaders(token),
+                    })
+                    .then(
+                      (res) => {
+                        createTables2();
+                        console.log(
+                          "App.js/loadAPI_Data2 ",
+                          "API 2 OK: " + res.data.data.length
+                        );
+                        for (let i = 0; i < res.data.data.length; i++) {
+                          const shipmentStatus =
+                            res.data.data[i].shipmentStatus;
+                          const data = res.data.data[i];
+                          if (!(tripStatus == 50 && shipmentStatus === "WFP")) {
+                            db.transaction((txn) => {
+                              txn.executeSql(
+                                "SELECT * FROM SellerMainScreenDetails where clientShipmentReferenceNumber = ? AND FMtripId=?",
+                                [data.clientShipmentReferenceNumber, tripID],
+                                (tx, result) => {
+                                  if (result.rows.length <= 0) {
+                                    db.transaction((txn) => {
+                                      txn.executeSql(
+                                        `INSERT OR REPLACE INTO SellerMainScreenDetails( 
                           clientShipmentReferenceNumber,
                           clientRefId,
                           awbNo,
@@ -1567,114 +1568,117 @@ function StackNavigators({ navigation }) {
                           FMtripId,
                           date
                         ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-                                    [
-                                      data
-                                        .clientShipmentReferenceNumber,
-                                        data.clientRefId,
-                                        data.awbNo,
-                                        data.courierCode,
-                                        data.consignorCode,
-                                        data.packagingStatus,
-                                        data.expectedPackagingId,
-                                        data.scannedPackageingId,
-                                        data.runsheetNo,
-                                        data.shipmentStatus,
-                                        data.shipmentAction,
-                                      "",
-                                      "",
-                                      0,
-                                      data.actionTime,
-                                      data.shipmentStatus ==
-                                        "PUS" ||
-                                        data.shipmentStatus ==
-                                        "PUC" ||
-                                        data.shipmentStatus ==
-                                        "DLR" ||
-                                        data.shipmentStatus == "RDS"
-                                        ? "accepted"
-                                        : data.shipmentStatus ==
-                                            "PUR" ||
-                                            data.shipmentStatus ==
-                                            "RDR" ||
-                                            data.shipmentStatus ==
-                                            "UDU" ||
-                                            data.shipmentStatus ==
-                                            "PUF"
-                                        ? "rejected"
-                                        : data.shipmentStatus ==
-                                          "RAH"
-                                        ? data.shipmentAction ==
-                                          "Seller Pickup"
-                                          ? "accepted"
-                                          : "rejected"
-                                        : null,
-                                      // null,
-                                      data.handoverStatus == 1
-                                        ? "accepted"
-                                        : data.handoverStatus == 2
-                                        ? "rejected"
-                                        : null,
-                                      null,
-                                      null,
-                                      "",
-                                      data.packagingAction,
-                                      null,
-                                      data.stopId,
-                                      data.FMtripId,
-                                      currentDateValue,
-                                    ],
-                                    (sqlTxn, _res) => {
-                                      // console.log('App.js/ ',`\n Data Added to local db successfully`);
-                                      // console.log('App.js/ ',res);
-                                    },
-                                    (error) => {
-                                      console.log(
-                                        "App.js/loadAPI_Data2 ",
-                                        "error on adding data " + error.message
+                                        [
+                                          data.clientShipmentReferenceNumber,
+                                          data.clientRefId,
+                                          data.awbNo,
+                                          data.courierCode,
+                                          data.consignorCode,
+                                          data.packagingStatus,
+                                          data.expectedPackagingId,
+                                          data.scannedPackageingId,
+                                          data.runsheetNo,
+                                          data.shipmentStatus,
+                                          data.shipmentAction,
+                                          "",
+                                          "",
+                                          0,
+                                          data.actionTime,
+                                          data.shipmentStatus == "PUS" ||
+                                          data.shipmentStatus == "PUC" ||
+                                          data.shipmentStatus == "DLR" ||
+                                          data.shipmentStatus == "RDS"
+                                            ? "accepted"
+                                            : data.shipmentStatus == "PUR" ||
+                                              data.shipmentStatus == "RDR" ||
+                                              data.shipmentStatus == "UDU" ||
+                                              data.shipmentStatus == "PUF"
+                                            ? "rejected"
+                                            : data.shipmentStatus == "RAH"
+                                            ? data.shipmentAction ==
+                                              "Seller Pickup"
+                                              ? "accepted"
+                                              : "rejected"
+                                            : null,
+                                          // null,
+                                          data.handoverStatus == 1
+                                            ? "accepted"
+                                            : data.handoverStatus == 2
+                                            ? "rejected"
+                                            : null,
+                                          null,
+                                          null,
+                                          "",
+                                          data.packagingAction,
+                                          null,
+                                          data.stopId,
+                                          data.FMtripId,
+                                          currentDateValue,
+                                        ],
+                                        (sqlTxn, _res) => {
+                                          // console.log('App.js/ ',`\n Data Added to local db successfully`);
+                                          // console.log('App.js/ ',res);
+                                        },
+                                        (error) => {
+                                          console.log(
+                                            "App.js/loadAPI_Data2 ",
+                                            "error on adding data " +
+                                              error.message
+                                          );
+                                        }
                                       );
-                                    }
-                                  );
-                                });
-                              }
-                            }
-                          );
-                        });
+                                    });
+                                  }
+                                }
+                              );
+                            });
+                          }
+                        }
+                        m++;
+                        var date = new Date();
+                        var hours = date.getHours();
+                        var minutes = date.getMinutes();
+                        var seconds = date.getSeconds();
+                        var miliseconds = date.getMilliseconds();
+                        var ampm = hours >= 12 ? "PM" : "AM";
+                        hours = hours % 12;
+                        hours = hours ? hours : 12;
+                        minutes = minutes < 10 ? "0" + minutes : minutes;
+                        var datetime =
+                          "Last Sync\n" + hours + ":" + minutes + " " + ampm;
+                        dispatch(setSyncTime(datetime));
+                        dispatch(
+                          setSyncTimeFull(minutes + seconds + miliseconds)
+                        );
+                        AsyncStorage.setItem("lastSyncTime112", datetime);
+                        // console.log('App.js/ ','value of m2 '+m);
+                        setIsLoading2(false);
+                      },
+                      (error) => {
+                        console.log("App.js/loadAPI_Data2 ", error);
+                        setIsLoading2(false);
                       }
-                    }
-                    m++;
-                    var date = new Date();
-                    var hours = date.getHours();
-                    var minutes = date.getMinutes();
-                    var seconds = date.getSeconds();
-                    var miliseconds = date.getMilliseconds();
-                    var ampm = hours >= 12 ? "PM" : "AM";
-                    hours = hours % 12;
-                    hours = hours ? hours : 12;
-                    minutes = minutes < 10 ? "0" + minutes : minutes;
-                    var datetime =
-                      "Last Sync\n" + hours + ":" + minutes + " " + ampm;
-                    dispatch(setSyncTime(datetime));
-                    dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
-                    AsyncStorage.setItem("lastSyncTime112", datetime);
-                    // console.log('App.js/ ','value of m2 '+m);
-                    setIsLoading2(false);
-                  },
-                  (error) => {
-                    console.log("App.js/loadAPI_Data2 ", error);
-                    setIsLoading2(false);
-                  }
-                )
-                .catch((error) => {
-                  console.log(
-                    "App.js/loadAPI_Data2/API call workload error",
-                    error
-                  );
-                  setIsLoading2(false);
-                });
-            })();
+                    )
+                    .catch((error) => {
+                      console.log(
+                        "App.js/loadAPI_Data2/API call workload error",
+                        error
+                      );
+                      setIsLoading2(false);
+                    });
+                })();
+              } else {
+                setIsLoading2(false);
+              }
+            } else {
+              setIsLoading2(false);
+            }
           }
-    }})})  
-    }    
+        );
+      });
+    } else {
+      setIsLoading2(false);
+    }
   };
   // console.log("token",token)
   const createTables3 = () => {
@@ -1724,7 +1728,7 @@ function StackNavigators({ navigation }) {
                 today.setUTCHours(0, 0, 0, 0);
                 today = today.valueOf();
                 if (res.data.res_data[i].date > today) {
-                  const data=res.data.res_data[i];
+                  const data = res.data.res_data[i];
                   db.transaction((txn) => {
                     txn.executeSql(
                       `INSERT OR REPLACE INTO TripDetails(tripID , userID, vehicleNumber, tripStatus, createdAt ,updatedAt,date
@@ -1826,7 +1830,7 @@ function StackNavigators({ navigation }) {
               for (let i = 0; i < res.data.data.length; i++) {
                 // const appliesto=JSON.parse(JSON.stringify(res.data.data[i].appliesTo))
                 const appliesto = String(res.data.data[i].appliesTo.slice());
-                const data=res.data.data[i];
+                const data = res.data.data[i];
                 db.transaction((txn) => {
                   txn.executeSql(
                     `INSERT OR REPLACE INTO ShipmentFailure(_id ,description , parentCode, short_code , consignor_failure , fe_failure , operational_failure , system_failure , enable_geo_fence , enable_future_scheduling , enable_otp , enable_call_validation, created_by , last_updated_by, applies_to ,life_cycle_code , __v,date
@@ -1883,6 +1887,8 @@ function StackNavigators({ navigation }) {
             setIsLoadingSF(false);
           });
       })();
+    } else {
+      setIsLoadingSF(false);
     }
   };
 
@@ -1924,8 +1930,6 @@ function StackNavigators({ navigation }) {
       );
     });
   };
-
-  
 
   return (
     <NativeBaseProvider>
