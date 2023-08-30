@@ -127,8 +127,8 @@ function StackNavigators({ navigation }) {
     (state) => state.autoSync.isAutoSyncEnable
   );
 
-  const currentDateValue =
-    useSelector((state) => state.currentDate.currentDateValue) ||
+  const todayDate =
+    // useSelector((state) => state.currentDate.currentDateValue) ||
     new Date().toISOString().split("T")[0];
   const [isLoading1, setIsLoading1] = useState(false);
   const [isLoading2, setIsLoading2] = useState(false);
@@ -140,6 +140,7 @@ function StackNavigators({ navigation }) {
   const [tripID, setTripID] = useState("");
   const [showModal11, setShowModal11] = useState(false);
   const [dataN, setDataN] = useState([]);
+  const [currentDateValue, setCurrentDateValue] = useState(todayDate);
 
   function createTables() {
     createConsignorListTable();
@@ -186,46 +187,51 @@ function StackNavigators({ navigation }) {
     const tripDate = new Date(parseInt(tripID.split("-")[1]));
     const todayDate = new Date(currentEpochTime);
 
-    if (
-      formatDate(tripDate.toLocaleString().split(",")[0].split("/")) !=
-      formatDate(todayDate.toLocaleString().split(",")[0].split("/"))
-    ) {
-      db.transaction((tx) => {
-        tx.executeSql(
-          "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
-          [],
-          (tx1, result) => {
-            for (let i = 0; i < result.rows.length; i++) {
-              const tableName = result.rows.item(i).name;
-              tx1.executeSql(`DELETE FROM ${tableName}`);
-              // console.log(`Cleared data from table: ${tableName}`);
-            }
-            console.log("SQLite DB data cleared successfully!");
-          }
-        );
-      });
-      setIsLoading1(false);
-      setIsLoading2(false);
-      setIsLoading4(false);
-      setIsLoadingSF(false);
-      setSyncLoading(false);
-    } else {
-      if (tripID && userId) {
-        await getUserTripInfoApiCall(syncType);
-        await getConsignorListApiCall(syncType);
-        await getWorkloadApiCall(syncType);
-      }
+    // if (
+    //   formatDate(tripDate.toLocaleString().split(",")[0].split("/")) !=
+    //   formatDate(todayDate.toLocaleString().split(",")[0].split("/"))
+    // ) {
+    //   db.transaction((tx) => {
+    //     tx.executeSql(
+    //       "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
+    //       [],
+    //       (tx1, result) => {
+    //         for (let i = 0; i < result.rows.length; i++) {
+    //           const tableName = result.rows.item(i).name;
+    //           tx1.executeSql(`DELETE FROM ${tableName}`);
+    //           // console.log(`Cleared data from table: ${tableName}`);
+    //         }
+    //         console.log("SQLite DB data cleared successfully!");
+    //       }
+    //     );
+    //   });
+    //   setIsLoading1(false);
+    //   setIsLoading2(false);
+    //   setIsLoading4(false);
+    //   setIsLoadingSF(false);
+    //   setSyncLoading(false);
+    // } else {
+    if (userId) {
+      await getUserTripInfoApiCall(syncType);
     }
+    if (
+      tripID &&
+      userId &&
+      userId == tripID.split("-")[0] &&
+      formatDate(tripDate.toLocaleString().split(",")[0].split("/")) ==
+        formatDate(todayDate.toLocaleString().split(",")[0].split("/"))
+    ) {
+      await getConsignorListApiCall(syncType);
+      await getWorkloadApiCall(syncType);
+    }
+    // }
     setSyncLoading(false);
   }
 
   useEffect(() => {
+    setCurrentDateValue(new Date().toISOString().split("T")[0]);
     sync11();
-  }, [tripID, token, userId]);
-
-  useEffect(() => {
-    fetchTripInfo();
-  }, [userId]);
+  }, [tripID, token, userId, currentDateValue]);
 
   useEffect(() => {
     if (userId) {
@@ -259,7 +265,7 @@ function StackNavigators({ navigation }) {
             consignorName VARCHAR(200),sellerIndex INT(20),consignorAddress1 VARCHAR(200),consignorAddress2 VARCHAR(200),consignorCity VARCHAR(200),consignorPincode,consignorLatitude INT(20),consignorLongitude DECIMAL(20,10),consignorContact VARCHAR(200),ReverseDeliveries INT(20),runSheetNumber VARCHAR(200),ForwardPickups INT(20), BagOpenClose11 VARCHAR(200), ShipmentListArray VARCHAR(800),contactPersonName VARCHAR(100),otpSubmitted VARCHAR(50),otpSubmittedDelivery VARCHAR(50), stopId VARCHAR(200) PRIMARY KEY, FMtripId VARCHAR(200),date Text)`,
         [],
         (sqlTxn, res) => {
-          console.log("App.js/ ", "table created successfully consignorList");
+          // console.log("App.js/ ", "table created successfully consignorList");
           // loadAPI_Data();
         },
         (error) => {
@@ -307,7 +313,7 @@ function StackNavigators({ navigation }) {
           )`,
         [],
         (sqlTxn, res) => {
-          console.log("App.js/ ", "table created successfully workload");
+          // console.log("App.js/ ", "table created successfully workload");
           // loadAPI_Data();
         },
         (error) => {
@@ -334,7 +340,7 @@ function StackNavigators({ navigation }) {
           )`,
         [],
         (sqlTxn, res) => {
-          console.log("App.js/ ", "table created successfully TripDetails");
+          // console.log("App.js/ ", "table created successfully TripDetails");
           // loadAPI_Data();
         },
         (error) => {
@@ -363,7 +369,7 @@ function StackNavigators({ navigation }) {
         )`,
         [],
         (tx, results) => {
-          console.log("App.js/ ", "Table created successfully Notice");
+          // console.log("App.js/ ", "Table created successfully Notice");
         },
         (error) => {
           console.log(
@@ -383,7 +389,7 @@ function StackNavigators({ navigation }) {
         "CREATE TABLE IF NOT EXISTS ShipmentFailure(_id VARCHAR(24) PRIMARY KEY,description VARCHAR(255),parentCode VARCHAR(20), short_code VARCHAR(20), consignor_failure BOOLEAN, fe_failure BOOLEAN, operational_failure BOOLEAN, system_failure BOOLEAN, enable_geo_fence BOOLEAN, enable_future_scheduling BOOLEAN, enable_otp BOOLEAN, enable_call_validation BOOLEAN, created_by VARCHAR(10), last_updated_by VARCHAR(10), applies_to VARCHAR(255),life_cycle_code INT(20), __v INT(10),date Text)",
         [],
         (sqlTxn, res) => {
-          console.log("App.js/ ", "Table created successfully ShipmentFailure");
+          // console.log("App.js/ ", "Table created successfully ShipmentFailure");
           // loadAPI_Data();
         },
         (error) => {
@@ -402,10 +408,10 @@ function StackNavigators({ navigation }) {
         "CREATE TABLE IF NOT EXISTS closeBag1 (bagSeal TEXT PRIMARY KEY, bagId TEXT, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode Text, stopId Text)",
         [],
         (tx, results) => {
-          console.log(
-            "App.js/ ",
-            "Table created successfully Pickup close bag"
-          );
+          // console.log(
+          //   "App.js/ ",
+          //   "Table created successfully Pickup close bag"
+          // );
         },
         (error) => {
           console.log(
@@ -425,10 +431,10 @@ function StackNavigators({ navigation }) {
         "CREATE TABLE IF NOT EXISTS closeHandoverBag1 (bagSeal TEXT , bagId TEXT PRIMARY KEY, bagDate TEXT, AcceptedList TEXT,status TEXT,consignorCode text,stopId Text,consignorName Text)",
         [],
         (tx, results) => {
-          console.log(
-            "App.js/ ",
-            "Table created successfully Handover Close Bag"
-          );
+          // console.log(
+          //   "App.js/ ",
+          //   "Table created successfully Handover Close Bag"
+          // );
         },
         (error) => {
           console.log(
@@ -459,39 +465,43 @@ function StackNavigators({ navigation }) {
             headers: getAuthorizedHeaders(token),
           }
         );
-        for (let i = 0; i < response.data.res_data.length; i++) {
-          let today = new Date();
-          today.setUTCHours(0, 0, 0, 0);
-          today = today.valueOf();
-          if (response.data.res_data[i].date > today) {
-            const data = response.data.res_data[i];
-            db.transaction((txn) => {
-              txn.executeSql(
-                `INSERT OR REPLACE INTO TripDetails(tripID , userID, vehicleNumber, tripStatus, createdAt ,updatedAt,date
+        if (response && response?.data?.res_data?.length) {
+          for (let i = 0; i < response.data.res_data.length; i++) {
+            let today = new Date();
+            today.setUTCHours(0, 0, 0, 0);
+            today = today.valueOf();
+            if (response.data.res_data[i].date > today) {
+              const data = response.data.res_data[i];
+              db.transaction((txn) => {
+                txn.executeSql(
+                  `INSERT OR REPLACE INTO TripDetails(tripID , userID, vehicleNumber, tripStatus, createdAt ,updatedAt,date
                           ) VALUES (?,?,?,?,?,?,?)`,
-                [
-                  data.tripID,
-                  data.userID,
-                  data.vehicleNumber,
-                  data.tripStatus,
-                  data.createdAt,
-                  data.updatedAt,
-                  currentDateValue,
-                ],
-                (sqlTxn, _res) => {
-                  m++;
-                  fetchTripInfo();
-                },
-                (error) => {
-                  fetchTripInfo();
-                  console.log(
-                    "App.js/ ",
-                    "error on adding data in tripdetails " + error.message
-                  );
-                }
-              );
-            });
+                  [
+                    data.tripID,
+                    data.userID,
+                    data.vehicleNumber,
+                    data.tripStatus,
+                    data.createdAt,
+                    data.updatedAt,
+                    currentDateValue,
+                  ],
+                  (sqlTxn, _res) => {
+                    m++;
+                    fetchTripInfo();
+                  },
+                  (error) => {
+                    fetchTripInfo();
+                    console.log(
+                      "App.js/ ",
+                      "error on adding data in tripdetails " + error.message
+                    );
+                  }
+                );
+              });
+            }
           }
+        } else {
+          fetchTripInfo();
         }
         setIsLoading4(false);
       }
@@ -518,7 +528,7 @@ function StackNavigators({ navigation }) {
         const responseData = response?.data?.data;
         setDataN(responseData);
         dispatch(setAdditionalWorkloadData(responseData));
-        console.log("Additional Workload API Data:", response.data.data.length);
+        // console.log("Additional Workload API Data:", response.data.data.length);
         setShowModal11(responseData && responseData.length > 0);
       }
     } catch (error) {
@@ -785,9 +795,11 @@ function StackNavigators({ navigation }) {
                             [data.clientShipmentReferenceNumber, tripID],
                             (tx, result) => {
                               if (result.rows.length <= 0) {
-                                db.transaction((txn) => {
-                                  txn.executeSql(
-                                    `INSERT OR REPLACE INTO SellerMainScreenDetails( 
+                                async function insertData() {
+                                  await new Promise((resolve, reject) => {
+                                    db.transaction((txn) => {
+                                      txn.executeSql(
+                                        `INSERT OR REPLACE INTO SellerMainScreenDetails( 
                           clientShipmentReferenceNumber,
                           clientRefId,
                           awbNo,
@@ -814,64 +826,73 @@ function StackNavigators({ navigation }) {
                           FMtripId,
                           date
                         ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
-                                    [
-                                      data.clientShipmentReferenceNumber,
-                                      data.clientRefId,
-                                      data.awbNo,
-                                      data.courierCode,
-                                      data.consignorCode,
-                                      data.packagingStatus,
-                                      data.expectedPackagingId,
-                                      data.scannedPackageingId,
-                                      data.runsheetNo,
-                                      data.shipmentStatus,
-                                      data.shipmentAction,
-                                      "",
-                                      "",
-                                      0,
-                                      data.actionTime,
-                                      data.shipmentStatus == "PUS" ||
-                                      data.shipmentStatus == "PUC" ||
-                                      data.shipmentStatus == "DLR" ||
-                                      data.shipmentStatus == "RDS"
-                                        ? "accepted"
-                                        : data.shipmentStatus == "PUR" ||
-                                          data.shipmentStatus == "RDR" ||
-                                          data.shipmentStatus == "UDU" ||
-                                          data.shipmentStatus == "PUF"
-                                        ? "rejected"
-                                        : data.shipmentStatus == "RAH"
-                                        ? data.shipmentAction == "Seller Pickup"
-                                          ? "accepted"
-                                          : "rejected"
-                                        : null,
-                                      // null,
-                                      data.handoverStatus == 1
-                                        ? "accepted"
-                                        : data.handoverStatus == 2
-                                        ? "rejected"
-                                        : null,
-                                      null,
-                                      null,
-                                      "",
-                                      data.packagingAction,
-                                      null,
-                                      data.stopId,
-                                      data.FMtripId,
-                                      currentDateValue,
-                                    ],
-                                    (sqlTxn, _res) => {
-                                      // console.log('App.js/ ',`\n Data Added to local db successfully`);
-                                      // console.log('App.js/ ',res);
-                                    },
-                                    (error) => {
-                                      console.log(
-                                        "App.js/getWorkloadApiCall ",
-                                        "error on adding data " + error.message
+                                        [
+                                          data.clientShipmentReferenceNumber,
+                                          data.clientRefId,
+                                          data.awbNo,
+                                          data.courierCode,
+                                          data.consignorCode,
+                                          data.packagingStatus,
+                                          data.expectedPackagingId,
+                                          data.scannedPackageingId,
+                                          data.runsheetNo,
+                                          data.shipmentStatus,
+                                          data.shipmentAction,
+                                          "",
+                                          "",
+                                          0,
+                                          data.actionTime,
+                                          data.shipmentStatus == "PUS" ||
+                                          data.shipmentStatus == "PUC" ||
+                                          data.shipmentStatus == "DLR" ||
+                                          data.shipmentStatus == "RDS"
+                                            ? "accepted"
+                                            : data.shipmentStatus == "PUR" ||
+                                              data.shipmentStatus == "RDR" ||
+                                              data.shipmentStatus == "UDU" ||
+                                              data.shipmentStatus == "PUF"
+                                            ? "rejected"
+                                            : data.shipmentStatus == "RAH"
+                                            ? data.shipmentAction ==
+                                              "Seller Pickup"
+                                              ? "accepted"
+                                              : "rejected"
+                                            : null,
+                                          // null,
+                                          data.handoverStatus == 1
+                                            ? "accepted"
+                                            : data.handoverStatus == 2
+                                            ? "rejected"
+                                            : null,
+                                          null,
+                                          null,
+                                          "",
+                                          data.packagingAction,
+                                          null,
+                                          data.stopId,
+                                          data.FMtripId,
+                                          currentDateValue,
+                                        ],
+                                        (sqlTxn, _res) => {
+                                          // console.log(
+                                          //   "App.js/ ",
+                                          //   `Data Added to local db successfully`
+                                          // );
+                                          // console.log('App.js/ ',res);
+                                        },
+                                        (error) => {
+                                          console.log(
+                                            "App.js/getWorkloadApiCall ",
+                                            "error on adding data " +
+                                              error.message
+                                          );
+                                        }
                                       );
-                                    }
-                                  );
-                                });
+                                      resolve();
+                                    });
+                                  });
+                                }
+                                insertData();
                               }
                             }
                           );
@@ -894,7 +915,17 @@ function StackNavigators({ navigation }) {
                     dispatch(setSyncTimeFull(minutes + seconds + miliseconds));
                     AsyncStorage.setItem("lastSyncTime112", datetime);
                     // console.log('App.js/ ','value of m2 '+m);
-                    setIsLoading2(false);
+
+                    if (response?.data?.data?.length >= 0) {
+                      setTimeout(() => {
+                        const randomValue =
+                          Math.floor(Math.random() * (100 - 1 + 1)) + 1;
+                        dispatch(setIsNewSync(randomValue));
+                        setIsLoading2(false);
+                      }, 2000);
+                    } else {
+                      setIsLoading2(false);
+                    }
                   }
                   callApiasync();
                 }
@@ -925,7 +956,7 @@ function StackNavigators({ navigation }) {
           }
         );
 
-        console.log("App.js/ ", "Table6 API OK: " + response.data.data.length);
+        // console.log("App.js/ ", "Table6 API OK: " + response.data.data.length);
 
         for (let i = 0; i < response.data.data.length; i++) {
           // const appliesto=JSON.parse(JSON.stringify(response.data.data[i].appliesTo))
@@ -1750,38 +1781,48 @@ function StackNavigators({ navigation }) {
   const sync11 = (syncType = "manual") => {
     NetInfo.fetch().then((state) => {
       if (state.isConnected && state.isInternetReachable) {
-        if (userId) {
+        setIsLoading2(true);
+        if (userId && tripID) {
           pull_Data(syncType);
           push_Data(syncType);
         }
       } else {
         ToastAndroid.show("You are Offline!", ToastAndroid.SHORT);
+        setIsLoading2(false);
       }
     });
   };
 
   const fetchTripInfo = async () => {
-    db.transaction((txn) => {
-      txn.executeSql(
-        "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ? AND date = ?",
-        [20, 50, userId, currentDateValue],
-        (tx, result) => {
-          if (result.rows.length > 0) {
-            setTripID(result.rows.item(0).tripID);
-          } else {
-            txn.executeSql(
-              "SELECT * FROM TripDetails WHERE tripStatus = ? AND userID = ? AND date = ?  ORDER BY tripID DESC LIMIT 1",
-              [200, userId, currentDateValue],
-              (tx, result) => {
-                if (result.rows.length > 0) {
-                  setTripID(result.rows.item(0).tripID);
+    try {
+      db.transaction((txn) => {
+        txn.executeSql(
+          "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ? AND date = ?",
+          [20, 50, userId, currentDateValue],
+          (tx, result) => {
+            if (result.rows.length > 0) {
+              setTripID(result.rows.item(0).tripID);
+            } else {
+              txn.executeSql(
+                "SELECT * FROM TripDetails WHERE tripStatus = ? AND userID = ? AND date = ?  ORDER BY tripID DESC LIMIT 1",
+                [200, userId, currentDateValue],
+                (tx, res) => {
+                  if (res.rows.length > 0) {
+                    setTripID(res.rows.item(0).tripID);
+                  } else {
+                    setTripID("");
+                    setIsLoading2(false);
+                  }
                 }
-              }
-            );
+              );
+            }
           }
-        }
-      );
-    });
+        );
+      });
+    } catch (err) {
+      console.log("App.js/fetchTripInfo Error", err);
+      setIsLoading2(false);
+    }
   };
 
   const viewDetails1 = () => {
@@ -1957,7 +1998,6 @@ function StackNavigators({ navigation }) {
           </Modal.Content>
         </Modal>
       )}
-
       <Stack.Navigator
         initialRouteName={"Main"}
         key={"Main"}
@@ -3595,10 +3635,8 @@ function StackNavigators({ navigation }) {
           }}
         />
       </Stack.Navigator>
-
-      {(isLoading1 || isLoading2 || isLoadingSF || isLoading4 || syncLoading) &&
-      userId &&
-      userId.length > 0 ? (
+      {/* isLoading1 || isLoading2 || isLoadingSF || isLoading4 || syncLoading */}
+      {isLoading2 && userId && userId.length > 0 ? (
         <View
           style={[
             StyleSheet.absoluteFillObject,
@@ -3693,7 +3731,8 @@ function CustomDrawerContent({ navigation }) {
 
           dispatch(setToken(response?.accessToken));
           dispatch(setIdToken(response?.idToken));
-          console.log("App.js/refreshTokenAgain/Token Refreshed", response);
+          // console.log("App.js/refreshTokenAgain/Token Refreshed", response);
+          console.log("App.js/refreshTokenAgain/Token Refreshed");
         } else {
           console.log("App.js/refreshTokenAgain/No ID Token Error", response);
           LogoutHandle();

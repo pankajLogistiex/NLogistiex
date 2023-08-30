@@ -60,7 +60,7 @@ export default function Main({ navigation, route }) {
   const tripStatus = useSelector((state) => state.trip.tripStatus);
   const isNewSync = useSelector((state) => state.newSync.value);
   const syncTimeFull = useSelector((state) => state.autoSync.syncTimeFull);
-  const currentDateValue =
+  const todayDate =
     // useSelector((state) => state.currentDate.currentDateValue) ||
     new Date().toISOString().split("T")[0];
   const [data, setData] = useState(0);
@@ -69,6 +69,7 @@ export default function Main({ navigation, route }) {
   // console.log("Main/currentDateValue",currentDateValue)
   const [isData, setIsData] = useState(false);
 
+  const [currentDateValue, setCurrentDateValue] = useState(todayDate);
   const [spts, setSpts] = useState(0);
   const [spc, setSpc] = useState(0);
   const [spp, setSpp] = useState(0);
@@ -256,30 +257,19 @@ export default function Main({ navigation, route }) {
       loadSellerDeliveryDetails();
 
       fetchTripInfo();
-
-      if (tripID && currentDateValue) {
-        db.transaction((tx) => {
-          tx.executeSql(
-            "SELECT COUNT(DISTINCT consignorCode) as count FROM SellerMainScreenDetails WHERE FMtripId=? AND date=?",
-            [tripID, currentDateValue],
-            (tx1, results) => {
-              if (results.rows.item(0).count != 0) {
-                setIsData(true);
-              } else {
-                setIsData(false);
-              }
-            }
-          );
-        });
-      }
     });
     return unsubscribe;
-  }, [navigation, syncTimeFull, currentDateValue]);
+  }, [navigation, syncTimeFull, currentDateValue, tripID]);
 
   useEffect(() => {
     loadSellerPickupDetails();
     loadHanoverDetails();
     loadSellerDeliveryDetails();
+    fetchTripInfo();
+  }, [isNewSync, syncTimeFull, currentDateValue, tripID]);
+
+  useEffect(() => {
+    setCurrentDateValue(new Date().toISOString().split("T")[0]);
     if (tripID && currentDateValue) {
       db.transaction((tx) => {
         tx.executeSql(
@@ -295,7 +285,7 @@ export default function Main({ navigation, route }) {
         );
       });
     }
-  }, [isNewSync, syncTimeFull, currentDateValue]);
+  }, [tripID, currentDateValue, isNewSync, syncTimeFull, navigation]);
 
   useEffect(() => {
     if (tripStatus == 1) {
@@ -306,7 +296,7 @@ export default function Main({ navigation, route }) {
   }, [tripStatus]);
 
   const loadSellerPickupDetails = async () => {
-    setIsLoading(true);
+    // setIsLoading(true);
     // await AsyncStorage.setItem('refresh11', 'notrefresh');
     db.transaction((tx) => {
       tx.executeSql(
@@ -381,7 +371,7 @@ export default function Main({ navigation, route }) {
   };
   // console.log("pendingPickups",spp)
   const loadHanoverDetails = async () => {
-    setIsLoading(true);
+    // setIsLoading(true);
     await AsyncStorage.setItem("refresh11", "notrefresh");
     db.transaction((tx) => {
       tx.executeSql(
@@ -455,7 +445,7 @@ export default function Main({ navigation, route }) {
     setIsLoading(false);
   };
   const loadSellerDeliveryDetails = async () => {
-    setIsLoading(true);
+    // setIsLoading(true);
     await AsyncStorage.setItem("refresh11", "notrefresh");
     db.transaction((tx) => {
       tx.executeSql(
