@@ -480,9 +480,10 @@ function StackNavigators({ navigation }) {
                 ],
                 (sqlTxn, _res) => {
                   m++;
-                  //
+                  fetchTripInfo();
                 },
                 (error) => {
+                  fetchTripInfo();
                   console.log(
                     "App.js/ ",
                     "error on adding data in tripdetails " + error.message
