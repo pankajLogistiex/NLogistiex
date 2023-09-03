@@ -411,17 +411,17 @@ const PendingHandover = ({ route }) => {
                         mt={4}
                       >
                         {handoverStatus.length > 0 &&
-                        handoverStatus.filter((obj) => obj.stopId === stopId)[0]
+                        handoverStatus.filter((obj) => obj.consignorCode === stopId)[0]
                           ?.rejectReason
                           ? (data11
-                              ?.filter((d) => d.applies_to.includes("PRHC"))
-                              .filter(
-                                (obj) =>
-                                  obj.short_code ==
-                                  handoverStatus.filter(
-                                    (obj) => obj.stopId === stopId
-                                  )[0].rejectReason
-                              ))[0]?.description
+                            ?.filter((d) => d.applies_to.includes("PRHC"))
+                            .filter(
+                              (obj) =>
+                                obj.short_code ==
+                                handoverStatus.filter(
+                                  (obj) => obj.consignorCode === stopId
+                                )[0]?.rejectReason
+                            ))[0]?.description
                           : "Select Exception Reason"}
                       </Button>
                     </>
