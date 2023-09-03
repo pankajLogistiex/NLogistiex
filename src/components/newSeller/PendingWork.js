@@ -451,7 +451,7 @@ const PendingWork = ({ route }) => {
               w="48%"
               size="lg"
               bg="#004aad"
-              onPress={() => navigation.navigate("MyTrip", { userId: userId, token:token })}
+              onPress={() => navigation.navigate("MyTrip", { userId: userId, token:route.params.token})}
             >
               Close Trip
             </Button>

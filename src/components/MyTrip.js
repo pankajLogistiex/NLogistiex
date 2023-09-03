@@ -489,11 +489,11 @@ export default function MyTrip({ navigation, route }) {
       setMessage1(2);
       setShowModal1(true);
     }
-    // else if(pendingPickup==0 && pendingDelivery==0 && tripStatus==0){
+    // else if(!tripID){
     //   setMessage1(1);
     //   setShowModal1(true);
     // }
-  }, [pendingPickup, pendingDelivery, pendingHandover, tripStatus]);
+  }, [pendingHandover, tripID]);
   let currentDate = new Date();
   currentDate.setHours(0, 0, 0, 0);
   currentDate = currentDate.valueOf();
