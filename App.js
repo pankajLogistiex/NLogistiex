@@ -184,7 +184,7 @@ function StackNavigators({ navigation }) {
     const currentDate = new Date();
     const currentEpochTime = currentDate.getTime();
 
-    const tripDate = new Date(parseInt(tripID.split("-")[1]));
+    const tripDate = new Date(parseInt(tripID?.split("-")[1]));
     const todayDate = new Date(currentEpochTime);
 
     // if (
@@ -234,7 +234,7 @@ function StackNavigators({ navigation }) {
   }, [tripID, token, userId, currentDateValue]);
 
   useEffect(() => {
-    if (userId) {
+    if (userId && tripID) {
       console.log(
         "App.js/AutoSync ",
         "===Background Task Run UseEffect Called==="
@@ -248,7 +248,7 @@ function StackNavigators({ navigation }) {
         BackgroundTimer.stopBackgroundTimer(timer);
       };
     }
-  }, [userId]);
+  }, [userId, tripID]);
 
   useEffect(() => {
     if (forceSync) {
@@ -1781,10 +1781,14 @@ function StackNavigators({ navigation }) {
   const sync11 = (syncType = "manual") => {
     NetInfo.fetch().then((state) => {
       if (state.isConnected && state.isInternetReachable) {
-        setIsLoading2(true);
-        if (userId && tripID) {
+        if (syncType != "auto") {
+          setIsLoading2(true);
+        }
+        if (userId) {
           pull_Data(syncType);
           push_Data(syncType);
+        } else {
+          setIsLoading2(false);
         }
       } else {
         ToastAndroid.show("You are Offline!", ToastAndroid.SHORT);
@@ -3721,27 +3725,39 @@ function CustomDrawerContent({ navigation }) {
   }, [refreshToken, refreshTime, id]);
 
   async function refreshTokenAgain(refreshToken) {
-    await refresh(config, {
-      refreshToken: refreshToken,
-    })
-      .then((response) => {
-        if (response?.idToken) {
-          AsyncStorage.setItem("token", response?.accessToken);
-          AsyncStorage.setItem("idToken", response?.idToken);
+    NetInfo.fetch().then((state) => {
+      if (state.isConnected && state.isInternetReachable) {
+        async function call() {
+          await refresh(config, {
+            refreshToken: refreshToken,
+          })
+            .then((response) => {
+              if (response?.idToken) {
+                AsyncStorage.setItem("token", response?.accessToken);
+                AsyncStorage.setItem("idToken", response?.idToken);
 
-          dispatch(setToken(response?.accessToken));
-          dispatch(setIdToken(response?.idToken));
-          // console.log("App.js/refreshTokenAgain/Token Refreshed", response);
-          console.log("App.js/refreshTokenAgain/Token Refreshed");
-        } else {
-          console.log("App.js/refreshTokenAgain/No ID Token Error", response);
-          LogoutHandle();
+                dispatch(setToken(response?.accessToken));
+                dispatch(setIdToken(response?.idToken));
+                // console.log("App.js/refreshTokenAgain/Token Refreshed", response);
+                console.log("App.js/refreshTokenAgain/Token Refreshed");
+              } else {
+                console.log(
+                  "App.js/refreshTokenAgain/No ID Token Error",
+                  response
+                );
+                LogoutHandle();
+              }
+            })
+            .catch((error) => {
+              console.log("App.js/refreshTokenAgain/Refresh Token Error".error);
+              LogoutHandle();
+            });
         }
-      })
-      .catch((error) => {
-        console.log("App.js/refreshTokenAgain/Refresh Token Error".error);
-        LogoutHandle();
-      });
+        call();
+      } else {
+        ToastAndroid.show("You are Offline!", ToastAndroid.SHORT);
+      }
+    });
   }
 
   useEffect(() => {
