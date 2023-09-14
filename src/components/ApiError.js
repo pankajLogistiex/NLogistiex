@@ -30,7 +30,7 @@ export const callApi = async (APIerror, latitude, longitude, userId, token) => {
     );
 
     // console.log(response);
-    ToastAndroid.show("Error Report Submitted", ToastAndroid.SHORT);
+    // ToastAndroid.show("Error Report Submitted", ToastAndroid.SHORT);
     console.log("API response:", response.data);
   } catch (error) {
     console.error("Error API Error:", error);
