@@ -1597,7 +1597,7 @@ console.log(packagingAction, packagingID)
                 }}
               />
             )}
-            {"\n"}
+            <View style={{ alignItems: 'center' }}>
             <Input
               placeholder="Enter Bag Seal"
               size="md"
@@ -1612,6 +1612,7 @@ console.log(packagingAction, packagingID)
               flex="1"
               mt={2}
               bg="#004aad"
+              style={{ width: 290 }}
               onPress={() => {
                 CloseBagEndScan();
                 setShowCloseBagModal11(false);
@@ -1620,6 +1621,7 @@ console.log(packagingAction, packagingID)
             >
               Submit
             </Button>
+            </View>
           </Modal.Body>
         </Modal.Content>
       </Modal>
