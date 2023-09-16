@@ -601,7 +601,6 @@ console.log(isRejecting);
       updateDetails2(expectedPackagingId);
       displayDataSPScan();
       setLen(0);
-      setIsRejecting(false);
     } else {
       setModal1(true);
       setIsRejecting(true);
@@ -1390,6 +1389,7 @@ console.log(isRejecting);
                 onPress={() => {
                   handleReScan();
                   setModal1(false);
+                  setIsRejecting(false);
                 }}
               >
                 ReScan

@@ -1182,7 +1182,6 @@ const ShipmentBarcode = ({ route }) => {
       updateDetails2(expectedPackagingId, stopId);
       displayDataSPScan();
       setLen(0);
-      setIsRejecting(false);
     } else {
       setModal1(true);
       setIsRejecting(true);
@@ -1884,6 +1883,7 @@ console.log(packagingAction, packagingID)
                 onPress={() => {
                   handleReScan();
                   setModal1(false);
+                  setIsRejecting(false);
                 }}
               >
                 ReScan
