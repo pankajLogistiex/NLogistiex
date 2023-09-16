@@ -1160,6 +1160,7 @@ const ShipmentBarcode = ({ route }) => {
         setLen(0);
       } else {
         setModal1(true);
+        setIsRejecting(true);
         setShowOuterScanner(false);
       }
     } else {

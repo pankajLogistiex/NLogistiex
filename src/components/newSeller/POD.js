@@ -284,11 +284,14 @@ const POD = ({ route }) => {
         .catch(function (error) {
           console.log("POD/SubmitForm11", error.response.data);
           setLoading(false);
+          ToastAndroid.show("Something Went Wrong", ToastAndroid.SHORT);
           alert(error.response.data.msg);
           navigation.navigate("Main");
         });
     } catch (error) {
       console.log("POD/SubmitForm11/===try catch post rd error====", error);
+      setLoading(false);
+      ToastAndroid.show("Something Went Wrong", ToastAndroid.SHORT);
     }
   };
 
@@ -358,7 +361,8 @@ const POD = ({ route }) => {
           setInputOtp("");
           setShowModal11(false);
         } else {
-          alert("Invalid OTP, please try again !!");
+          ToastAndroid.show("Invalid OTP, please try again !!", ToastAndroid.SHORT);
+          // alert("Invalid OTP, please try again !!");
           setMessage(2);
         }
       })
