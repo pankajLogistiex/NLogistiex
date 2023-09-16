@@ -277,6 +277,11 @@ const CollectPOD = ({ route }) => {
       })
       .catch(function (error) {
         console.log("CollectPOD.js/submitForm11 ", error.response.data);
+        setLoading(false);
+        ToastAndroid.show(
+          "Something went Wrong",
+          ToastAndroid.SHORT
+        );
       });
   };
   const sendSmsOtp = async () => {
@@ -326,7 +331,8 @@ const CollectPOD = ({ route }) => {
           setInputOtp("");
           setShowModal11(false);
         } else {
-          alert("Invalid OTP, please try again !!");
+          ToastAndroid.show("Invalid OTP, please try again !!", ToastAndroid.SHORT);
+          // alert("Invalid OTP, please try again !!");
           setMessage(2);
         }
       })

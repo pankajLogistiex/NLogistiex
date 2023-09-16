@@ -51,7 +51,7 @@ const NewSellerPickup = ({route}) => {
   // dataSeller.forEach(item => {console.log(`consignorName: ${item.consignorName}, otpSubmitted: ${item.otpSubmitted}`)});
   // data.forEach(item => console.log(`consignorName: ${item.consignorName}, otpSubmitted: ${item.otpSubmitted}`));
   const progress = 
-  (data.reduce((sum, seller, i) => sum + (value[i] > 0 && value[i] === pending11[i]  ? 1 : 0), 0)/value.reduce((accumulator, currentValue) => accumulator + (currentValue > 0 ? 1 : 0), 0)) * 100;
+  (data.reduce((sum, seller, i) => sum + (value[i] > 0 && value[i] === pending11[i] && seller.otpSubmitted=='true' ? 1 : 0), 0)/value.reduce((accumulator, currentValue) => accumulator + (currentValue > 0 ? 1 : 0), 0)) * 100;
   useEffect(() => {
   
     if(value && value.length>0 && data && data.length===0){
@@ -305,7 +305,7 @@ return (
           fontWeight: 'bold',
         }}
       >
-       Sellers Attempted ({data.reduce((sum, seller, i) => sum + (value[i] > 0 && value[i] === pending11[i]  ? 1 : 0), 0)}/{value.reduce((accumulator, currentValue) => accumulator + (currentValue > 0 ? 1 : 0), 0)})
+       Sellers Attempted ({data.reduce((sum, seller, i) => sum + (value[i] > 0 && value[i] === pending11[i] && seller.otpSubmitted=='true'  ? 1 : 0), 0)}/{value.reduce((accumulator, currentValue) => accumulator + (currentValue > 0 ? 1 : 0), 0)})
       </Text>
     </View>
     </View>
@@ -449,7 +449,7 @@ position: 'relative',
                     position: 'relative',
     }}
   >
-    {value[data.findIndex((item) => item.stopId === seller.stopId)] === pending11[data.findIndex((item) => item.stopId === seller.stopId)] && seller.otpSubmitted== 'false'
+    {value[data.findIndex((item) => item.stopId === seller.stopId)] === pending11[data.findIndex((item) => item.stopId === seller.stopId)] && seller.otpSubmitted== 'true'
                           ? 
     <Image alt={'Completed Icon'}
       source={require('../../assets/complete/IMG_complete.png')}
