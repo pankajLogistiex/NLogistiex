@@ -339,7 +339,7 @@ const HandoverShipmentRTO = ({ route }) => {
               );
 
               ToastAndroid.show(
-                "HandoverShipmentsRTO/closeBag Bag closed successfully",
+                "Bag closed successfully",
                 ToastAndroid.SHORT
               );
               // console.log(results11);
