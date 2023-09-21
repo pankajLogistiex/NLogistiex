@@ -33,7 +33,7 @@ import OTPTextInput from "react-native-otp-textinput";
 import MaterialIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { openDatabase } from "react-native-sqlite-storage";
 import { backendUrl } from "../../utils/backendUrl";
-import { setAutoSync } from "../../redux/slice/autoSyncSlice";
+import { setAutoSync, setForceSync } from "../../redux/slice/autoSyncSlice";
 import { useDispatch, useSelector } from "react-redux";
 import DeviceInfo from "react-native-device-info";
 import { getAuthorizedHeaders } from "../../utils/headers";
@@ -310,7 +310,9 @@ const POD = ({ route }) => {
         { headers: getAuthorizedHeaders(token) }
       )
       .then(setShowModal11(true))
-      .catch((err) => ToastAndroid.show(err,"OTP not sent", ToastAndroid.SHORT));
+      .catch((err) =>
+        ToastAndroid.show(err, "OTP not sent", ToastAndroid.SHORT)
+      );
   };
 
   function handleButtonPress11(item) {
@@ -355,13 +357,19 @@ const POD = ({ route }) => {
       .then((response) => {
         if (response.data.return) {
           // alert("OTP Submitted Successfully")
-          setLoading(true)
+          setLoading(true);
           setMessage(1);
-          submitForm11();
+          dispatch(setForceSync(true));
+          setTimeout(() => {
+            submitForm11();
+          }, 3000);
           setInputOtp("");
           setShowModal11(false);
         } else {
-          ToastAndroid.show("Invalid OTP, please try again !!", ToastAndroid.SHORT);
+          ToastAndroid.show(
+            "Invalid OTP, please try again !!",
+            ToastAndroid.SHORT
+          );
           // alert("Invalid OTP, please try again !!");
           setMessage(2);
         }
@@ -600,7 +608,10 @@ const POD = ({ route }) => {
                   title="Submit"
                   onPress={() => {
                     if (!name || !mobileNumber) {
-                      ToastAndroid.show("Please enter name and mobile number", ToastAndroid.SHORT);
+                      ToastAndroid.show(
+                        "Please enter name and mobile number",
+                        ToastAndroid.SHORT
+                      );
                     } else {
                       sendSmsOtp();
                       setTimer(60);

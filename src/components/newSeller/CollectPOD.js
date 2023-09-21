@@ -32,7 +32,7 @@ import OTPTextInput from "react-native-otp-textinput";
 
 import { openDatabase } from "react-native-sqlite-storage";
 import { backendUrl } from "../../utils/backendUrl";
-import { setAutoSync } from "../../redux/slice/autoSyncSlice";
+import { setAutoSync, setForceSync } from "../../redux/slice/autoSyncSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { getAuthorizedHeaders } from "../../utils/headers";
 
@@ -278,10 +278,7 @@ const CollectPOD = ({ route }) => {
       .catch(function (error) {
         console.log("CollectPOD.js/submitForm11 ", error.response.data);
         setLoading(false);
-        ToastAndroid.show(
-          "Something went Wrong",
-          ToastAndroid.SHORT
-        );
+        ToastAndroid.show("Something went Wrong", ToastAndroid.SHORT);
       });
   };
   const sendSmsOtp = async () => {
@@ -299,7 +296,8 @@ const CollectPOD = ({ route }) => {
         { headers: getAuthorizedHeaders(token) }
       )
       .then(setShowModal11(true))
-      .catch((err) =>  ToastAndroid.show(err,"OTP not sent", ToastAndroid.SHORT)
+      .catch((err) =>
+        ToastAndroid.show(err, "OTP not sent", ToastAndroid.SHORT)
       );
   };
 
@@ -327,11 +325,17 @@ const CollectPOD = ({ route }) => {
           // alert("OTP Submitted Successfully")
           setLoading(true);
           setMessage(1);
-          submitForm11();
+          dispatch(setForceSync(true));
+          setTimeout(() => {
+            submitForm11();
+          }, 3000);
           setInputOtp("");
           setShowModal11(false);
         } else {
-          ToastAndroid.show("Invalid OTP, please try again !!", ToastAndroid.SHORT);
+          ToastAndroid.show(
+            "Invalid OTP, please try again !!",
+            ToastAndroid.SHORT
+          );
           // alert("Invalid OTP, please try again !!");
           setMessage(2);
         }
@@ -578,11 +582,16 @@ const CollectPOD = ({ route }) => {
                   style={{ backgroundColor: "#004aad", color: "#fff" }}
                   title="Submit"
                   onPress={() => {
-                    if(!name || !mobileNumber){
-                      ToastAndroid.show("Please enter name and mobile number", ToastAndroid.SHORT);
-                    }else{setShowModal11(true);
+                    if (!name || !mobileNumber) {
+                      ToastAndroid.show(
+                        "Please enter name and mobile number",
+                        ToastAndroid.SHORT
+                      );
+                    } else {
+                      setShowModal11(true);
                       sendSmsOtp();
-                      setTimer(60);}
+                      setTimer(60);
+                    }
                   }}
                 >
                   Send OTP
