@@ -40,8 +40,8 @@ import GetLocation from "react-native-get-location";
 import DeviceInfo from "react-native-device-info";
 import { getAuthorizedHeaders } from "../utils/headers";
 const config = {
-  issuer: "https://uacc.logistiex.com/realms/Logistiex-Demo",
-  clientId: "logistiex-demo",
+  issuer: "https://uacc.logistiex.com/realms/LGTX-UFP-IN-DEV",
+  clientId: "fm-ui",
   redirectUrl: "com.demoproject.app://Login",
   scopes: [
     "openid",
