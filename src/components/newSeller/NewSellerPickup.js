@@ -183,7 +183,7 @@ const NewSellerPickup = ({route}) => {
         dataSeller.forEach((single) => {
           db.transaction((tx) => {
             tx.executeSql(
-              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND status IS NULL AND handoverStatus="accepted"',
+              'SELECT * FROM SellerMainScreenDetails where shipmentAction="Seller Delivery" AND stopId=? AND FMtripId=? AND status IS NOT NULL AND handoverStatus="accepted"',
               [single.stopId, single.FMtripId],
               (tx1, results) => {
                 counts.push(results.rows.length);
