@@ -195,10 +195,8 @@ export default function Login() {
     //   setTimeout(() => {
     //     requestPermissions();
     //   }, 3000);
-
     //   console.log("Login/requestPermissions ", "Request permission", userId);
     // }
-
   });
 
   const requestPermissions = async () => {
@@ -235,24 +233,23 @@ export default function Login() {
     }
   };
   messaging()
-  .requestPermission()
-  .then((permission) => {
-    if (permission) {
-      console.log(
-        "App.js/requestPermissions ",
-        "Notification permission granted"
-      );
-      // messaging().getToken().then((token) => {
-      // console.log('App.js/ ','FCM Token:', token);
-      // });
-    } else {
-      console.log(
-        "App.js/requestPermissions ",
-        "Notification permission denied"
-      );
-    }
-  });
-
+    .requestPermission()
+    .then((permission) => {
+      if (permission) {
+        console.log(
+          "App.js/requestPermissions ",
+          "Notification permission granted"
+        );
+        // messaging().getToken().then((token) => {
+        // console.log('App.js/ ','FCM Token:', token);
+        // });
+      } else {
+        console.log(
+          "App.js/requestPermissions ",
+          "Notification permission denied"
+        );
+      }
+    });
 
   console.log(latitude);
   const current_location = () => {
