@@ -3684,8 +3684,8 @@ function CustomDrawerContent({ navigation }) {
   const refreshTime = useSelector((state) => state.user.refreshTime);
 
   const config = {
-    issuer: "https://uacc.logistiex.com/realms/LGTX-UFP-IN-DEV",
-    clientId: "fm-ui",
+    issuer: "https://uacc.logistiex.com/realms/janus-test",
+    clientId: "fm-app",
     redirectUrl: "com.demoproject.app://Login",
     scopes: [
       "openid",
@@ -3797,7 +3797,7 @@ function CustomDrawerContent({ navigation }) {
   };
   const LogoutHandle = async () => {
     await logout(
-      { issuer: "https://uacc.logistiex.com/realms/LGTX-UFP-IN-DEV" },
+      { issuer: "https://uacc.logistiex.com/realms/janus-test" },
       {
         idToken: idToken,
         postLogoutRedirectUrl: "com.demoproject.app://Login",
