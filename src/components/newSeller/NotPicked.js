@@ -120,7 +120,7 @@ const NotPicked = ({ route }) => {
         });
         axios
           .post(
-            backendUrl + "SellerMainScreen/attemptFailed",
+            backendUrl + "SellerMainScreen/pickupAttemptFailed",
             {
               consignorCode: route.params.consignorCode,
               rejectionReason: rejectionCode,

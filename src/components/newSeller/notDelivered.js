@@ -112,7 +112,7 @@ const NotDelivered = ({ route }) => {
 
         axios
           .post(
-            backendUrl + "SellerMainScreen/attemptFailed",
+            backendUrl + "SellerMainScreen/deliveryAttemptFailed",
             {
               consignorCode: route.params.consignorCode,
               rejectionReason: rejectionCode,
