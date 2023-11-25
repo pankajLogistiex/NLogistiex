@@ -309,7 +309,8 @@ function StackNavigators({ navigation }) {
           postRDStatus VARCHAR(200),
           stopId VARCHAR(200),
           FMtripId VARCHAR(200),
-          date Text
+          date Text,
+          bagSealId VARCHAR(200)
           )`,
         [],
         (sqlTxn, res) => {
@@ -824,8 +825,9 @@ function StackNavigators({ navigation }) {
                           postRDStatus,
                           stopId,
                           FMtripId,
-                          date
-                        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                          date,
+                          bagSealId
+                        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
                                         [
                                           data.clientShipmentReferenceNumber,
                                           data.clientRefId,
@@ -866,12 +868,13 @@ function StackNavigators({ navigation }) {
                                             : null,
                                           null,
                                           null,
-                                          "",
+                                          data.bagId,
                                           data.packagingAction,
                                           null,
                                           data.stopId,
                                           data.FMtripId,
                                           currentDateValue,
+                                          data?.bagSealId,
                                         ],
                                         (sqlTxn, _res) => {
                                           // console.log(
@@ -1039,6 +1042,7 @@ function StackNavigators({ navigation }) {
     //   tripID: row.FMtripId,
     //   deviceId: deviceId,
     //   deviceIPaddress: IpAddress,
+    //   bagSealId: row.bagSealId,
     // });
     const decodedToken = token ? jwtDecode(token) : null;
     const currentEpochTime = Math.floor(Date.now() / 1000);
@@ -1073,6 +1077,7 @@ function StackNavigators({ navigation }) {
             tripID: row.FMtripId,
             deviceId: deviceId,
             deviceIPaddress: IpAddress,
+            bagSealId: row.bagSealId
           },
           { headers: getAuthorizedHeaders(token) }
         )
@@ -1158,7 +1163,7 @@ function StackNavigators({ navigation }) {
 
     db.transaction((tx) => {
       tx.executeSql(
-        "SELECT * FROM SellerMainScreenDetails WHERE status IS NOT Null AND syncStatus IS Null",
+        "SELECT * FROM SellerMainScreenDetails WHERE status IS NOT Null AND (syncStatus IS Null OR syncStatus='')",
         [],
         (tx1, results) => {
           if (results.rows.length > 0) {
