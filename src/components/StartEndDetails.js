@@ -24,6 +24,8 @@ export default function StartEndDetails({ navigation, route }) {
   const [data, setData] = useState();
   const [token, setToken] = useState(route.params.token);
   const [printData, setPrintData] = useState([]);
+  const [startImage, setStartImage] = useState("");
+  const [endImage, setEndImage] = useState("");
   useEffect(() => {
     axios
       .get(backendUrl + "UserTripInfo/getUserTripInfo", {
@@ -35,7 +37,45 @@ export default function StartEndDetails({ navigation, route }) {
       .then((response) => {
         console.log("StartEndDetails/useEffect/data", response.data);
         setData(response.data);
-        setPrintData(response.data.res_data);
+        setPrintData(response?.data?.res_data);
+        if (response?.data?.res_data?.startVehicleImageUrl) {
+          axios
+            .get(
+              "https://storage.dev.logistiex.com/api/file-metas/" +
+                response?.data?.res_data?.startVehicleImageUrl,
+              {
+                headers: getAuthorizedHeaders(token),
+              }
+            )
+            .then((res) => {
+              setStartImage(res.data?.signedUrl);
+            })
+            .catch((error) => {
+              console.log(
+                error,
+                "StartEndDetails/useEffect/errorInStartTripImage"
+              );
+            });
+        }
+        if (response?.data?.res_data?.endVehicleImageUrl) {
+          axios
+            .get(
+              "https://storage.dev.logistiex.com/api/file-metas/" +
+                response?.data?.res_data?.endVehicleImageUrl,
+              {
+                headers: getAuthorizedHeaders(token),
+              }
+            )
+            .then((res) => {
+              setEndImage(res.data?.signedUrl);
+            })
+            .catch((error) => {
+              console.log(
+                error,
+                "StartEndDetails/useEffect/errorInEndTripImage"
+              );
+            });
+        }
       })
       .catch((error) => {
         console.log(error, "StartEndDetails/useEffect/error");
@@ -176,11 +216,13 @@ export default function StartEndDetails({ navigation, route }) {
               alignItems: "center",
             }}
           >
-            <Image
-              style={{ height: 200, width: "90%", borderRadius: 5 }}
-              source={{ uri: printData.startVehicleImageUrl }}
-              alt="image base"
-            />
+            {startImage ? (
+              <Image
+                style={{ height: 200, width: "90%", borderRadius: 5 }}
+                source={{ uri: startImage }}
+                alt="image base"
+              />
+            ) : null}
             <Text
               bold
               position="absolute"
@@ -191,12 +233,14 @@ export default function StartEndDetails({ navigation, route }) {
             >
               Start vehicle
             </Text>
-            <Image
-              marginTop={15}
-              style={{ height: 200, width: "90%", borderRadius: 5 }}
-              source={{ uri: printData.endVehicleImageUrl }}
-              alt="image base"
-            />
+            {endImage ? (
+              <Image
+                marginTop={15}
+                style={{ height: 200, width: "90%", borderRadius: 5 }}
+                source={{ uri: endImage }}
+                alt="image base"
+              />
+            ) : null}
             <Text bold position="absolute" color="coolGray.50" top="40" m="20">
               End vehicle
             </Text>

@@ -46,6 +46,8 @@ export default function MyTrip({ navigation, route }) {
   const [endkm, setEndkm] = useState(0);
   const [startImageUrl, setStartImageUrl] = useState("");
   const [endImageUrl, setEndImageUrl] = useState("");
+  const [startImageId, setStartImageId] = useState("");
+  const [endImageId, setEndImageId] = useState("");
   const [tripID, setTripID] = useState("");
   const [userId, setUserId] = useState(route.params.userId);
   const [token, setToken] = useState(route.params.token);
@@ -73,16 +75,15 @@ export default function MyTrip({ navigation, route }) {
   const focus = useIsFocused();
   const startKmInputRef = useRef(null);
   const EndKmInputRef = useRef(null);
-  const [errorText, setErrorText] = useState('');
+  const [errorText, setErrorText] = useState("");
 
   const handleEndKmChange = (value) => {
     if (Number(value) < Number(startkm)) {
-      setErrorText('End KMs cannot be lower than Start KMs');
-    } 
-    else if(Number(value) == Number(startkm)){
-      setErrorText('End KMs cannot be equal to Start KMs');
-    }else {
-      setErrorText('');
+      setErrorText("End KMs cannot be lower than Start KMs");
+    } else if (Number(value) == Number(startkm)) {
+      setErrorText("End KMs cannot be equal to Start KMs");
+    } else {
+      setErrorText("");
     }
     setEndkm(value);
   };
@@ -194,7 +195,7 @@ export default function MyTrip({ navigation, route }) {
     db.transaction((txn) => {
       txn.executeSql(
         "SELECT * FROM TripDetails WHERE (tripStatus = ? OR tripStatus = ?) AND userID = ? AND date = ?",
-        [20, 50, userId,currentDateValue],
+        [20, 50, userId, currentDateValue],
         (tx, result) => {
           if (result.rows.length > 0) {
             setTripID(result.rows.item(0).tripID);
@@ -344,6 +345,7 @@ export default function MyTrip({ navigation, route }) {
   const takeStartPhoto = async () => {
     setUploadStatus("uploading");
     setStartImageUrl("");
+    setStartImageId("");
     let options = {
       mediaType: "photo",
       quality: 1,
@@ -363,22 +365,17 @@ export default function MyTrip({ navigation, route }) {
     if (result.assets !== undefined) {
       fetch(backendUrl + "DSQCPicture/uploadPicture", {
         method: "POST",
-        body: createFormData(
-          result.assets[0],
-          {
-            useCase: "DSQC",
-            type: "front",
-            contextId: "SI002",
-            contextType: "shipment",
-            hubCode: "HC001",
-          },
-          
-        ),
-        headers: getAuthorizedHeaders(token) 
+        body: createFormData(result.assets[0], {
+          useCase: "trip_info",
+          type: result.assets[0]?.type,
+          contextId: tripID,
+        }),
+        headers: getAuthorizedHeaders(token),
       })
         .then((data) => data.json())
         .then((res) => {
-          setStartImageUrl(res.publicURL);
+          setStartImageUrl(res.signedUrl);
+          setStartImageId(res.publicURL);
           setUploadStatus("done");
         })
         .catch((error) => {
@@ -392,6 +389,7 @@ export default function MyTrip({ navigation, route }) {
   const takeEndPhoto = async () => {
     setUploadStatus("uploading");
     setEndImageUrl("");
+    setEndImageId("");
     let options = {
       mediaType: "photo",
       quality: 1,
@@ -411,21 +409,17 @@ export default function MyTrip({ navigation, route }) {
     if (result.assets !== undefined) {
       fetch(backendUrl + "DSQCPicture/uploadPicture", {
         method: "POST",
-        body: createFormData(
-          result.assets[0],
-          {
-            useCase: "DSQC",
-            type: "front",
-            contextId: "SI002",
-            contextType: "shipment",
-            hubCode: "HC001",
-          },
-        ),
-         headers: getAuthorizedHeaders(token) 
+        body: createFormData(result.assets[0], {
+          useCase: "trip_info",
+          type: result.assets[0]?.type,
+          contextId: tripID,
+        }),
+        headers: getAuthorizedHeaders(token),
       })
         .then((data) => data.json())
         .then((res) => {
-          setEndImageUrl(res.publicURL);
+          setEndImageUrl(res.signedUrl);
+          setEndImageId(res.publicURL);
           setUploadStatus("done");
         })
         .catch((error) => {
@@ -445,7 +439,7 @@ export default function MyTrip({ navigation, route }) {
             tripID: tripID,
             endTime: new Date().valueOf(),
             endkilometer: endkm,
-            endVehicleImageUrl: endImageUrl,
+            endVehicleImageUrl: endImageId,
             tripStatus: 200,
             tripSummary: {
               acceptedPickup: completePickup,
@@ -508,7 +502,7 @@ export default function MyTrip({ navigation, route }) {
             startTime: new Date().valueOf(),
             vehicleNumber: vehicle,
             startKilometer: startkm,
-            startVehicleImageUrl: startImageUrl,
+            startVehicleImageUrl: startImageId,
             tripStatus: 50,
           },
           { headers: getAuthorizedHeaders(token) }
@@ -941,7 +935,10 @@ export default function MyTrip({ navigation, route }) {
                         }}
                       />
                       {errorText && (
-                      <Text style={{ color: "red", marginTop: 5 }}>{errorText}</Text>)}
+                        <Text style={{ color: "red", marginTop: 5 }}>
+                          {errorText}
+                        </Text>
+                      )}
                     </View>
                     <Button
                       py={3}

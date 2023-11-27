@@ -98,8 +98,8 @@ const ScanShipment = ({ route }) => {
   const [modalVisibleCNA, setModalVisibleCNA] = useState(false);
   const buttonColorRejected = check11 === 0 ? "gray.300" : "#004aad";
   var otpInput = useRef(null);
-  const [ImageUrl, setImageUrl] = useState("");
   const [imageUrls, setImageUrls] = useState([]);
+  const [imageUrlsSigned, setImageUrlsSigned] = useState([]);
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isRejecting, setIsRejecting] = useState(false);
@@ -142,7 +142,6 @@ const ScanShipment = ({ route }) => {
   // var imageUrls = [];
   const takePicture = async () => {
     setUploadStatus("uploading");
-    setImageUrl("");
     let options = {
       mediaType: "photo",
       quality: 1,
@@ -163,28 +162,26 @@ const ScanShipment = ({ route }) => {
     if (result.assets !== undefined) {
       const newImage = result.assets[0];
       const formData = createFormData(newImage, {
-        useCase: "DSQC",
-        type: "front",
-        contextId: "SI002",
-        contextType: "shipment",
-        hubCode: "HC001",
+        useCase: "dsqc",
+        type: newImage?.type,
+        contextId: barcode,
       });
 
-      fetch(
-        backendUrl + "DSQCPicture/uploadPicture",
-        {
-          method: "POST",
-          body: formData,
-          headers: getAuthorizedHeaders(token)
-        },
-      )
+      fetch(backendUrl + "DSQCPicture/uploadPicture", {
+        method: "POST",
+        body: formData,
+        headers: getAuthorizedHeaders(token),
+      })
         .then((data) => data.json())
         .then((res) => {
-          setImageUrl(res.publicURL);
           setUploadStatus("done");
           setModalVisible1(true);
           console.log("ScanShipment.js/takePicture ", "upload success", res);
           setImageUrls((prevImageUrls) => [...prevImageUrls, res.publicURL]);
+          setImageUrlsSigned((prevImageUrls) => [
+            ...prevImageUrls,
+            res.signedUrl,
+          ]);
           setUploadStatus("idle");
         })
         .catch((error) => {
@@ -460,6 +457,7 @@ const ScanShipment = ({ route }) => {
           }
           setIsRejecting(false);
           setImageUrls([]);
+          setImageUrlsSigned([]);
           setCheck11(0);
           setExpectedPackaging("");
           setPackagingAction();
@@ -516,6 +514,7 @@ const ScanShipment = ({ route }) => {
           }
           setIsRejecting(false);
           setImageUrls([]);
+          setImageUrlsSigned([]);
           setCheck11(0);
           setExpectedPackaging("");
           setPackagingAction();
@@ -527,7 +526,7 @@ const ScanShipment = ({ route }) => {
       );
     });
   };
-console.log(isRejecting);
+  console.log(isRejecting);
   const getCategories = (data) => {
     db.transaction((txn) => {
       txn.executeSql(
@@ -631,10 +630,10 @@ console.log(isRejecting);
     });
   };
   const onSuccess = (e) => {
-    if(!isRejecting){
-    console.log("ScanShipment.js/onSuccess ", e.data, "barcode");
-    setBarcode(e.data);
-    getCategories(e.data);
+    if (!isRejecting) {
+      console.log("ScanShipment.js/onSuccess ", e.data, "barcode");
+      setBarcode(e.data);
+      getCategories(e.data);
     }
   };
 
@@ -798,64 +797,6 @@ console.log(isRejecting);
     callApi(error, latitude, longitude, route.params.userId, token);
   };
 
-  const submitFormsubmitForm1 = () => {
-    axios
-      .post("https://bked.logistiex.com/SellerMainScreen/postSPS", {
-        clientShipmentReferenceNumber: route.params.barcode,
-        feUserID: route.params.userId,
-        isAccepted: "false",
-        rejectionReason: DropDownValue,
-        consignorCode: route.params.consignorCode,
-        stopId: route.params.stopId,
-        tripId: route.params.tripId,
-        DeliveryTime: new Date().toJSON().slice(0, 10).replace(/-/g, "/"),
-        latitude: latitude,
-        longitude: longitude,
-        packagingId: "PL00000026",
-        packageingStatus: 1,
-        PRSNumber: route.params.PRSNumber,
-        files: imageUrls,
-      })
-      .then(function (response) {
-        console.log(
-          "ScanShipment.js/submitFormsubmitForm1 ",
-          response.data,
-          "Data has been pushed"
-        );
-      })
-      .catch(function (error) {
-        console.log("ScanShipment.js/submitFormsubmitForm1 ", error);
-      });
-  };
-  const submitForm1 = () => {
-    axios
-      .post("https://bked.logistiex.com/SellerMainScreen/postSPS", {
-        clientShipmentReferenceNumber: route.params.barcode,
-        feUserID: route.params.userId,
-        isAccepted: "true",
-        rejectionReason: DropDownValue,
-        consignorCode: route.params.consignorCode,
-        stopId: route.params.stopId,
-        tripId: route.params.tripId,
-        DeliveryTime: new Date().toJSON().slice(0, 10).replace(/-/g, "/"),
-        latitude: latitude,
-        longitude: longitude,
-        packagingId: "PL00000026",
-        packageingStatus: 1,
-        PRSNumber: route.params.PRSNumber,
-        files: imageUrls,
-      })
-      .then(function (response) {
-        console.log(
-          "ScanShipment.js/submitForm1 ",
-          response.data,
-          "Data has been pushed"
-        );
-      })
-      .catch(function (error) {
-        console.log("ScanShipment.js/submitForm1 ", error);
-      });
-  };
   const partialClose112 = () => {
     if (newaccepted + newrejected + newtagged === route.params.Forward) {
       navigation.navigate("CollectPOD", {
@@ -1163,6 +1104,7 @@ console.log(isRejecting);
         onClose={() => {
           setModalVisible1(false);
           setImageUrls([]);
+          setImageUrlsSigned([]);
           setIsRejecting(false);
         }}
         size="lg"
@@ -1193,7 +1135,7 @@ console.log(isRejecting);
                 <MaterialIcons name="error" size={22} color="red" />
               )}
             </Button>
-            {imageUrls.length > 0 && (
+            {imageUrlsSigned.length > 0 && (
               <View
                 style={{
                   flex: 1,
@@ -1202,7 +1144,7 @@ console.log(isRejecting);
                   marginTop: 50,
                 }}
               >
-                {imageUrls.map((url, index) => (
+                {imageUrlsSigned.map((url, index) => (
                   <Image
                     key={index}
                     source={{ uri: url }}
@@ -1227,7 +1169,11 @@ console.log(isRejecting);
                 marginBottom={1.5}
                 marginTop={1.5}
                 marginRight={1}
-                onPress={() => {setImageUrls([]); takePicture()}}
+                onPress={() => {
+                  setImageUrls([]);
+                  setImageUrlsSigned([]);
+                  takePicture();
+                }}
               >
                 ReClick
               </Button>
@@ -1299,34 +1245,34 @@ console.log(isRejecting);
                 callErrorAPIFromScanner(error);
               }}
             />
-            <View style={{ alignItems: 'center' }}>
-            <Input
-              placeholder="Enter Packaging ID"
-              size="md"
-              value={expectedPackagingId}
-              onChangeText={(text) => setExpectedPackaging(text)}
-              style={{
-                width: 290,
-                backgroundColor: "white",
-              }}
-            />
-            {expectedPackagingId.length ? (
-              <Button
-                flex="1"
-                mt={2}
-                bg="#004aad"
-                onPress={() => {
-                  handlepackaging(expectedPackagingId);
+            <View style={{ alignItems: "center" }}>
+              <Input
+                placeholder="Enter Packaging ID"
+                size="md"
+                value={expectedPackagingId}
+                onChangeText={(text) => setExpectedPackaging(text)}
+                style={{
+                  width: 290,
+                  backgroundColor: "white",
                 }}
-                style={{ width: 290 }}
-              >
-                Submit
-              </Button>
-            ) : (
-              <Button flex="1" mt={2} bg="gray.300" style={{ width: 290 }}>
-                Submit
-              </Button>
-            )}
+              />
+              {expectedPackagingId.length ? (
+                <Button
+                  flex="1"
+                  mt={2}
+                  bg="#004aad"
+                  onPress={() => {
+                    handlepackaging(expectedPackagingId);
+                  }}
+                  style={{ width: 290 }}
+                >
+                  Submit
+                </Button>
+              ) : (
+                <Button flex="1" mt={2} bg="gray.300" style={{ width: 290 }}>
+                  Submit
+                </Button>
+              )}
             </View>
           </Modal.Body>
         </Modal.Content>
@@ -1375,7 +1321,7 @@ console.log(isRejecting);
                 onPress={() => {
                   rejectDetails2("WPR");
                   setModal1(false);
-                  setIsRejecting(true)
+                  setIsRejecting(true);
                 }}
               >
                 Reject Shipment
@@ -1479,14 +1425,16 @@ console.log(isRejecting);
                   <Button
                     title="Reject/Tag Shipment"
                     onPress={() => {
-                      if(check11 === 0){
+                      if (check11 === 0) {
                         ToastAndroid.show(
-                            "No Shipment to Reject/Tag",
-                            ToastAndroid.SHORT
-                          )
-                      }else{// setModalVisible1(true);
+                          "No Shipment to Reject/Tag",
+                          ToastAndroid.SHORT
+                        );
+                      } else {
+                        // setModalVisible1(true);
                         takePicture();
-                        setIsRejecting(true)}
+                        setIsRejecting(true);
+                      }
                     }}
                     w="90%"
                     size="lg"
